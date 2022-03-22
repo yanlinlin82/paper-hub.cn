@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Paper-Hub</title>
+        <style type="text/css">
+            a { color:blue; }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Paper-Hub</h1>
+        </header>
+        <article>
+{% if paper_list %}
+    {% for paper in paper_list %}
+            <hr>
+            <p>[{{ paper.create_time }}] <b>{{ paper.creator }}</b>({{ paper.creator_weixin_id }}):</p>
+            <p><b>{{ paper.title }}</b></p>
+            <p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
+            {% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a></p>{% endif %}
+            {% if paper.pmid %}<p>PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}">{{ paper.pmid }}</a></p>{% endif %}
+            {% if paper.pmcid %}<p>PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}">{{ paper.pmcid }}</a></p>{% endif %}
+            {% if paper.arxiv_id %}<p>arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}">{{ paper.arxiv_id }}</a></p>{% endif %}
+            <p>{{ paper.comments }}</p>
+    {% endfor %}
+{% else %}
+            <p>No paper is available.</p>
+{% endif %}
+        </article>
+        <footer>
+        </footer>
+    </body>
+</html>
