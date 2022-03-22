@@ -14,7 +14,7 @@
 {% if paper_list %}
     {% for paper in paper_list %}
             <hr>
-            <p>[{{ paper.create_time }}] <b>{{ paper.creator }}</b>({{ paper.creator_weixin_id }}):</p>
+            <p>[{{ paper.create_time }}] <b>{{ paper.creator }}</b>:</p>
             <p><b>{{ paper.title }}</b></p>
             <p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
             {% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a></p>{% endif %}
