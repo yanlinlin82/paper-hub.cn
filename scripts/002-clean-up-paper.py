@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# 更新部分字段，将“-”改为空
 import os
 import sys
 import pandas as pd

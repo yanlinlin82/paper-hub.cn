@@ -20,6 +20,7 @@
     </header>
     <article>
 {% if paper_list %}
+      <p class="summary">There are total {{ paper_list|length }} paper(s).</p>
   {% for paper in paper_list %}
       <div class="paper-item">
         <p>[{{ paper.create_time|date:"Y-m-d" }}] <b>{{ paper.creator }}</b>:</p>

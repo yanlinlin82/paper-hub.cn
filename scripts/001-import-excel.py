@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# 从Excel文件中导入当前所有记录
 import os
 import sys
 import pandas as pd
