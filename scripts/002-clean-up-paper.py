@@ -15,11 +15,20 @@ def main():
     #print(Paper.objects.all())
 
     for p in Paper.objects.all():
+        modified = False
         if p.arxiv_id == '-':
             p.arxiv_id = ''
-            p.save()
-        elif p.doi == '-':
+            modified = True
+        if p.doi == '-':
             p.doi = ''
+            modified = True
+        if p.pmid == '-':
+            p.pmid = ''
+            modified = True
+        if p.pmcid == '-':
+            p.pmcid = ''
+            modified = True
+        if modified:
             p.save()
 
 if __name__ == '__main__':
