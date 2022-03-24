@@ -14,7 +14,12 @@
         <article>
 {% if paper %}
 <div class="paper-item">
-  {% include "sub/paper-item.html" %}
+  <p><a href="{% url 'index' %}paper/{{ paper.pk }}"><b>{{ paper.title }}</b></a></p>
+  <p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
+  {% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a></p>{% endif %}
+  {% if paper.pmid %}<p>PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a></p>{% endif %}
+  {% if paper.pmcid %}<p>PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a></p>{% endif %}
+  {% if paper.arxiv_id %}<p>arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a></p>{% endif %}
   {% if paper.abstract %}
     <p class="abstract">{{ paper.abstract }}</p>
   {% else %}
