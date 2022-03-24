@@ -46,3 +46,17 @@ def user(request, id):
         'paper_list': paper_list,
     }
     return HttpResponse(template.render(context, request))
+
+def add(request):
+    title = ''
+    if request.method == 'POST' and request.POST:
+        title = request.POST['title']
+    if title:
+        p = Paper()
+        return HttpResponseRedirect(reverse('index'))
+    else:
+        template = loader.get_template('add.html')
+        context = {
+            'paper': paper,
+        }
+        return HttpResponse(template.render(context, request))
