@@ -4,42 +4,22 @@
     <meta charset="utf-8">
     <title>Paper-Hub: An easy way to read and share papers for scientific research</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style type="text/css">
-      body { margin: 0; font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif; }
-      header { margin: 0; background-color: #eee; }
-      .container { margin: 0 auto; max-width: 800px; }
-      header h1.logo { margin: 0; padding: 10px 0; font-family:cIconfont!important;font-style:normal;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale; }
-      article { margin: 10px auto; max-width:800px; }
-      footer { margin: 0; padding: 10px; background-color: #ccc; }
-      footer p { text-align: center; }
-      .paper-item { margin: 0; padding: 10px; border-bottom: 1px dashed black; }
-    </style>
+    {% include "sub/inline-css.html" %}
   </head>
   <body>
-    <header>
-      <div class="container">
-        <h1 class="logo">Paper-Hub</h1>
-        <nav></nav>
-      </div>
-    </header>
-    <article>
+    {% include "sub/header.html" %}
+    <div class="container">
+      {% include "sub/left-sidebar.html" %}
+      <div class="content">
+        <article>
 {% if paper %}
-      <div class="paper-item">
-        <p>[{{ paper.create_time|date:"Y-m-d" }}] <b>{{ paper.creator }}</b>:</p>
-        <p><b>{{ paper.title }}</b></p>
-        <p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
-        {% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a></p>{% endif %}
-        {% if paper.pmid %}<p>PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}">{{ paper.pmid }}</a></p>{% endif %}
-        {% if paper.pmcid %}<p>PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}">{{ paper.pmcid }}</a></p>{% endif %}
-        {% if paper.arxiv_id %}<p>arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}">{{ paper.arxiv_id }}</a></p>{% endif %}
-        <p>{{ paper.comments }}</p>
-      </div>
+  {% include "sub/paper-item.html" %}
 {% else %}
-      <p>No paper is available.</p>
+          <p>No paper is available.</p>
 {% endif %}
-    </article>
-    <footer>
-      <p>Copyright | <a href="http://www.beian.miit.gov.cn/">京ICP备18031542号-9</a></p>
-    </footer>
+        </article>
+      </div>
+    </div>
+    {% include "sub/footer.html" %}
   </body>
 </html>
