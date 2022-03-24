@@ -1,10 +1,6 @@
-<div class="paper-item">
-  <p class="date">[{{ paper.create_time|date:"Y-m-d" }}] <b>{{ paper.creator }}</b>:</p>
-  <p><b>{{ paper.title }}</b></p>
-  <p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
-  {% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a></p>{% endif %}
-  {% if paper.pmid %}<p>PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}">{{ paper.pmid }}</a></p>{% endif %}
-  {% if paper.pmcid %}<p>PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}">{{ paper.pmcid }}</a></p>{% endif %}
-  {% if paper.arxiv_id %}<p>arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}">{{ paper.arxiv_id }}</a></p>{% endif %}
-  <p class="comments">{{ paper.comments }}</p>
-</div>
+<p><a href="{% url 'index' %}paper/{{ paper.pk }}"><b>{{ paper.title }}</b></a></p>
+<p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
+{% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a></p>{% endif %}
+{% if paper.pmid %}<p>PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}">{{ paper.pmid }}</a></p>{% endif %}
+{% if paper.pmcid %}<p>PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}">{{ paper.pmcid }}</a></p>{% endif %}
+{% if paper.arxiv_id %}<p>arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}">{{ paper.arxiv_id }}</a></p>{% endif %}

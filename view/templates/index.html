@@ -16,7 +16,9 @@
           <p class="summary">There are total {{ paper_list|length }} paper(s).</p>
           <hr>
   {% for paper in paper_list %}
+  <div class="paper-item">
     {% include "sub/paper-item.html" %}
+  </div>
   {% endfor %}
 {% else %}
           <p>No paper is available.</p>

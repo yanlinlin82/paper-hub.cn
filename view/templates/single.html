@@ -13,8 +13,16 @@
       <div class="content">
         <article>
 {% if paper %}
+<div class="paper-item">
   {% include "sub/paper-item.html" %}
-{% else %}
+  {% if paper.abstract %}
+    <p class="abstract">{{ paper.abstract }}</p>
+  {% else %}
+    <p class="abstract"><i>No abstract available.</i></p>
+  {% endif %}
+  <p class="date">[{{ paper.create_time|date:"Y-m-d" }}] <b>{{ paper.creator }}</b>:</p>
+  <p class="comments">{{ paper.comments }}</p>
+</div>{% else %}
           <p>No paper is available.</p>
 {% endif %}
         </article>
