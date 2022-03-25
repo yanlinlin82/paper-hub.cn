@@ -39,7 +39,7 @@ header h1.logo a {
 }
 
 .left-sidebar {
-    width: 164px;
+    width: 124px;
     border-right: solid 1px #999;
     flex: 0 0 auto;
 }
@@ -66,7 +66,7 @@ header h1.logo a {
 }
 
 .content {
-    width: calc(100% - 164px);
+    width: calc(100% - 124px);
     flex: 0 0 auto;
 }
 
