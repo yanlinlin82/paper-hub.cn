@@ -1,9 +1,9 @@
 <div class="left-sidebar">
   <nav>
-    <div class="menu-item"><a href="{% url 'index' %}add">Add New</a></div>
-    <div class="menu-item current-item"><a href="{% url 'index' %}">All Papers</a></div>
-    <div class="menu-item"><a href="{% url 'index' %}paper/1">Single Paper</a></div>
-    <div class="menu-item"><a href="{% url 'index' %}label/xiangma">Labels</a></div>
-    <div class="menu-item"><a href="{% url 'index' %}user/1">Users</a></div>
+    <a href="{% url 'add' %}"><div class="menu-item">Add New</div></a>
+    <a href="{% url 'index' %}"><div class="menu-item current-item">All Papers</div></a>
+    <a href="{% url 'paper' id=1 %}"><div class="menu-item">Single Paper</div></a>
+    <a href="{% url 'label' text='xiangma' %}"><div class="menu-item">Labels</div></a>
+    <a href="{% url 'user' id=1 %}"><div class="menu-item">Users</div></a>
   </nav>
 </div>

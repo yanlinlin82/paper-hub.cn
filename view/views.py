@@ -28,7 +28,7 @@ def label(request, text):
     xiangma = Label.objects.filter(name=text)
     if xiangma.count() > 0:
         paper_list = xiangma[0].paper_set.all().order_by('-create_time')
-    template = loader.get_template('index.html')
+    template = loader.get_template('list.html')
     context = {
         'paper_list': paper_list,
     }
