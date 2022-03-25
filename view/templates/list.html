@@ -1,7 +1,8 @@
-<!DOCTYPE html>
-<html>
-  {% include "sub/head.html" %}
-  <body>
+{% extends "base.html" %}
+
+{% block title %}Paper-Hub: An easy way to read and share papers for scientific research{% endblock title %}
+
+{% block content %}
     {% include "sub/header.html" %}
     <div class="container">
       {% include "sub/left-sidebar.html" %}
@@ -29,5 +30,4 @@
       </div>
     </div>
     {% include "sub/footer.html" %}
-  </body>
-</html>
+{% endblock content %}

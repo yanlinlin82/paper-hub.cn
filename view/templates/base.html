@@ -1,0 +1,17 @@
+<!DOCTYPE html>{% load static %}
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}{% endblock title %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+  {% include "sub/inline-css.html" %}
+  {% block style %}{% endblock style %}
+</head>
+<body>
+  {% block content %}{% endblock content %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  {% block javascript %}{% endblock javascript %}
+</body>
+</html>
