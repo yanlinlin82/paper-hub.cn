@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html>
-  {% include "sub/head.html" %}
-  <body>
-    {% include "sub/header.html" %}
-    <div class="container">
-      {% include "sub/left-sidebar.html" %}
-      <div class="content">
-        <article>
+{% extends "base.html" %}
+
+{% block title %}Paper-Hub: An easy way to read and share papers for scientific research{% endblock title %}
+
+{% block content %}
 {% if paper %}
 <div class="paper-item">
   <p><a href="{% url 'index' %}paper/{{ paper.pk }}"><b>{{ paper.title }}</b></a></p>
@@ -25,9 +21,4 @@
 </div>{% else %}
           <p>No paper is available.</p>
 {% endif %}
-        </article>
-      </div>
-    </div>
-    {% include "sub/footer.html" %}
-  </body>
-</html>
+{% endblock content %}
