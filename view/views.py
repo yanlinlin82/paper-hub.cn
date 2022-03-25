@@ -25,7 +25,7 @@ def index(request):
     paper_list = Paper.objects.order_by('-create_time')
     template = loader.get_template('list.html')
     context = {
-        'paper_list': paper_list,
+        'paper_list': paper_list
     }
     return HttpResponse(template.render(context, request))
 
