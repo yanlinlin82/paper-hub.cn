@@ -177,6 +177,24 @@ footer p {
     background-color: #ffe;
 }
 
+.paper-item .paper-op-list {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.paper-item .paper-op-list-sub-left {
+    margin-right: auto;
+    text-align: left;
+    flex: 1 1 none;
+}
+
+.paper-item .paper-op-list-sub-right {
+    margin-left: auto;
+    text-align: right;
+    flex: 1 1 none;
+}
+
 .paper-item .paper-sep-line {
     border-top: 1px dashed #666;
 }
