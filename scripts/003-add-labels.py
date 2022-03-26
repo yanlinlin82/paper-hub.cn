@@ -14,8 +14,9 @@ def main():
     from view.models import Label, Paper
     #print(Paper.objects.all())
 
-    #xiangma = Label(name = "xiangma")
-    #xiangma.save()
+    if Label.objects.filter(name="xiangma").count() == 0:
+        xiangma = Label(name = "xiangma")
+        xiangma.save()
     xiangma = Label.objects.filter(name="xiangma")[0]
 
     for p in Paper.objects.all():

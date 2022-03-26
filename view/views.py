@@ -20,7 +20,7 @@ def ajax_test(request):
 
 # Create your views here.
 def AllPapersView(request, current_page):
-    paper_list = Paper.objects.order_by('-create_time')
+    paper_list = Paper.objects.order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
@@ -29,7 +29,7 @@ def AllPapersView(request, current_page):
     return HttpResponse(template.render(context, request))
 
 def RecentPapersView(request, current_page):
-    paper_list = Paper.objects.order_by('-create_time')
+    paper_list = Paper.objects.order_by('-create_time' '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
@@ -38,7 +38,7 @@ def RecentPapersView(request, current_page):
     return HttpResponse(template.render(context, request))
 
 def PaperListView(request, id, current_page):
-    paper_list = Paper.objects.order_by('-create_time')
+    paper_list = Paper.objects.order_by('-create_time' '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
@@ -50,7 +50,7 @@ def PaperLabelView(request, name, current_page):
     paper_list = None
     xiangma = Label.objects.filter(name=name)
     if xiangma.count() > 0:
-        paper_list = xiangma[0].paper_set.all().order_by('-create_time')
+        paper_list = xiangma[0].paper_set.all().order_by('-create_time' '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,

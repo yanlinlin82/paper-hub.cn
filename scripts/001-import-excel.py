@@ -23,7 +23,7 @@ def main():
     #print(df)
     #print(len(df))
 
-    for i in range(3, len(df)):
+    for i in range(0, len(df)):
         p = Paper(
             creator = df['群友'][i],
             creator_weixin_id = df['微信号'][i],

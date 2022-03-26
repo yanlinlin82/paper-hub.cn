@@ -6,7 +6,8 @@
 <p class="page-summary">There are total {{ paper_list|length }} paper(s).</p>
 {% for paper in paper_list %}
 <div class="paper-item">
-  <p>
+  <p class="paper-id"><a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a></p>
+  <p class="paper-info">
     {{ paper.publish_year }},
     <i>{{ paper.journal }}</i>.
     {% if paper.doi %}DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
@@ -14,10 +15,10 @@
     {% if paper.pmcid %}PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a>{% endif %}
     {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a>{% endif %}
   </p>
-  <p class="title"><b>{{ paper.title }}</b></p>
-  <p class="abstract">{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></p>{% endif %}
+  <p class="paper-title"><b>{{ paper.title }}</b></p>
+  <p class="paper-abstract">{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></p>{% endif %}
   <hr class="paper-sep-line">
-  <p class="comments">[{{ paper.create_time|date:'Y-m-d' }}] <b>{{ paper.creator }}: </b></p>
+  <p class="paper-comments">[{{ paper.create_time|date:'Y-m-d' }}] <b>{{ paper.creator }}: </b></p>
   {% autoescape off %}<p>{{ paper.comments|replace_line_br }}</p>{% endautoescape %}
 </div>
 {% endfor %}

@@ -181,15 +181,15 @@ footer p {
     border-top: 1px dashed #666;
 }
 
-.paper-item .title {
+.paper-item .paper-title {
     font-size: 1.2em;
 }
 
-.paper-item .abstract {
+.paper-item .paper-abstract {
     word-break: break-word;
 }
 
-.paper-item .comments {
+.paper-item .paper-comments {
     word-break: break-word;
 }
 
