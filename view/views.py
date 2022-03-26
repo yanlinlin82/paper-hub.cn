@@ -32,7 +32,7 @@ def AllPapersView(request, current_page):
 
 def RecentPapersView(request, current_page):
     last_week = datetime.today() - timedelta(days=7)
-    paper_list = Paper.objects.filter(create_time__gte=last_week).order_by('-create_time', '-pk')[1:20]
+    paper_list = Paper.objects.filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
@@ -106,7 +106,7 @@ def UserView(request, id, current_page):
         return render(request, 'list.html', {
             'error_message': "Invalid user id!",
         })
-    paper_list = Paper.objects.filter(creator=u[0])
+    paper_list = Paper.objects.filter(creator=u[0]).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,

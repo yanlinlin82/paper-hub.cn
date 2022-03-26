@@ -4,8 +4,9 @@ from . import views
 
 app_name = 'view'
 urlpatterns = [
-    path('', views.AllPapersView, name='all', kwargs={ 'current_page': 'all' }),
+    path('', views.RecentPapersView, name='index', kwargs={ 'current_page': 'recent' }),
     path('recent', views.RecentPapersView, name='recent', kwargs={ 'current_page': 'recent' }),
+    path('all', views.AllPapersView, name='all', kwargs={ 'current_page': 'all' }),
     path('list/<int:id>', views.PaperListView, name='list', kwargs={ 'current_page': 'list' }),
     path('label/<str:name>', views.PaperLabelView, name='label', kwargs={ 'current_page': 'label' }),
     path('paper/<int:id>', views.SinglePaperView, name='paper', kwargs={ 'current_page': 'paper' }),
