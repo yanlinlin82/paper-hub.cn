@@ -36,4 +36,4 @@ class Paper(models.Model):
     is_private = models.BooleanField(default=True)
     full_text = models.FileField(default='')
     def __str__(self):
-        return self.creator + ' - ' + self.publish_year + ' - ' + self.journal + ' - ' + self.title
+        return self.creator.nickname + ' - ' + self.publish_year + ' - ' + self.journal + ' - ' + self.title

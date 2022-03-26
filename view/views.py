@@ -74,11 +74,29 @@ def SinglePaperView(request, id, current_page):
     return HttpResponse(template.render(context, request))
 
 def StatView(request, current_page):
-    stat = Paper.objects.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
-    template = loader.get_template('contributes.html')
+    stat_all = Paper.objects.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+
+    today = datetime.today()
+    year = today.year
+    month = today.month
+    stat_this_month = Paper.objects.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+
+    if month > 1:
+        month = month - 1
+    else:
+        year = year - 1
+        month = 12
+    stat_last_month = Paper.objects.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+
+    stat_journal = Paper.objects.values('journal').annotate(Count('journal')).order_by('-journal__count')
+
+    template = loader.get_template('stat.html')
     context = {
         'current_page': current_page,
-        'stat': stat,
+        'stat_all': stat_all,
+        'stat_this_month': stat_this_month,
+        'stat_last_month': stat_last_month,
+        'stat_journal': stat_journal,
     }
     return HttpResponse(template.render(context, request))
 
