@@ -159,14 +159,14 @@ footer p {
     font-size: 10pt;
 }
 
-.summary {
+.page-summary {
     margin: 0;
     padding: 10px;
     border-bottom: 1px solid #999;
     background-color: #eef;
 }
 
-div.paper-item {
+.paper-item {
     margin: 10px;
     padding: 0 10px;
     border: 1px dotted #333;
@@ -177,11 +177,19 @@ div.paper-item {
     background-color: #ffe;
 }
 
-.paper-sep-line {
+.paper-item .paper-sep-line {
     border-top: 1px dashed #666;
 }
 
-.comments {
+.paper-item .title {
+    font-size: 1.2em;
+}
+
+.paper-item .abstract {
+    word-break: break-word;
+}
+
+.paper-item .comments {
     word-break: break-word;
 }
 

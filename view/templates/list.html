@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% load view_extras %}
 
 {% block content %}
 {% if paper_list %}
-<p class="summary">There are total {{ paper_list|length }} paper(s).</p>
+<p class="page-summary">There are total {{ paper_list|length }} paper(s).</p>
 {% for paper in paper_list %}
 <div class="paper-item">
   <p>
@@ -13,11 +14,11 @@
     {% if paper.pmcid %}PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a>{% endif %}
     {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a>{% endif %}
   </p>
-  <p><b>{{ paper.title }}</b></p>
+  <p class="title"><b>{{ paper.title }}</b></p>
   <p class="abstract">{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></p>{% endif %}
-  <hr style="border-top:1px dashed #666;">
+  <hr class="paper-sep-line">
   <p class="comments">[{{ paper.create_time|date:'Y-m-d' }}] <b>{{ paper.creator }}: </b></p>
-  <p>{{ paper.comments }}</p>
+  {% autoescape off %}<p>{{ paper.comments|replace_line_br }}</p>{% endautoescape %}
 </div>
 {% endfor %}
 {% else %}
