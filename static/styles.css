@@ -19,10 +19,51 @@ header {
     flex: 0 0 auto;
 }
 
+.banner {
+    margin: 0 auto;
+    max-width: 960px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .container {
     margin: 0 auto;
     max-width: 960px;
     display: flex;
+}
+
+.search-box {
+    height: 30px;
+    width: 100%;
+    margin: auto;
+    right: 0;
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.search-input {
+    width: 50%;
+    max-width: 800px;
+    margin: auto;
+    background-color: transparent;
+    border: 1px solid #999;
+}
+
+.search-button {
+    height: 30px;
+    font-size: 12px;
+    margin: auto;
+    right: 0;
+    flex: none;
+}
+
+.login-button {
+    height: 30px;
+    font-size: 12px;
+    margin: auto;
+    right: 0;
+    flex: none;
 }
 
 header h1.logo {
@@ -31,11 +72,16 @@ header h1.logo {
     font-family: Helvetica;
     font-size: 24px;
     font-weight: 900;
+    flex: none;
+}
+
+header h1.logo:hover {
+    background-color: #ddd;
 }
 
 header h1.logo a {
     text-decoration: none;
-    color: black;
+    color: #333;
 }
 
 .left-sidebar {
@@ -46,7 +92,7 @@ header h1.logo a {
 
 .left-sidebar a {
     text-decoration: none;
-    color: black;
+    color: #333;
 }
 
 .left-sidebar .menu-item {
@@ -57,11 +103,14 @@ header h1.logo a {
 
 .left-sidebar .menu-item:hover {
     background-color: #fc9;
+    color: black;
+    font-weight: bold;
 }
 
 .left-sidebar .current-item {
     background-color: #eee;
     border-left: solid 3px #bf9000;
+    color: #333;
     font-weight: bold;
 }
 

@@ -10,9 +10,14 @@
 </head>
 <body>
   <header>
-    <div class="container">
+    <div class="banner">
       <h1 class="logo"><a href="{% url 'index' %}">Paper-Hub</a></h1>
-      <nav></nav>
+      <div class="search-box">
+        <form style="display:none;">
+          <input id="search_text" class="search-input" type="text" value="{{ search_text }}"><input id="search_button" class="search-button" type="hidden" value="Search">
+        </form>
+      </div>
+      <input id="login_button" class="login-button" type="button" value="Login">
     </div>
   </header>
   <div class="container">
