@@ -4,9 +4,11 @@
     <a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a>
   </div>
   <div class="paper-op-list-sub-right">
+    {% comment %}
     <a href="javascript: edit({{ paper.pk }})">[修改]</a>
     <a href="javascript: share({{ paper.pk }})">[分享]</a>
     <a href="javascript: delete({{ paper.pk }})">[删除]</a>
+    {% endcomment %}
     <a href="#top">[顶部]</a>
   </div>
 </div>
@@ -21,5 +23,5 @@
 <p class="paper-title"><b>{{ paper.title }}</b></p>
 <p class="paper-abstract">{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></p>{% endif %}
 <hr class="paper-sep-line">
-<p class="paper-comments">[{{ paper.create_time|date:'Y-m-d' }}] <b>{{ paper.creator }}: </b></p>
+<p class="paper-comments">[{{ paper.create_time|date:'Y-m-d' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>:</p>
 {% autoescape off %}<p>{{ paper.comments|replace_line_br }}</p>{% endautoescape %}

@@ -80,11 +80,12 @@ def UserView(request, id, current_page):
         return render(request, 'list.html', {
             'error_message': "Invalid user id!",
         })
-    paper_list = Paper.objects.filter(creator=u[0].nickname)
+    paper_list = Paper.objects.filter(creator=u[0])
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
         'paper_list': paper_list,
+        'summary_messages': 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. ',
     }
     return HttpResponse(template.render(context, request))
 

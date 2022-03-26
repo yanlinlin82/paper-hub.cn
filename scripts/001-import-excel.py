@@ -11,7 +11,7 @@ def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
     django.setup()
 
-    from view.models import Paper, Label
+    from view.models import Paper, Label, User
     #print(Paper.objects.all())
 
     if len(sys.argv) < 2:
@@ -29,9 +29,21 @@ def main():
     xiangma = Label.objects.filter(name=label_name)[0]
 
     for i in range(0, len(df)):
+        if User.objects.filter(weixin_id=df['微信号'][i]).count() > 0:
+            u = User.objects.filter(weixin_id=df['微信号'][i])[0]
+        elif User.objects.filter(nickname=df['群友'][i]).count() > 0:
+            u = User.objects.filter(nickname=df['群友'][i])[0]
+        else:
+            u = User(
+                name = df['姓名'][i],
+                nickname = df['群友'][i],
+                weixin_id = df['微信号'][i],
+                create_time = df['推荐日期'][i],
+                last_login_time = df['推荐日期'][i])
+            u.save()
+
         p = Paper(
-            creator = df['群友'][i],
-            creator_weixin_id = df['微信号'][i],
+            creator = u,
             create_time = df['推荐日期'][i],
             doi = df['DOI'][i],
             arxiv_id = df['arXiv'][i],
@@ -57,7 +69,7 @@ def main():
 
         p.save()
         xiangma.paper_set.add(p)
-        
+
     xiangma.save()
 
 if __name__ == '__main__':

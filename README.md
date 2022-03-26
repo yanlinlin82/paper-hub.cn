@@ -8,6 +8,4 @@ rm -fvr view/migrations
 python manage.py makemigrations view
 python manage.py migrate
 ./scripts/001-import-excel.py XXX.xlsx
-./scripts/002-clean-up-paper.py
-./scripts/003-add-labels.py
 ```

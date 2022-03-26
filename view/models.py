@@ -9,7 +9,7 @@ class User(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     last_login_time = models.DateTimeField(default=timezone.now)
     def __str__(self):
-        return self.name
+        return self.nickname
 
 class Label(models.Model):
     name = models.CharField(max_length=50)
@@ -17,8 +17,7 @@ class Label(models.Model):
         return self.name
 
 class Paper(models.Model):
-    creator = models.CharField(max_length=100, default='')
-    creator_weixin_id = models.CharField(max_length=100)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(default=timezone.now)
     doi = models.CharField(max_length=100, default='')
