@@ -21,58 +21,55 @@ def ajax_test(request):
     return HttpResponse(message)
 
 # Create your views here.
-def IndexView(request):
-    return HttpResponseRedirect('all')
-
-def AllPapersView(request):
+def AllPapersView(request, current_page):
     paper_list = Paper.objects.order_by('-create_time')
     template = loader.get_template('list.html')
     context = {
-        'current_page': 'all',
+        'current_page': current_page,
         'paper_list': paper_list
     }
     return HttpResponse(template.render(context, request))
 
-def RecentPapersView(request):
+def RecentPapersView(request, current_page):
     paper_list = Paper.objects.order_by('-create_time')
     template = loader.get_template('list.html')
     context = {
-        'current_page': 'recent',
+        'current_page': current_page,
         'paper_list': paper_list
     }
     return HttpResponse(template.render(context, request))
 
-def PaperListView(request, id):
+def PaperListView(request, id, current_page):
     paper_list = Paper.objects.order_by('-create_time')
     template = loader.get_template('list.html')
     context = {
-        'current_page': 'list',
+        'current_page': current_page,
         'paper_list': paper_list
     }
     return HttpResponse(template.render(context, request))
 
-def PaperLabelView(request, name):
+def PaperLabelView(request, name, current_page):
     paper_list = None
     xiangma = Label.objects.filter(name=name)
     if xiangma.count() > 0:
         paper_list = xiangma[0].paper_set.all().order_by('-create_time')
     template = loader.get_template('list.html')
     context = {
-        'current_page': 'label',
+        'current_page': current_page,
         'paper_list': paper_list,
     }
     return HttpResponse(template.render(context, request))
 
-def SinglePaperView(request, id):
+def SinglePaperView(request, id, current_page):
     paper = Paper.objects.filter(pk=id)
     template = loader.get_template('single.html')
     context = {
-        'current_page': 'paper',
+        'current_page': current_page,
         'paper': paper[0],
     }
     return HttpResponse(template.render(context, request))
 
-def UserView(request, id):
+def UserView(request, id, current_page):
     u = User.objects.filter(pk=id)
     if u.count() <= 0:
         return render(request, 'list.html', {
@@ -81,16 +78,16 @@ def UserView(request, id):
     paper_list = Paper.objects.filter(creator=u[0].nickname)
     template = loader.get_template('list.html')
     context = {
-        'current_page': 'user',
+        'current_page': current_page,
         'paper_list': paper_list,
     }
     return HttpResponse(template.render(context, request))
 
-def PaperAdd(request):
+def PaperAdd(request, current_page):
     form = PaperForm()
     paper_list = Paper.objects.all()
     context = {
-        'current_page': 'add',
+        'current_page': current_page,
         'form': form,
         'paper_list': paper_list
     }

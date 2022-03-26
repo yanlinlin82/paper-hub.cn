@@ -11,7 +11,7 @@
 <body>
   <header>
     <div class="banner">
-      <h1 class="logo"><a href="{% url 'view:index' %}">Paper-Hub</a></h1>
+      <h1 class="logo"><a href="{% url 'view:all' %}">Paper-Hub</a></h1>
       <div class="search-box">
         <form style="display:none;">
           <input id="search_text" class="search-input" type="text" value="{{ search_text }}"><input id="search_button" class="search-button" type="hidden" value="Search">
@@ -23,7 +23,7 @@
   <div class="container">
     <div class="left-sidebar">
       <nav>
-        <a href="{% url 'view:index' %}"><div class="menu-item{% if current_page == "all" %} current-item{% endif %}">All Papers</div></a>
+        <a href="{% url 'view:all' %}"><div class="menu-item{% if current_page == "all" %} current-item{% endif %}">All Papers</div></a>
         <a href="{% url 'view:recent' %}"><div class="menu-item{% if current_page == "recent" %} current-item{% endif %}">Recent Papers</div></a>
         <a href="{% url 'view:list' id=1 %}"><div class="menu-item{% if current_page == "list" %} current-item{% endif %}">As List</div></a>
         <a href="{% url 'view:label' name='xiangma' %}"><div class="menu-item{% if current_page == "label" %} current-item{% endif %}">As Label</div></a>
