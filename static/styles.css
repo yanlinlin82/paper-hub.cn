@@ -115,7 +115,7 @@ header h1.logo a {
 }
 
 .content {
-    width: calc(100% - 150px);
+    width: calc(100% - 151px);
     flex: 0 0 auto;
 }
 
@@ -160,37 +160,25 @@ footer p {
 }
 
 .summary {
+    margin: 0;
     padding: 10px;
+    border-bottom: 1px solid #999;
+    background-color: #eef;
 }
 
 div.paper-item {
-    margin: 0;
-    padding: 10px;
-    border-bottom: 1px dashed black;
+    margin: 10px;
+    padding: 0 10px;
+    border: 1px dotted #333;
+    border-top: 3px solid #bf9000;
 }
 
-li.paper-item {
-    margin: 0;
-    padding: 5px;
-    line-height: 1.5em;
+.paper-item:hover {
+    background-color: #ffe;
 }
 
-div.icon {
-    border: 1px dotted black;
-    background-color: #eee;
-    font-size: 9px;
-    display: inline;
-    padding: 2px;
-}
-
-div.icon a {
-    text-decoration: none;
-    color: black;
-}
-
-.date {
-    font-family: "Courier New";
-    font-weight: bold;
+.paper-sep-line {
+    border-top: 1px dashed #666;
 }
 
 .comments {
