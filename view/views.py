@@ -1,11 +1,10 @@
+from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.core import serializers
-
-from datetime import datetime, timedelta
 
 from .models import Label, Paper, User
 from .forms import PaperForm
@@ -71,6 +70,15 @@ def SinglePaperView(request, id, current_page):
     context = {
         'current_page': current_page,
         'paper': paper[0],
+    }
+    return HttpResponse(template.render(context, request))
+
+def StatView(request, current_page):
+    stat = Paper.objects.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+    template = loader.get_template('contributes.html')
+    context = {
+        'current_page': current_page,
+        'stat': stat,
     }
     return HttpResponse(template.render(context, request))
 

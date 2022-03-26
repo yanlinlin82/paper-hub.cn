@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if stat %}
+<p class="summary">There are total {{ stat|length }} item(s).</p>
+<table>
+  <tr>
+    <th>Creator</th>
+    <th>Paper Count</th>
+  </tr>
+{% for i in stat %}
+  <tr>
+    <td><a href="{% url "view:user" id=i.creator__pk %}">{{ i.creator__nickname }}</a></td>
+    <td>{{ i.creator__count }}</td>
+  </tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No result is available.</p>
+{% endif %}
+{% endblock content %}

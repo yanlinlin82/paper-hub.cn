@@ -29,6 +29,7 @@
         <a href="{% url 'view:label' name='响马' %}"><div class="menu-item{% if current_page == "label" %} current-item{% endif %}">As Label</div></a>
         <a href="{% url 'view:paper' id=1 %}"><div class="menu-item{% if current_page == "paper" %} current-item{% endif %}">Single Paper</div></a>
         <a href="{% url 'view:user' id=1 %}"><div class="menu-item{% if current_page == "user" %} current-item{% endif %}">Users</div></a>
+        <a href="{% url 'view:stat' %}"><div class="menu-item{% if current_page == "stat" %} current-item{% endif %}">Statistics</div></a>
         <a href="{% url 'view:add' %}"><div class="menu-item{% if current_page == "add" %} current-item{% endif %}">Add New</div></a>
       </nav>
     </div>

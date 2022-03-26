@@ -10,6 +10,7 @@ urlpatterns = [
     path('label/<str:name>', views.PaperLabelView, name='label', kwargs={ 'current_page': 'label' }),
     path('paper/<int:id>', views.SinglePaperView, name='paper', kwargs={ 'current_page': 'paper' }),
     path('user/<int:id>', views.UserView, name='user', kwargs={ 'current_page': 'user' }),
+    path('stat', views.StatView, name='stat', kwargs={ 'current_page': 'stat' }),
     path('add', views.PaperAdd, name='add', kwargs={ 'current_page': 'add' }),
     path('post/ajax/paper', views.PaperPostAjax, name = 'ajax'),
 ]
