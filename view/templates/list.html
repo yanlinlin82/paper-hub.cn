@@ -8,7 +8,7 @@
 {% for paper in paper_list %}
   <li class="paper-item">
     {{ paper.title }}. {{ paper.publish_year }}, <i>{{ paper.journal }}</i>
-    <div class="icon"><a href="{% url 'index' %}paper/{{ paper.pk }}">详情</a></div>
+    <div class="icon"><a href="{% url 'view:paper' id=paper.pk %}">详情</a></div>
     {% if paper.doi %}<div class="icon"><a href="https://doi.org/{{ paper.doi }}" target="_blank">DOI</a></div>{% endif %}
     {% if paper.pmid %}<div class="icon"><a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">PubMed</a></div>{% endif %}
     {% if paper.pmcid %}<div class="icon"><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">PMC</a></div>{% endif %}

@@ -64,7 +64,7 @@
         // make POST ajax call
         $.ajax({
             type: 'POST',
-            url: "{% url 'post_paper' %}",
+            url: "{% url 'view:ajax' %}",
             data: serializedData,
             success: function (response) {
                 // on successfull creating object

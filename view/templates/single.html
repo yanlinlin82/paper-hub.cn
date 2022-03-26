@@ -3,7 +3,7 @@
 {% block content %}
 {% if paper %}
 <div class="paper-item">
-  <p><a href="{% url 'index' %}paper/{{ paper.pk }}"><b>{{ paper.title }}</b></a></p>
+  <p><a href="{% url 'view:paper' id=paper.pk %}"><b>{{ paper.title }}</b></a></p>
   <p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
   {% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a></p>{% endif %}
   {% if paper.pmid %}<p>PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a></p>{% endif %}

@@ -11,7 +11,7 @@
 <body>
   <header>
     <div class="banner">
-      <h1 class="logo"><a href="{% url 'index' %}">Paper-Hub</a></h1>
+      <h1 class="logo"><a href="{% url 'view:index' %}">Paper-Hub</a></h1>
       <div class="search-box">
         <form style="display:none;">
           <input id="search_text" class="search-input" type="text" value="{{ search_text }}"><input id="search_button" class="search-button" type="hidden" value="Search">
@@ -23,13 +23,15 @@
   <div class="container">
     <div class="left-sidebar">
       <nav>
-        <a href="{% url 'add' %}"><div class="menu-item">Add New</div></a>
-        <a href="{% url 'index' %}"><div class="menu-item current-item">All Papers</div></a>
-        <a href="{% url 'paper' id=1 %}"><div class="menu-item">Single Paper</div></a>
-        <a href="{% url 'label' text='xiangma' %}"><div class="menu-item">Labels</div></a>
-        <a href="{% url 'user' id=1 %}"><div class="menu-item">Users</div></a>
+        <a href="{% url 'view:index' %}"><div class="menu-item{% if current_page == "all" %} current-item{% endif %}">All Papers</div></a>
+        <a href="{% url 'view:recent' %}"><div class="menu-item{% if current_page == "recent" %} current-item{% endif %}">Recent Papers</div></a>
+        <a href="{% url 'view:list' id=1 %}"><div class="menu-item{% if current_page == "list" %} current-item{% endif %}">As List</div></a>
+        <a href="{% url 'view:label' name='xiangma' %}"><div class="menu-item{% if current_page == "label" %} current-item{% endif %}">As Label</div></a>
+        <a href="{% url 'view:paper' id=1 %}"><div class="menu-item{% if current_page == "paper" %} current-item{% endif %}">Single Paper</div></a>
+        <a href="{% url 'view:user' id=1 %}"><div class="menu-item{% if current_page == "user" %} current-item{% endif %}">Users</div></a>
+        <a href="{% url 'view:add' %}"><div class="menu-item{% if current_page == "add" %} current-item{% endif %}">Add New</div></a>
       </nav>
-    </div>    
+    </div>
     <div class="content">
       <article>
         {% if error_message %}<div id="error_message" class="error_message">{{ error_message }}<span class="close" onclick="this.parentElement.style.display = 'none';">x</span></div>{% endif %}
