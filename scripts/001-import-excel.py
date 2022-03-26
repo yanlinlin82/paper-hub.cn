@@ -6,13 +6,12 @@ import pandas as pd
 import django
 
 def main():
+    # 载入Django相关环境
     sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-    #print(sys.path)
-
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
     django.setup()
 
-    from view.models import Paper
+    from view.models import Paper, Label
     #print(Paper.objects.all())
 
     if len(sys.argv) < 2:
@@ -22,6 +21,12 @@ def main():
     df = pd.read_excel(sys.argv[1])
     #print(df)
     #print(len(df))
+
+    label_name = "响马"
+    if Label.objects.filter(name=label_name).count() == 0:
+        xiangma = Label(name = label_name)
+        xiangma.save()
+    xiangma = Label.objects.filter(name=label_name)[0]
 
     for i in range(0, len(df)):
         p = Paper(
@@ -34,8 +39,26 @@ def main():
             publish_year = str(df['发表年份'][i]),
             title = df['文章标题'][i],
             comments = df['推荐理由'][i])
-        #print(p)
+
+        if p.arxiv_id == '-':
+            p.arxiv_id = ''
+            modified = True
+        if p.doi == '-':
+            p.doi = ''
+            modified = True
+        if p.pmid == '-':
+            p.pmid = ''
+            modified = True
+        if p.pmcid == '-':
+            p.pmcid = ''
+            modified = True
+        if modified:
+            p.save()
+
         p.save()
+        xiangma.paper_set.add(p)
+        
+    xiangma.save()
 
 if __name__ == '__main__':
     main()
