@@ -168,9 +168,18 @@ footer p {
 
 .paper-item {
     margin: 10px;
-    padding: 0 10px;
+    padding: 0;
     border: 1px dotted #333;
     border-top: 3px solid #bf9000;
+}
+
+.paper-item .paper-info-block {
+    padding: 0 10px;
+    background-color: #f0f0f0;
+}
+
+.paper-item .paper-comments-block {
+    padding: 0 10px;
 }
 
 .paper-item:hover {
@@ -180,7 +189,8 @@ footer p {
 .paper-item .paper-op-list {
     display: flex;
     align-items: center;
-    margin: 5px 0;
+    margin: 0;
+    padding: 5px 0;
 }
 
 .paper-item .paper-op-list-sub-left {
@@ -196,18 +206,36 @@ footer p {
 }
 
 .paper-item .paper-sep-line {
+    margin: 0;
+    padding: 0;
     border-top: 1px dashed #666;
 }
 
+.paper-item .paper-info {
+    margin: 0;
+    padding: 0;
+}
+
 .paper-item .paper-title {
+    margin: 0;
+    padding: 0.5em 0;
     font-size: 1.2em;
 }
 
 .paper-item .paper-abstract {
+    margin: 0;
+    padding: 0 0 0.5em 0;
     word-break: break-word;
 }
 
+.paper-item .paper-comments-head {
+    margin: 0;
+    padding: 0.5em 0;
+}
+
 .paper-item .paper-comments {
+    margin: 0;
+    padding: 0 0 0.5em 0;
     word-break: break-word;
 }
 
