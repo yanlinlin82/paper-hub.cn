@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.db.models import Q
 from django.core import serializers
 
+from datetime import datetime, timedelta
+
 from .models import Label, Paper, User
 from .forms import PaperForm
 
@@ -24,25 +26,29 @@ def AllPapersView(request, current_page):
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
-        'paper_list': paper_list
+        'paper_list': paper_list,
+        'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
 
 def RecentPapersView(request, current_page):
-    paper_list = Paper.objects.order_by('-create_time' '-pk')
+    last_week = datetime.today() - timedelta(days=7)
+    paper_list = Paper.objects.filter(create_time__gte=last_week).order_by('-create_time', '-pk')[1:20]
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
-        'paper_list': paper_list
+        'paper_list': paper_list,
+        'summary_messages': 'This page shows papers in last week. '
     }
     return HttpResponse(template.render(context, request))
 
 def PaperListView(request, id, current_page):
-    paper_list = Paper.objects.order_by('-create_time' '-pk')
+    paper_list = Paper.objects.order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
-        'paper_list': paper_list
+        'paper_list': paper_list,
+        'summary_messages': 'This page shows list <b>#' + str(id) + '</b>. ',
     }
     return HttpResponse(template.render(context, request))
 
@@ -50,11 +56,12 @@ def PaperLabelView(request, name, current_page):
     paper_list = None
     xiangma = Label.objects.filter(name=name)
     if xiangma.count() > 0:
-        paper_list = xiangma[0].paper_set.all().order_by('-create_time' '-pk')
+        paper_list = xiangma[0].paper_set.all().order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
         'current_page': current_page,
         'paper_list': paper_list,
+        'summary_messages': 'This page shows list of label "<b>' + name + '</b>". ',
     }
     return HttpResponse(template.render(context, request))
 

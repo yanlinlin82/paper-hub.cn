@@ -1,22 +1,25 @@
 {% extends "base.html" %}
+{% load view_extras %}
 
 {% block content %}
 {% if paper %}
 <div class="paper-item">
-  <p><a href="{% url 'view:paper' id=paper.pk %}"><b>{{ paper.title }}</b></a></p>
-  <p>{{ paper.publish_year }}, <i>{{ paper.journal }}</i></p>
-  {% if paper.doi %}<p>DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a></p>{% endif %}
-  {% if paper.pmid %}<p>PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a></p>{% endif %}
-  {% if paper.pmcid %}<p>PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a></p>{% endif %}
-  {% if paper.arxiv_id %}<p>arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a></p>{% endif %}
-  {% if paper.abstract %}
-    <p class="abstract">{{ paper.abstract }}</p>
-  {% else %}
-    <p class="abstract"><i>No abstract available.</i></p>
-  {% endif %}
-  <p class="date">[{{ paper.create_time|date:"Y-m-d" }}] <b>{{ paper.creator }}</b>:</p>
-  <p class="comments">{{ paper.comments }}</p>
-</div>{% else %}
-          <p>No paper is available.</p>
+  <p class="paper-id"><a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a></p>
+  <p class="paper-info">
+    {{ paper.publish_year }},
+    <i>{{ paper.journal }}</i>.
+    {% if paper.doi %}DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
+    {% if paper.pmid %}PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
+    {% if paper.pmcid %}PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a>{% endif %}
+    {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a>{% endif %}
+  </p>
+  <p class="paper-title"><b>{{ paper.title }}</b></p>
+  <p class="paper-abstract">{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></p>{% endif %}
+  <hr class="paper-sep-line">
+  <p class="paper-comments">[{{ paper.create_time|date:'Y-m-d' }}] <b>{{ paper.creator }}: </b></p>
+  {% autoescape off %}<p>{{ paper.comments|replace_line_br }}</p>{% endautoescape %}
+</div>
+{% else %}
+<p>Invalid paper ID.</p>
 {% endif %}
 {% endblock content %}

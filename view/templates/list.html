@@ -3,7 +3,7 @@
 
 {% block content %}
 {% if paper_list %}
-<p class="page-summary">There are total {{ paper_list|length }} paper(s).</p>
+<p class="page-summary">{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ paper_list|length }} paper(s).</p>
 {% for paper in paper_list %}
 <div class="paper-item">
   <p class="paper-id"><a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a></p>
