@@ -31,6 +31,76 @@ header {
     margin: 0 auto;
     max-width: 960px;
     display: flex;
+    flex-direction: column;
+}
+
+.menu {
+    background-color: #ccf;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.menu-item {
+    margin-right: auto;
+    height: 30px;
+    text-decoration: none;
+    color: #333;
+    background-color: #ccf;
+    text-align: center;
+    line-height: 30px;
+    align-items: flex-start;
+    margin: 0;
+    padding: 0 10px;
+}
+
+.menu-item:hover {
+    background-color: #fc9;
+}
+
+.current-item {
+    color: #333;
+    background-color: #a8a8ff;
+    font-weight: bold;
+    border-top: 3px solid #bf9000;
+    margin-top: -3px;
+}
+
+.content {
+    width: 100%;
+}
+
+@media (min-width: 600px) {
+    .container {
+        flex-direction: row;
+    }
+    .menu {
+        width: 150px;
+        background-color: transparent;
+        border-right: solid 1px #999;
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+    }
+    .content {
+        width: calc(100% - 151px);
+        flex: 0 0 auto;
+    }
+    .menu-item {
+        background-color: transparent;
+        width: 150px;
+        margin: 0;
+        padding: 0;
+    }
+    .current-item {
+        background-color: #eee;
+        font-weight: bold;
+        border-right: 3px solid #bf9000;
+        padding: 0;
+        border-top: 0;
+    }
 }
 
 .search-box {
@@ -82,41 +152,6 @@ header h1.logo:hover {
 header h1.logo a {
     text-decoration: none;
     color: #333;
-}
-
-.left-sidebar {
-    width: 150px;
-    border-right: solid 1px #999;
-    flex: 0 0 auto;
-}
-
-.left-sidebar a {
-    text-decoration: none;
-    color: #333;
-}
-
-.left-sidebar .menu-item {
-    padding: 10px;
-    cursor: pointer;
-    font-size: 11pt;
-}
-
-.left-sidebar .menu-item:hover {
-    background-color: #fc9;
-    color: black;
-    font-weight: bold;
-}
-
-.left-sidebar .current-item {
-    background-color: #eee;
-    border-left: solid 3px #bf9000;
-    color: #333;
-    font-weight: bold;
-}
-
-.content {
-    width: calc(100% - 151px);
-    flex: 0 0 auto;
 }
 
 .error_message {
@@ -237,13 +272,4 @@ footer p {
     margin: 0;
     padding: 0 0 0.5em 0;
     word-break: break-word;
-}
-
-@media (max-width: 600px) {
-    .left-sidebar {
-        display: none;
-    }
-    .content {
-        width: 100%;
-    }
 }
