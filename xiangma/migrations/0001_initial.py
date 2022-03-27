@@ -52,8 +52,8 @@ class Migration(migrations.Migration):
                 ('urls', models.CharField(default='', max_length=65536)),
                 ('is_private', models.BooleanField(default=True)),
                 ('full_text', models.FileField(default='', upload_to='')),
-                ('creator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='view.user')),
-                ('labels', models.ManyToManyField(to='view.label')),
+                ('creator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='xiangma.user')),
+                ('labels', models.ManyToManyField(to='xiangma.label')),
             ],
         ),
     ]

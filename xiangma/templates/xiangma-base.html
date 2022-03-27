@@ -1,0 +1,41 @@
+<!DOCTYPE html>{% load static %}
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>响马读paper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+  <link rel="stylesheet" href="{% static 'styles.css' %}">{% block css %}{% endblock css %}
+</head>
+<body>
+  <a name="top">
+  <header>
+    <div class="banner">
+      <h1 class="logo"><a href="{% url 'xiangma:index' %}">响马读paper</a></h1>
+      <div class="search-box">
+        <form style="display:none;">
+          <input id="search_text" class="search-input" type="text" value="{{ search_text }}"><input id="search_button" class="search-button" type="hidden" value="Search">
+        </form>
+      </div>
+      <input id="login_button" class="login-button" type="button" value="Login" style="display:none">
+    </div>
+  </header>
+  <div class="container">
+    <nav class="menu">
+      <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'xiangma:recent' %}">近一周分享</a>
+      <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'xiangma:all' %}">所有分享</a>
+      <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'xiangma:stat' %}">响马榜单</a>
+    </nav>
+    <div class="content">
+      <article>
+        {% if error_message %}<div id="error_message" class="error_message">{{ error_message }}<span class="close" onclick="this.parentElement.style.display = 'none';">x</span></div>{% endif %}
+        {% block content %}{% endblock content %}
+      </article>
+    </div>
+  </div>
+  <footer>
+    <p>&copy; Linlin Yan, 2022 | <a href="http://www.beian.miit.gov.cn/" target="_blank">京ICP备18031542号-9</a></p>
+  </footer>
+  {% block javascript %}{% endblock javascript %}
+</body>
+</html>

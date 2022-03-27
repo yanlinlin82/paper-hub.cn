@@ -18,10 +18,11 @@ from django.urls import include, path
 from django.http import HttpResponseRedirect
 
 def redirect(request):
-    return HttpResponseRedirect('view/')
+    return HttpResponseRedirect('xiangma/')
 
 urlpatterns = [
     path('', redirect),
     path('view/', include('view.urls')),
+    path('xiangma/', include('xiangma.urls')),
     path('admin/', admin.site.urls),
 ]

@@ -11,7 +11,8 @@ def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
     django.setup()
 
-    from view.models import Paper, Label, User
+    #from view.models import Paper, Label, User
+    from xiangma.models import Paper, Label, User
     #print(Paper.objects.all())
 
     if len(sys.argv) < 2:
