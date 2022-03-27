@@ -35,12 +35,12 @@ header {
 }
 
 .menu {
-    background-color: #ccf;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: flex-start;
+    border-bottom: 1px solid #999;
 }
 
 .menu-item {
@@ -48,7 +48,6 @@ header {
     height: 30px;
     text-decoration: none;
     color: #333;
-    background-color: #ccf;
     text-align: center;
     line-height: 30px;
     align-items: flex-start;
@@ -58,11 +57,11 @@ header {
 
 .menu-item:hover {
     background-color: #fc9;
+    font-weight: bold;
 }
 
 .current-item {
-    color: #333;
-    background-color: #a8a8ff;
+    background-color: #eee;
     font-weight: bold;
     border-top: 3px solid #bf9000;
     margin-top: -3px;
@@ -78,7 +77,6 @@ header {
     }
     .menu {
         width: 150px;
-        background-color: transparent;
         border-right: solid 1px #999;
         flex: 0 0 auto;
         display: flex;
@@ -98,8 +96,10 @@ header {
         background-color: #eee;
         font-weight: bold;
         border-right: 3px solid #bf9000;
+        margin-right: -3px;
         padding: 0;
         border-top: 0;
+        z-index: 1;
     }
 }
 
