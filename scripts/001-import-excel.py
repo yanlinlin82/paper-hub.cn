@@ -32,9 +32,11 @@ def main():
         xiangma.save()
     xiangma = Label.objects.filter(name=label_name)[0]
 
+    # 获取当前时区信息
     tz = timezone.now().tzinfo
 
     for i in range(0, len(df)):
+        # 根据时区信息初始化推荐日期
         the_date = df['推荐日期'][i].replace(tzinfo=tz)
 
         if User.objects.filter(weixin_id=df['微信号'][i]).count() > 0:
@@ -42,7 +44,7 @@ def main():
         elif User.objects.filter(nickname=df['群友'][i]).count() > 0:
             u = User.objects.filter(nickname=df['群友'][i])[0]
         else:
-            print("Import user: '" + df['姓名'][i] + "'")
+            print("> Import user: '" + df['群友'][i] + "'")
             u = User(
                 name = df['姓名'][i],
                 nickname = df['群友'][i],
@@ -51,15 +53,15 @@ def main():
                 last_login_time = the_date)
             u.save()
 
-        print("Import paper: '" + df['文章标题'][i] + "'")
+        print(">> Import paper: '" + df['文章标题'][i] + "'")
         p = Paper(
             creator = u,
             create_time = the_date,
             update_time = the_date,
 
-            doi = df['DOI'][i] if df['DOI'][i] != '' else '',
+            doi = df['DOI'][i] if df['DOI'][i] != '-' else '',
             pmid = '',
-            arxiv_id = df['arXiv'][i] if df['arXiv'][i] != '' else '',
+            arxiv_id = df['arXiv'][i] if df['arXiv'][i] != '-' else '',
             pmcid = '',
 
             journal = df['杂志'][i],
