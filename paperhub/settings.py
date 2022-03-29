@@ -79,6 +79,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'DATE_FORMAT': 'Y-m-d',
+        'DATETIME_FORMAT': 'Y-m-d H:i:s',
+        'DATE_INPUT_FORMATS': '%Y-%m-%d',
+        'DATETIME_INPUT_FORMATS': '%Y-%m-%d %H:%M:%S',
     }
 }
 

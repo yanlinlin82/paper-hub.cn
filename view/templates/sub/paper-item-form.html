@@ -4,12 +4,13 @@
 </div>
 <div class="row">
     <div class="col-25">{{ form.create_time.label_tag }}</div>
-    <div class="col-75">{{ form.create_time }}&nbsp;</div>
+    <div class="col-75">{{ form.create_time }}</div>
 </div>
 <div class="row">
     <div class="col-25">{{ form.update_time.label_tag }}</div>
-    <div class="col-75">{{ form.update_time }}&nbsp;</div>
+    <div class="col-75">{{ form.update_time }}</div>
 </div>
+<br>
 <div class="row">
     <div class="col-25">{{ form.doi.label_tag }}</div>
     <div class="col-75">{{ form.doi }}<input type="button" id="fetch_doi" name="fetch_doi" value="Fetch" class="attach_to_text"></div>
@@ -41,13 +42,12 @@
 </div>
 <div class="row">
     <div class="col-25"><label for="pub_date">Publish Date</label></div>
-    <div class="col-75"><input type="text" id="pub_date" name="pub_date" value="{{ paper.pub_date }}"></div>
+    <div class="col-75"><input type="text" id="pub_date" name="pub_date" value="{{ paper.pub_date|date:'Y-m-d' }}"></div>
 </div>
 <div class="row">
     <div class="col-25"><label for="abstract">Abstract</label></div>
     <div class="col-75"><textarea id="abstract" name="abstract" style="height:200px">{{ paper.abstract }}</textarea></div>
 </div>
-<br>
 <div class="row">
     <div class="col-25"><label for="urls">URLs</label></div>
     <div class="col-75"><textarea id="urls" name="urls" style="height:80px">{{ paper.urls }}</textarea></div>
