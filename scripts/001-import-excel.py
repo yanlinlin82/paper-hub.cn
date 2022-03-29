@@ -63,10 +63,14 @@ def main():
             pmid = df['PMID'][i] if df['PMID'][i] != '-' else '',
             arxiv_id = df['arXiv'][i] if df['arXiv'][i] != '-' else '',
             pmcid = df['PMCID'][i] if df['PMCID'][i] != '-' else '',
+            cnki_id = df['CNKI'][i] if df['CNKI'][i] != '-' else '',
 
             journal = df['杂志'][i],
-            title = df['文章标题'][i],
             pub_date = datetime.date(df['发表年份'][i], 1, 1),
+            title = df['文章标题'][i],
+            authors = df['作者'][i],
+            abstract = df['摘要'][i],
+            keywords = df['关键词'][i],
             urls = df['URLs'][i],
 
             is_private = False,

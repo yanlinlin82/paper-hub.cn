@@ -1,39 +1,67 @@
 {% load view_extras %}
 <div class="paper-info-block">
-<div class="paper-op-list">
-  <div class="paper-op-list-sub-left">
-    <a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a>
+  <div class="paper-op-list">
+    <div class="paper-op-list-sub-left">
+      <a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a>
+    </div>
+    <div class="paper-op-list-sub-right">
+      <a href="{% url "view:paper" id=paper.pk %}/edit">[Edit]</a>
+      {% comment %}
+      <a href="javascript: share({{ paper.pk }})">[分享]</a>
+      <a href="javascript: delete({{ paper.pk }})">[删除]</a>
+      {% endcomment %}
+      <a href="#top">[Top]</a>
+    </div>
   </div>
-  <div class="paper-op-list-sub-right">
-    <a href="{% url "view:paper" id=paper.pk %}/edit">[Edit]</a>
-    {% comment %}
-    <a href="javascript: share({{ paper.pk }})">[分享]</a>
-    <a href="javascript: delete({{ paper.pk }})">[删除]</a>
-    {% endcomment %}
-    <a href="#top">[Top]</a>
+  <div class="paper-info">
+    {{ paper.pub_year }},
+    <i>{{ paper.journal }}</i>.
+    {% if paper.doi %}DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a><sup>↗</sup>{% endif %}
+    {% if paper.pmid %}PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a><sup>↗</sup>{% endif %}
+    {% if paper.pmcid %}PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a><sup>↗</sup>{% endif %}
+    {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a><sup>↗</sup>{% endif %}
+    {% if paper.cnki_id %}CNKI ID: <a href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{ paper.cnki_id }}" target="_blank">{{ paper.cnki_id|escape }}</a><sup>↗</sup>{% endif %}
+    <div class="paper-title"><b>{{ paper.title }}</b></div>
+    <div style="font-size: 14px; float: right; margin-top: -1.5em;"><a id="paper_button_{{ paper.pk }}" href="javascript:toggle({{paper.pk}});">[More]</a></div>
+    <script>
+      function toggle(id) {
+        e = document.getElementById('paper_detail_' + id);
+        b = document.getElementById('paper_button_' + id);
+        if (e.style.display == 'none') {
+          e.style.display = 'block';
+          b.innerText = '[Less]';
+        } else {
+          e.style.display = 'none';
+          b.innerText = '[More]';
+        }
+      }
+    </script>
   </div>
-</div>
-<div class="paper-info">
-  {{ paper.pub_year }},
-  <i>{{ paper.journal }}</i>.
-  {% if paper.doi %}DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a><sup>↗</sup>{% endif %}
-  {% if paper.pmid %}PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a><sup>↗</sup>{% endif %}
-  {% if paper.pmcid %}PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a><sup>↗</sup>{% endif %}
-  {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a><sup>↗</sup>{% endif %}
-</div>
-<div class="paper-title"><b>{{ paper.title }}</b></div>
-<div class="paper-abstract">
-  <div class="abstract-label"><b>Abstract:</b></div>
-  <div>{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></div>{% endif %}</div>
-{% if paper.urls %}
-<div class="paper-urls">
-  <div class="url-label"><b>Related Links:</b></div>
-  <div class="url-item"><a href="{{ paper.urls }}" target="_blank">{{ paper.urls }}</a></div>
-</div>
-{% endif %}
+  <div class="paper-details" id="paper_detail_{{ paper.pk }}" style="display: none;">
+    <div class="paper-authors">
+      <b>Authors:</b>
+      {{ paper.authors }}
+    </div>
+    <div class="paper-abstract">
+      <div class="abstract-label"><b>Abstract:</b></div>
+      <div>{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i>{% endif %}</div>
+    </div>
+    {% if paper.keywords %}
+    <div class="paper-keywords">
+      <b>Keywords:</b>
+      {{ paper.keywords }}
+    </div>
+    {% endif %}
+    {% if paper.urls %}
+    <div class="paper-urls">
+      <div class="url-label"><b>Related Links:</b></div>
+      <div class="url-item"><a href="{{ paper.urls }}" target="_blank">{{ paper.urls }}</a></div>
+    </div>
+    {% endif %}
+  </div>
 </div>
 <div class="paper-comments-block">
-<hr class="paper-sep-line">
-<div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>:</div>
-<div class="paper-comments">{% autoescape off %}{{ paper.comments|replace_line_br }}{% endautoescape %}</div>
+  <hr class="paper-sep-line">
+  <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>:</div>
+  <div class="paper-comments">{% autoescape off %}{{ paper.comments|replace_line_br }}{% endautoescape %}</div>
 </div>

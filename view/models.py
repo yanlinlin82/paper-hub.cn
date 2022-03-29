@@ -27,13 +27,15 @@ class Paper(models.Model):
     pmid = models.CharField(max_length=20, default='')
     arxiv_id = models.CharField(max_length=30, default='')
     pmcid = models.CharField(max_length=100, default='')
+    cnki_id = models.CharField(max_length=100, default='') # CNKI CJFD ID
 
     # paper info
     journal = models.CharField(max_length=200, default='')
-    title = models.CharField(max_length=500, default='')
     pub_date = models.DateField(blank=True, default=None)
+    title = models.CharField(max_length=500, default='')
     authors = models.CharField(max_length=4000, default='')
     abstract = models.CharField(max_length=4000, default='')
+    keywords = models.CharField(max_length=1000, default='')
     urls = models.CharField(max_length=1000, default='')
     full_text = models.FileField(default='')
 

@@ -27,6 +27,10 @@
     <div class="col-25">{{ form.pmcid.label_tag }}</div>
     <div class="col-75">{{ form.pmcid }}<input type="button" id="fetch_pmcid" name="fetch_pmcid" value="Fetch" class="attach_to_text"></div>
 </div>
+<div class="row">
+    <div class="col-25">{{ form.cnki_id.label_tag }}</div>
+    <div class="col-75">{{ form.cnki_id }}<input type="button" id="fetch_cnki_id" name="fetch_cnki_id" value="Fetch" class="attach_to_text"></div>
+</div>
 <br>
 <div class="row">
     <div class="col-25"><label for="journal">Journal</label></div>
@@ -47,6 +51,10 @@
 <div class="row">
     <div class="col-25"><label for="abstract">Abstract</label></div>
     <div class="col-75"><textarea id="abstract" name="abstract" style="height:200px">{{ paper.abstract }}</textarea></div>
+</div>
+<div class="row">
+    <div class="col-25"><label for="keywords">Keywords</label></div>
+    <div class="col-75"><textarea id="keywords" name="keywords" style="height:200px">{{ paper.keywords }}</textarea></div>
 </div>
 <div class="row">
     <div class="col-25"><label for="urls">URLs</label></div>
