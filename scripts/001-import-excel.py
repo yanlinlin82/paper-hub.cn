@@ -22,7 +22,7 @@ def main():
         print("Usage:", sys.argv[0], "<input.xlsx>")
         exit(1)
 
-    df = pd.read_excel(sys.argv[1])
+    df = pd.read_excel(sys.argv[1], na_filter=False)
     #print(df)
     #print(len(df))
 
@@ -60,16 +60,17 @@ def main():
             update_time = the_date,
 
             doi = df['DOI'][i] if df['DOI'][i] != '-' else '',
-            pmid = '',
+            pmid = df['PMID'][i] if df['PMID'][i] != '-' else '',
             arxiv_id = df['arXiv'][i] if df['arXiv'][i] != '-' else '',
-            pmcid = '',
+            pmcid = df['PMCID'][i] if df['PMCID'][i] != '-' else '',
 
             journal = df['杂志'][i],
             title = df['文章标题'][i],
             pub_date = datetime.date(df['发表年份'][i], 1, 1),
+            urls = df['URLs'][i],
 
             is_private = False,
-            comments = re.sub(r"^\#paper", "", df['推荐理由'][i]))
+            comments = re.sub(r"^\#paper\s*", "", df['推荐理由'][i], flags=re.I))
 
         p.save()
         xiangma.paper_set.add(p)
