@@ -5,6 +5,7 @@ from django.template import loader
 from django.urls import reverse
 from django.db.models import Q, Count
 from django.core import serializers
+from django.utils import timezone
 
 from .models import Label, Paper, User
 from .forms import PaperForm
@@ -31,7 +32,7 @@ def AllPapersView(request, current_page):
     return HttpResponse(template.render(context, request))
 
 def RecentPapersView(request, current_page):
-    last_week = datetime.today() - timedelta(days=7)
+    last_week = timezone.now() - timedelta(days=7)
     paper_list = Paper.objects.filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
@@ -65,20 +66,26 @@ def PaperLabelView(request, name, current_page):
     return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id, current_page):
-    paper = Paper.objects.filter(pk=id)
+    paper_list = Paper.objects.filter(pk=id)
+    if paper_list.count() <= 0:
+        return render(request, 'single.html', {
+            'current_page': current_page,
+            'error_message': 'Invalid paper ID: ' + str(id),
+        })
+    paper = paper_list[0]
     template = loader.get_template('single.html')
     context = {
         'current_page': current_page,
-        'paper': paper[0],
+        'paper': paper,
     }
     return HttpResponse(template.render(context, request))
 
 def EditPaperView(request, id, current_page):
     paper_list = Paper.objects.filter(pk=id)
-    if paper_list.count == 0:
+    if paper_list.count() <= 0:
         return render(request, 'edit.html', {
             'current_page': current_page,
-            'error_message': 'Invalid paper id: ' + str(id),
+            'error_message': 'Invalid paper ID: ' + str(id),
         })
     paper = paper_list[0]
     if request.method == 'POST':

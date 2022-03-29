@@ -364,8 +364,28 @@ input[type=submit]:hover {
     align: right;
 }
 
+.paper-urls {
+    padding: 0 0 10px 0;
+}
 
-/* Clear floats after the columns */
+.abstract-label {
+    padding: 10px 0;
+}
+
+.paper-urls .url-label {
+    padding: 10px 0;
+}
+
+.paper-urls .url-item {
+    width: 100%;
+    height: 1.2em;
+    overflow: hidden;
+    word-break: break-all;
+}
+
+.paper-urls .url-item:before {
+    content: '> ';
+}
 
 .row:after {
     content: "";

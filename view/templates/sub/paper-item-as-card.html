@@ -5,12 +5,12 @@
     <a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a>
   </div>
   <div class="paper-op-list-sub-right">
-    <a href="{% url "view:paper" id=paper.pk %}/edit">[修改]</a>
+    <a href="{% url "view:paper" id=paper.pk %}/edit">[Edit]</a>
     {% comment %}
     <a href="javascript: share({{ paper.pk }})">[分享]</a>
     <a href="javascript: delete({{ paper.pk }})">[删除]</a>
     {% endcomment %}
-    <a href="#top">[▲]</a>
+    <a href="#top">[Top]</a>
   </div>
 </div>
 <div class="paper-info">
@@ -22,7 +22,15 @@
   {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a><sup>↗</sup>{% endif %}
 </div>
 <div class="paper-title"><b>{{ paper.title }}</b></div>
-<div class="paper-abstract">{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></div>{% endif %}
+<div class="paper-abstract">
+  <div class="abstract-label"><b>Abstract:</b></div>
+  <div>{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i></div>{% endif %}</div>
+{% if paper.urls %}
+<div class="paper-urls">
+  <div class="url-label"><b>Related Links:</b></div>
+  <div class="url-item"><a href="{{ paper.urls }}" target="_blank">{{ paper.urls }}</a></div>
+</div>
+{% endif %}
 </div>
 <div class="paper-comments-block">
 <hr class="paper-sep-line">
