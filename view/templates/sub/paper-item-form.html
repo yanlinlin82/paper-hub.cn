@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-25">{{ form.creator.label_tag }}</div>
+    <div class="col-75">{{ form.creator }}</div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.create_time.label_tag }}</div>
+    <div class="col-75">{{ form.create_time }}&nbsp;</div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.update_time.label_tag }}</div>
+    <div class="col-75">{{ form.update_time }}&nbsp;</div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.doi.label_tag }}</div>
+    <div class="col-75">{{ form.doi }}<input type="button" id="fetch_doi" name="fetch_doi" value="Fetch" class="attach_to_text"></div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.pmid.label_tag }}</div>
+    <div class="col-75">{{ form.pmid }}<input type="button" id="fetch_pmid" name="fetch_pmid" value="Fetch" class="attach_to_text"></div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.arxiv_id.label_tag }}</div>
+    <div class="col-75">{{ form.arxiv_id }}<input type="button" id="fetch_arxiv_id" name="fetch_arxiv_id" value="Fetch" class="attach_to_text"></div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.pmcid.label_tag }}</div>
+    <div class="col-75">{{ form.pmcid }}<input type="button" id="fetch_pmcid" name="fetch_pmcid" value="Fetch" class="attach_to_text"></div>
+</div>
+<br>
+<div class="row">
+    <div class="col-25"><label for="journal">Journal</label></div>
+    <div class="col-75"><input type="text" id="journal" name="journal" value="{{ paper.journal }}"></div>
+</div>
+<div class="row">
+    <div class="col-25"><label for="title">Title</label></div>
+    <div class="col-75"><input type="text" id="title" name="title" value="{{ paper.title }}"></div>
+</div>
+<div class="row">
+    <div class="col-25"><label for="authors">Authors</label></div>
+    <div class="col-75"><input type="text" id="authors" name="authors" value="{{ paper.authors }}"></div>
+</div>
+<div class="row">
+    <div class="col-25"><label for="pub_date">Publish Date</label></div>
+    <div class="col-75"><input type="text" id="pub_date" name="pub_date" value="{{ paper.pub_date }}"></div>
+</div>
+<div class="row">
+    <div class="col-25"><label for="abstract">Abstract</label></div>
+    <div class="col-75"><textarea id="abstract" name="abstract" style="height:200px">{{ paper.abstract }}</textarea></div>
+</div>
+<br>
+<div class="row">
+    <div class="col-25"><label for="urls">URLs</label></div>
+    <div class="col-75"><textarea id="urls" name="urls" style="height:80px">{{ paper.urls }}</textarea></div>
+</div>
+<br>
+<div class="row">
+    <div class="col-25"><label for="comments">Permission</label></div>
+    <div class="col-75">
+    <div style="line-height: 40px;">
+        <input type="radio" id="permission" name="permission" value="public"> Public
+        <input type="radio" id="permission" name="permission" value="private" checked> Private
+    </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-25"><label for="comments">Comments</label></div>
+    <div class="col-75"><textarea id="comments" name="comments" style="height:200px">{{ paper.comments }}</textarea></div>
+</div>

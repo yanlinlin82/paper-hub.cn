@@ -277,3 +277,111 @@ footer p {
     padding: 0 0 0.5em 0;
     word-break: break-word;
 }
+
+* {
+    box-sizing: border-box;
+}
+
+input[type=text],
+select,
+textarea {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+input[type=text].with_button {
+    width: calc(100% - 65px);
+}
+
+input[type=button].attach_to_text {
+    width: 65px;
+    border: 1px solid #ccc;
+    background-color: #ccc;
+    padding: 5px 10px;
+}
+
+input[type=button].attach_to_text:hover {
+    background-color: #eee;
+}
+
+input[type=button].attach_to_text:active {
+    background-color: #ddd;
+}
+
+label {
+    padding: 5px 5px 5px 0;
+    display: inline-block;
+}
+
+input[type=button] {
+    background-color: #04AA6D;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+input[type=button]:hover {
+    background-color: #45a049;
+}
+
+input[type=submit] {
+    background-color: #04AA6D;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+input[type=submit]:hover {
+    background-color: #45a049;
+}
+
+.container-fluid {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+
+.col-25 {
+    padding: 0 10px;
+    float: left;
+    width: 25%;
+    margin-top: 6px;
+    text-align: right;
+}
+
+.col-75 {
+    float: left;
+    width: 75%;
+    margin-top: 6px;
+    align: right;
+}
+
+
+/* Clear floats after the columns */
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+@media screen and (max-width: 600px) {
+    .col-25,
+    .col-75,
+    input[type=submit] {
+        width: 100%;
+        margin-top: 0;
+    }
+    .col-25 {
+        padding: 0;
+        text-align: left;
+    }
+}

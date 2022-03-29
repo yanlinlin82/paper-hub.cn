@@ -73,6 +73,53 @@ def SinglePaperView(request, id, current_page):
     }
     return HttpResponse(template.render(context, request))
 
+def EditPaperView(request, id, current_page):
+    paper_list = Paper.objects.filter(pk=id)
+    if paper_list.count == 0:
+        return render(request, 'edit.html', {
+            'current_page': current_page,
+            'error_message': 'Invalid paper id: ' + str(id),
+        })
+    paper = paper_list[0]
+    if request.method == 'POST':
+        form = PaperForm(request.POST)
+        if form.is_valid():
+            paper.doi = form.cleaned_data['doi']
+            paper.pmid = form.cleaned_data['pmid']
+            paper.journal = form.cleaned_data['journal']
+            paper.title = form.cleaned_data['title']
+            paper.abstract = form.cleaned_data['abstract']
+            paper.comments = form.cleaned_data['comments']
+            paper.save()
+            return HttpResponseRedirect(reverse('view:paper', args=[id]))
+    else:
+        data = {
+            'creator': paper.creator,
+            'create_time': paper.create_time,
+            'update_time': paper.update_time,
+            'doi': paper.doi,
+            'pmid': paper.pmid,
+            'arxiv_id': paper.arxiv_id,
+            'pmcid': paper.pmcid,
+            'journal': paper.journal,
+            'pub_date': paper.pub_date,
+            'title': paper.title,
+            'authors': paper.authors,
+            'abstract': paper.abstract,
+            'urls': paper.urls,
+            'is_private': paper.is_private,
+            'comments': paper.comments,
+            'full_text': paper.full_text,
+        }
+        form = PaperForm(data)
+    template = loader.get_template('edit.html')
+    context = {
+        'current_page': current_page,
+        'paper': paper,
+        'form': form,
+    }
+    return HttpResponse(template.render(context, request))
+
 def StatView(request, current_page):
     stat_all = Paper.objects.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
@@ -116,14 +163,11 @@ def UserView(request, id, current_page):
     return HttpResponse(template.render(context, request))
 
 def PaperAdd(request, current_page):
-    form = PaperForm()
-    paper_list = Paper.objects.all()
+    paper = Paper()
     context = {
         'current_page': current_page,
-        'form': form,
-        'paper_list': paper_list
+        'paper': paper,
     }
-    #return render(request, 'add.html', context)
     template = loader.get_template('add.html')
     return HttpResponse(template.render(context, request))
 

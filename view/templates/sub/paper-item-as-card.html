@@ -5,8 +5,8 @@
     <a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a>
   </div>
   <div class="paper-op-list-sub-right">
+    <a href="{% url "view:paper" id=paper.pk %}/edit">[修改]</a>
     {% comment %}
-    <a href="javascript: edit({{ paper.pk }})">[修改]</a>
     <a href="javascript: share({{ paper.pk }})">[分享]</a>
     <a href="javascript: delete({{ paper.pk }})">[删除]</a>
     {% endcomment %}
@@ -14,7 +14,7 @@
   </div>
 </div>
 <div class="paper-info">
-  {{ paper.publish_year }},
+  {{ paper.pub_year }},
   <i>{{ paper.journal }}</i>.
   {% if paper.doi %}DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a><sup>↗</sup>{% endif %}
   {% if paper.pmid %}PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a><sup>↗</sup>{% endif %}

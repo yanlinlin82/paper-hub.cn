@@ -29,9 +29,7 @@
       <a class="menu-item{% if current_page == "paper" %} current-item{% endif %}" href="{% url 'view:paper' id=1 %}">Single Paper</a>
       <a class="menu-item{% if current_page == "user" %} current-item{% endif %}" href="{% url 'view:user' id=1 %}">Users</a>
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">Statistics</a>
-      {% comment %}
-      <a class="mitem" href="{% url 'view:add' %}"><div class="menu-item{% if current_page == "add" %} current-item{% endif %}">Add New</div></a>
-      {% endcomment %}
+      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
     </nav>
     <div class="content">
       <article>
