@@ -3,12 +3,11 @@
 {% block content %}
 <div class="container-fluid">
 <h2 style="text-align: center;">Add A New Paper</h2>
-<form id="paper-form" action="{% url "view:add" %}">
+<form id="paper-form" method="post">
+  {% csrf_token %}
   {% include "sub/paper-item-form.html" %}
   <hr>
-  <div class="row">
-    <input type="submit" value="Add">
-  </div>
+  <div class="row"><input type="submit" value="Add"></div>
 <form>
 </div>
 {% endblock content %}

@@ -90,15 +90,36 @@ def EditPaperView(request, id, current_page):
     paper = paper_list[0]
     if request.method == 'POST':
         form = PaperForm(request.POST)
-        if form.is_valid():
-            paper.doi = form.cleaned_data['doi']
-            paper.pmid = form.cleaned_data['pmid']
-            paper.journal = form.cleaned_data['journal']
-            paper.title = form.cleaned_data['title']
-            paper.abstract = form.cleaned_data['abstract']
-            paper.comments = form.cleaned_data['comments']
-            paper.save()
-            return HttpResponseRedirect(reverse('view:paper', args=[id]))
+        if not form.is_valid():
+            return render(request, 'edit.html', {
+                'current_page': current_page,
+                'error_message': form.errors,
+            })
+        user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
+        if user_list.count() <= 0:
+            return render(request, 'edit.html', {
+                'current_page': current_page,
+                'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
+            })
+        paper.creator = user_list[0]
+        paper.create_time = form.cleaned_data['create_time']
+        paper.update_time = form.cleaned_data['update_time']
+        paper.doi = form.cleaned_data['doi']
+        paper.pmid = form.cleaned_data['pmid']
+        paper.arxiv_id = form.cleaned_data['arxiv_id']
+        paper.pmcid = form.cleaned_data['pmcid']
+        paper.cnki_id = form.cleaned_data['cnki_id']
+        paper.journal = form.cleaned_data['journal']
+        paper.pub_date = form.cleaned_data['pub_date']
+        paper.title = form.cleaned_data['title']
+        paper.authors = form.cleaned_data['authors']
+        paper.abstract = form.cleaned_data['abstract']
+        paper.keywords = form.cleaned_data['keywords']
+        paper.urls = form.cleaned_data['urls']
+        paper.is_private = form.cleaned_data['is_private']
+        paper.comments = form.cleaned_data['comments']
+        paper.save()
+        return HttpResponseRedirect(reverse('view:paper', args=[id]))
     else:
         data = {
             'creator': paper.creator,
@@ -108,24 +129,26 @@ def EditPaperView(request, id, current_page):
             'pmid': paper.pmid,
             'arxiv_id': paper.arxiv_id,
             'pmcid': paper.pmcid,
+            'cnki_id': paper.cnki_id,
             'journal': paper.journal,
             'pub_date': paper.pub_date,
             'title': paper.title,
             'authors': paper.authors,
             'abstract': paper.abstract,
+            'keywords': paper.keywords,
             'urls': paper.urls,
             'is_private': paper.is_private,
             'comments': paper.comments,
             'full_text': paper.full_text,
         }
         form = PaperForm(data)
-    template = loader.get_template('edit.html')
-    context = {
-        'current_page': current_page,
-        'paper': paper,
-        'form': form,
-    }
-    return HttpResponse(template.render(context, request))
+        template = loader.get_template('edit.html')
+        context = {
+            'current_page': current_page,
+            'paper': paper,
+            'form': form,
+        }
+        return HttpResponse(template.render(context, request))
 
 def StatView(request, current_page):
     stat_all = Paper.objects.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
@@ -170,13 +193,49 @@ def UserView(request, id, current_page):
     return HttpResponse(template.render(context, request))
 
 def PaperAdd(request, current_page):
-    paper = Paper()
-    context = {
-        'current_page': current_page,
-        'paper': paper,
-    }
-    template = loader.get_template('add.html')
-    return HttpResponse(template.render(context, request))
+    if request.method == 'POST':
+        form = PaperForm(request.POST)
+        if not form.is_valid():
+            return render(request, 'add.html', {
+                'current_page': current_page,
+                'error_message': form.errors,
+            })
+        user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
+        if user_list.count() <= 0:
+            return render(request, 'edit.html', {
+                'current_page': current_page,
+                'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
+                })
+        paper = Paper()
+        paper.creator = user_list[0]
+        paper.create_time = timezone.now()
+        paper.update_time = timezone.now()
+        paper.doi = form.cleaned_data['doi']
+        paper.pmid = form.cleaned_data['pmid']
+        paper.arxiv_id = form.cleaned_data['arxiv_id']
+        paper.pmcid = form.cleaned_data['pmcid']
+        paper.cnki_id = form.cleaned_data['cnki_id']
+        paper.journal = form.cleaned_data['journal']
+        paper.pub_date = form.cleaned_data['pub_date']
+        paper.title = form.cleaned_data['title']
+        paper.authors = form.cleaned_data['authors']
+        paper.abstract = form.cleaned_data['abstract']
+        paper.keywords = form.cleaned_data['keywords']
+        paper.urls = form.cleaned_data['urls']
+        paper.is_private = form.cleaned_data['is_private']
+        paper.comments = form.cleaned_data['comments']
+        paper.save()
+        return HttpResponseRedirect(reverse('view:paper', args=[paper.id]))
+    else:
+        form = PaperForm()
+        paper = Paper()
+        context = {
+            'current_page': current_page,
+            'form': form,
+            'paper': paper,
+        }
+        template = loader.get_template('add.html')
+        return HttpResponse(template.render(context, request))
 
 def PaperPostAjax(request):
     if is_ajax(request) and request.method == "POST":
