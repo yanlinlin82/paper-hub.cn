@@ -23,6 +23,6 @@ def redirect(request):
 urlpatterns = [
     path('', redirect),
     path('view/', include('view.urls')),
-    path('xiangma/', include('xiangma.urls')),
+    path('xiangma/', include('view.urls')),
     path('admin/', admin.site.urls),
 ]

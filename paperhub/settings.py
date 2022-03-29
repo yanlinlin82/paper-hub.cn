@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'view.apps.ViewConfig',
-    'xiangma.apps.ViewConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

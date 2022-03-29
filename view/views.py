@@ -21,70 +21,70 @@ def ajax_test(request):
     return HttpResponse(message)
 
 # Create your views here.
-def AllPapersView(request, current_page):
+def AllPapersView(request):
     paper_list = Paper.objects.order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
-        'current_page': current_page,
+        'current_page': 'all',
         'paper_list': paper_list,
         'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
 
-def RecentPapersView(request, current_page):
+def RecentPapersView(request):
     last_week = timezone.now() - timedelta(days=7)
     paper_list = Paper.objects.filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
-        'current_page': current_page,
+        'current_page': 'recent',
         'paper_list': paper_list,
         'summary_messages': 'This page shows papers in last week. '
     }
     return HttpResponse(template.render(context, request))
 
-def PaperListView(request, id, current_page):
+def PaperListView(request, id):
     paper_list = Paper.objects.order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
-        'current_page': current_page,
+        'current_page': 'list',
         'paper_list': paper_list,
         'summary_messages': 'This page shows list <b>#' + str(id) + '</b>. ',
     }
     return HttpResponse(template.render(context, request))
 
-def PaperLabelView(request, name, current_page):
+def PaperLabelView(request, name):
     paper_list = None
-    xiangma = Label.objects.filter(name=name)
-    if xiangma.count() > 0:
-        paper_list = xiangma[0].paper_set.all().order_by('-create_time', '-pk')
+    label_list = Label.objects.filter(name=name)
+    if label_list.count() > 0:
+        paper_list = label_list[0].paper_set.all().order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
-        'current_page': current_page,
+        'current_page': 'label',
         'paper_list': paper_list,
         'summary_messages': 'This page shows list of label "<b>' + name + '</b>". ',
     }
     return HttpResponse(template.render(context, request))
 
-def SinglePaperView(request, id, current_page):
+def SinglePaperView(request, id):
     paper_list = Paper.objects.filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'single.html', {
-            'current_page': current_page,
+            'current_page': 'paper',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     paper = paper_list[0]
     template = loader.get_template('single.html')
     context = {
-        'current_page': current_page,
+        'current_page': 'paper',
         'paper': paper,
     }
     return HttpResponse(template.render(context, request))
 
-def EditPaperView(request, id, current_page):
+def EditPaperView(request, id):
     paper_list = Paper.objects.filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'edit.html', {
-            'current_page': current_page,
+            'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     paper = paper_list[0]
@@ -92,13 +92,13 @@ def EditPaperView(request, id, current_page):
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'edit.html', {
-                'current_page': current_page,
+                'current_page': 'edit',
                 'error_message': form.errors,
             })
         user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
         if user_list.count() <= 0:
             return render(request, 'edit.html', {
-                'current_page': current_page,
+                'current_page': 'edit',
                 'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
             })
         paper.creator = user_list[0]
@@ -150,7 +150,7 @@ def EditPaperView(request, id, current_page):
         }
         return HttpResponse(template.render(context, request))
 
-def StatView(request, current_page):
+def StatView(request):
     stat_all = Paper.objects.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
     today = datetime.today()
@@ -169,7 +169,7 @@ def StatView(request, current_page):
 
     template = loader.get_template('stat.html')
     context = {
-        'current_page': current_page,
+        'current_page': 'stat',
         'stat_all': stat_all,
         'stat_this_month': stat_this_month,
         'stat_last_month': stat_last_month,
@@ -177,7 +177,7 @@ def StatView(request, current_page):
     }
     return HttpResponse(template.render(context, request))
 
-def UserView(request, id, current_page):
+def UserView(request, id):
     u = User.objects.filter(pk=id)
     if u.count() <= 0:
         return render(request, 'list.html', {
@@ -186,24 +186,24 @@ def UserView(request, id, current_page):
     paper_list = Paper.objects.filter(creator=u[0]).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
-        'current_page': current_page,
+        'current_page': 'user',
         'paper_list': paper_list,
         'summary_messages': 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. ',
     }
     return HttpResponse(template.render(context, request))
 
-def PaperAdd(request, current_page):
+def PaperAdd(request):
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'add.html', {
-                'current_page': current_page,
+                'current_page': 'add',
                 'error_message': form.errors,
             })
         user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
         if user_list.count() <= 0:
             return render(request, 'edit.html', {
-                'current_page': current_page,
+                'current_page': 'add',
                 'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
                 })
         paper = Paper()
@@ -230,7 +230,7 @@ def PaperAdd(request, current_page):
         form = PaperForm()
         paper = Paper()
         context = {
-            'current_page': current_page,
+            'current_page': 'add',
             'form': form,
             'paper': paper,
         }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>{% load static %}
+<!DOCTYPE html>{% load static %}{% load view_extras %}
 <html>
 <head>
   <meta charset="utf-8">
@@ -24,12 +24,16 @@
     <nav class="menu">
       <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent Papers</a>
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
+      {% if not request.path|is_for_xiangma %}
       <a class="menu-item{% if current_page == "list" %} current-item{% endif %}" href="{% url 'view:list' id=1 %}">As List</a>
       <a class="menu-item{% if current_page == "label" %} current-item{% endif %}" href="{% url 'view:label' name='响马' %}">As Label</a>
       <a class="menu-item{% if current_page == "paper" %} current-item{% endif %}" href="{% url 'view:paper' id=1 %}">Single Paper</a>
       <a class="menu-item{% if current_page == "user" %} current-item{% endif %}" href="{% url 'view:user' id=1 %}">Users</a>
+      {% endif %}
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">Statistics</a>
+      {% if not request.path|is_for_xiangma %}
       <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
+      {% endif %}
     </nav>
     <div class="content">
       <article>
