@@ -48,4 +48,4 @@ class Paper(models.Model):
         return self.pub_date.year if self.pub_date else ''
 
     def __str__(self):
-        return self.creator.nickname + ': ' + self.pub_year() + ' - ' + self.journal + ' - ' + self.title
+        return self.creator.nickname + ': ' + str(self.pub_year()) + ' - ' + self.journal + ' - ' + self.title

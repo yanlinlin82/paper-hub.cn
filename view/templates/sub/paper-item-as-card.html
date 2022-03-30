@@ -40,7 +40,7 @@
   <div class="paper-details" id="paper_detail_{{ paper.pk }}" style="display: none;">
     <div class="paper-authors">
       <b>Authors:</b>
-      {{ paper.authors }}
+      {{ paper.authors|show_author_list }}
     </div>
     <div class="paper-abstract">
       <div class="abstract-label"><b>Abstract:</b></div>
@@ -55,7 +55,13 @@
     {% if paper.urls %}
     <div class="paper-urls">
       <div class="url-label"><b>Related Links:</b></div>
-      <div class="url-item"><a href="{{ paper.urls }}" target="_blank">{{ paper.urls }}</a></div>
+      <div class="url-item"><ul>
+        {% with paper.urls|splitlines as urls %}
+        {% for u in urls %}
+        <li><a href="{{ u }}" target="_blank">{{ u }}</a></li>
+        {% endfor %}
+        {% endwith %}
+      </ul></div>
     </div>
     {% endif %}
   </div>

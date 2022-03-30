@@ -144,7 +144,7 @@ def EditPaperView(request, id):
         form = PaperForm(data)
         template = loader.get_template('edit.html')
         context = {
-            'current_page': current_page,
+            'current_page': 'edit',
             'paper': paper,
             'form': form,
         }
