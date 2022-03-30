@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -9,6 +10,20 @@ from django.utils import timezone
 
 from .models import Label, Paper, User
 from .forms import PaperForm
+
+def get_site_name(request):
+    if re.match("^/xiangma/", request.path):
+        return '响马读paper'
+    return 'Paper-Hub'
+
+def get_paper_list(request):
+    if re.match("^/xiangma/", request.path):
+        paper_list = None
+        label_list = Label.objects.filter(name='响马')
+        if label_list.count() > 0:
+            paper_list = label_list[0].paper_set
+        return paper_list
+    return Paper.objects
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -22,9 +37,10 @@ def ajax_test(request):
 
 # Create your views here.
 def AllPapersView(request):
-    paper_list = Paper.objects.order_by('-create_time', '-pk')
+    paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
+        'site_name': get_site_name(request),
         'current_page': 'all',
         'paper_list': paper_list,
         'summary_messages': '',
@@ -33,9 +49,10 @@ def AllPapersView(request):
 
 def RecentPapersView(request):
     last_week = timezone.now() - timedelta(days=7)
-    paper_list = Paper.objects.filter(create_time__gte=last_week).order_by('-create_time', '-pk')
+    paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
+        'site_name': get_site_name(request),
         'current_page': 'recent',
         'paper_list': paper_list,
         'summary_messages': 'This page shows papers in last week. '
@@ -43,9 +60,10 @@ def RecentPapersView(request):
     return HttpResponse(template.render(context, request))
 
 def PaperListView(request, id):
-    paper_list = Paper.objects.order_by('-create_time', '-pk')
+    paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
+        'site_name': get_site_name(request),
         'current_page': 'list',
         'paper_list': paper_list,
         'summary_messages': 'This page shows list <b>#' + str(id) + '</b>. ',
@@ -59,6 +77,7 @@ def PaperLabelView(request, name):
         paper_list = label_list[0].paper_set.all().order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
+        'site_name': get_site_name(request),
         'current_page': 'label',
         'paper_list': paper_list,
         'summary_messages': 'This page shows list of label "<b>' + name + '</b>". ',
@@ -66,24 +85,27 @@ def PaperLabelView(request, name):
     return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id):
-    paper_list = Paper.objects.filter(pk=id)
+    paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'single.html', {
+            'site_name': get_site_name(request),
             'current_page': 'paper',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     paper = paper_list[0]
     template = loader.get_template('single.html')
     context = {
+        'site_name': get_site_name(request),
         'current_page': 'paper',
         'paper': paper,
     }
     return HttpResponse(template.render(context, request))
 
 def EditPaperView(request, id):
-    paper_list = Paper.objects.filter(pk=id)
+    paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'edit.html', {
+            'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
@@ -92,12 +114,14 @@ def EditPaperView(request, id):
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'edit.html', {
+                'site_name': get_site_name(request),
                 'current_page': 'edit',
                 'error_message': form.errors,
             })
         user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
         if user_list.count() <= 0:
             return render(request, 'edit.html', {
+                'site_name': get_site_name(request),
                 'current_page': 'edit',
                 'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
             })
@@ -153,6 +177,7 @@ def EditPaperView(request, id):
         form = PaperForm(data)
         template = loader.get_template('edit.html')
         context = {
+            'site_name': get_site_name(request),
             'current_page': 'edit',
             'paper': paper,
             'form': form,
@@ -160,24 +185,25 @@ def EditPaperView(request, id):
         return HttpResponse(template.render(context, request))
 
 def StatView(request):
-    stat_all = Paper.objects.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+    stat_all = get_paper_list(request).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
     today = datetime.today()
     year = today.year
     month = today.month
-    stat_this_month = Paper.objects.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+    stat_this_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
     if month > 1:
         month = month - 1
     else:
         year = year - 1
         month = 12
-    stat_last_month = Paper.objects.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+    stat_last_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
-    stat_journal = Paper.objects.values('journal').annotate(Count('journal')).order_by('-journal__count')
+    stat_journal = get_paper_list(request).values('journal').annotate(Count('journal')).order_by('-journal__count')
 
     template = loader.get_template('stat.html')
     context = {
+        'site_name': get_site_name(request),
         'current_page': 'stat',
         'stat_all': stat_all,
         'stat_this_month': stat_this_month,
@@ -190,11 +216,14 @@ def UserView(request, id):
     u = User.objects.filter(pk=id)
     if u.count() <= 0:
         return render(request, 'list.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'list',
             'error_message': "Invalid user id!",
         })
-    paper_list = Paper.objects.filter(creator=u[0]).order_by('-create_time', '-pk')
+    paper_list = get_paper_list(request).filter(creator=u[0]).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
+        'site_name': get_site_name(request),
         'current_page': 'user',
         'paper_list': paper_list,
         'summary_messages': 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. ',
@@ -206,12 +235,14 @@ def PaperAdd(request):
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'add.html', {
+                'site_name': get_site_name(request),
                 'current_page': 'add',
                 'error_message': form.errors,
             })
         user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
         if user_list.count() <= 0:
             return render(request, 'edit.html', {
+                'site_name': get_site_name(request),
                 'current_page': 'add',
                 'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
                 })
@@ -254,39 +285,13 @@ def PaperAdd(request):
             'is_private': paper.is_private}
         form = PaperForm(data)
         context = {
+            'site_name': get_site_name(request),
             'current_page': 'add',
             'form': form,
             'paper': paper,
         }
         template = loader.get_template('add.html')
         return HttpResponse(template.render(context, request))
-
-def PaperPostAjax(request):
-    if is_ajax(request) and request.method == "POST":
-        form = PaperForm(request.POST)
-        if form.is_valid():
-            instance = form.save()
-            # serialize in new friend object in json
-            ser_instance = serializers.serialize('json', [ instance, ])
-            # send to client side.
-            return JsonResponse({"instance": ser_instance}, status=200)
-        else:
-            # some form errors occured.
-            return JsonResponse({"error": form.errors}, status=400)
-    # some error occured
-    return JsonResponse({"error": ""}, status=400)
-#    title = ''
-#    if request.method == 'POST' and request.POST:
-#        title = request.POST['title']
-#    if title:
-#        p = Paper()
-#        return HttpResponseRedirect(reverse('index'))
-#    else:
-#        template = loader.get_template('add.html')
-#        context = {
-#            'paper': paper,
-#        }
-#        return HttpResponse(template.render(context, request))
 
 def AjaxFetchDOI(request, doi):
     if request.method == "GET":

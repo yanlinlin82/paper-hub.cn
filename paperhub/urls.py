@@ -22,7 +22,7 @@ def redirect(request):
 
 urlpatterns = [
     path('', redirect),
-    path('view/', include('view.urls')),
-    path('xiangma/', include('view.urls')),
+    path('view/', include('view.urls', namespace='paper-hub')),
+    path('xiangma/', include('view.urls', namespace='xiangma')),
     path('admin/', admin.site.urls),
 ]

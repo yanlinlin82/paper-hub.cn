@@ -15,7 +15,6 @@ def main():
     django.setup()
 
     from view.models import Paper, Label, User
-    #from xiangma.models import Paper, Label, User
     #print(Paper.objects.all())
 
     if len(sys.argv) < 2:
@@ -24,13 +23,13 @@ def main():
 
     df = pd.read_excel(sys.argv[1], na_filter=False)
     #print(df)
-    #print(len(df))
 
     label_name = "响马"
     if Label.objects.filter(name=label_name).count() == 0:
         xiangma = Label(name = label_name)
         xiangma.save()
-    xiangma = Label.objects.filter(name=label_name)[0]
+    else:
+        xiangma = Label.objects.filter(name=label_name)[0]
 
     # 获取当前时区信息
     tz = timezone.now().tzinfo
