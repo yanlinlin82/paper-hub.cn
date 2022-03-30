@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.db.models import Q, Count
 from django.core import serializers
 from django.utils import timezone
+from django.contrib.auth import authenticate, login, logout
 
 from .models import Label, Paper, User
 from .forms import PaperForm
@@ -102,6 +103,12 @@ def SinglePaperView(request, id):
     return HttpResponse(template.render(context, request))
 
 def EditPaperView(request, id):
+    if not request.user.is_authenticated:
+        return render(request, 'edit.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'edit',
+            'error_message': 'No permission! Login first!',
+        })
     paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'edit.html', {
@@ -148,7 +155,7 @@ def EditPaperView(request, id):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
-        return HttpResponseRedirect(reverse('view:paper', args=[id]))
+        return HttpResponseRedirect(reverse('view:paper', args=[id], current_app=request.resolver_match.namespace))
     else:
         data = {
             'creator': paper.creator,
@@ -231,6 +238,12 @@ def UserView(request, id):
     return HttpResponse(template.render(context, request))
 
 def PaperAdd(request):
+    if not request.user.is_authenticated:
+        return render(request, 'add.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'add',
+            'error_message': 'No permission! Login first!',
+        })
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
@@ -270,7 +283,7 @@ def PaperAdd(request):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
-        return HttpResponseRedirect(reverse('view:paper', args=[paper.id]))
+        return HttpResponseRedirect(reverse('view:paper', args=[paper.id], current_app=request.resolver_match.namespace))
     else:
         u = User.objects.filter(pk=1)
         paper = Paper(
@@ -299,3 +312,19 @@ def AjaxFetchDOI(request, doi):
         return JsonResponse({"query": { "doi": doi, "results": 123}}, status=200)
     else:
         return JsonResponse({"error": 1234}, status=400)
+
+def Login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
+    return render(request, 'login.html', {
+        'site_name': get_site_name(request),
+    })
+
+def Logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))

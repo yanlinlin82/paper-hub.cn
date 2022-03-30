@@ -14,5 +14,7 @@ urlpatterns = [
     path('user/<int:id>', views.UserView, name='user'),
     path('stat', views.StatView, name='stat'),
     path('add', views.PaperAdd, name='add'),
+    path('login', views.Login, name='login'),
+    path('logout', views.Logout, name='logout'),
     re_path(r'^ajax/fetch/doi/(?P<doi>.+)', views.AjaxFetchDOI, name='ajax-fetch-doi'),
 ]

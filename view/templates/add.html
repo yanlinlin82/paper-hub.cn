@@ -5,8 +5,7 @@
 <h2 style="text-align: center;">Add A New Paper</h2>
 <hr>
 {{ form.errors }}
-<form id="paper-form" method="post">
-  {% csrf_token %}
+<form id="paper-form" method="post">{% csrf_token %}
   {% include "sub/paper-item-form.html" %}
   <hr>
   <div class="row"><input type="submit" value="Add"></div>
