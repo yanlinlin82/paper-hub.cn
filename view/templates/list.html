@@ -1,8 +1,10 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load view_extras %}
 
 {% block content %}
 {% if paper_list %}
-<p class="page-summary">{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ paper_list|length }} paper(s).</p>
+<p class="page-summary">
+  {% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if not request.path|is_for_xiangma %}There are total {{ paper_list|length }} paper(s).{% else %}共有 {{ paper_list|length }} 篇文献。{% endif %}
+</p>
 {% for paper in paper_list %}
 <div class="paper-item">
   {% include "sub/paper-item-as-card.html" %}

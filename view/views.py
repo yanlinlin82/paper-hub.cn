@@ -12,8 +12,11 @@ from django.contrib.auth import authenticate, login, logout
 from .models import Label, Paper, User
 from .forms import PaperForm
 
+def is_xiangma(request):
+    return re.match("^/xiangma/", request.path)
+
 def get_site_name(request):
-    if re.match("^/xiangma/", request.path):
+    if is_xiangma(request):
         return '响马读paper'
     return 'Paper-Hub'
 
@@ -52,22 +55,30 @@ def RecentPapersView(request):
     last_week = timezone.now() - timedelta(days=7)
     paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
+    if is_xiangma(request):
+        summary_message = '本页面显示最近一周的文献分享。'
+    else:
+        summary_message = 'This page shows papers in last week. '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'recent',
         'paper_list': paper_list,
-        'summary_messages': 'This page shows papers in last week. '
+        'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
 
 def PaperListView(request, id):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
+    if is_xiangma(request):
+        summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
+    else:
+        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'list',
         'paper_list': paper_list,
-        'summary_messages': 'This page shows list <b>#' + str(id) + '</b>. ',
+        'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
@@ -77,11 +88,15 @@ def PaperLabelView(request, name):
     if label_list.count() > 0:
         paper_list = label_list[0].paper_set.all().order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
+    if is_xiangma(request):
+        summary_message = '本页面显示标签 <b>' + name + '</b> 的文献。'
+    else:
+        summary_message = 'This page shows list of label "<b>' + name + '</b>". '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'label',
         'paper_list': paper_list,
-        'summary_messages': 'This page shows list of label "<b>' + name + '</b>". ',
+        'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
@@ -229,11 +244,15 @@ def UserView(request, id):
         })
     paper_list = get_paper_list(request).filter(creator=u[0]).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
+    if is_xiangma(request):
+        summary_message = '本页面显示由用户 <b>' + u[0].nickname + '</b> 推荐的文献。'
+    else:
+        summary_message = 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'user',
         'paper_list': paper_list,
-        'summary_messages': 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. ',
+        'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
