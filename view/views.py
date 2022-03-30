@@ -227,8 +227,18 @@ def PaperAdd(request):
         paper.save()
         return HttpResponseRedirect(reverse('view:paper', args=[paper.id]))
     else:
-        form = PaperForm()
-        paper = Paper()
+        u = User.objects.filter(pk=1)
+        paper = Paper(
+            creator = u[0],
+            create_time = timezone.now(),
+            update_time = timezone.now(),
+            is_private = True)
+        data = {
+            'creator': paper.creator,
+            'create_time': paper.create_time,
+            'update_time': paper.update_time,
+            'is_private': paper.is_private}
+        form = PaperForm(data)
         context = {
             'current_page': 'add',
             'form': form,

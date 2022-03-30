@@ -3,6 +3,8 @@
 {% block content %}
 <div class="container-fluid">
 <h2 style="text-align: center;">Add A New Paper</h2>
+<hr>
+{{ form.errors }}
 <form id="paper-form" method="post">
   {% csrf_token %}
   {% include "sub/paper-item-form.html" %}
