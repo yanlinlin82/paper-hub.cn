@@ -273,3 +273,10 @@ def PaperPostAjax(request):
 #            'paper': paper,
 #        }
 #        return HttpResponse(template.render(context, request))
+
+def AjaxFetchDOI(request, doi):
+    if request.method == "GET":
+        print(request.GET)
+        return JsonResponse({"query": { "doi": doi, "results": 123}}, status=200)
+    else:
+        return JsonResponse({"error": 1234}, status=400)

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path, include
 
 from . import views
 
@@ -14,5 +14,6 @@ urlpatterns = [
     path('user/<int:id>', views.UserView, name='user'),
     path('stat', views.StatView, name='stat'),
     path('add', views.PaperAdd, name='add'),
+    re_path(r'^ajax/fetch/doi/(?P<doi>.+)', views.AjaxFetchDOI, name='ajax-fetch-doi'),
     path('post/ajax/paper', views.PaperPostAjax, name = 'ajax'),
 ]
