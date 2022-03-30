@@ -1,4 +1,5 @@
 import datetime
+from email.policy import default
 from django.db import models
 from django.utils import timezone
 
@@ -38,11 +39,13 @@ class Paper(models.Model):
     keywords = models.CharField(max_length=1000, default='')
     urls = models.CharField(max_length=1000, default='')
     full_text = models.FileField(default='')
+    is_preprint = models.BooleanField(default=False)
     is_review = models.BooleanField(default=False)
     is_open = models.BooleanField(default=False)
 
     # user comments
     is_private = models.BooleanField(default=True)
+    is_favorite = models.BooleanField(default=False)
     comments = models.CharField(max_length=65536, default='')
     labels = models.ManyToManyField(Label)
 

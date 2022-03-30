@@ -117,8 +117,10 @@ def EditPaperView(request, id):
         paper.keywords = form.cleaned_data['keywords']
         paper.urls = form.cleaned_data['urls']
         #paper.full_text = form.cleaned_data['full_text']
+        paper.is_preprint = form.cleaned_data['is_preprint']
         paper.is_review = form.cleaned_data['is_review']
         paper.is_open = form.cleaned_data['is_open']
+        paper.is_favorite = form.cleaned_data['is_favorite']
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
@@ -141,8 +143,10 @@ def EditPaperView(request, id):
             'keywords': paper.keywords,
             'urls': paper.urls,
             #'full_text': paper.full_text,
+            'is_preprint': paper.is_preprint,
             'is_review': paper.is_review,
             'is_open': paper.is_open,
+            'is_favorite': paper.is_favorite,
             'is_private': paper.is_private,
             'comments': paper.comments,
         }
@@ -228,8 +232,10 @@ def PaperAdd(request):
         paper.keywords = form.cleaned_data['keywords']
         paper.urls = form.cleaned_data['urls']
         #paper.full_text = form.cleaned_data['full_text']
+        paper.is_preprint = form.cleaned_data['is_preprint']
         paper.is_review = form.cleaned_data['is_review']
         paper.is_open = form.cleaned_data['is_open']
+        paper.is_favorite = form.cleaned_data['is_favorite']
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()

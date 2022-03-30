@@ -23,6 +23,8 @@
     {% if paper.cnki_id %}CNKI ID: <a href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{ paper.cnki_id }}" target="_blank">{{ paper.cnki_id|escape }}</a><sup>↗</sup>{% endif %}
     <div class="paper-title"><b>{{ paper.title }}</b></div>
     <div style="padding: 0 0 10px 0;">
+      {% if paper.is_favorite %}<b>[Favorite]</b>{% endif %}
+      {% if paper.is_preprint %}[Preprint]{% endif %}
       {% if paper.is_review %}[Review]{% endif %}
       {% if paper.is_open %}[Open]{% endif %}
     </div>
@@ -48,7 +50,7 @@
     </div>
     <div class="paper-abstract">
       <div class="abstract-label"><b>Abstract:</b></div>
-      <div>{% if paper.abstract %}{{ paper.abstract }}{% else %}<i>No abstract available.</i>{% endif %}</div>
+      <div>{% if paper.abstract %}{% autoescape off %}{{ paper.abstract|replace_line_br }}{% endautoescape %}{% else %}<i>No abstract available.</i>{% endif %}</div>
     </div>
     {% if paper.keywords %}
     <div class="paper-keywords">

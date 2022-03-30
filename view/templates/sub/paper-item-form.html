@@ -71,6 +71,10 @@
 </div>
 {% endcomment %}
 <div class="row">
+    <div class="col-25">{{ form.is_preprint.label_tag }}</div>
+    <div class="col-75">{{ form.is_preprint }}</div>
+</div>
+<div class="row">
     <div class="col-25">{{ form.is_review.label_tag }}</div>
     <div class="col-75">{{ form.is_review }}</div>
 </div>
@@ -79,6 +83,10 @@
     <div class="col-75">{{ form.is_open }}</div>
 </div>
 <br>
+<div class="row">
+    <div class="col-25">{{ form.is_favorite.label_tag }}</div>
+    <div class="col-75">{{ form.is_favorite }}</div>
+</div>
 <div class="row">
     <div class="col-25">{{ form.is_private.label_tag }}</div>
     <div class="col-75">{{ form.is_private }}</div>

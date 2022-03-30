@@ -23,9 +23,11 @@ class PaperForm(forms.Form):
     urls = forms.CharField(label='URLs', max_length=65536, widget=forms.Textarea(attrs={'style': 'height:60px'}), required=False)
     #full_text = forms.FileField(label='Full Text', required=False)
     #full_text = forms.FileInput()
+    is_preprint = forms.BooleanField(label='Is Preprint', required=False)
     is_review = forms.BooleanField(label='Is Review', required=False)
     is_open = forms.BooleanField(label='Is Open', required=False)
 
+    is_favorite = forms.BooleanField(label='Is Favorite', required=False)
     is_private = forms.ChoiceField(label='Permission', widget=forms.RadioSelect, choices=[(False, 'Public'), (True, 'Private')])
-    comments = forms.CharField(label='Comments', max_length=65536, widget=forms.Textarea(attrs={'style': 'height:200px'}), required=False)
+    comments = forms.CharField(label='Comments', max_length=65536, widget=forms.Textarea(attrs={'style': 'height:400px'}), required=False)
     
