@@ -116,6 +116,9 @@ def EditPaperView(request, id):
         paper.abstract = form.cleaned_data['abstract']
         paper.keywords = form.cleaned_data['keywords']
         paper.urls = form.cleaned_data['urls']
+        #paper.full_text = form.cleaned_data['full_text']
+        paper.is_review = form.cleaned_data['is_review']
+        paper.is_open = form.cleaned_data['is_open']
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
@@ -137,9 +140,11 @@ def EditPaperView(request, id):
             'abstract': paper.abstract,
             'keywords': paper.keywords,
             'urls': paper.urls,
+            #'full_text': paper.full_text,
+            'is_review': paper.is_review,
+            'is_open': paper.is_open,
             'is_private': paper.is_private,
             'comments': paper.comments,
-            'full_text': paper.full_text,
         }
         form = PaperForm(data)
         template = loader.get_template('edit.html')
@@ -222,6 +227,9 @@ def PaperAdd(request):
         paper.abstract = form.cleaned_data['abstract']
         paper.keywords = form.cleaned_data['keywords']
         paper.urls = form.cleaned_data['urls']
+        #paper.full_text = form.cleaned_data['full_text']
+        paper.is_review = form.cleaned_data['is_review']
+        paper.is_open = form.cleaned_data['is_open']
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()

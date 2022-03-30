@@ -64,6 +64,20 @@
     <div class="col-25">{{ form.urls.label_tag }}</div>
     <div class="col-75">{{ form.urls }}</div>
 </div>
+{% comment %}
+<div class="row">
+    <div class="col-25">{{ form.full_text.label_tag }}</div>
+    <div class="col-75">{{ form.full_text }}</div>
+</div>
+{% endcomment %}
+<div class="row">
+    <div class="col-25">{{ form.is_review.label_tag }}</div>
+    <div class="col-75">{{ form.is_review }}</div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.is_open.label_tag }}</div>
+    <div class="col-75">{{ form.is_open }}</div>
+</div>
 <br>
 <div class="row">
     <div class="col-25">{{ form.is_private.label_tag }}</div>

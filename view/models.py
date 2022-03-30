@@ -38,6 +38,8 @@ class Paper(models.Model):
     keywords = models.CharField(max_length=1000, default='')
     urls = models.CharField(max_length=1000, default='')
     full_text = models.FileField(default='')
+    is_review = models.BooleanField(default=False)
+    is_open = models.BooleanField(default=False)
 
     # user comments
     is_private = models.BooleanField(default=True)

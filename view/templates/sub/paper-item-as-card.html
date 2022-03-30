@@ -22,7 +22,11 @@
     {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a><sup>↗</sup>{% endif %}
     {% if paper.cnki_id %}CNKI ID: <a href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{ paper.cnki_id }}" target="_blank">{{ paper.cnki_id|escape }}</a><sup>↗</sup>{% endif %}
     <div class="paper-title"><b>{{ paper.title }}</b></div>
-    <div style="font-size: 14px; float: right; margin-top: -1.5em;"><a id="paper_button_{{ paper.pk }}" href="javascript:toggle({{paper.pk}});">[More]</a></div>
+    <div style="padding: 0 0 10px 0;">
+      {% if paper.is_review %}[Review]{% endif %}
+      {% if paper.is_open %}[Open]{% endif %}
+    </div>
+    <div style="font-size: 14px; float: right; margin-top: -1.5em;"><a id="paper_button_{{ paper.pk }}" href="javascript:toggle({{paper.pk}});">{% if current_page == "paper" %}[Less]{% else %}[More]{% endif %}</a></div>
     <script>
       function toggle(id) {
         e = document.getElementById('paper_detail_' + id);
@@ -37,7 +41,7 @@
       }
     </script>
   </div>
-  <div class="paper-details" id="paper_detail_{{ paper.pk }}" style="display: none;">
+  <div class="paper-details" id="paper_detail_{{ paper.pk }}"{% if current_page != "paper" %} style="display: none;"{% endif %}>
     <div class="paper-authors">
       <b>Authors:</b>
       {{ paper.authors|show_author_list }}
