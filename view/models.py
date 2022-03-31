@@ -1,19 +1,23 @@
 import datetime
 from email.policy import default
+from statistics import mode
 from django.db import models
 from django.utils import timezone
 
 class User(models.Model):
-    name = models.CharField(max_length=100)
-    nickname = models.CharField(max_length=100)
-    weixin_id = models.CharField(max_length=100)
+    username = models.CharField(max_length=100, default='') # unique symbol, link to authorization table
+    name = models.CharField(max_length=100, default='')
+    nickname = models.CharField(max_length=100, default='')
+    weixin_id = models.CharField(max_length=100, default='')
     create_time = models.DateTimeField(default=timezone.now)
     last_login_time = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return self.nickname
 
 class Label(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=200, default='')
+    desc = models.CharField(max_length=2000, default='')
+    owner = models.CharField(max_length=100, default='') # link to User.username
     def __str__(self):
         return self.name
 
