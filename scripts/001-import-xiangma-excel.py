@@ -73,7 +73,7 @@ def main():
             p.urls = df['URLs'][i]
 
             p.is_private = False
-            p.comments = re.sub(r"^\#paper\s*", "", df['推荐理由'][i], flags=re.I)
+            p.comments = df['推荐理由'][i]
         else:
             print(">> Import paper: '" + df['文章标题'][i] + "'")
             p = Paper(
@@ -96,7 +96,7 @@ def main():
                 urls = df['URLs'][i],
 
                 is_private = False,
-                comments = re.sub(r"^\#paper\s*", "", df['推荐理由'][i], flags=re.I))
+                comments = df['推荐理由'][i])
 
         p.save()
         xiangma.paper_set.add(p)
