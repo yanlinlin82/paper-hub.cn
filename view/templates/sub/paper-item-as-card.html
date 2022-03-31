@@ -6,10 +6,10 @@
     </div>
     <div class="paper-op-list-sub-right">
       {% if user.is_authenticated %}
-      <a href="{% url "view:paper" id=paper.pk %}/edit">[Edit]</a>
+      <a href="{% url "view:edit" id=paper.pk %}">[Edit]</a>
+      <a href="{% url "view:delete" id=paper.pk %}" onclick="javascript:return(confirm('Sure to remove paper #' + {{ paper.pk }}));">[Delete]</a>
       {% comment %}
       <a href="javascript: share({{ paper.pk }})">[分享]</a>
-      <a href="javascript: delete({{ paper.pk }})">[删除]</a>
       {% endcomment %}
       {% endif %}
       <a href="#top">[Top]</a>

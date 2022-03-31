@@ -117,6 +117,23 @@ def SinglePaperView(request, id):
     }
     return HttpResponse(template.render(context, request))
 
+def DeletePaperView(request, id):
+    if not request.user.is_authenticated:
+        return render(request, 'base.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'delete',
+            'error_message': 'No permission! Login first!',
+        })
+    paper_list = get_paper_list(request).filter(pk=id)
+    if paper_list.count() <= 0:
+        return render(request, 'edit.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'edit',
+            'error_message': 'Invalid paper ID: ' + str(id),
+        })
+    get_paper_list(request).filter(pk=id).delete()
+    return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
+
 def EditPaperView(request, id):
     if not request.user.is_authenticated:
         return render(request, 'edit.html', {

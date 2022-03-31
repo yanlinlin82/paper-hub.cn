@@ -10,6 +10,7 @@ urlpatterns = [
     path('list/<int:id>', views.PaperListView, name='list'),
     path('label/<str:name>', views.PaperLabelView, name='label'),
     path('paper/<int:id>/edit', views.EditPaperView, name='edit'),
+    path('paper/<int:id>/delete', views.DeletePaperView, name='delete'),
     path('paper/<int:id>', views.SinglePaperView, name='paper'),
     path('user/<int:id>', views.UserView, name='user'),
     path('stat', views.StatView, name='stat'),
