@@ -52,13 +52,17 @@ def AllPapersView(request):
     return HttpResponse(template.render(context, request))
 
 def RecentPapersView(request):
-    last_week = timezone.now() - timedelta(days=7)
-    paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
-    template = loader.get_template('list.html')
     if is_xiangma(request):
-        summary_message = '本页面显示最近一周的文献分享。'
+        today = datetime.today()
+        year = today.year
+        month = today.month
+        paper_list = get_paper_list(request).filter(create_time__year=year, create_time__month=month).order_by('-create_time', '-pk')
+        summary_message = '本页面显示本月的文献分享。'
     else:
+        last_week = timezone.now() - timedelta(days=7)
+        paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
         summary_message = 'This page shows papers in last week. '
+    template = loader.get_template('list.html')
     context = {
         'site_name': get_site_name(request),
         'current_page': 'recent',

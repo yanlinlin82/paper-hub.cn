@@ -41,7 +41,7 @@
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">Statistics</a>
       <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
 {% else %}
-      <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">近一周分享</a>
+      <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">本月分享</a>
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">所有分享</a>
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">响马榜单</a>
 {% endif %}
