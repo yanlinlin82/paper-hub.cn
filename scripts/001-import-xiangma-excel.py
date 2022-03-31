@@ -38,16 +38,23 @@ def main():
         # 根据时区信息初始化推荐日期
         the_date = df['推荐日期'][i].replace(tzinfo=tz)
 
-        if User.objects.filter(weixin_id=df['微信号'][i]).count() > 0:
-            u = User.objects.filter(weixin_id=df['微信号'][i])[0]
-        elif User.objects.filter(nickname=df['群友'][i]).count() > 0:
-            u = User.objects.filter(nickname=df['群友'][i])[0]
+        weixin_id = df['微信号'][i]
+        nickname = df['群友'][i]
+        name = df['姓名'][i]
+        if nickname == "":
+            print("ERROR: empty user name and nickname in row " + str(i + 1))
+            continue
+
+        if weixin_id != "" and User.objects.filter(weixin_id=weixin_id).count() > 0:
+            u = User.objects.filter(weixin_id=weixin_id)[0]
+        elif User.objects.filter(nickname=nickname).count() > 0:
+            u = User.objects.filter(nickname=nickname)[0]
         else:
             print("> Import user: '" + df['群友'][i] + "'")
             u = User(
-                name = df['姓名'][i],
-                nickname = df['群友'][i],
-                weixin_id = df['微信号'][i],
+                name = name,
+                nickname = nickname,
+                weixin_id = weixin_id,
                 create_time = the_date,
                 last_login_time = the_date)
             u.save()
