@@ -1,4 +1,5 @@
 import re
+from backports import zoneinfo
 from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -11,6 +12,8 @@ from django.contrib.auth import authenticate, login, logout
 
 from .models import Label, Paper, User
 from .forms import PaperForm
+
+tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
 def is_xiangma(request):
     return re.match("^/xiangma/", request.path)
@@ -53,13 +56,14 @@ def AllPapersView(request):
 
 def RecentPapersView(request):
     if is_xiangma(request):
-        today = datetime.today()
+        today = datetime.today().astimezone(tz_beijing)
         year = today.year
         month = today.month
+        print("Recent: ", today, ", ", year, ", ", month)
         paper_list = get_paper_list(request).filter(create_time__year=year, create_time__month=month).order_by('-create_time', '-pk')
         summary_message = '本页面显示本月的文献分享。'
     else:
-        last_week = timezone.now() - timedelta(days=7)
+        last_week = datetime.now() - timedelta(days=7)
         paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
         summary_message = 'This page shows papers in last week. '
     template = loader.get_template('list.html')
@@ -119,6 +123,7 @@ def SinglePaperView(request, id):
         'current_page': 'paper',
         'paper': paper,
     }
+    print(paper.create_time)
     return HttpResponse(template.render(context, request))
 
 def DeletePaperView(request, id):
@@ -230,7 +235,7 @@ def EditPaperView(request, id):
 def StatView(request):
     stat_all = get_paper_list(request).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
-    today = datetime.today()
+    today = datetime.today().astimezone(tz_beijing)
     year = today.year
     month = today.month
     stat_this_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')

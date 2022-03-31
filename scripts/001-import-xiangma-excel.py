@@ -6,6 +6,7 @@ import pandas as pd
 import django
 import datetime
 from django.utils import timezone
+from backports import zoneinfo
 import re
 
 def main():
@@ -32,11 +33,12 @@ def main():
         xiangma = Label.objects.filter(name=label_name)[0]
 
     # 获取当前时区信息
-    tz = timezone.now().tzinfo
+    tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
     for i in range(0, len(df)):
         # 根据时区信息初始化推荐日期
-        the_date = df['推荐日期'][i].replace(tzinfo=tz)
+        the_date = timezone.make_aware(df['推荐日期'][i], tz_beijing)
+        #print(the_date)
 
         weixin_id = df['微信号'][i]
         nickname = df['群友'][i]
@@ -59,10 +61,11 @@ def main():
                 last_login_time = the_date)
             u.save()
 
-        find_paper = Paper.objects.filter(creator=u, create_time=the_date, title=df['文章标题'][i])
-        if find_paper.count() > 0:
+        find_paper = Paper.objects.filter(creator=u, title=df['文章标题'][i])
+        if find_paper.count() == 1:
             print(">> Update paper: '" + df['文章标题'][i] + "'")
             p = find_paper[0]
+            p.create_time = the_date
             p.update_time = the_date
 
             p.doi = df['DOI'][i] if df['DOI'][i] != '-' else ''
@@ -82,6 +85,7 @@ def main():
             p.is_private = False
             p.comments = df['推荐理由'][i]
         else:
+            Paper.objects.filter(creator=u, title=df['文章标题'][i]).delete()
             print(">> Import paper: '" + df['文章标题'][i] + "'")
             p = Paper(
                 creator = u,
