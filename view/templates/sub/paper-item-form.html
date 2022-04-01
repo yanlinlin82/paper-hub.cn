@@ -17,7 +17,40 @@
 <br>
 <div class="row">
     <div class="col-25">{{ form.doi.label_tag }}</div>
-    <div class="col-75">{{ form.doi }}<input type="button" id="fetch_doi" name="fetch_doi" value="Fetch" class="attach_to_text"></div>
+    <div class="col-75">{{ form.doi }}<input type="button" id="fetch_doi" name="fetch_doi" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_doi();"></div>
+    <script>
+    function fill_doi(xhttp) {
+        const obj = JSON.parse(xhttp.responseText);
+        if (obj["error"] != "") {
+            alert("Error: " + obj["error"]);
+        } else {
+            document.getElementById('id_title').value = obj["results"]["title"];
+            document.getElementById('id_journal').value = obj["results"]["journal"];
+            document.getElementById('id_pub_date').value = obj["results"]["pub_date"];
+            document.getElementById('id_authors').value = obj["results"]["authors"];
+            document.getElementById('id_abstract').value = obj["results"]["abstract"];
+            document.getElementById('id_urls').value = obj["results"]["urls"];
+        }
+    }
+    function do_fetch_doi() {
+        var doi = document.getElementById('id_doi').value
+        if (doi == "") {
+            alert("Error: fill DOI first!");
+            return 1;
+        }
+        var url = "http://localhost:8000/view/ajax/fetch/doi/" + doi;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                fill_doi(this);
+            } else if (this.readyState == 4) {
+                alert("Error: query DOI failed! status: " + this.status);
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    </script>
 </div>
 <div class="row">
     <div class="col-25">{{ form.pmid.label_tag }}</div>

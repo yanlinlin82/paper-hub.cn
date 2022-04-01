@@ -58,3 +58,23 @@ class Paper(models.Model):
 
     def __str__(self):
         return self.creator.nickname + ': ' + str(self.pub_year()) + ' - ' + self.journal + ' - ' + self.title
+
+class CrossRefCache(models.Model):
+    DOI = 'DOI'
+    PMID = 'PMID'
+    PMCID = 'PMCID'
+    arXiv = 'arXiv'
+    CNKI = 'CNKI'
+    CROSS_REF_CHOICES = [
+        (DOI, 'DOI'),
+        (PMID, 'PMID'),
+        (PMCID, 'PMCID'),
+        (arXiv, 'arXiv'),
+        (CNKI, 'CNKI'),
+    ]
+    type = models.CharField(max_length=10, choices=CROSS_REF_CHOICES, default=DOI)
+    key = models.CharField(max_length=100, default='')
+    value = models.CharField(max_length=100000)
+
+    def __str__(self):
+        return self.type + ': ' + self.value

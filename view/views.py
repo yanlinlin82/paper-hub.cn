@@ -1,4 +1,7 @@
 import re
+import requests
+import json
+
 from backports import zoneinfo
 from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -10,7 +13,7 @@ from django.core import serializers
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 
-from .models import Label, Paper, User
+from .models import Label, Paper, User, CrossRefCache
 from .forms import PaperForm
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
@@ -63,7 +66,8 @@ def RecentPapersView(request):
         paper_list = get_paper_list(request).filter(create_time__year=year, create_time__month=month).order_by('-create_time', '-pk')
         summary_message = '本页面显示本月的文献分享。'
     else:
-        last_week = datetime.now() - timedelta(days=7)
+        last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
+        print("last_week: ", last_week)
         paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
         summary_message = 'This page shows papers in last week. '
     template = loader.get_template('list.html')
@@ -364,11 +368,104 @@ def PaperAdd(request):
         return HttpResponse(template.render(context, request))
 
 def AjaxFetchDOI(request, doi):
-    if request.method == "GET":
-        print(request.GET)
-        return JsonResponse({"query": { "doi": doi, "results": 123}}, status=200)
+    print("DOI query: ", doi)
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid http query"}, status=400)
+    cache = CrossRefCache.objects.filter(type=CrossRefCache.DOI, key=doi)
+    if cache.count() == 0:
+        print("load from query")
+        try:
+            url = 'http://api.crossref.org/works/' + doi
+            data = requests.get(url).json()
+        except:
+            return JsonResponse({"error": "Failed to query json from URL: " + url}, status=400)
+        item = CrossRefCache(type=CrossRefCache.DOI, key=doi, value=json.dumps(data))
+        item.save()
     else:
-        return JsonResponse({"error": 1234}, status=400)
+        print("load from cache")
+        data = json.loads(cache[0].value)
+
+    try:
+        type = data["message"]["type"]
+    except:
+        type = ""
+
+    try:
+        title = " ".join(data["message"]["title"])
+    except:
+        title = ""
+    
+    try:
+        journal = " ".join(data["message"]["container-title"])
+    except:
+        journal = ""
+
+    try:
+        pub_date = data["message"]["created"]["date-time"][0:10]
+    except:
+        pub_date = ""
+    
+    try:
+        issue = data["message"]["issue"]
+    except:
+        issue = ""
+
+    try:
+        volume = data["message"]["volume"]
+    except:
+        volume = ""
+
+    try:
+        page = data["message"]["page"]
+    except:
+        page = ""
+
+    try:
+        abstract = data["message"]["abstract"]
+    except:
+        abstract = ""
+
+    try:
+        authors = "\n".join(node["given"] + " " + node["family"] for node in data["message"]["author"])
+    except:
+        authors = ""
+
+    try:
+        urls = "\n".join(node["URL"] for node in data["message"]["link"])
+    except:
+        urls = ""
+
+    return JsonResponse({"error": "", "doi": doi, "results": {
+        "type": type,
+        "title": title,
+        "journal": journal,
+        "pub_date": pub_date,
+        "issue": issue,
+        "volume": volume,
+        "page": page,
+        "authors": authors,
+        "abstract": abstract,
+        "urls": urls,
+    }}, status=200)
+
+def AjaxFetchRawDOI(request, doi):
+    print("DOI query: ", doi)
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid http query"}, status=400)
+    cache = CrossRefCache.objects.filter(type=CrossRefCache.DOI, key=doi)
+    if cache.count() == 0:
+        print("load from query")
+        try:
+            url = 'http://api.crossref.org/works/' + doi
+            data = requests.get(url).json()
+        except:
+            return JsonResponse({"error": "Failed to query json from URL: " + url}, status=400)
+        item = CrossRefCache(type=CrossRefCache.DOI, key=doi, value=json.dumps(data))
+        item.save()
+    else:
+        print("load from cache")
+        data = json.loads(cache[0].value)
+    return JsonResponse({"error": "", "doi": doi, "results": data}, status=200)
 
 def Login(request):
     if request.method == 'POST':
