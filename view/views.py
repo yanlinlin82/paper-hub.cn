@@ -75,6 +75,18 @@ def RecentPapersView(request):
     }
     return HttpResponse(template.render(context, request))
 
+def FavorPapersView(request):
+    paper_list = get_paper_list(request).filter(is_favorite=True).order_by('-create_time', '-pk')
+    summary_message = 'This page shows favorite papers. '
+    template = loader.get_template('list.html')
+    context = {
+        'site_name': get_site_name(request),
+        'current_page': 'favor',
+        'paper_list': paper_list,
+        'summary_messages': summary_message
+    }
+    return HttpResponse(template.render(context, request))
+
 def PaperListView(request, id):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')

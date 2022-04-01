@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.RecentPapersView, name='index'),
     path('recent', views.RecentPapersView, name='recent'),
     path('all', views.AllPapersView, name='all'),
+    path('favor', views.FavorPapersView, name='favor'),
     path('list/<int:id>', views.PaperListView, name='list'),
     path('label/<str:name>', views.PaperLabelView, name='label'),
     path('paper/<int:id>/edit', views.EditPaperView, name='edit'),
