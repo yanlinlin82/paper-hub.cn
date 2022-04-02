@@ -12,6 +12,7 @@ from django.db.models import Q, Count
 from django.core import serializers
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
+from django.db.models.aggregates import Min, Max
 
 from .models import Label, Paper, User, CrossRefCache, Collection
 from .forms import PaperForm
@@ -292,16 +293,16 @@ def StatView(request):
     today = datetime.today().astimezone(tz_beijing)
     year = today.year
     month = today.month
-    stat_this_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+    stat_this_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
 
     if month > 1:
         month = month - 1
     else:
         year = year - 1
         month = 12
-    stat_last_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+    stat_last_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
 
-    stat_journal = get_paper_list(request).values('journal').annotate(Count('journal')).order_by('-journal__count')
+    stat_journal = get_paper_list(request).values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
 
     template = loader.get_template('stat.html')
     context = {
