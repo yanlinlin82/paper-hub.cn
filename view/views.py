@@ -302,7 +302,7 @@ def StatView(request):
         month = 12
     stat_last_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
 
-    stat_journal = get_paper_list(request).values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
+    stat_journal = get_paper_list(request).exclude(journal='').values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
 
     template = loader.get_template('stat.html')
     context = {
