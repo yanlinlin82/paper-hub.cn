@@ -78,3 +78,22 @@ class CrossRefCache(models.Model):
 
     def __str__(self):
         return self.type + ': ' + self.value
+
+class Collection(models.Model):
+    name = models.CharField(max_length=100, default="")
+    slug = models.CharField(max_length=200, default="")
+    desc = models.CharField(max_length=50000, default="")
+    parent = models.IntegerField(default=0)
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
+    create_time = models.DateTimeField(default=timezone.now)
+    update_time = models.DateTimeField(default=timezone.now)
+
+    papers = models.ManyToManyField(Paper)
+    order_fields = models.CharField(max_length=1000, default="")
+
+    is_private = models.BooleanField(default=True)
+    members = models.ManyToManyField(User, related_name='members')
+
+    def __str__(self):
+        return self.name + ' (with ' + str(self.papers.count()) + ' paper(s), owned by ' + str(self.owner) + ')'

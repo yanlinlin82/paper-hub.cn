@@ -13,7 +13,7 @@ from django.core import serializers
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 
-from .models import Label, Paper, User, CrossRefCache
+from .models import Label, Paper, User, CrossRefCache, Collection
 from .forms import PaperForm
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
@@ -101,6 +101,44 @@ def PaperListView(request, id):
     context = {
         'site_name': get_site_name(request),
         'current_page': 'list',
+        'paper_list': paper_list,
+        'summary_messages': summary_message,
+    }
+    return HttpResponse(template.render(context, request))
+
+def CollectionViewByID(request, id):
+    collections = Collection.objects.filter(pk=id)
+    if collections.count() <= 0:
+        return render(request, 'collection.html', {
+            'error_message': 'Invalid collection ID: ' + str(id),
+            'site_name': get_site_name(request),
+            'current_page': 'collection',
+        })
+    paper_list = collections[0].papers.order_by('-create_time', '-pk')
+    template = loader.get_template('collection.html')
+    if is_xiangma(request):
+        summary_message = '本页面显示合集 <b>#' + collections[0].name + '</b> 的文献。'
+    else:
+        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
+    context = {
+        'site_name': get_site_name(request),
+        'current_page': 'collection',
+        'collection': collections[0],
+        'paper_list': paper_list,
+        'summary_messages': summary_message,
+    }
+    return HttpResponse(template.render(context, request))
+
+def CollectionViewBySlug(request, slug):
+    paper_list = get_paper_list(request).order_by('-create_time', '-pk')
+    template = loader.get_template('list.html')
+    if is_xiangma(request):
+        summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
+    else:
+        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
+    context = {
+        'site_name': get_site_name(request),
+        'current_page': 'collection',
         'paper_list': paper_list,
         'summary_messages': summary_message,
     }

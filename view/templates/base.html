@@ -32,7 +32,9 @@
   <div class="container">
     <nav class="menu">
 {% if not request.path|is_for_xiangma %}
-      <a class="menu-item{% if current_page == "user" %} current-item{% endif %}" href="{% url 'view:user' id=1 %}">My Collection</a>
+      <a class="menu-item{% if current_page == "user" %} current-item{% endif %}" href="{% url 'view:user' id=1 %}">All My Papers</a>
+      <a class="menu-item{% if current_page == "collection-list" %} current-item{% endif %}" href="{% url 'view:collection' id=1 %}">My Collections</a>
+      <a class="menu-item{% if current_page == "collection" %} current-item{% endif %}" href="{% url 'view:collection' id=1 %}">Collection</a>
       <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">My Favorite</a>
       <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent Papers</a>
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
