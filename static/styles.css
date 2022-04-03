@@ -31,6 +31,27 @@ header {
     align-items: center;
 }
 
+header h1.logo {
+    margin: 0;
+    padding: 10px;
+    font-family: Helvetica;
+    font-size: 20px;
+    font-weight: 900;
+    flex: none;
+    width: 150px;
+    text-align: center;
+}
+
+header h1.logo:hover {
+    background-color: #ddd;
+    color: #fdd;
+}
+
+header h1.logo a {
+    text-decoration: none;
+    color: #333;
+}
+
 .container {
     margin: 0 auto;
     max-width: 960px;
@@ -49,11 +70,11 @@ header {
 
 .menu-item {
     margin-right: auto;
-    height: 30px;
+    height: 25px;
     text-decoration: none;
     color: #333;
     text-align: center;
-    line-height: 30px;
+    line-height: 25px;
     align-items: flex-start;
     margin: 0;
     padding: 0 10px;
@@ -61,7 +82,6 @@ header {
 
 .menu-item:hover {
     background-color: #fc9;
-    font-weight: bold;
 }
 
 .current-item {
@@ -94,21 +114,19 @@ header {
         background-color: transparent;
         width: 150px;
         margin: 0;
-        padding: 0;
     }
     .current-item {
         background-color: #eee;
         font-weight: bold;
         border-right: 3px solid #bf9000;
-        margin-right: -3px;
-        padding: 0;
+        margin-right: -30px;
         border-top: 0;
         z-index: 1;
     }
 }
 
 .search-box {
-    height: 30px;
+    height: 25px;
     margin: auto;
     right: 0;
     flex: 1 1 auto;
@@ -124,7 +142,7 @@ header {
 }
 
 .search-button {
-    height: 30px;
+    height: 25px;
     font-size: 16px;
     margin: auto;
     right: 0;
@@ -137,24 +155,6 @@ header {
     margin: auto;
     right: 0;
     flex: none;
-}
-
-header h1.logo {
-    margin: 0;
-    padding: 10px;
-    font-family: Helvetica;
-    font-size: 24px;
-    font-weight: 900;
-    flex: none;
-}
-
-header h1.logo:hover {
-    background-color: #ddd;
-}
-
-header h1.logo a {
-    text-decoration: none;
-    color: #333;
 }
 
 .error_message {
