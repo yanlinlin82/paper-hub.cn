@@ -1,16 +1,27 @@
-from django.urls import path, re_path, include
+import re
+from django.urls import path, re_path
+from django.http import HttpResponseRedirect
 
 from . import views
 
+def is_xiangma(request):
+    return re.match("^/xiangma/", request.path)
+
+def redirect(request):
+    if is_xiangma(request):
+        return HttpResponseRedirect('recent')
+    else:
+        return HttpResponseRedirect('all')
+
 app_name = 'view'
 urlpatterns = [
-    path('', views.RecentPapersView, name='index'),
-    path('recent', views.RecentPapersView, name='recent'),
-    path('all', views.AllPapersView, name='all'),
-    path('favor', views.FavorPapersView, name='favor'),
+    path('', redirect, name='index'),
+    path('all', views.All, name='all'),
+    path('recent', views.Recent, name='recent'),
+    path('favor', views.Favor, name='favor'),
+    path('trash', views.Trash, name='trash'),
     path('collection/<int:id>', views.CollectionViewByID, name='collection'),
     path('collection/<str:slug>', views.CollectionViewBySlug, name='collection'),
-    path('list/<int:id>', views.PaperListView, name='list'),
     path('label/<str:name>', views.PaperLabelView, name='label'),
     path('paper/<int:id>/edit', views.EditPaperView, name='edit'),
     path('paper/<int:id>/delete', views.DeletePaperView, name='delete'),

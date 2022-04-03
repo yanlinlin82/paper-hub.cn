@@ -27,27 +27,24 @@ def get_site_name(request):
         return '响马读paper'
     return 'Paper-Hub'
 
-def get_paper_list(request):
+def get_paper_list(request, is_trash=False):
     if re.match("^/xiangma/", request.path):
         paper_list = None
         label_list = Label.objects.filter(name='响马')
         if label_list.count() > 0:
             paper_list = label_list[0].paper_set
         return paper_list
-    return Paper.objects
-
-def is_ajax(request):
-    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-
-def ajax_test(request):
-    if is_ajax(request=request):
-        message = "This is ajax"
+        
+    if request.user.is_authenticated and User.objects.filter(username=request.user.username).count() > 0:
+        u = User.objects.filter(username=request.user.username)[0]
     else:
-        message = "Not ajax"
-    return HttpResponse(message)
+        u = User()
+    if is_trash:
+        return Paper.objects.filter(creator=u).exclude(delete_time=None)
+    else:
+        return Paper.objects.filter(creator=u, delete_time=None)
 
-# Create your views here.
-def AllPapersView(request):
+def All(request):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('list.html')
     context = {
@@ -58,7 +55,7 @@ def AllPapersView(request):
     }
     return HttpResponse(template.render(context, request))
 
-def RecentPapersView(request):
+def Recent(request):
     if is_xiangma(request):
         today = datetime.today().astimezone(tz_beijing)
         year = today.year
@@ -80,7 +77,7 @@ def RecentPapersView(request):
     }
     return HttpResponse(template.render(context, request))
 
-def FavorPapersView(request):
+def Favor(request):
     paper_list = get_paper_list(request).filter(is_favorite=True).order_by('-create_time', '-pk')
     summary_message = 'This page shows favorite papers. '
     template = loader.get_template('list.html')
@@ -92,20 +89,15 @@ def FavorPapersView(request):
     }
     return HttpResponse(template.render(context, request))
 
-def PaperListView(request, id):
-    paper_list = get_paper_list(request).order_by('-create_time', '-pk')
-    template = loader.get_template('list.html')
-    if is_xiangma(request):
-        summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
-    else:
-        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
-    context = {
+def Trash(request):
+    paper_list = get_paper_list(request, is_trash=True).order_by('-create_time', '-pk')
+    summary_message = 'Papers in this folder will be removed after 30 days automatically.'
+    return render(request, 'list.html', {
         'site_name': get_site_name(request),
-        'current_page': 'list',
+        'current_page': 'trash',
         'paper_list': paper_list,
-        'summary_messages': summary_message,
-    }
-    return HttpResponse(template.render(context, request))
+        'summary_messages': summary_message
+    })
 
 def CollectionViewByID(request, id):
     collections = Collection.objects.filter(pk=id)

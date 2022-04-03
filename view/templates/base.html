@@ -31,22 +31,27 @@
   </header>
   <div class="container">
     <nav class="menu">
-{% if not request.path|is_for_xiangma %}
-      <a class="menu-item{% if current_page == "user" %} current-item{% endif %}" href="{% url 'view:user' id=1 %}">All My Papers</a>
-      <a class="menu-item{% if current_page == "collection-list" %} current-item{% endif %}" href="{% url 'view:collection' id=1 %}">My Collections</a>
-      <a class="menu-item{% if current_page == "collection" %} current-item{% endif %}" href="{% url 'view:collection' id=1 %}">Collection</a>
-      <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">My Favorite</a>
-      <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent Papers</a>
-      <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
-      <a class="menu-item{% if current_page == "list" %} current-item{% endif %}" href="{% url 'view:list' id=1 %}">As List</a>
-      <a class="menu-item{% if current_page == "label" %} current-item{% endif %}" href="{% url 'view:label' name='响马' %}">As Label</a>
-      <a class="menu-item{% if current_page == "paper" %} current-item{% endif %}" href="{% url 'view:paper' id=1 %}">Single Paper</a>
-      <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">Statistics</a>
-      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
-{% else %}
+{% if request.path|is_for_xiangma %}
       <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">本月分享</a>
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">所有分享</a>
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">响马榜单</a>
+{% else %}
+      <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
+      <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent</a>
+      <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">Favorites</a>
+      <a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'view:trash' %}">Trash</a>
+      <div class="menu-group">
+        <div style="display:inline">Groups</div>
+        <div style="display:inline; float:right"><a href="javascript:alert('add group');">+</a></div>
+      </div>
+      <div class="menu-group">
+        <div style="display:inline">Searches</div>
+        <div style="display:inline; float:right"><a href="javascript:alert('add search');">+</a></div>
+      </div>
+      <div class="menu-group">
+        <div style="display:inline">Collections</div>
+        <div style="display:inline; float:right"><a href="javascript:alert('add collection');">+</a></div>
+      </div>
 {% endif %}
     </nav>
     <div class="content">

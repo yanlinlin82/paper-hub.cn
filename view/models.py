@@ -26,6 +26,7 @@ class Paper(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(default=timezone.now)
+    delete_time = models.DateTimeField(null=True, default=None)
 
     # index id
     doi = models.CharField(max_length=100, default='')
