@@ -226,7 +226,7 @@ footer p {
 }
 
 .paper-item {
-    margin: 10px;
+    margin: 10px 0 10px 10px;
     padding: 0;
     border: 1px dotted #333;
     border-top: 3px solid #bf9000;
