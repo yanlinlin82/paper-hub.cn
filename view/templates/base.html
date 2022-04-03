@@ -37,10 +37,12 @@
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">响马榜单</a>
 {% else %}
       <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
+  {% if user.is_authenticated %}
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
       <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent</a>
       <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">Favorites</a>
       <a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'view:trash' %}">Trash</a>
+  {% endif %}
       <div class="menu-group">
         <div style="display:inline">Groups</div>
         <div style="display:inline; float:right"><a href="javascript:alert('add group');">+</a></div>
