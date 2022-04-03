@@ -36,6 +36,7 @@
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">所有分享</a>
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">响马榜单</a>
 {% else %}
+      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
       <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent</a>
       <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">Favorites</a>

@@ -20,6 +20,7 @@ urlpatterns = [
     path('recent', views.Recent, name='recent'),
     path('favor', views.Favor, name='favor'),
     path('trash', views.Trash, name='trash'),
+    path('trash/<int:id>/delete', views.DeletePaperView, name='delete-forever'),
     path('collection/<int:id>', views.CollectionViewByID, name='collection'),
     path('collection/<str:slug>', views.CollectionViewBySlug, name='collection'),
     path('label/<str:name>', views.PaperLabelView, name='label'),

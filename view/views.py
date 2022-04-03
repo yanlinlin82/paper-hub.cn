@@ -27,20 +27,20 @@ def get_site_name(request):
         return '响马读paper'
     return 'Paper-Hub'
 
-def get_paper_list(request, is_trash=False):
+def get_paper_list(request, include_trash=False):
     if re.match("^/xiangma/", request.path):
         paper_list = None
         label_list = Label.objects.filter(name='响马')
         if label_list.count() > 0:
             paper_list = label_list[0].paper_set
         return paper_list
-        
+
     if request.user.is_authenticated and User.objects.filter(username=request.user.username).count() > 0:
         u = User.objects.filter(username=request.user.username)[0]
     else:
         u = User()
-    if is_trash:
-        return Paper.objects.filter(creator=u).exclude(delete_time=None)
+    if include_trash:
+        return Paper.objects.filter(creator=u)
     else:
         return Paper.objects.filter(creator=u, delete_time=None)
 
@@ -90,7 +90,7 @@ def Favor(request):
     return HttpResponse(template.render(context, request))
 
 def Trash(request):
-    paper_list = get_paper_list(request, is_trash=True).order_by('-create_time', '-pk')
+    paper_list = get_paper_list(request, include_trash=True).exclude(delete_time=None).order_by('-create_time', '-pk')
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'list.html', {
         'site_name': get_site_name(request),
@@ -180,14 +180,19 @@ def DeletePaperView(request, id):
             'current_page': 'delete',
             'error_message': 'No permission! Login first!',
         })
-    paper_list = get_paper_list(request).filter(pk=id)
+    paper_list = get_paper_list(request, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
-        return render(request, 'edit.html', {
+        return render(request, 'list.html', {
             'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    get_paper_list(request).filter(pk=id).delete()
+    p = paper_list[0]
+    if p.delete_time == None:
+        p.delete_time = timezone.now()
+        p.save()
+    else:
+        get_paper_list(request, include_trash=True).filter(pk=id).delete()
     return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
 
 def EditPaperView(request, id):
