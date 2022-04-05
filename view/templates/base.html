@@ -68,5 +68,13 @@
     <p>&copy; <a href="https://yanlinlin.cn/" target="_blank">Linlin Yan</a>, 2022 | <a href="http://beian.miit.gov.cn/" target="_blank">京ICP备18031542号-9</a> | Powered by <a href="https://www.djangoproject.com/" target="_blank">Django</a></p>
   </footer>
   {% block javascript %}{% endblock javascript %}
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1JBLE3S3G0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-1JBLE3S3G0');
+  </script>
 </body>
 {% endtimezone %}</html>
