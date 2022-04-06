@@ -81,5 +81,5 @@
 <div class="paper-comments-block">
   <hr class="paper-sep-line">
   <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>:</div>
-  <div class="paper-comments">{% autoescape off %}{{ paper.comments|replace_line_br }}{% endautoescape %}</div>
+  <div class="paper-comments">{% autoescape off %}{{ paper.comments|replace_line_br|identify_labels }}{% endautoescape %}</div>
 </div>

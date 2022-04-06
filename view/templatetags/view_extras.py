@@ -22,3 +22,7 @@ def split(value, sep):
 @register.filter(name='splitlines')
 def splitlines(value):
     return value.splitlines()
+
+@register.filter(name='identify_labels')
+def identify_labels(value):
+    return re.sub(r'#(\S+)', r'<div class="label"><a href="/view/label/\1">#\1</a></div>', value)

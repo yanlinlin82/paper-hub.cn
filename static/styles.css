@@ -453,3 +453,12 @@ input[type=submit]:hover {
     text-align: right;
     padding: 0 10px;
 }
+
+.label {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.label:hover {
+    background-color: #ccc;
+}
