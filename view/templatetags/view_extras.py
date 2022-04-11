@@ -1,5 +1,6 @@
-from django import template
 import re
+from django import template
+from django.urls import reverse
 
 register = template.Library()
 
@@ -23,6 +24,12 @@ def split(value, sep):
 def splitlines(value):
     return value.splitlines()
 
-@register.filter(name='identify_labels')
-def identify_labels(value):
-    return re.sub(r'#(\S+)', r'<div class="label"><a href="/view/label/\1">#\1</a></div>', value)
+def label_replace(match, request):
+    m = match.group(1)
+    m2 = re.sub('/', '+', m)
+    s = '<div class="label"><a href="' + reverse('view:label', kwargs={'name': m2}, current_app=request.resolver_match.namespace) + '">#' + m + '</a></div>'
+    return re.sub('\n', '<br>', s)
+
+@register.simple_tag(name='format_comments', takes_context=True)
+def format_comments(context, value):
+    return re.sub(r'#([^\s:#\'\"]+)', lambda line: label_replace(line, context['request']), value)
