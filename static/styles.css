@@ -456,9 +456,16 @@ input[type=submit]:hover {
 
 .label {
     display: inline-block;
-    margin-right: 10px;
+    margin-right: 5px;
 }
 
 .label:hover {
     background-color: #ccc;
+}
+
+a.external {
+    background-image: url("/static/images/external-link-icon.svg");
+    background-position: center right;
+    background-repeat: no-repeat;
+    padding-right: 13px;
 }

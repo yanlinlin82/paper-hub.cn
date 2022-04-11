@@ -22,11 +22,11 @@
   <div class="paper-info">
     {{ paper.pub_year }},
     <i>{{ paper.journal }}</i>.
-    {% if paper.doi %}DOI: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a><sup>↗</sup>{% endif %}
-    {% if paper.pmid %}PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a><sup>↗</sup>{% endif %}
-    {% if paper.pmcid %}PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}" target="_blank">{{ paper.pmcid }}</a><sup>↗</sup>{% endif %}
-    {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}" target="_blank">{{ paper.arxiv_id }}</a><sup>↗</sup>{% endif %}
-    {% if paper.cnki_id %}CNKI ID: <a href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{ paper.cnki_id }}" target="_blank">{{ paper.cnki_id|escape }}</a><sup>↗</sup>{% endif %}
+    {% if paper.doi %}DOI: <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>{% endif %}
+    {% if paper.pmid %}PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/{{ paper.pmid }}">{{ paper.pmid }}</a>{% endif %}
+    {% if paper.pmcid %}PMCID: <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ paper.pmcid }}">{{ paper.pmcid }}</a>{% endif %}
+    {% if paper.arxiv_id %}arXiv ID: <a href="https://arxiv.org/abs/{{ paper.arxiv_id }}">{{ paper.arxiv_id }}</a>{% endif %}
+    {% if paper.cnki_id %}CNKI ID: <a href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{ paper.cnki_id }}">{{ paper.cnki_id|escape }}</a>{% endif %}
     <div class="paper-title"><b>{{ paper.title }}</b></div>
     <div style="padding: 0 0 10px 0;">
       {% if paper.is_favorite %}<b>[Favorite]</b>{% endif %}
@@ -70,7 +70,7 @@
       <div class="url-item"><ul>
         {% with paper.urls|splitlines as urls %}
         {% for u in urls %}
-        <li><a href="{{ u }}" target="_blank">{{ u }}</a></li>
+        <li><a href="{{ u }}">{{ u }}</a></li>
         {% endfor %}
         {% endwith %}
       </ul></div>
