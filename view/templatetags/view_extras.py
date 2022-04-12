@@ -27,9 +27,9 @@ def splitlines(value):
 def label_replace(match, request):
     m = match.group(1)
     m2 = re.sub('/', '+', m)
-    s = '<div class="label"><a href="' + reverse('view:label', kwargs={'name': m2}, current_app=request.resolver_match.namespace) + '">#' + m + '</a></div>'
-    return re.sub('\n', '<br>', s)
+    return '<div class="label"><a href="' + reverse('view:label', kwargs={'name': m2}, current_app=request.resolver_match.namespace) + '">#' + m + '</a></div>'
 
 @register.simple_tag(name='format_comments', takes_context=True)
 def format_comments(context, value):
-    return re.sub(r'#([^\s:#\'\"]+)', lambda line: label_replace(line, context['request']), value)
+    s = re.sub(r'#([^\s:#\'\"]+)', lambda line: label_replace(line, context['request']), value)
+    return re.sub('\n', '<br>', s)
