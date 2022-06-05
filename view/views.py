@@ -304,6 +304,7 @@ def StatView(request):
     year = today.year
     month = today.month
     stat_this_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
+    this_month = str(year) + '/' + str(month)
 
     if month > 1:
         month = month - 1
@@ -311,6 +312,7 @@ def StatView(request):
         year = year - 1
         month = 12
     stat_last_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
+    last_month = str(year) + '/' + str(month)
 
     stat_journal = get_paper_list(request).exclude(journal='').values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
 
@@ -320,7 +322,9 @@ def StatView(request):
         'current_page': 'stat',
         'stat_all': stat_all,
         'stat_this_month': stat_this_month,
+        'this_month': this_month,
         'stat_last_month': stat_last_month,
+        'last_month': last_month,
         'stat_journal': stat_journal,
     }
     return HttpResponse(template.render(context, request))
