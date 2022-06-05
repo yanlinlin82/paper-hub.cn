@@ -458,6 +458,12 @@ def AjaxFetchUser(request, user):
         return JsonResponse({"error": "Invalid http query"}, status=400)
     u = User.objects.filter(nickname=user)
     if u.count() == 0:
+        u = User.objects.filter(name=user)
+    if u.count() == 0:
+        u = User.objects.filter(weixin_id=user)
+    if u.count() == 0:
+        u = User.objects.filter(username=user)
+    if u.count() == 0:
         return JsonResponse({"error": "user '" + user + "' not found."}, status=200)
     else:
         return JsonResponse({"error": "", "query": user, "results": {
