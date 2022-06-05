@@ -1,18 +1,66 @@
+{% if is_xiangma %}
 <div class="row">
-    <div class="col-25">{{ form.creator.label_tag }}</div>
-    <div class="col-75">{{ form.creator }}</div>
+    <div class="col-25">{{ form.creator_nickname.label_tag }}</div>
+    <div class="col-75">{{ form.creator_nickname }}<input type="button" id="fetch_creator" name="fetch_creator" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_creator_info();"></div>
+    <script>
+        function fill_creator_info(xhttp) {
+            const obj = JSON.parse(xhttp.responseText);
+            if (obj["error"] != "") {
+                alert("Error: " + obj["error"]);
+            } else {
+                document.getElementById('id_creator_nickname').value = obj["results"]["nickname"];
+                document.getElementById('id_creator_name').value = obj["results"]["name"];
+                document.getElementById('id_creator_weixin_id').value = obj["results"]["weixin_id"];
+                document.getElementById('id_creator_username').value = obj["results"]["username"];
+            }
+        }
+        function do_fetch_creator_info() {
+            var nickname = document.getElementById('id_creator_nickname').value
+            if (nickname == "") {
+                alert("Error: fill nickname first!");
+                return 1;
+            }
+            var url = "http://localhost:8000/view/ajax/fetch/user/" + nickname;
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    fill_creator_info(this);
+                } else if (this.readyState == 4) {
+                    alert("Error: query nickname failed! status: " + this.status);
+                }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        }
+    </script>
 </div>
-{% if paper.create_time %}
+<div class="row">
+    <div class="col-25">{{ form.creator_name.label_tag }}</div>
+    <div class="col-75">{{ form.creator_name }}</div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.creator_weixin_id.label_tag }}</div>
+    <div class="col-75">{{ form.creator_weixin_id }}</div>
+</div>
+<div class="row">
+    <div class="col-25">{{ form.creator_username.label_tag }}</div>
+    <div class="col-75">{{ form.creator_username }}</div>
+</div>
+<br>
+  {% if paper.create_time %}
 <div class="row">
     <div class="col-25">{{ form.create_time.label_tag }}</div>
     <div class="col-75">{{ form.create_time }}</div>
 </div>
-{% endif %}
-{% if paper.update_time %}
+  {% endif %}
+  {% if current_page == "edit" %}
+    {% if paper.update_time %}
 <div class="row">
     <div class="col-25">{{ form.update_time.label_tag }}</div>
     <div class="col-75">{{ form.update_time }}</div>
 </div>
+    {% endif %}
+  {% endif %}
 {% endif %}
 <br>
 <div class="row">

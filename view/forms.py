@@ -4,9 +4,13 @@ from django import forms
 from .models import Paper
 
 class PaperForm(forms.Form):
-    creator = forms.CharField(label='Creator', max_length=100)
-    create_time = forms.DateTimeField(label='Create Time', input_formats='%Y-%m-%d %H:%M:%S')
-    update_time = forms.DateTimeField(label='Update Time', input_formats='%Y-%m-%d %H:%M:%S')
+    creator_nickname = forms.CharField(label='Nick Name', max_length=100, widget=forms.TextInput(attrs={'class':'with_button'})) # 群友（昵称，用于搜索）
+    creator_name = forms.CharField(label='Real Name', max_length=100) # 姓名
+    creator_weixin_id = forms.CharField(label='Weixin ID', max_length=100, required=False) # 微信ID（跨系统的统一标识，但可能没法获取）
+    creator_username = forms.CharField(label='User Name', max_length=100, required=False) # 关联到内部用户表（本系统的唯一标识）
+
+    create_time = forms.DateTimeField(label='Create Time', input_formats='%Y-%m-%d %H:%M:%S', required=False)
+    update_time = forms.DateTimeField(label='Update Time', input_formats='%Y-%m-%d %H:%M:%S', required=False)
 
     doi = forms.CharField(label='DOI', max_length=100, widget=forms.TextInput(attrs={'class':'with_button'}), required=False)
     pmid = forms.CharField(label='PMID', max_length=20, widget=forms.TextInput(attrs={'class':'with_button'}), required=False)
@@ -30,4 +34,3 @@ class PaperForm(forms.Form):
     is_favorite = forms.BooleanField(label='Is Favorite', required=False)
     is_private = forms.ChoiceField(label='Permission', widget=forms.RadioSelect, choices=[(False, 'Public'), (True, 'Private')])
     comments = forms.CharField(label='Comments', max_length=65536, widget=forms.Textarea(attrs={'style': 'height:400px'}), required=False)
-    

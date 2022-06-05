@@ -201,6 +201,7 @@ def EditPaperView(request, id):
             'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'No permission! Login first!',
+            'is_xiangma': is_xiangma(request),
         })
     paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
@@ -208,6 +209,7 @@ def EditPaperView(request, id):
             'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
+            'is_xiangma': is_xiangma(request),
         })
     paper = paper_list[0]
     if request.method == 'POST':
@@ -217,17 +219,25 @@ def EditPaperView(request, id):
                 'site_name': get_site_name(request),
                 'current_page': 'edit',
                 'error_message': form.errors,
+                'is_xiangma': is_xiangma(request),
             })
         user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
         if user_list.count() <= 0:
             return render(request, 'edit.html', {
                 'site_name': get_site_name(request),
                 'current_page': 'edit',
-                'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
+                'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"',
+                'is_xiangma': is_xiangma(request),
             })
         paper.creator = user_list[0]
-        paper.create_time = form.cleaned_data['create_time']
-        paper.update_time = form.cleaned_data['update_time']
+        if form.cleaned_data['create_time']:
+            paper.create_time = form.cleaned_data['create_time']
+        else:
+            paper.create_time = timezone.now()
+        if form.cleaned_data['update_time']:
+            paper.update_time = form.cleaned_data['update_time']
+        else:
+            paper.update_time = timezone.now()
         paper.doi = form.cleaned_data['doi']
         paper.pmid = form.cleaned_data['pmid']
         paper.arxiv_id = form.cleaned_data['arxiv_id']
@@ -251,7 +261,10 @@ def EditPaperView(request, id):
         return HttpResponseRedirect(reverse('view:paper', args=[id], current_app=request.resolver_match.namespace))
     else:
         data = {
-            'creator': paper.creator,
+            'creator_nickname': paper.creator.nickname,
+            'creator_name': paper.creator.name,
+            'creator_weixin_id': paper.creator.weixin_id,
+            'creator_username': paper.creator.username,
             'create_time': paper.create_time,
             'update_time': paper.update_time,
             'doi': paper.doi,
@@ -281,6 +294,7 @@ def EditPaperView(request, id):
             'current_page': 'edit',
             'paper': paper,
             'form': form,
+            'is_xiangma': is_xiangma(request),
         }
         return HttpResponse(template.render(context, request))
 
@@ -340,6 +354,7 @@ def PaperAdd(request):
             'site_name': get_site_name(request),
             'current_page': 'add',
             'error_message': 'No permission! Login first!',
+            'is_xiangma': is_xiangma(request),
         })
     if request.method == 'POST':
         form = PaperForm(request.POST)
@@ -348,18 +363,32 @@ def PaperAdd(request):
                 'site_name': get_site_name(request),
                 'current_page': 'add',
                 'error_message': form.errors,
+                'is_xiangma': is_xiangma(request),
             })
-        user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
+        user_list = User.objects.filter(nickname=form.cleaned_data['creator_nickname'])
         if user_list.count() <= 0:
-            return render(request, 'edit.html', {
-                'site_name': get_site_name(request),
-                'current_page': 'add',
-                'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"'
-                })
+            u = User(
+                username = form.cleaned_data['creator_username'],
+                nickname = form.cleaned_data['creator_nickname'],
+                weixin_id = form.cleaned_data['creator_weixin_id'],
+                name = form.cleaned_data['creator_name'],
+                create_time = timezone.now()
+            )
+            u.save()
+        user_list = User.objects.filter(nickname=form.cleaned_data['creator_nickname'])
+
         paper = Paper()
         paper.creator = user_list[0]
-        paper.create_time = timezone.now()
-        paper.update_time = timezone.now()
+
+        print("form time: ", form.cleaned_data['create_time'])
+        print("time now: ", timezone.now())
+        
+        if is_xiangma(request):
+            paper.create_time = form.cleaned_data['create_time']
+            paper.update_time = form.cleaned_data['create_time']
+        else:
+            paper.create_time = timezone.now()
+            paper.update_time = timezone.now()
         paper.doi = form.cleaned_data['doi']
         paper.pmid = form.cleaned_data['pmid']
         paper.arxiv_id = form.cleaned_data['arxiv_id']
@@ -380,28 +409,59 @@ def PaperAdd(request):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
+
+        if is_xiangma(request):
+            label_name = "响马"
+            if Label.objects.filter(name=label_name).count() == 0:
+                xiangma = Label(name = label_name)
+                xiangma.save()
+            else:
+                xiangma = Label.objects.filter(name=label_name)[0]
+            xiangma.paper_set.add(paper)
+            xiangma.save()
+
         return HttpResponseRedirect(reverse('view:paper', args=[paper.id], current_app=request.resolver_match.namespace))
     else:
-        u = User.objects.filter(pk=1)
+        u = User.objects.filter(username=request.user)
         paper = Paper(
             creator = u[0],
             create_time = timezone.now(),
             update_time = timezone.now(),
             is_private = True)
         data = {
-            'creator': paper.creator,
+            'creator_nickname': u[0].nickname,
+            'creator_name': u[0].name,
+            'creator_weixin_id': u[0].weixin_id,
+            'creator_username': u[0].username,
             'create_time': paper.create_time,
             'update_time': paper.update_time,
-            'is_private': paper.is_private}
+            'is_private': paper.is_private
+            }
         form = PaperForm(data)
         context = {
             'site_name': get_site_name(request),
             'current_page': 'add',
             'form': form,
             'paper': paper,
+            'is_xiangma': is_xiangma(request),
         }
         template = loader.get_template('add.html')
         return HttpResponse(template.render(context, request))
+
+def AjaxFetchUser(request, user):
+    print("User query: ", user)
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid http query"}, status=400)
+    u = User.objects.filter(nickname=user)
+    if u.count() == 0:
+        return JsonResponse({"error": "user '" + user + "' not found."}, status=200)
+    else:
+        return JsonResponse({"error": "", "query": user, "results": {
+            "nickname": u[0].nickname,
+            "name": u[0].name,
+            "weixin_id": u[0].weixin_id,
+            "username": u[0].username,
+        }}, status=200)
 
 def AjaxFetchDOI(request, doi):
     print("DOI query: ", doi)
