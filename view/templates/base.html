@@ -33,6 +33,7 @@
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">所有分享</a>
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">响马榜单</a>
       {% if user.is_authenticated %}
+      <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">我的收藏</a>
       <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">新增分享</a>
       {% endif %}
 {% else %}

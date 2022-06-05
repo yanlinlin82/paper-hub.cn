@@ -1,8 +1,22 @@
-{% load view_extras %}
+{% load view_extras %}{% load static %}
 <div class="paper-info-block">
   <div class="paper-op-list">
     <div class="paper-op-list-sub-left">
       <a href="{% url "view:paper" id=paper.pk %}">[{{ paper.pk }}]</a>
+      {% if user.is_authenticated %}
+      <div id="favor_{{ paper.pk }}" class="{% if paper.is_favorite %}starred{% else %}unstarred{% endif %}" onclick="javascript:toggle_favor({{ paper.pk }});">
+      </div>
+      <script>
+      function toggle_favor(id) {
+        e = document.getElementById('favor_' + id)
+        if (e.className == "starred") {
+          e.className = "unstarred";
+        } else {
+          e.className = "starred";
+        }
+      }
+      </script>
+      {% endif %}
     </div>
     <div class="paper-op-list-sub-right">
       {% if user.is_authenticated %}

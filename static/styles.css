@@ -372,3 +372,21 @@ a.external {
 table.stat {
     width: 80%;
 }
+
+.starred {
+    display: inline-block;
+    cursor: pointer;
+    vertical-align: text-top;
+    width: 20px;
+    height: 20px;
+    background-image: url('/static/images/star-yellow.png');
+}
+
+.unstarred {
+    display: inline-block;
+    cursor: pointer;
+    vertical-align: text-top;
+    width: 20px;
+    height: 20px;
+    background-image: url('/static/images/star-gray.png');
+}
