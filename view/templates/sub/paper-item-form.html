@@ -1,178 +1,178 @@
 {% if is_xiangma %}
 <div class="row">
-    <div class="col-25">{{ form.creator_nickname.label_tag }}</div>
-    <div class="col-75">{{ form.creator_nickname }}<input type="button" id="fetch_creator" name="fetch_creator" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_creator_info();"></div>
-    <script>
-        function fill_creator_info(xhttp) {
-            const obj = JSON.parse(xhttp.responseText);
-            if (obj["error"] != "") {
-                alert("Error: " + obj["error"]);
-            } else {
-                document.getElementById('id_creator_nickname').value = obj["results"]["nickname"];
-                document.getElementById('id_creator_name').value = obj["results"]["name"];
-                document.getElementById('id_creator_weixin_id').value = obj["results"]["weixin_id"];
-                document.getElementById('id_creator_username').value = obj["results"]["username"];
-            }
+  <div class="col-25">{{ form.creator_nickname.label_tag }}</div>
+  <div class="col-75">{{ form.creator_nickname }}<input type="button" id="fetch_creator" name="fetch_creator" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_creator_info();"></div>
+  <script>
+    function fill_creator_info(xhttp) {
+      const obj = JSON.parse(xhttp.responseText);
+      if (obj["error"] != "") {
+        alert("Error: " + obj["error"]);
+      } else {
+        document.getElementById('id_creator_nickname').value = obj["results"]["nickname"];
+        document.getElementById('id_creator_name').value = obj["results"]["name"];
+        document.getElementById('id_creator_weixin_id').value = obj["results"]["weixin_id"];
+        document.getElementById('id_creator_username').value = obj["results"]["username"];
+      }
+    }
+    function do_fetch_creator_info() {
+      var nickname = document.getElementById('id_creator_nickname').value
+      if (nickname == "") {
+        alert("Error: fill nickname first!");
+        return 1;
+      }
+      var url = '{% url "view:ajax_fetch_user" 0 %}'.replace('0', nickname);
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          fill_creator_info(this);
+        } else if (this.readyState == 4) {
+          alert("Error: query nickname failed! status: " + this.status);
         }
-        function do_fetch_creator_info() {
-            var nickname = document.getElementById('id_creator_nickname').value
-            if (nickname == "") {
-                alert("Error: fill nickname first!");
-                return 1;
-            }
-            var url = '{% url "view:ajax_fetch_user" 0 %}'.replace('0', nickname);
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    fill_creator_info(this);
-                } else if (this.readyState == 4) {
-                    alert("Error: query nickname failed! status: " + this.status);
-                }
-            };
-            xhttp.open("GET", url, true);
-            xhttp.send();
-        }
-    </script>
+      };
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+  </script>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.creator_name.label_tag }}</div>
-    <div class="col-75">{{ form.creator_name }}</div>
+  <div class="col-25">{{ form.creator_name.label_tag }}</div>
+  <div class="col-75">{{ form.creator_name }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.creator_weixin_id.label_tag }}</div>
-    <div class="col-75">{{ form.creator_weixin_id }}</div>
+  <div class="col-25">{{ form.creator_weixin_id.label_tag }}</div>
+  <div class="col-75">{{ form.creator_weixin_id }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.creator_username.label_tag }}</div>
-    <div class="col-75">{{ form.creator_username }}</div>
+  <div class="col-25">{{ form.creator_username.label_tag }}</div>
+  <div class="col-75">{{ form.creator_username }}</div>
 </div>
 <br>
-  {% if paper.create_time %}
+{% if paper.create_time %}
 <div class="row">
-    <div class="col-25">{{ form.create_time.label_tag }}</div>
-    <div class="col-75">{{ form.create_time }}</div>
+  <div class="col-25">{{ form.create_time.label_tag }}</div>
+  <div class="col-75">{{ form.create_time }}</div>
+</div>
+{% endif %}
+{% if current_page == "edit" %}
+  {% if paper.update_time %}
+<div class="row">
+  <div class="col-25">{{ form.update_time.label_tag }}</div>
+  <div class="col-75">{{ form.update_time }}</div>
 </div>
   {% endif %}
-  {% if current_page == "edit" %}
-    {% if paper.update_time %}
-<div class="row">
-    <div class="col-25">{{ form.update_time.label_tag }}</div>
-    <div class="col-75">{{ form.update_time }}</div>
-</div>
-    {% endif %}
-  {% endif %}
+{% endif %}
 {% endif %}
 <br>
 <div class="row">
-    <div class="col-25">{{ form.doi.label_tag }}</div>
-    <div class="col-75">{{ form.doi }}<input type="button" id="fetch_doi" name="fetch_doi" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_doi();"></div>
-    <script>
-    function fill_doi(xhttp) {
-        const obj = JSON.parse(xhttp.responseText);
-        if (obj["error"] != "") {
-            alert("Error: " + obj["error"]);
-        } else {
-            document.getElementById('id_title').value = obj["results"]["title"];
-            document.getElementById('id_journal').value = obj["results"]["journal"];
-            document.getElementById('id_pub_date').value = obj["results"]["pub_date"];
-            document.getElementById('id_authors').value = obj["results"]["authors"];
-            document.getElementById('id_abstract').value = obj["results"]["abstract"];
-            document.getElementById('id_urls').value = obj["results"]["urls"];
-        }
+  <div class="col-25">{{ form.doi.label_tag }}</div>
+  <div class="col-75">{{ form.doi }}<input type="button" id="fetch_doi" name="fetch_doi" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_doi();"></div>
+  <script>
+  function fill_doi(xhttp) {
+    const obj = JSON.parse(xhttp.responseText);
+    if (obj["error"] != "") {
+      alert("Error: " + obj["error"]);
+    } else {
+      document.getElementById('id_title').value = obj["results"]["title"];
+      document.getElementById('id_journal').value = obj["results"]["journal"];
+      document.getElementById('id_pub_date').value = obj["results"]["pub_date"];
+      document.getElementById('id_authors').value = obj["results"]["authors"];
+      document.getElementById('id_abstract').value = obj["results"]["abstract"];
+      document.getElementById('id_urls').value = obj["results"]["urls"];
     }
-    function do_fetch_doi() {
-        var doi = document.getElementById('id_doi').value
-        if (doi == "") {
-            alert("Error: fill DOI first!");
-            return 1;
-        }
-        var url = '{% url "view:ajax_fetch_doi" 0 %}'.replace('0', doi);
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                fill_doi(this);
-            } else if (this.readyState == 4) {
-                alert("Error: query DOI failed! status: " + this.status);
-            }
-        };
-        xhttp.open("GET", url, true);
-        xhttp.send();
+  }
+  function do_fetch_doi() {
+    var doi = document.getElementById('id_doi').value
+    if (doi == "") {
+      alert("Error: fill DOI first!");
+      return 1;
     }
-    </script>
+    var url = '{% url "view:ajax_fetch_doi" 0 %}'.replace('0', doi);
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        fill_doi(this);
+      } else if (this.readyState == 4) {
+        alert("Error: query DOI failed! status: " + this.status);
+      }
+    };
+    xhttp.open("GET", url, true);
+    xhttp.send();
+  }
+  </script>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.pmid.label_tag }}</div>
-    <div class="col-75">{{ form.pmid }}<input type="button" id="fetch_pmid" name="fetch_pmid" value="Fetch" class="attach_to_text"></div>
+  <div class="col-25">{{ form.pmid.label_tag }}</div>
+  <div class="col-75">{{ form.pmid }}<input type="button" id="fetch_pmid" name="fetch_pmid" value="Fetch" class="attach_to_text"></div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.arxiv_id.label_tag }}</div>
-    <div class="col-75">{{ form.arxiv_id }}<input type="button" id="fetch_arxiv_id" name="fetch_arxiv_id" value="Fetch" class="attach_to_text"></div>
+  <div class="col-25">{{ form.arxiv_id.label_tag }}</div>
+  <div class="col-75">{{ form.arxiv_id }}<input type="button" id="fetch_arxiv_id" name="fetch_arxiv_id" value="Fetch" class="attach_to_text"></div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.pmcid.label_tag }}</div>
-    <div class="col-75">{{ form.pmcid }}<input type="button" id="fetch_pmcid" name="fetch_pmcid" value="Fetch" class="attach_to_text"></div>
+  <div class="col-25">{{ form.pmcid.label_tag }}</div>
+  <div class="col-75">{{ form.pmcid }}<input type="button" id="fetch_pmcid" name="fetch_pmcid" value="Fetch" class="attach_to_text"></div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.cnki_id.label_tag }}</div>
-    <div class="col-75">{{ form.cnki_id }}<input type="button" id="fetch_cnki_id" name="fetch_cnki_id" value="Fetch" class="attach_to_text"></div>
+  <div class="col-25">{{ form.cnki_id.label_tag }}</div>
+  <div class="col-75">{{ form.cnki_id }}<input type="button" id="fetch_cnki_id" name="fetch_cnki_id" value="Fetch" class="attach_to_text"></div>
 </div>
 <br>
 <div class="row">
-    <div class="col-25">{{ form.journal.label_tag }}</div>
-    <div class="col-75">{{ form.journal }}</div>
+  <div class="col-25">{{ form.journal.label_tag }}</div>
+  <div class="col-75">{{ form.journal }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.title.label_tag }}</div>
-    <div class="col-75">{{ form.title }}</div>
+  <div class="col-25">{{ form.title.label_tag }}</div>
+  <div class="col-75">{{ form.title }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.authors.label_tag }}</div>
-    <div class="col-75">{{ form.authors }}</div>
+  <div class="col-25">{{ form.authors.label_tag }}</div>
+  <div class="col-75">{{ form.authors }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.pub_date.label_tag }}</div>
-    <div class="col-75">{{ form.pub_date }}</div>
+  <div class="col-25">{{ form.pub_date.label_tag }}</div>
+  <div class="col-75">{{ form.pub_date }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.abstract.label_tag }}</div>
-    <div class="col-75">{{ form.abstract }}</div>
+  <div class="col-25">{{ form.abstract.label_tag }}</div>
+  <div class="col-75">{{ form.abstract }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.keywords.label_tag }}</div>
-    <div class="col-75">{{ form.keywords }}</div>
+  <div class="col-25">{{ form.keywords.label_tag }}</div>
+  <div class="col-75">{{ form.keywords }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.urls.label_tag }}</div>
-    <div class="col-75">{{ form.urls }}</div>
+  <div class="col-25">{{ form.urls.label_tag }}</div>
+  <div class="col-75">{{ form.urls }}</div>
 </div>
 {% comment %}
 <div class="row">
-    <div class="col-25">{{ form.full_text.label_tag }}</div>
-    <div class="col-75">{{ form.full_text }}</div>
+  <div class="col-25">{{ form.full_text.label_tag }}</div>
+  <div class="col-75">{{ form.full_text }}</div>
 </div>
 {% endcomment %}
 <div class="row">
-    <div class="col-25">{{ form.is_preprint.label_tag }}</div>
-    <div class="col-75">{{ form.is_preprint }}</div>
+  <div class="col-25">{{ form.is_preprint.label_tag }}</div>
+  <div class="col-75">{{ form.is_preprint }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.is_review.label_tag }}</div>
-    <div class="col-75">{{ form.is_review }}</div>
+  <div class="col-25">{{ form.is_review.label_tag }}</div>
+  <div class="col-75">{{ form.is_review }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.is_open.label_tag }}</div>
-    <div class="col-75">{{ form.is_open }}</div>
+  <div class="col-25">{{ form.is_open.label_tag }}</div>
+  <div class="col-75">{{ form.is_open }}</div>
 </div>
 <br>
 <div class="row">
-    <div class="col-25">{{ form.is_favorite.label_tag }}</div>
-    <div class="col-75">{{ form.is_favorite }}</div>
+  <div class="col-25">{{ form.is_favorite.label_tag }}</div>
+  <div class="col-75">{{ form.is_favorite }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.is_private.label_tag }}</div>
-    <div class="col-75">{{ form.is_private }}</div>
+  <div class="col-25">{{ form.is_private.label_tag }}</div>
+  <div class="col-75">{{ form.is_private }}</div>
 </div>
 <div class="row">
-    <div class="col-25">{{ form.comments.label_tag }}</div>
-    <div class="col-75">{{ form.comments }}</div>
+  <div class="col-25">{{ form.comments.label_tag }}</div>
+  <div class="col-75">{{ form.comments }}</div>
 </div>

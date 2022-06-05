@@ -14,11 +14,6 @@
   <header>
     <div class="banner">
       <h1 class="logo"><a href="{% url 'view:index' %}">{{ site_name }}</a></h1>
-      <div class="search-box">
-        <form style="display:none;">
-          <input id="search_text" class="search-input" type="text" value="{{ search_text }}"><input id="search_button" class="search-button" type="hidden" value="Search">
-        </form>
-      </div>
 {% if user.is_authenticated or not request.path|is_for_xiangma %}
       <div class="login-panel">
         {% if user.is_authenticated %}
@@ -38,33 +33,21 @@
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">所有分享</a>
       <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">响马榜单</a>
       {% if user.is_authenticated %}
-      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">新增</a>
+      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">新增分享</a>
       {% endif %}
 {% else %}
-      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
   {% if user.is_authenticated %}
+      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
       <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent</a>
       <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">Favorites</a>
       <a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'view:trash' %}">Trash</a>
   {% endif %}
-      <div class="menu-group">
-        <div style="display:inline">Groups</div>
-        <div style="display:inline; float:right"><a href="javascript:alert('add group');">+</a></div>
-      </div>
-      <div class="menu-group">
-        <div style="display:inline">Searches</div>
-        <div style="display:inline; float:right"><a href="javascript:alert('add search');">+</a></div>
-      </div>
-      <div class="menu-group">
-        <div style="display:inline">Collections</div>
-        <div style="display:inline; float:right"><a href="javascript:alert('add collection');">+</a></div>
-      </div>
 {% endif %}
     </nav>
     <div class="content">
       <article>
-        {% if error_message %}<div id="error_message" class="error_message">{{ error_message }}<span class="close" onclick="this.parentElement.style.display = 'none';">x</span></div>{% endif %}
+        {% if error_message %}<div id="error_message" class="error_message">{{ error_message }}</div>{% endif %}
         {% block content %}{% endblock content %}
       </article>
     </div>

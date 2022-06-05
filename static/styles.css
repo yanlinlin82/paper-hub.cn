@@ -1,40 +1,28 @@
-* {
-    box-sizing: border-box;
-}
-
 body {
     margin: 0;
+    border-top: solid 3px #bf9000;
     font-family: Arial, "Microsoft YaHei", Sans-Serif;
     font-size: 16px;
 }
 
-a {
-    color: #33f;
-}
-
-a:hover {
-    color: #f33;
-}
+a { color: #33f; }
+a:hover { color: #f33; }
 
 header {
     margin: 0;
     background-color: #eee;
-    border-top: solid 3px #bf9000;
     border-bottom: solid 1px #999;
-    flex: 0 0 auto;
 }
 
 .banner {
     margin: 0 auto;
     max-width: 960px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
 }
 
 header h1.logo {
+    display: inline-block;
     margin: 0;
-    padding: 10px;
+    padding: 10px 0;
     font-family: Helvetica;
     font-size: 20px;
     font-weight: 900;
@@ -51,6 +39,33 @@ header h1.logo:hover {
 header h1.logo a {
     text-decoration: none;
     color: #333;
+}
+
+.login-panel {
+    float: right;
+    text-align: right;
+    padding: 10px;
+}
+
+.form-row {
+    margin: 5px 0;
+    padding: 5px 0;
+}
+
+.col-25 {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    width: 24%;
+    text-align: right;
+}
+
+.col-75 {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    width: 75%;
+    text-align: left;
 }
 
 .container {
@@ -72,11 +87,11 @@ header h1.logo a {
 .menu-group {
     width: 100%;
     margin-right: auto;
-    height: 25px;
+    height: 35px;
     text-decoration: none;
     color: #999;
     text-align: left;
-    line-height: 25px;
+    line-height: 35px;
     align-items: flex-start;
     margin: 0;
     margin-top: 5px;
@@ -92,11 +107,11 @@ header h1.logo a {
 
 .menu-item {
     margin-right: auto;
-    height: 25px;
+    height: 35px;
     text-decoration: none;
     color: #333;
     text-align: left;
-    line-height: 25px;
+    line-height: 35px;
     align-items: flex-start;
     margin: 0;
     padding: 0 10px;
@@ -136,6 +151,8 @@ header h1.logo a {
         background-color: transparent;
         width: 150px;
         margin: 0;
+        padding: 0;
+        text-indent: 10px;
     }
     .current-item {
         background-color: #eee;
@@ -147,38 +164,6 @@ header h1.logo a {
     }
 }
 
-.search-box {
-    height: 25px;
-    margin: auto;
-    right: 0;
-    flex: 1 1 auto;
-    text-align: center;
-}
-
-.search-input {
-    width: 50%;
-    max-width: 800px;
-    margin: auto;
-    background-color: transparent;
-    border: 1px solid #999;
-}
-
-.search-button {
-    height: 25px;
-    font-size: 16px;
-    margin: auto;
-    right: 0;
-    flex: none;
-}
-
-.login-button {
-    height: 30px;
-    font-size: 16px;
-    margin: auto;
-    right: 0;
-    flex: none;
-}
-
 .error_message {
     position: relative;
     margin: 0;
@@ -186,20 +171,6 @@ header h1.logo a {
     border: 1px solid #999;
     background-color: #ff9;
     color: #c33;
-}
-
-.close {
-    cursor: pointer;
-    position: absolute;
-    top: 0%;
-    right: 0%;
-    padding: 0 8px;
-    transform: translate(0%, -10%);
-}
-
-.close:hover {
-    font-weight: bold;
-    background: #ccc;
 }
 
 article {
@@ -303,6 +274,13 @@ footer p {
     word-break: break-word;
 }
 
+.paper-item .label {
+    display: inline-block;
+    border: #333 1px dotted;
+    background-color: #eee;
+    padding: 5px;
+}
+
 input[type=text],
 input[type=password],
 select,
@@ -316,54 +294,21 @@ textarea {
 }
 
 input[type=text].with_button {
-    width: calc(100% - 65px);
+    width: calc(100% - 78px);
+}
+
+input[type=submit] {
+    padding: 5px 10px;
 }
 
 input[type=button].attach_to_text {
     width: 65px;
-    border: 1px solid #ccc;
-    background-color: #ccc;
     padding: 5px 10px;
-}
-
-input[type=button].attach_to_text:hover {
-    background-color: #eee;
-}
-
-input[type=button].attach_to_text:active {
-    background-color: #ddd;
 }
 
 label {
     padding: 5px 5px 5px 0;
     display: inline-block;
-}
-
-input[type=button] {
-    background-color: #04AA6D;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    float: right;
-}
-
-input[type=button]:hover {
-    background-color: #45a049;
-}
-
-input[type=submit] {
-    background-color: #04AA6D;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    float: right;
-}
-
-input[type=submit]:hover {
-    background-color: #45a049;
 }
 
 .container-fluid {
@@ -372,18 +317,14 @@ input[type=submit]:hover {
     padding: 20px;
 }
 
-.col-25 {
-    padding: 0 10px;
-    float: left;
-    width: 25%;
+.container-fluid .col-25 {
     margin-top: 6px;
-    text-align: right;
+    vertical-align: top;
 }
 
-.col-75 {
-    float: left;
-    width: 75%;
+.container-fluid .col-75 {
     margin-top: 6px;
+    vertical-align: top;
 }
 
 .paper-urls {
@@ -419,48 +360,6 @@ input[type=submit]:hover {
 
 .errorlist {
     color: red;
-}
-
-.login {
-    margin: 50px auto;
-    width: 500px;
-    height: 200px;
-    border: 1px solid black;
-    border-top: solid 3px #bf9000;
-    background-color: #eee;
-}
-
-.login .logo {
-    padding: 0 30px;
-    font-family: Helvetica;
-    font-size: 24px;
-    font-weight: 900;
-}
-
-.login input[type=text],
-.login input[type=password] {
-    width: 90%;
-}
-
-.login input[type=submit] {
-    float: left;
-}
-
-.login-panel {
-    float: right;
-    width: 200px;
-    align-self: start;
-    text-align: right;
-    padding: 0 10px;
-}
-
-.label {
-    display: inline-block;
-    margin-right: 5px;
-}
-
-.label:hover {
-    background-color: #ccc;
 }
 
 a.external {
