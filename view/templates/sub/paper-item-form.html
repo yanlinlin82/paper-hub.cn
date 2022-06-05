@@ -20,7 +20,7 @@
         alert("Error: fill nickname first!");
         return 1;
       }
-      var url = '{% url "view:ajax_fetch_user" 0 %}'.replace('0', nickname);
+      var url = '{% url "view:ajax_query_user" 0 %}'.replace('0', nickname);
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -46,6 +46,10 @@
   <div class="col-25">{{ form.creator_username.label_tag }}</div>
   <div class="col-75">{{ form.creator_username }}</div>
 </div>
+{% else %}
+<input type="hidden" name="content" value="{{value}}">
+{% endif %}
+{% if is_xiangma %}
 <br>
 {% if paper.create_time %}
 <div class="row">
@@ -64,67 +68,84 @@
 {% endif %}
 <br>
 <div class="row">
-  <div class="col-25">{{ form.doi.label_tag }}</div>
-  <div class="col-75">{{ form.doi }}<input type="button" id="fetch_doi" name="fetch_doi" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_doi();"></div>
+  <div class="col-25"><label for="paper_query_id">Paper ID:</label></div>
+  <div class="col-75"><input id="paper_query_id" type="text" placeholder="DOI/PMID/arXivID" class="with_button"><input type="button" id="fetch_paper_info" name="fetch_paper_info" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_paper_info();"></div>
   <script>
-  function fill_doi(xhttp) {
-    const obj = JSON.parse(xhttp.responseText);
-    if (obj["error"] != "") {
-      alert("Error: " + obj["error"]);
-    } else {
-      document.getElementById('id_title').value = obj["results"]["title"];
-      document.getElementById('id_journal').value = obj["results"]["journal"];
-      document.getElementById('id_pub_date').value = obj["results"]["pub_date"];
-      document.getElementById('id_authors').value = obj["results"]["authors"];
-      document.getElementById('id_abstract').value = obj["results"]["abstract"];
-      document.getElementById('id_urls').value = obj["results"]["urls"];
-    }
-  }
-  function do_fetch_doi() {
-    var doi = document.getElementById('id_doi').value
-    if (doi == "") {
-      alert("Error: fill DOI first!");
-      return 1;
-    }
-    var url = '{% url "view:ajax_fetch_doi" 0 %}'.replace('0', doi);
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        fill_doi(this);
-      } else if (this.readyState == 4) {
-        alert("Error: query DOI failed! status: " + this.status);
+    function fill_doi(xhttp) {
+      const obj = JSON.parse(xhttp.responseText);
+      if (obj["error"] != "") {
+        alert("Error: " + obj["error"]);
+      } else {
+        document.getElementById('id_doi').value = obj["results"]["doi"];
+        document.getElementById('id_title').value = obj["results"]["title"];
+        document.getElementById('id_journal').value = obj["results"]["journal"];
+        document.getElementById('id_pub_date').value = obj["results"]["pub_date"];
+        document.getElementById('id_authors').value = obj["results"]["authors"];
+        document.getElementById('id_abstract').value = obj["results"]["abstract"];
+        document.getElementById('id_urls').value = obj["results"]["urls"];
       }
-    };
-    xhttp.open("GET", url, true);
-    xhttp.send();
-  }
+    }
+    function do_fetch_paper_info() {
+      var id = document.getElementById('paper_query_id').value
+      if (id == "") {
+        alert("Error: fill ID first!");
+        return 1;
+      }
+      var url = '{% url "view:ajax_fetch_paper" 0 %}'.replace('0', id);
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          fill_doi(this);
+        } else if (this.readyState == 4) {
+          alert("Error: query DOI failed! status: " + this.status);
+        }
+      };
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
   </script>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.pmid.label_tag }}</div>
-  <div class="col-75">{{ form.pmid }}<input type="button" id="fetch_pmid" name="fetch_pmid" value="Fetch" class="attach_to_text"></div>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.arxiv_id.label_tag }}</div>
-  <div class="col-75">{{ form.arxiv_id }}<input type="button" id="fetch_arxiv_id" name="fetch_arxiv_id" value="Fetch" class="attach_to_text"></div>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.pmcid.label_tag }}</div>
-  <div class="col-75">{{ form.pmcid }}<input type="button" id="fetch_pmcid" name="fetch_pmcid" value="Fetch" class="attach_to_text"></div>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.cnki_id.label_tag }}</div>
-  <div class="col-75">{{ form.cnki_id }}<input type="button" id="fetch_cnki_id" name="fetch_cnki_id" value="Fetch" class="attach_to_text"></div>
-</div>
-<br>
-<div class="row">
-  <div class="col-25">{{ form.journal.label_tag }}</div>
-  <div class="col-75">{{ form.journal }}</div>
 </div>
 <div class="row">
   <div class="col-25">{{ form.title.label_tag }}</div>
   <div class="col-75">{{ form.title }}</div>
 </div>
+<div class="row">
+  <div class="col-25">{{ form.journal.label_tag }}</div>
+  <div class="col-75">{{ form.journal }}</div>
+</div>
+<br>
+<div class="row">
+  <div class="col-25">{{ form.comments.label_tag }}</div>
+  <div class="col-75">{{ form.comments }}</div>
+</div>
+<br>
+<div class="row">
+  <div class="col-25"></div>
+  <div class="col-75"><input type="submit" value="Add"></div>
+</div>
+<hr>
+<h2>More Details:</h2>
+<div class="row">
+  <div class="col-25">{{ form.doi.label_tag }}</div>
+  <div class="col-75">{{ form.doi }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.pmid.label_tag }}</div>
+  <div class="col-75">{{ form.pmid }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.arxiv_id.label_tag }}</div>
+  <div class="col-75">{{ form.arxiv_id }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.pmcid.label_tag }}</div>
+  <div class="col-75">{{ form.pmcid }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.cnki_id.label_tag }}</div>
+  <div class="col-75">{{ form.cnki_id }}</div>
+</div>
+<br>
 <div class="row">
   <div class="col-25">{{ form.authors.label_tag }}</div>
   <div class="col-75">{{ form.authors }}</div>
@@ -171,8 +192,4 @@
 <div class="row">
   <div class="col-25">{{ form.is_private.label_tag }}</div>
   <div class="col-75">{{ form.is_private }}</div>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.comments.label_tag }}</div>
-  <div class="col-75">{{ form.comments }}</div>
 </div>

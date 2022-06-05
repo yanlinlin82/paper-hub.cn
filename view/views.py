@@ -27,6 +27,14 @@ def get_site_name(request):
         return '响马读paper'
     return 'Paper-Hub'
 
+def GetCurrentUser(request):
+    if not request.user.is_authenticated:
+        return None
+    user_list = User.objects.filter(username=request.user.username)
+    if user_list.count() <= 0:
+        return None
+    return user_list[0]
+
 def get_paper_list(request, include_trash=False):
     if re.match("^/xiangma/", request.path):
         paper_list = None
@@ -35,9 +43,8 @@ def get_paper_list(request, include_trash=False):
             paper_list = label_list[0].paper_set
         return paper_list
 
-    if request.user.is_authenticated and User.objects.filter(username=request.user.username).count() > 0:
-        u = User.objects.filter(username=request.user.username)[0]
-    else:
+    u = GetCurrentUser(request)
+    if u is None:
         u = User()
     if include_trash:
         return Paper.objects.filter(creator=u)
@@ -172,6 +179,42 @@ def SinglePaperView(request, id):
     }
     print(paper.create_time)
     return HttpResponse(template.render(context, request))
+
+def RestorePaperView(request, id):
+    if not request.user.is_authenticated:
+        return render(request, 'base.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'restore_from_trash',
+            'error_message': 'No permission! Login first!',
+        })
+    paper_list = get_paper_list(request, include_trash=True).filter(pk=id)
+    if paper_list.count() <= 0:
+        return render(request, 'list.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'edit',
+            'error_message': 'Invalid paper ID: ' + str(id),
+        })
+    p = paper_list[0]
+    p.delete_time = None
+    p.save()
+    return HttpResponseRedirect(reverse('view:paper', args=[id], current_app=request.resolver_match.namespace))
+
+def DeleteForeverPaperView(request, id):
+    if not request.user.is_authenticated:
+        return render(request, 'base.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'delete_forever',
+            'error_message': 'No permission! Login first!',
+        })
+    paper_list = get_paper_list(request, include_trash=True).filter(pk=id)
+    if paper_list.count() <= 0:
+        return render(request, 'list.html', {
+            'site_name': get_site_name(request),
+            'current_page': 'edit',
+            'error_message': 'Invalid paper ID: ' + str(id),
+        })
+    get_paper_list(request, include_trash=True).filter(pk=id).delete()
+    return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
 
 def DeletePaperView(request, id):
     if not request.user.is_authenticated:
@@ -376,6 +419,8 @@ def PaperAdd(request):
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
+            print("form invalid")
+            print(request.POST)
             return render(request, 'add.html', {
                 'site_name': get_site_name(request),
                 'current_page': 'add',
@@ -384,13 +429,16 @@ def PaperAdd(request):
             })
 
         paper = Paper()
-        paper.creator = AddUserIfNotExist(
-            form.cleaned_data['creator_nickname'],
-            form.cleaned_data['creator_name'],
-            form.cleaned_data['creator_weixin_id'],
-            form.cleaned_data['creator_username']
-        )
-        
+        if is_xiangma(request):
+            paper.creator = AddUserIfNotExist(
+                form.cleaned_data['creator_nickname'],
+                form.cleaned_data['creator_name'],
+                form.cleaned_data['creator_weixin_id'],
+                form.cleaned_data['creator_username']
+            )
+        else:
+            paper.creator = GetCurrentUser(request)
+    
         if is_xiangma(request):
             paper.create_time = form.cleaned_data['create_time']
             paper.update_time = form.cleaned_data['create_time']
@@ -477,10 +525,11 @@ def AjaxFetchUser(request, user):
             "username": u[0].username,
         }}, status=200)
 
-def AjaxFetchDOI(request, doi):
-    print("DOI query: ", doi)
+def AjaxFetchPaper(request, id):
+    print("Fetch Paper: ", id)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid http query"}, status=400)
+    doi = id
     cache = CrossRefCache.objects.filter(type=CrossRefCache.DOI, key=doi)
     if cache.count() == 0:
         print("load from query")
@@ -546,6 +595,7 @@ def AjaxFetchDOI(request, doi):
         urls = ""
 
     return JsonResponse({"error": "", "doi": doi, "results": {
+        "doi": doi,
         "type": type,
         "title": title,
         "journal": journal,
@@ -558,7 +608,7 @@ def AjaxFetchDOI(request, doi):
         "urls": urls,
     }}, status=200)
 
-def AjaxFetchRawDOI(request, doi):
+def AjaxFetchDOI(request, doi):
     print("DOI query: ", doi)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid http query"}, status=400)

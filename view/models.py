@@ -9,8 +9,8 @@ class User(models.Model):
     name = models.CharField(max_length=100, default='')
     nickname = models.CharField(max_length=100, default='')
     weixin_id = models.CharField(max_length=100, default='')
-    create_time = models.DateTimeField(default=timezone.now)
-    last_login_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
+    last_login_time = models.DateTimeField(null=True, default=None)
     def __str__(self):
         return self.nickname
 
@@ -24,8 +24,8 @@ class Label(models.Model):
 class Paper(models.Model):
     # creation info
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    create_time = models.DateTimeField(default=timezone.now)
-    update_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
     delete_time = models.DateTimeField(null=True, default=None)
 
     # index id
@@ -37,7 +37,7 @@ class Paper(models.Model):
 
     # paper info
     journal = models.CharField(max_length=200, default='')
-    pub_date = models.DateField(blank=True, default=None)
+    pub_date = models.DateField(blank=True, null=True, default=None)
     title = models.CharField(max_length=500, default='')
     authors = models.CharField(max_length=4000, default='')
     abstract = models.CharField(max_length=4000, default='')
@@ -87,8 +87,8 @@ class Collection(models.Model):
     parent = models.IntegerField(default=0)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
-    create_time = models.DateTimeField(default=timezone.now)
-    update_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
 
     papers = models.ManyToManyField(Paper)
     order_fields = models.CharField(max_length=1000, default="")

@@ -6,10 +6,11 @@
     </div>
     <div class="paper-op-list-sub-right">
       {% if user.is_authenticated %}
-      <a href="{% url "view:edit" id=paper.pk %}">[Edit]</a>
 {% if current_page == 'trash' %}
+      <a href="{% url "view:restore_from_trash" id=paper.pk %}">[Restore]</a>
       <a href="{% url "view:delete_forever" id=paper.pk %}" onclick="javascript:return(confirm('Sure to delete paper #' + {{ paper.pk }} + ' forever?'));">[Delete Forever]</a>
 {% else %}
+      <a href="{% url "view:edit" id=paper.pk %}">[Edit]</a>
       <a href="{% url "view:delete" id=paper.pk %}" onclick="javascript:return(confirm('Sure to remove paper #' + {{ paper.pk }} + '?'));">[Delete]</a>
 {% endif %}
       {% comment %}
