@@ -20,7 +20,7 @@
                 alert("Error: fill nickname first!");
                 return 1;
             }
-            var url = "http://localhost:8000/view/ajax/fetch/user/" + nickname;
+            var url = '{% url "view:ajax_fetch_user" 0 %}'.replace('0', nickname);
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
@@ -86,7 +86,7 @@
             alert("Error: fill DOI first!");
             return 1;
         }
-        var url = "http://localhost:8000/view/ajax/fetch/doi/" + doi;
+        var url = '{% url "view:ajax_fetch_doi" 0 %}'.replace('0', doi);
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
