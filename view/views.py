@@ -221,15 +221,14 @@ def EditPaperView(request, id):
                 'error_message': form.errors,
                 'is_xiangma': is_xiangma(request),
             })
-        user_list = User.objects.filter(nickname=form.cleaned_data['creator'])
-        if user_list.count() <= 0:
-            return render(request, 'edit.html', {
-                'site_name': get_site_name(request),
-                'current_page': 'edit',
-                'error_message': 'Invalid user "' + form.cleaned_data['creator'] + '"',
-                'is_xiangma': is_xiangma(request),
-            })
-        paper.creator = user_list[0]
+
+        paper.creator = AddUserIfNotExist(
+            form.cleaned_data['creator_nickname'],
+            form.cleaned_data['creator_name'],
+            form.cleaned_data['creator_weixin_id'],
+            form.cleaned_data['creator_username']
+        )
+
         if form.cleaned_data['create_time']:
             paper.create_time = form.cleaned_data['create_time']
         else:
@@ -348,6 +347,20 @@ def UserView(request, id):
     }
     return HttpResponse(template.render(context, request))
 
+def AddUserIfNotExist(nickname, name, weixin_id, username):
+    user_list = User.objects.filter(nickname=nickname)
+    if user_list.count() > 0:
+        return user_list[0]
+    u = User(
+        username = username,
+        nickname = nickname,
+        weixin_id = weixin_id,
+        name = name,
+        create_time = timezone.now()
+    )
+    u.save()
+    return u
+
 def PaperAdd(request):
     if not request.user.is_authenticated:
         return render(request, 'add.html', {
@@ -365,23 +378,14 @@ def PaperAdd(request):
                 'error_message': form.errors,
                 'is_xiangma': is_xiangma(request),
             })
-        user_list = User.objects.filter(nickname=form.cleaned_data['creator_nickname'])
-        if user_list.count() <= 0:
-            u = User(
-                username = form.cleaned_data['creator_username'],
-                nickname = form.cleaned_data['creator_nickname'],
-                weixin_id = form.cleaned_data['creator_weixin_id'],
-                name = form.cleaned_data['creator_name'],
-                create_time = timezone.now()
-            )
-            u.save()
-        user_list = User.objects.filter(nickname=form.cleaned_data['creator_nickname'])
 
         paper = Paper()
-        paper.creator = user_list[0]
-
-        print("form time: ", form.cleaned_data['create_time'])
-        print("time now: ", timezone.now())
+        paper.creator = AddUserIfNotExist(
+            form.cleaned_data['creator_nickname'],
+            form.cleaned_data['creator_name'],
+            form.cleaned_data['creator_weixin_id'],
+            form.cleaned_data['creator_username']
+        )
         
         if is_xiangma(request):
             paper.create_time = form.cleaned_data['create_time']
