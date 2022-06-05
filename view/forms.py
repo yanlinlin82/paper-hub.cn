@@ -4,7 +4,7 @@ from django import forms
 from .models import Paper
 
 class PaperForm(forms.Form):
-    creator_nickname = forms.CharField(label='Nick Name', max_length=100, required=False) # 群友（昵称，用于搜索）
+    creator_nickname = forms.CharField(label='Nick Name', max_length=100, widget=forms.TextInput(attrs={'class': 'with_button'}), required=False) # 群友（昵称，用于搜索）
     creator_name = forms.CharField(label='Real Name', max_length=100, required=False) # 姓名
     creator_weixin_id = forms.CharField(label='Weixin ID', max_length=100, required=False) # 微信ID（跨系统的统一标识，但可能没法获取）
     creator_username = forms.CharField(label='User Name', max_length=100, required=False) # 关联到内部用户表（本系统的唯一标识）
