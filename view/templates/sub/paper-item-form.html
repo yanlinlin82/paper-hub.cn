@@ -121,7 +121,7 @@
 <br>
 <div class="row">
   <div class="col-25"></div>
-  <div class="col-75"><input type="submit" value="Add"></div>
+  <div class="col-75"><input type="submit" value="{% if current_page == "add" %}Add{% else %}Save{% endif %}"></div>
 </div>
 <hr>
 <h2>More Details:</h2>

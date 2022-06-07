@@ -254,7 +254,7 @@ def EditPaperView(request, id):
             'error_message': 'Invalid paper ID: ' + str(id),
             'is_xiangma': is_xiangma(request),
         })
-    paper = paper_list[0]
+
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
@@ -265,13 +265,19 @@ def EditPaperView(request, id):
                 'is_xiangma': is_xiangma(request),
             })
 
-        paper.creator = AddUserIfNotExist(
-            form.cleaned_data['creator_nickname'],
-            form.cleaned_data['creator_name'],
-            form.cleaned_data['creator_weixin_id'],
-            form.cleaned_data['creator_username']
-        )
+        if is_xiangma(request):
+            u = AddUserIfNotExist(
+                form.cleaned_data['creator_nickname'],
+                form.cleaned_data['creator_name'],
+                form.cleaned_data['creator_weixin_id'],
+                form.cleaned_data['creator_username']
+            )
+        else:
+            u = GetCurrentUser(request)
+        paper_list = get_paper_list(request).filter(pk=id)
+        paper_list.update(creator = u)
 
+        paper = paper_list[0]
         if form.cleaned_data['create_time']:
             paper.create_time = form.cleaned_data['create_time']
         else:
@@ -302,6 +308,7 @@ def EditPaperView(request, id):
         paper.save()
         return HttpResponseRedirect(reverse('view:paper', args=[id], current_app=request.resolver_match.namespace))
     else:
+        paper = get_paper_list(request).get(pk=id)
         data = {
             'creator_nickname': paper.creator.nickname,
             'creator_name': paper.creator.name,
