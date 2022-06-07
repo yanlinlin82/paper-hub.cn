@@ -280,8 +280,6 @@ def EditPaperView(request, id):
         paper = paper_list[0]
         if form.cleaned_data['create_time']:
             paper.create_time = form.cleaned_data['create_time']
-        else:
-            paper.create_time = timezone.now()
         if form.cleaned_data['update_time']:
             paper.update_time = form.cleaned_data['update_time']
         else:

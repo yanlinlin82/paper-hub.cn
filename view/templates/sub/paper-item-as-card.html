@@ -44,7 +44,9 @@
     {% if paper.cnki_id %}CNKI ID: <a href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{ paper.cnki_id }}">{{ paper.cnki_id|escape }}</a>{% endif %}
     <div class="paper-title"><b>{{ paper.title }}</b></div>
     <div style="padding: 0 0 10px 0;">
+      {% if user.is_authenticated %}
       {% if paper.is_favorite %}<b>[Favorite]</b>{% endif %}
+      {% endif %}
       {% if paper.is_preprint %}[Preprint]{% endif %}
       {% if paper.is_review %}[Review]{% endif %}
       {% if paper.is_open %}[Open]{% endif %}
@@ -95,6 +97,6 @@
 </div>
 <div class="paper-comments-block">
   <hr class="paper-sep-line">
-  <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>:</div>
+  <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>: {% if paper.create_time|date:'Y-m-d H:i:s' < paper.update_time|date:'Y-m-d H:i:s' %}<i>(updated at {{ paper.update_time|date:'Y-m-d H:i:s' }})</i>{% endif %}</div>
   <div class="paper-comments">{% autoescape off %}{% format_comments paper.comments %}{% endautoescape %}</div>
 </div>
