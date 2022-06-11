@@ -97,6 +97,6 @@
 </div>
 <div class="paper-comments-block">
   <hr class="paper-sep-line">
-  <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>: {% if paper.create_time|date:'Y-m-d H:i:s' < paper.update_time|date:'Y-m-d H:i:s' %}<i>(updated at {{ paper.update_time|date:'Y-m-d H:i:s' }})</i>{% endif %}</div>
+  <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "view:user" id=paper.creator.pk %}">{{ paper.creator }}</a></b>: {% if not request.path|is_for_xiangma %}{% if paper.create_time|date:'Y-m-d H:i:s' < paper.update_time|date:'Y-m-d H:i:s' %}<i>(updated at {{ paper.update_time|date:'Y-m-d H:i:s' }})</i>{% endif %}{% endif %}</div>
   <div class="paper-comments">{% autoescape off %}{% format_comments paper.comments %}{% endautoescape %}</div>
 </div>

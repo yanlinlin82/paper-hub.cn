@@ -444,12 +444,6 @@ def PaperAdd(request):
         else:
             paper.creator = GetCurrentUser(request)
     
-        if is_xiangma(request):
-            paper.create_time = form.cleaned_data['create_time']
-            paper.update_time = form.cleaned_data['create_time']
-        else:
-            paper.create_time = timezone.now()
-            paper.update_time = timezone.now()
         paper.doi = form.cleaned_data['doi']
         paper.pmid = form.cleaned_data['pmid']
         paper.arxiv_id = form.cleaned_data['arxiv_id']
@@ -470,6 +464,10 @@ def PaperAdd(request):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
+
+        if is_xiangma(request):
+            paper.create_time = form.cleaned_data['create_time']
+            paper.save()
 
         if is_xiangma(request):
             label_name = "响马"
