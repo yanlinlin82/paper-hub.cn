@@ -399,15 +399,52 @@ def UserView(request, id):
     }
     return HttpResponse(template.render(context, request))
 
-def AddUserIfNotExist(nickname, name, weixin_id, username):
-    user_list = User.objects.filter(nickname=nickname)
-    if user_list.count() > 0:
-        return user_list[0]
+def AddUserIfNotExist(a_nickname, a_name, a_weixin_id, a_username):
+    if a_nickname != "":
+        user_list = User.objects.filter(nickname=a_nickname)
+        if user_list.count() > 0:
+            if user_list[0].name != a_name:
+                user_list.update(name=a_name)
+            if user_list[0].weixin_id != a_weixin_id:
+                user_list.update(weixin_id=a_weixin_id)
+            if user_list[0].username != a_username:
+                user_list[0].update(username=a_username)
+            return user_list[0]
+    if a_name != "":
+        user_list = User.objects.filter(name=a_name)
+        if user_list.count() > 0:
+            if user_list[0].nickname != a_nickname:
+                user_list.update(nickname=a_nickname)
+            if user_list[0].weixin_id != a_weixin_id:
+                user_list.update(weixin_id=a_weixin_id)
+            if user_list[0].username != a_username:
+                user_list[0].update(username=a_username)
+            return user_list[0]
+    if a_weixin_id != "":
+        user_list = User.objects.filter(weixin_id=a_weixin_id)
+        if user_list.count() > 0:
+            if user_list[0].name != a_name:
+                user_list.update(name=a_name)
+            if user_list[0].nickname != a_nickname:
+                user_list.update(nickname=a_nickname)
+            if user_list[0].username != a_username:
+                user_list[0].update(username=a_username)
+            return user_list[0]
+    if a_username != "":
+        user_list = User.objects.filter(username=a_username)
+        if user_list.count() > 0:
+            if user_list[0].name != a_name:
+                user_list.update(name=a_name)
+            if user_list[0].nickname != a_nickname:
+                user_list.update(nickname=a_nickname)
+            if user_list[0].weixin_id != a_weixin_id:
+                user_list.update(weixin_id=a_weixin_id)
+            return user_list[0]
     u = User(
-        username = username,
-        nickname = nickname,
-        weixin_id = weixin_id,
-        name = name,
+        username = a_username,
+        nickname = a_nickname,
+        weixin_id = a_weixin_id,
+        name = a_name,
         create_time = timezone.now()
     )
     u.save()
