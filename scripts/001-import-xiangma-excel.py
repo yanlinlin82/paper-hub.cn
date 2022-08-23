@@ -6,7 +6,10 @@ import pandas as pd
 import django
 import datetime
 from django.utils import timezone
-from backports import zoneinfo
+try:
+    import zoneinfo
+except ImportError:
+    from backports import zoneinfo
 import re
 
 def main():
