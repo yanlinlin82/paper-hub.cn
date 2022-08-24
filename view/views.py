@@ -70,12 +70,10 @@ def Recent(request):
         today = datetime.today().astimezone(tz_beijing)
         year = today.year
         month = today.month
-        print("Recent: ", today, ", ", year, ", ", month)
         paper_list = get_paper_list(request).filter(create_time__year=year, create_time__month=month).order_by('-create_time', '-pk')
         summary_message = '本页面显示本月的文献分享。'
     else:
         last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
-        print("last_week: ", last_week)
         paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
         summary_message = 'This page shows papers in last week. '
     template = loader.get_template('list.html')
@@ -180,7 +178,6 @@ def SinglePaperView(request, id):
         'current_page': 'paper',
         'paper': paper,
     }
-    print(paper.create_time)
     return HttpResponse(template.render(context, request))
 
 def RestorePaperView(request, id):
@@ -464,8 +461,6 @@ def PaperAdd(request):
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
-            print("form invalid")
-            print(request.POST)
             return render(request, 'add.html', {
                 'site_name': get_site_name(request),
                 'current_page': 'add',
@@ -548,7 +543,6 @@ def PaperAdd(request):
         return HttpResponse(template.render(context, request))
 
 def AjaxFetchUser(request, user):
-    print("User query: ", user)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid http query"}, status=400)
     u = User.objects.filter(nickname=user)
@@ -569,13 +563,11 @@ def AjaxFetchUser(request, user):
         }}, status=200)
 
 def AjaxFetchPaper(request, id):
-    print("Fetch Paper: ", id)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid http query"}, status=400)
     doi = id
     cache = CrossRefCache.objects.filter(type=CrossRefCache.DOI, key=doi)
     if cache.count() == 0:
-        print("load from query")
         try:
             url = 'http://api.crossref.org/works/' + doi
             data = requests.get(url).json()
@@ -584,7 +576,6 @@ def AjaxFetchPaper(request, id):
         item = CrossRefCache(type=CrossRefCache.DOI, key=doi, value=json.dumps(data))
         item.save()
     else:
-        print("load from cache")
         data = json.loads(cache[0].value)
 
     try:
@@ -652,12 +643,10 @@ def AjaxFetchPaper(request, id):
     }}, status=200)
 
 def AjaxFetchDOI(request, doi):
-    print("DOI query: ", doi)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid http query"}, status=400)
     cache = CrossRefCache.objects.filter(type=CrossRefCache.DOI, key=doi)
     if cache.count() == 0:
-        print("load from query")
         try:
             url = 'http://api.crossref.org/works/' + doi
             data = requests.get(url).json()
@@ -666,7 +655,6 @@ def AjaxFetchDOI(request, doi):
         item = CrossRefCache(type=CrossRefCache.DOI, key=doi, value=json.dumps(data))
         item.save()
     else:
-        print("load from cache")
         data = json.loads(cache[0].value)
     return JsonResponse({"error": "", "doi": doi, "results": data}, status=200)
 
