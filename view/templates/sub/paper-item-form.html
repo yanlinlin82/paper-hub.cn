@@ -1,38 +1,55 @@
+<script>
+function E(id) { return document.getElementById(id); }
+
+function do_fetch_creator_info() {
+  var nickname = E('id_creator_nickname').value;
+  if (nickname == "") {
+    alert("Error: fill nickname first!");
+    return 1;
+  }
+  var url = '{% url "view:ajax_query_user" 0 %}'.replace('0', nickname);
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data["error"] != "") {
+        alert("Error: " + data["error"]);
+      } else {
+        E('id_creator_nickname').value = data["results"]["nickname"];
+        E('id_creator_name').value = data["results"]["name"];
+        E('id_creator_weixin_id').value = data["results"]["weixin_id"];
+        E('id_creator_username').value = data["results"]["username"];
+      }
+    });
+}
+
+function do_fetch_paper_info() {
+  var id = E('paper_query_id').value;
+  if (id == "") {
+    alert("Error: fill ID first!");
+    return 1;
+  }
+  var url = '{% url "view:ajax_fetch_paper" 0 %}'.replace('0', id);
+  fetch(url)
+    .then(response => response.json())
+    .then(obj => {
+      if (obj["error"] != "") {
+        alert("Error: " + obj["error"]);
+      } else {
+        E('id_doi').value = obj["results"]["doi"];
+        E('id_title').value = obj["results"]["title"];
+        E('id_journal').value = obj["results"]["journal"];
+        E('id_pub_date').value = obj["results"]["pub_date"];
+        E('id_authors').value = obj["results"]["authors"];
+        E('id_abstract').value = obj["results"]["abstract"];
+        E('id_urls').value = obj["results"]["urls"];
+      }
+    });
+}
+</script>
 {% if is_xiangma %}
 <div class="row">
   <div class="col-25">{{ form.creator_nickname.label_tag }}</div>
   <div class="col-75">{{ form.creator_nickname }}<input type="button" id="fetch_creator" name="fetch_creator" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_creator_info();"></div>
-  <script>
-    function fill_creator_info(xhttp) {
-      const obj = JSON.parse(xhttp.responseText);
-      if (obj["error"] != "") {
-        alert("Error: " + obj["error"]);
-      } else {
-        document.getElementById('id_creator_nickname').value = obj["results"]["nickname"];
-        document.getElementById('id_creator_name').value = obj["results"]["name"];
-        document.getElementById('id_creator_weixin_id').value = obj["results"]["weixin_id"];
-        document.getElementById('id_creator_username').value = obj["results"]["username"];
-      }
-    }
-    function do_fetch_creator_info() {
-      var nickname = document.getElementById('id_creator_nickname').value
-      if (nickname == "") {
-        alert("Error: fill nickname first!");
-        return 1;
-      }
-      var url = '{% url "view:ajax_query_user" 0 %}'.replace('0', nickname);
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          fill_creator_info(this);
-        } else if (this.readyState == 4) {
-          alert("Error: query nickname failed! status: " + this.status);
-        }
-      };
-      xhttp.open("GET", url, true);
-      xhttp.send();
-    }
-  </script>
 </div>
 <div class="row">
   <div class="col-25">{{ form.creator_name.label_tag }}</div>
@@ -70,40 +87,6 @@
 <div class="row">
   <div class="col-25"><label for="paper_query_id">Paper ID:</label></div>
   <div class="col-75"><input id="paper_query_id" type="text" placeholder="DOI/PMID/arXivID" class="with_button"><input type="button" id="fetch_paper_info" name="fetch_paper_info" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_paper_info();"></div>
-  <script>
-    function fill_doi(xhttp) {
-      const obj = JSON.parse(xhttp.responseText);
-      if (obj["error"] != "") {
-        alert("Error: " + obj["error"]);
-      } else {
-        document.getElementById('id_doi').value = obj["results"]["doi"];
-        document.getElementById('id_title').value = obj["results"]["title"];
-        document.getElementById('id_journal').value = obj["results"]["journal"];
-        document.getElementById('id_pub_date').value = obj["results"]["pub_date"];
-        document.getElementById('id_authors').value = obj["results"]["authors"];
-        document.getElementById('id_abstract').value = obj["results"]["abstract"];
-        document.getElementById('id_urls').value = obj["results"]["urls"];
-      }
-    }
-    function do_fetch_paper_info() {
-      var id = document.getElementById('paper_query_id').value
-      if (id == "") {
-        alert("Error: fill ID first!");
-        return 1;
-      }
-      var url = '{% url "view:ajax_fetch_paper" 0 %}'.replace('0', id);
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          fill_doi(this);
-        } else if (this.readyState == 4) {
-          alert("Error: query DOI failed! status: " + this.status);
-        }
-      };
-      xhttp.open("GET", url, true);
-      xhttp.send();
-    }
-  </script>
 </div>
 <div class="row">
   <div class="col-25">{{ form.title.label_tag }}</div>
