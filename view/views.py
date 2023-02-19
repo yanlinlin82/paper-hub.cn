@@ -1,6 +1,4 @@
 import re
-import requests
-import json
 
 try:
     import zoneinfo
@@ -11,14 +9,14 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
-from django.db.models import Q, Count
-from django.core import serializers
+from django.db.models import Count
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
-from django.db.models.aggregates import Min, Max
+from django.db.models.aggregates import Min
 
-from .models import Label, Paper, User, CrossRefCache, Collection
+from .models import Label, Paper, User, Collection
 from .forms import PaperForm
+from .paper import *
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
@@ -565,98 +563,16 @@ def AjaxFetchUser(request, user):
 def AjaxFetchPaper(request, id):
     if request.method != "GET":
         return JsonResponse({"error": "Invalid http query"}, status=400)
-    doi = id
-    cache = CrossRefCache.objects.filter(type=CrossRefCache.DOI, key=doi)
-    if cache.count() == 0:
-        try:
-            url = 'http://api.crossref.org/works/' + doi
-            data = requests.get(url).json()
-        except:
-            return JsonResponse({"error": "Failed to query json from URL: " + url}, status=400)
-        item = CrossRefCache(type=CrossRefCache.DOI, key=doi, value=json.dumps(data))
-        item.save()
+    pattern_pubmed = re.compile('^[0-9]+$')
+    if pattern_pubmed.search(id):
+        return query_pubmed(id)
+    pattern_arxiv = re.compile('^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
+    m = pattern_arxiv.match(id)
+    if m:
+        arxiv_id = m.group(1)
+        return query_arxiv(arxiv_id)
     else:
-        data = json.loads(cache[0].value)
-
-    try:
-        type = data["message"]["type"]
-    except:
-        type = ""
-
-    try:
-        title = " ".join(data["message"]["title"])
-    except:
-        title = ""
-    
-    try:
-        journal = " ".join(data["message"]["container-title"])
-    except:
-        journal = ""
-
-    try:
-        pub_date = data["message"]["created"]["date-time"][0:10]
-    except:
-        pub_date = ""
-    
-    try:
-        issue = data["message"]["issue"]
-    except:
-        issue = ""
-
-    try:
-        volume = data["message"]["volume"]
-    except:
-        volume = ""
-
-    try:
-        page = data["message"]["page"]
-    except:
-        page = ""
-
-    try:
-        abstract = data["message"]["abstract"]
-    except:
-        abstract = ""
-
-    try:
-        authors = "\n".join(node["given"] + " " + node["family"] for node in data["message"]["author"])
-    except:
-        authors = ""
-
-    try:
-        urls = "\n".join(node["URL"] for node in data["message"]["link"])
-    except:
-        urls = ""
-
-    return JsonResponse({"error": "", "doi": doi, "results": {
-        "doi": doi,
-        "type": type,
-        "title": title,
-        "journal": journal,
-        "pub_date": pub_date,
-        "issue": issue,
-        "volume": volume,
-        "page": page,
-        "authors": authors,
-        "abstract": abstract,
-        "urls": urls,
-    }}, status=200)
-
-def AjaxFetchDOI(request, doi):
-    if request.method != "GET":
-        return JsonResponse({"error": "Invalid http query"}, status=400)
-    cache = CrossRefCache.objects.filter(type=CrossRefCache.DOI, key=doi)
-    if cache.count() == 0:
-        try:
-            url = 'http://api.crossref.org/works/' + doi
-            data = requests.get(url).json()
-        except:
-            return JsonResponse({"error": "Failed to query json from URL: " + url}, status=400)
-        item = CrossRefCache(type=CrossRefCache.DOI, key=doi, value=json.dumps(data))
-        item.save()
-    else:
-        data = json.loads(cache[0].value)
-    return JsonResponse({"error": "", "doi": doi, "results": data}, status=200)
+        return query_doi(id)
 
 def Login(request):
     if request.method == 'POST':

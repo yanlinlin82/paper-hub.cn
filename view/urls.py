@@ -35,5 +35,4 @@ urlpatterns = [
     path('logout', views.Logout, name='logout'),
     re_path(r'^ajax/query/user/(?P<user>.+)', views.AjaxFetchUser, name='ajax_query_user'),
     re_path(r'^ajax/fetch/paper/(?P<id>.+)', views.AjaxFetchPaper, name='ajax_fetch_paper'),
-    re_path(r'^ajax/fetch/doi/(?P<doi>.+)', views.AjaxFetchDOI, name='ajax_fetch_doi'),
 ]
