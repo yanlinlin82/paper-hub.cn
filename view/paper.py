@@ -3,6 +3,7 @@ import json
 from django.http import JsonResponse
 from .models import CrossRefCache
 import xml.etree.ElementTree as ET
+import numpy as np
 
 def query_pubmed(pmid):
     print('query_pubmed: ', pmid)
@@ -87,7 +88,8 @@ def query_doi(doi):
         authors = ""
 
     try:
-        urls = "\n".join(node["URL"] for node in data["message"]["link"])
+        links = [node["URL"] for node in data["message"]["link"]]
+        urls = "\n".join(list(np.unique(links)))
     except:
         urls = ""
 
