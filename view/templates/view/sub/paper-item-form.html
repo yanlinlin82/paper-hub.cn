@@ -1,0 +1,178 @@
+<script>
+function E(id) { return document.getElementById(id); }
+
+function do_fetch_creator_info() {
+  var nickname = E('id_creator_nickname').value;
+  if (nickname == "") {
+    alert("Error: fill nickname first!");
+    return 1;
+  }
+  var url = '{% url "view:ajax_query_user" 0 %}'.replace('0', nickname);
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data["error"] != "") {
+        alert("Error: " + data["error"]);
+      } else {
+        E('id_creator_nickname').value = data["results"]["nickname"];
+        E('id_creator_name').value = data["results"]["name"];
+        E('id_creator_weixin_id').value = data["results"]["weixin_id"];
+        E('id_creator_username').value = data["results"]["username"];
+      }
+    });
+}
+
+function do_fetch_paper_info() {
+  var id = E('paper_query_id').value;
+  if (id == "") {
+    alert("Error: fill ID first!");
+    return 1;
+  }
+  var url = '{% url "view:ajax_fetch_paper" 0 %}'.replace('0', id);
+  fetch(url)
+    .then(response => response.json())
+    .then(obj => {
+      if (obj["error"] != "") {
+        alert("Error: " + obj["error"]);
+      } else {
+        E('id_doi').value = obj["results"]["doi"];
+        E('id_title').value = obj["results"]["title"];
+        E('id_journal').value = obj["results"]["journal"];
+        E('id_pub_date').value = obj["results"]["pub_date"];
+        E('id_authors').value = obj["results"]["authors"];
+        E('id_abstract').value = obj["results"]["abstract"];
+        E('id_urls').value = obj["results"]["urls"];
+      }
+    });
+}
+</script>
+{% if is_xiangma %}
+<div class="row">
+  <div class="col-25">{{ form.creator_nickname.label_tag }}</div>
+  <div class="col-75">{{ form.creator_nickname }}<input type="button" id="fetch_creator" name="fetch_creator" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_creator_info();"></div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.creator_name.label_tag }}</div>
+  <div class="col-75">{{ form.creator_name }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.creator_weixin_id.label_tag }}</div>
+  <div class="col-75">{{ form.creator_weixin_id }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.creator_username.label_tag }}</div>
+  <div class="col-75">{{ form.creator_username }}</div>
+</div>
+{% else %}
+<input type="hidden" name="content" value="{{value}}">
+{% endif %}
+{% if is_xiangma %}
+<br>
+{% if paper.create_time %}
+<div class="row">
+  <div class="col-25">{{ form.create_time.label_tag }}</div>
+  <div class="col-75">{{ form.create_time }}</div>
+</div>
+{% endif %}
+{% if current_page == "edit" %}
+  {% if paper.update_time %}
+<div class="row">
+  <div class="col-25">{{ form.update_time.label_tag }}</div>
+  <div class="col-75">{{ form.update_time }}</div>
+</div>
+  {% endif %}
+{% endif %}
+{% endif %}
+<br>
+<div class="row">
+  <div class="col-25"><label for="paper_query_id">Paper ID:</label></div>
+  <div class="col-75"><input id="paper_query_id" type="text" placeholder="DOI/PMID/arXivID" class="with_button"><input type="button" id="fetch_paper_info" name="fetch_paper_info" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_paper_info();"></div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.title.label_tag }}</div>
+  <div class="col-75">{{ form.title }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.journal.label_tag }}</div>
+  <div class="col-75">{{ form.journal }}</div>
+</div>
+<br>
+<div class="row">
+  <div class="col-25">{{ form.comments.label_tag }}</div>
+  <div class="col-75">{{ form.comments }}</div>
+</div>
+<br>
+<div class="row">
+  <div class="col-25"></div>
+  <div class="col-75"><input type="submit" value="{% if current_page == "add" %}Add{% else %}Save{% endif %}"></div>
+</div>
+<hr>
+<h2>More Details:</h2>
+<div class="row">
+  <div class="col-25">{{ form.doi.label_tag }}</div>
+  <div class="col-75">{{ form.doi }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.pmid.label_tag }}</div>
+  <div class="col-75">{{ form.pmid }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.arxiv_id.label_tag }}</div>
+  <div class="col-75">{{ form.arxiv_id }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.pmcid.label_tag }}</div>
+  <div class="col-75">{{ form.pmcid }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.cnki_id.label_tag }}</div>
+  <div class="col-75">{{ form.cnki_id }}</div>
+</div>
+<br>
+<div class="row">
+  <div class="col-25">{{ form.authors.label_tag }}</div>
+  <div class="col-75">{{ form.authors }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.pub_date.label_tag }}</div>
+  <div class="col-75">{{ form.pub_date }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.abstract.label_tag }}</div>
+  <div class="col-75">{{ form.abstract }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.keywords.label_tag }}</div>
+  <div class="col-75">{{ form.keywords }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.urls.label_tag }}</div>
+  <div class="col-75">{{ form.urls }}</div>
+</div>
+{% comment %}
+<div class="row">
+  <div class="col-25">{{ form.full_text.label_tag }}</div>
+  <div class="col-75">{{ form.full_text }}</div>
+</div>
+{% endcomment %}
+<div class="row">
+  <div class="col-25">{{ form.is_preprint.label_tag }}</div>
+  <div class="col-75">{{ form.is_preprint }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.is_review.label_tag }}</div>
+  <div class="col-75">{{ form.is_review }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.is_open.label_tag }}</div>
+  <div class="col-75">{{ form.is_open }}</div>
+</div>
+<br>
+<div class="row">
+  <div class="col-25">{{ form.is_favorite.label_tag }}</div>
+  <div class="col-75">{{ form.is_favorite }}</div>
+</div>
+<div class="row">
+  <div class="col-25">{{ form.is_private.label_tag }}</div>
+  <div class="col-75">{{ form.is_private }}</div>
+</div>

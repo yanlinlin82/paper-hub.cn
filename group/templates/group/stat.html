@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "group/base.html" %}
 
 {% block content %}
 <div class="stat">
@@ -13,7 +13,7 @@
 {% for i in stat_this_month %}
   <tr>
     <td align="center">{{ forloop.counter }}</td>
-    <td align="left"><a href="{% url "view:user" id=i.creator__pk %}">{{ i.creator__nickname }}</a></td>
+    <td align="left"><a href="{% url "group:user" id=i.creator__pk group_name=group_name %}">{{ i.creator__nickname }}</a></td>
     <td align="center">{{ i.creator__count }}</td>
   </tr>
 {% endfor %}
@@ -29,7 +29,7 @@
 {% for i in stat_last_month %}
   <tr>
     <td align="center">{{ forloop.counter }}</td>
-    <td align="left"><a href="{% url "view:user" id=i.creator__pk %}">{{ i.creator__nickname }}</a></td>
+    <td align="left"><a href="{% url "group:user" id=i.creator__pk group_name=group_name %}">{{ i.creator__nickname }}</a></td>
     <td align="center">{{ i.creator__count }}</td>
   </tr>
 {% endfor %}
@@ -45,7 +45,7 @@
 {% for i in stat_all %}
   <tr>
     <td align="center">{{ forloop.counter }}</td>
-    <td align="left"><a href="{% url "view:user" id=i.creator__pk %}">{{ i.creator__nickname }}</a></td>
+    <td align="left"><a href="{% url "group:user" id=i.creator__pk group_name=group_name %}">{{ i.creator__nickname }}</a></td>
     <td align="center">{{ i.creator__count }}</td>
   </tr>
 {% endfor %}

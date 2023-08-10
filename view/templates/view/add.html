@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "view/base.html" %}
 
 {% block content %}
 <div class="container-fluid">
@@ -6,7 +6,7 @@
 <hr>
 {{ form.errors }}
 <form id="paper-form" method="post">{% csrf_token %}
-  {% include "sub/paper-item-form.html" %}
+  {% include "view/sub/paper-item-form.html" %}
   <hr>
   <div class="row">
     <div class="col-25"></div>

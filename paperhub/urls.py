@@ -18,11 +18,12 @@ from django.urls import include, path
 from django.http import HttpResponseRedirect
 
 def redirect(request):
-    return HttpResponseRedirect('xiangma/')
+    return HttpResponseRedirect('group/xiangma/')
 
 urlpatterns = [
-    path('', redirect),
-    path('view/', include('view.urls', namespace='paper-hub')),
-    path('xiangma/', include('view.urls', namespace='xiangma')),
+    path('', redirect, name='index'),
+    path('view/', include('view.urls')),
+    path('user/', include('user.urls')),
+    path('group/', include('group.urls')),
     path('admin/', admin.site.urls),
 ]

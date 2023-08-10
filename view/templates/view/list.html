@@ -1,0 +1,16 @@
+{% extends "view/base.html" %}{% load view_extras %}
+
+{% block content %}
+<div class="page-summary">
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ paper_list|length }} paper(s).</p>
+</div>
+{% if paper_list %}
+{% for paper in paper_list %}
+<div class="paper-item">
+  {% include "view/sub/paper-item-as-card.html" %}
+</div>
+{% endfor %}
+{% else %}
+<p style="padding:20px; height:200px;">No paper is available.</p>
+{% endif %}
+{% endblock content %}

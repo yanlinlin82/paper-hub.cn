@@ -1,0 +1,110 @@
+{% extends "view/base.html" %}
+
+{% block content %}
+<div class="stat">
+
+<table class="stat">
+  <caption><a id="this-month" href="#this-month">本月排名榜({{ this_month }})</a></caption>
+  <tr>
+    <th>排名</th>
+    <th>分享者</th>
+    <th>分享数</th>
+  </tr>
+{% for i in stat_this_month %}
+  <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="left"><a href="{% url "view:user" id=i.creator__pk %}">{{ i.creator__nickname }}</a></td>
+    <td align="center">{{ i.creator__count }}</td>
+  </tr>
+{% endfor %}
+</table>
+
+<table class="stat">
+  <caption><a id="last-month" href="#last-month">上月排名榜({{ last_month }})</a></caption>
+  <tr>
+    <th>排名</th>
+    <th>分享者</th>
+    <th>分享数</th>
+  </tr>
+{% for i in stat_last_month %}
+  <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="left"><a href="{% url "view:user" id=i.creator__pk %}">{{ i.creator__nickname }}</a></td>
+    <td align="center">{{ i.creator__count }}</td>
+  </tr>
+{% endfor %}
+</table>
+  
+<table class="stat">
+  <caption><a id="all" href="#all">总排名榜</a></caption>
+  <tr>
+    <th>排名</th>
+    <th>分享者</th>
+    <th>分享数</th>
+  </tr>
+{% for i in stat_all %}
+  <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="left"><a href="{% url "view:user" id=i.creator__pk %}">{{ i.creator__nickname }}</a></td>
+    <td align="center">{{ i.creator__count }}</td>
+  </tr>
+{% endfor %}
+</table>
+
+<table class="stat">
+  <caption><a id="journal" href="#journal">杂志排名榜</a></caption>
+  <tr>
+    <th>排名</th>
+    <th>杂志</th>
+    <th>分享数</th>
+  </tr>
+{% for i in stat_journal %}
+  <tr>
+    <td align="center">{{ forloop.counter }}</td>
+    <td align="left">{{ i.journal }}</a></td>
+    <td align="center">{{ i.journal__count }}</td>
+  </tr>
+{% endfor %}
+</table>
+
+</div>
+{% endblock content %}
+
+{% block css %}
+<style>
+div.stat {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+table.stat {
+  flex: 1 1 none;
+  caption-side: top;
+  font-size: 16px;
+  margin: 10px;
+  border-bottom: 2px solid #333;
+}
+table.stat caption {
+  caption-side: top;
+  display: table-caption;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 36px;
+  border-bottom: 2px solid #333;
+}
+table.stat th {
+  border-bottom: 1px solid #333;
+  padding: 0 10px;
+}
+table.stat tr:nth-child(even) {
+  background-color: #eee;
+}
+table.stat tr:hover {
+  background-color: #fef;
+}
+table.stat td {
+  padding: 0 10px;
+}
+</style>
+{% endblock css %}

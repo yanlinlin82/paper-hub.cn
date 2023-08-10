@@ -1,0 +1,16 @@
+{% extends "group/base.html" %}{% load group_extras %}
+
+{% block content %}
+<div class="page-summary">
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group_name != "xiangma" %}There are total {{ paper_list|length }} paper(s).{% else %}共有 {{ paper_list|length }} 篇文献。{% endif %}</p>
+</div>
+{% if paper_list %}
+{% for paper in paper_list %}
+<div class="paper-item">
+  {% include "group/sub/paper-item-as-card.html" %}
+</div>
+{% endfor %}
+{% else %}
+<p style="padding:20px; height:200px;">No paper is available.</p>
+{% endif %}
+{% endblock content %}

@@ -1,9 +1,9 @@
-{% extends "base.html" %}{% load view_extras %}
+{% extends "group/base.html" %}{% load group_extras %}
 
 {% block content %}
 {% if paper_list %}
 <p class="page-summary">
-  {% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if not request.path|is_for_xiangma %}There are total {{ paper_list|length }} paper(s).{% else %}共有 {{ paper_list|length }} 篇文献。{% endif %}
+  {% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group_name != "xiangma" %}There are total {{ paper_list|length }} paper(s).{% else %}共有 {{ paper_list|length }} 篇文献。{% endif %}
 </p>
 <h2>{{ collection.name }}</h2>
 <p>创建时间：{{ collection.create_time|date:'Y-m-d H:i:s' }}</p>
@@ -11,7 +11,7 @@
 <p>{{ collection.desc }}</p>
 {% for paper in paper_list %}
 <div class="paper-item">
-  {% include "sub/paper-item-as-card.html" %}
+  {% include "group/sub/paper-item-as-card.html" %}
 </div>
 {% endfor %}
 {% else %}

@@ -1,0 +1,11 @@
+{% extends "group/base.html" %}
+
+{% block content %}
+{% if paper %}
+<div class="paper-item">
+  {% include "group/sub/paper-item-as-card.html" %}
+</div>
+{% else %}
+<p>Invalid paper ID.</p>
+{% endif %}
+{% endblock content %}

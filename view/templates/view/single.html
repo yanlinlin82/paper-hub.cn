@@ -1,9 +1,9 @@
-{% extends "base.html" %}
+{% extends "view/base.html" %}
 
 {% block content %}
 {% if paper %}
 <div class="paper-item">
-  {% include "sub/paper-item-as-card.html" %}
+  {% include "view/sub/paper-item-as-card.html" %}
 </div>
 {% else %}
 <p>Invalid paper ID.</p>
