@@ -513,9 +513,11 @@ def Login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
+            #return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
+            return HttpResponseRedirect(request.GET['ref'])
     return render(request, 'view/login.html', {
         'site_name': get_site_name(request),
+        'ref': request.GET['ref'],
     })
 
 def Logout(request):

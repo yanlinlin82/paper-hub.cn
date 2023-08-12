@@ -14,16 +14,14 @@
   <header>
     <div class="banner">
       <h1 class="logo"><a href="{% url 'index' %}">{{ site_name }}</a></h1>
-{% if user.is_authenticated or group_name == "xiangma" %}
       <div class="login-panel">
         {% if user.is_authenticated %}
         {{ user }}
         <a href="{% url 'view:logout' %}">[Logout]</a>
         {% else %}
-        <a href="{% url 'view:login' %}">[Login]</a>
+        <a href="{% url 'view:login' %}?ref={{ request.path }}">[Login]</a>
         {% endif %}
       </div>
-{% endif %}
     </div>
   </header>
   <div class="container">
