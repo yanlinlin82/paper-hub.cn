@@ -190,12 +190,7 @@ def SinglePaperView(request, id, group_name):
 
 def RestorePaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return render(request, 'group/base.html', {
-            'site_name': get_site_name(group_name),
-            'group_name': group_name,
-            'current_page': 'restore_from_trash',
-            'error_message': 'No permission! Login first!',
-        })
+        return HttpResponseRedirect(reverse('group:all', args={'group_name':group_name}, current_app=request.resolver_match.namespace))
     paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
@@ -211,12 +206,7 @@ def RestorePaperView(request, id, group_name):
 
 def DeleteForeverPaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return render(request, 'group/base.html', {
-            'site_name': get_site_name(group_name),
-            'group_name': group_name,
-            'current_page': 'delete_forever',
-            'error_message': 'No permission! Login first!',
-        })
+        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
     paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
@@ -226,16 +216,11 @@ def DeleteForeverPaperView(request, id, group_name):
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('group:index', current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
 
 def DeletePaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return render(request, 'group/base.html', {
-            'site_name': get_site_name(group_name),
-            'group_name': group_name,
-            'current_page': 'delete',
-            'error_message': 'No permission! Login first!',
-        })
+        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
     paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
@@ -250,17 +235,11 @@ def DeletePaperView(request, id, group_name):
         p.save()
     else:
         get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('group:index', current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
 
 def EditPaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return render(request, 'group/edit.html', {
-            'site_name': get_site_name(group_name),
-            'group_name': group_name,
-            'current_page': 'edit',
-            'error_message': 'No permission! Login first!',
-            'is_xiangma': is_xiangma(group_name),
-        })
+        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
     paper_list = get_paper_list(request, group_name).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/edit.html', {
@@ -472,14 +451,9 @@ def AddUserIfNotExist(a_nickname, a_name, a_weixin_id, a_username):
     return u
 
 def PaperAdd(request, group_name):
+    print("PaperAdd:", group_name)
     if not request.user.is_authenticated:
-        return render(request, 'group/add.html', {
-            'site_name': get_site_name(group_name),
-            'group_name': group_name,
-            'current_page': 'add',
-            'error_message': 'No permission! Login first!',
-            'is_xiangma': is_xiangma(group_name),
-        })
+        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
@@ -565,54 +539,3 @@ def PaperAdd(request, group_name):
         }
         template = loader.get_template('group/add.html')
         return HttpResponse(template.render(context, request))
-
-def AjaxFetchUser(request, user):
-    if request.method != "GET":
-        return JsonResponse({"error": "Invalid http query"}, status=400)
-    u = User.objects.filter(nickname=user)
-    if u.count() == 0:
-        u = User.objects.filter(name=user)
-    if u.count() == 0:
-        u = User.objects.filter(weixin_id=user)
-    if u.count() == 0:
-        u = User.objects.filter(username=user)
-    if u.count() == 0:
-        return JsonResponse({"error": "user '" + user + "' not found."}, status=200)
-    else:
-        return JsonResponse({"error": "", "query": user, "results": {
-            "nickname": u[0].nickname,
-            "name": u[0].name,
-            "weixin_id": u[0].weixin_id,
-            "username": u[0].username,
-        }}, status=200)
-
-def AjaxFetchPaper(request, id):
-    if request.method != "GET":
-        return JsonResponse({"error": "Invalid http query"}, status=400)
-    pattern_pubmed = re.compile('^[0-9]+$')
-    if pattern_pubmed.search(id):
-        return query_pubmed(id)
-    pattern_arxiv = re.compile('^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
-    m = pattern_arxiv.match(id)
-    if m:
-        arxiv_id = m.group(1)
-        return query_arxiv(arxiv_id)
-    else:
-        return query_doi(id)
-
-def Login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(reverse('group:index', current_app=request.resolver_match.namespace))
-    return render(request, 'group/login.html', {
-        'site_name': get_site_name(group_name),
-        'group_name': group_name,
-    })
-
-def Logout(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('group:index', current_app=request.resolver_match.namespace))

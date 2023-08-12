@@ -17,7 +17,7 @@
       <div class="login-panel">
         {% if user.is_authenticated %}
         {{ user }}
-        <a href="{% url 'view:logout' %}">[Logout]</a>
+        <a href="{% url 'view:logout' %}?ref={{ request.path }}">[Logout]</a>
         {% else %}
         <a href="{% url 'view:login' %}?ref={{ request.path }}">[Login]</a>
         {% endif %}
@@ -26,12 +26,13 @@
   </header>
   <div class="container">
     <nav class="menu">
-{% if user.is_authenticated %}
-      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
       <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'view:all' %}">All Papers</a>
       <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'view:recent' %}">Recent</a>
+      <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'view:stat' %}">Stat</a>
+{% if user.is_authenticated %}
       <a class="menu-item{% if current_page == "favor" %} current-item{% endif %}" href="{% url 'view:favor' %}">Favorites</a>
       <a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'view:trash' %}">Trash</a>
+      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'view:add' %}">Add New</a>
 {% endif %}
     </nav>
     <div class="content">
