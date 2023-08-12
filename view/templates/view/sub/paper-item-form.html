@@ -46,43 +46,7 @@ function do_fetch_paper_info() {
     });
 }
 </script>
-{% if is_xiangma %}
-<div class="row">
-  <div class="col-25">{{ form.creator_nickname.label_tag }}</div>
-  <div class="col-75">{{ form.creator_nickname }}<input type="button" id="fetch_creator" name="fetch_creator" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_creator_info();"></div>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.creator_name.label_tag }}</div>
-  <div class="col-75">{{ form.creator_name }}</div>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.creator_weixin_id.label_tag }}</div>
-  <div class="col-75">{{ form.creator_weixin_id }}</div>
-</div>
-<div class="row">
-  <div class="col-25">{{ form.creator_username.label_tag }}</div>
-  <div class="col-75">{{ form.creator_username }}</div>
-</div>
-{% else %}
 <input type="hidden" name="content" value="{{value}}">
-{% endif %}
-{% if is_xiangma %}
-<br>
-{% if paper.create_time %}
-<div class="row">
-  <div class="col-25">{{ form.create_time.label_tag }}</div>
-  <div class="col-75">{{ form.create_time }}</div>
-</div>
-{% endif %}
-{% if current_page == "edit" %}
-  {% if paper.update_time %}
-<div class="row">
-  <div class="col-25">{{ form.update_time.label_tag }}</div>
-  <div class="col-75">{{ form.update_time }}</div>
-</div>
-  {% endif %}
-{% endif %}
-{% endif %}
 <br>
 <div class="row">
   <div class="col-25"><label for="paper_query_id">Paper ID:</label></div>

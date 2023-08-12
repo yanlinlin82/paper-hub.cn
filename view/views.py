@@ -20,12 +20,7 @@ from .paper import *
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
-def is_xiangma(request):
-    return re.match("^/xiangma/", request.path)
-
 def get_site_name(request):
-    if is_xiangma(request):
-        return '响马读paper'
     return 'Paper-Hub'
 
 def GetCurrentUser(request):
@@ -37,13 +32,6 @@ def GetCurrentUser(request):
     return user_list[0]
 
 def get_paper_list(request, include_trash=False):
-    if re.match("^/xiangma/", request.path):
-        paper_list = None
-        label_list = Label.objects.filter(name='响马')
-        if label_list.count() > 0:
-            paper_list = label_list[0].paper_set
-        return paper_list
-
     u = GetCurrentUser(request)
     if u is None:
         u = User()
@@ -64,16 +52,9 @@ def All(request):
     return HttpResponse(template.render(context, request))
 
 def Recent(request):
-    if is_xiangma(request):
-        today = datetime.today().astimezone(tz_beijing)
-        year = today.year
-        month = today.month
-        paper_list = get_paper_list(request).filter(create_time__year=year, create_time__month=month).order_by('-create_time', '-pk')
-        summary_message = '本页面显示本月的文献分享。'
-    else:
-        last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
-        paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
-        summary_message = 'This page shows papers in last week. '
+    last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
+    paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
+    summary_message = 'This page shows papers in last week. '
     template = loader.get_template('view/list.html')
     context = {
         'site_name': get_site_name(request),
@@ -115,10 +96,7 @@ def CollectionViewByID(request, id):
         })
     paper_list = collections[0].papers.order_by('-create_time', '-pk')
     template = loader.get_template('view/collection.html')
-    if is_xiangma(request):
-        summary_message = '本页面显示合集 <b>#' + collections[0].name + '</b> 的文献。'
-    else:
-        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
+    summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'collection',
@@ -131,10 +109,7 @@ def CollectionViewByID(request, id):
 def CollectionViewBySlug(request, slug):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('view/list.html')
-    if is_xiangma(request):
-        summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
-    else:
-        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
+    summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'collection',
@@ -149,10 +124,7 @@ def PaperLabelView(request, name):
     if label_list.count() > 0:
         paper_list = label_list[0].paper_set.all().order_by('-create_time', '-pk')
     template = loader.get_template('view/list.html')
-    if is_xiangma(request):
-        summary_message = '本页面显示标签 <b>' + name + '</b> 的文献。'
-    else:
-        summary_message = 'This page shows list of label "<b>' + name + '</b>". '
+    summary_message = 'This page shows list of label "<b>' + name + '</b>". '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'label',
@@ -242,7 +214,6 @@ def EditPaperView(request, id):
             'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'No permission! Login first!',
-            'is_xiangma': is_xiangma(request),
         })
     paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
@@ -250,7 +221,6 @@ def EditPaperView(request, id):
             'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
-            'is_xiangma': is_xiangma(request),
         })
 
     if request.method == 'POST':
@@ -260,18 +230,9 @@ def EditPaperView(request, id):
                 'site_name': get_site_name(request),
                 'current_page': 'edit',
                 'error_message': form.errors,
-                'is_xiangma': is_xiangma(request),
             })
 
-        if is_xiangma(request):
-            u = AddUserIfNotExist(
-                form.cleaned_data['creator_nickname'],
-                form.cleaned_data['creator_name'],
-                form.cleaned_data['creator_weixin_id'],
-                form.cleaned_data['creator_username']
-            )
-        else:
-            u = GetCurrentUser(request)
+        u = GetCurrentUser(request)
         paper_list = get_paper_list(request).filter(pk=id)
         paper_list.update(creator = u)
 
@@ -339,7 +300,6 @@ def EditPaperView(request, id):
             'current_page': 'edit',
             'paper': paper,
             'form': form,
-            'is_xiangma': is_xiangma(request),
         }
         return HttpResponse(template.render(context, request))
 
@@ -385,10 +345,7 @@ def UserView(request, id):
         })
     paper_list = get_paper_list(request).filter(creator=u[0]).order_by('-create_time', '-pk')
     template = loader.get_template('view/list.html')
-    if is_xiangma(request):
-        summary_message = '本页面显示由用户 <b>' + u[0].nickname + '</b> 推荐的文献。'
-    else:
-        summary_message = 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. '
+    summary_message = 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. '
     context = {
         'site_name': get_site_name(request),
         'current_page': 'user',
@@ -454,7 +411,6 @@ def PaperAdd(request):
             'site_name': get_site_name(request),
             'current_page': 'add',
             'error_message': 'No permission! Login first!',
-            'is_xiangma': is_xiangma(request),
         })
     if request.method == 'POST':
         form = PaperForm(request.POST)
@@ -463,19 +419,10 @@ def PaperAdd(request):
                 'site_name': get_site_name(request),
                 'current_page': 'add',
                 'error_message': form.errors,
-                'is_xiangma': is_xiangma(request),
             })
 
         paper = Paper()
-        if is_xiangma(request):
-            paper.creator = AddUserIfNotExist(
-                form.cleaned_data['creator_nickname'],
-                form.cleaned_data['creator_name'],
-                form.cleaned_data['creator_weixin_id'],
-                form.cleaned_data['creator_username']
-            )
-        else:
-            paper.creator = GetCurrentUser(request)
+        paper.creator = GetCurrentUser(request)
     
         paper.doi = form.cleaned_data['doi']
         paper.pmid = form.cleaned_data['pmid']
@@ -497,20 +444,6 @@ def PaperAdd(request):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
-
-        if is_xiangma(request):
-            paper.create_time = form.cleaned_data['create_time']
-            paper.save()
-
-        if is_xiangma(request):
-            label_name = "响马"
-            if Label.objects.filter(name=label_name).count() == 0:
-                xiangma = Label(name = label_name)
-                xiangma.save()
-            else:
-                xiangma = Label.objects.filter(name=label_name)[0]
-            xiangma.paper_set.add(paper)
-            xiangma.save()
 
         return HttpResponseRedirect(reverse('view:paper', args=[paper.id], current_app=request.resolver_match.namespace))
     else:
@@ -535,7 +468,6 @@ def PaperAdd(request):
             'current_page': 'add',
             'form': form,
             'paper': paper,
-            'is_xiangma': is_xiangma(request),
         }
         template = loader.get_template('view/add.html')
         return HttpResponse(template.render(context, request))

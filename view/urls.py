@@ -4,14 +4,8 @@ from django.http import HttpResponseRedirect
 
 from . import views
 
-def is_xiangma(request):
-    return re.match("^/xiangma/", request.path)
-
 def redirect(request):
-    if is_xiangma(request):
-        return HttpResponseRedirect('recent')
-    else:
-        return HttpResponseRedirect('all')
+    return HttpResponseRedirect('all')
 
 app_name = 'view'
 urlpatterns = [
