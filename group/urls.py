@@ -8,7 +8,6 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('<str:group_name>/', views.All, name='all'),
     path('<str:group_name>/recent', views.Recent, name='recent'),
-    path('<str:group_name>/favor', views.Favor, name='favor'),
     path('<str:group_name>/trash', views.Trash, name='trash'),
     path('<str:group_name>/trash/<int:id>/restore', views.RestorePaperView, name='restore_from_trash'),
     path('<str:group_name>/trash/<int:id>/delete', views.DeleteForeverPaperView, name='delete_forever'),

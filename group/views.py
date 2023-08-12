@@ -6,6 +6,7 @@ except ImportError:
     from backports import zoneinfo
 from datetime import datetime, timedelta
 from django.contrib.auth import authenticate, login, logout
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count
 from django.db.models.aggregates import Min
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -38,12 +39,42 @@ def GetCurrentUser(request):
         return None
     return user_list[0]
 
-def get_paper_list(request, group_name, include_trash=False):
+def get_paper_list(request, group_name, latest_month=False, latest_week=False, trash=False):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers
-    if not include_trash:
+
+    if trash:
+        papers = papers.exclude(delete_time=None)
+    else:
         papers = papers.filter(delete_time=None)
-    return papers
+
+    if latest_month:
+        today = datetime.today().astimezone(tz_beijing)
+        year = today.year
+        month = today.month
+        papers = papers.filter(create_time__year=year, create_time__month=month)
+    elif latest_week:
+        last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
+        papers = papers.filter(create_time__gte=last_week)
+
+    papers = papers.order_by('-create_time', '-pk')
+    total_count = papers.count()
+
+    page_number = request.GET.get('page')
+    if page_number is None:
+        page_number = 1
+
+    p = Paginator(papers, 20)
+    try:
+        papers = p.get_page(page_number)
+    except PageNotAnInteger:
+        page_number = 1
+        papers = p.page(1)
+    except EmptyPage:
+        page_number = p.num_pages
+        papers = p.page(p.num_pages)
+    papers.adjusted_elided_pages = p.get_elided_page_range(page_number)
+    return papers, total_count
 
 class IndexView(generic.ListView):
     template_name = 'group/index.html'
@@ -61,12 +92,13 @@ class IndexView(generic.ListView):
         return context
 
 def All(request, group_name):
-    paper_list = get_paper_list(request, group_name).order_by('-create_time', '-pk')
+    paper_list, total_count = get_paper_list(request, group_name)
     template = loader.get_template('group/list.html')
     context = {
         'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'all',
+        'total_count': total_count,
         'paper_list': paper_list,
         'summary_messages': '',
     }
@@ -74,45 +106,30 @@ def All(request, group_name):
 
 def Recent(request, group_name):
     if is_xiangma(group_name):
-        today = datetime.today().astimezone(tz_beijing)
-        year = today.year
-        month = today.month
-        paper_list = get_paper_list(request, group_name).filter(create_time__year=year, create_time__month=month).order_by('-create_time', '-pk')
+        paper_list, total_count = get_paper_list(request, group_name, latest_month=True)
         summary_message = '本页面显示本月的文献分享。'
     else:
-        last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
-        paper_list = get_paper_list(request, group_name).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
+        paper_list, total_count = get_paper_list(request, group_name, latest_week=True)
         summary_message = 'This page shows papers in last week. '
     template = loader.get_template('group/list.html')
     context = {
         'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'recent',
-        'paper_list': paper_list,
-        'summary_messages': summary_message
-    }
-    return HttpResponse(template.render(context, request))
-
-def Favor(request, group_name):
-    paper_list = get_paper_list(request, group_name).filter(is_favorite=True).order_by('-create_time', '-pk')
-    summary_message = 'This page shows favorite papers. '
-    template = loader.get_template('group/list.html')
-    context = {
-        'site_name': get_site_name(group_name),
-        'group_name': group_name,
-        'current_page': 'favor',
+        'total_count': total_count,
         'paper_list': paper_list,
         'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
 
 def Trash(request, group_name):
-    paper_list = get_paper_list(request, group_name, include_trash=True).exclude(delete_time=None).order_by('-create_time', '-pk')
+    paper_list, total_count = get_paper_list(request, group_name, trash=True)
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'group/list.html', {
         'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'trash',
+        'total_count': total_count,
         'paper_list': paper_list,
         'summary_messages': summary_message
     })
@@ -137,13 +154,14 @@ def CollectionViewByID(request, id, group_name):
         'group_name': group_name,
         'current_page': 'collection',
         'collection': collections[0],
+        'total_count': total_count,
         'paper_list': paper_list,
         'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
 def CollectionViewBySlug(request, slug, group_name):
-    paper_list = get_paper_list(request, group_name).order_by('-create_time', '-pk')
+    paper_list, total_count = get_paper_list(request, group_name).order_by('-create_time', '-pk')
     template = loader.get_template('group/list.html')
     if is_xiangma(group_name):
         summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
@@ -153,6 +171,7 @@ def CollectionViewBySlug(request, slug, group_name):
         'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'collection',
+        'total_count': total_count,
         'paper_list': paper_list,
         'summary_messages': summary_message,
     }
@@ -172,13 +191,14 @@ def PaperLabelView(request, name, group_name):
         'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'label',
+        'total_count': total_count,
         'paper_list': paper_list,
         'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id, group_name):
-    paper_list = get_paper_list(request, group_name).filter(pk=id)
+    paper_list, total_count = get_paper_list(request, group_name).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/single.html', {
             'site_name': get_site_name(group_name),
@@ -199,7 +219,7 @@ def SinglePaperView(request, id, group_name):
 def RestorePaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', args={'group_name':group_name}))
-    paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
+    paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
             'site_name': get_site_name(group_name),
@@ -215,7 +235,7 @@ def RestorePaperView(request, id, group_name):
 def DeleteForeverPaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', args=[group_name]))
-    paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
+    paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
             'site_name': get_site_name(group_name),
@@ -229,7 +249,7 @@ def DeleteForeverPaperView(request, id, group_name):
 def DeletePaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', args=[group_name]))
-    paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
+    paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
             'site_name': get_site_name(group_name),
@@ -248,7 +268,7 @@ def DeletePaperView(request, id, group_name):
 def EditPaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', args=[group_name]))
-    paper_list = get_paper_list(request, group_name).filter(pk=id)
+    paper_list, total_count = get_paper_list(request, group_name).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/edit.html', {
             'site_name': get_site_name(group_name),
@@ -278,7 +298,7 @@ def EditPaperView(request, id, group_name):
             )
         else:
             u = GetCurrentUser(request)
-        paper_list = get_paper_list(request, group_name).filter(pk=id)
+        paper_list, total_count = get_paper_list(request, group_name).filter(pk=id)
         paper_list.update(creator = u)
 
         paper = paper_list[0]
@@ -351,12 +371,15 @@ def EditPaperView(request, id, group_name):
         return HttpResponse(template.render(context, request))
 
 def StatView(request, group_name):
-    stat_all = get_paper_list(request, group_name).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+    group = get_object_or_404(Group, name=group_name)
+    papers = group.papers.filter(delete_time=None)
+
+    stat_all = papers.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
     today = datetime.today().astimezone(tz_beijing)
     year = today.year
     month = today.month
-    stat_this_month = get_paper_list(request, group_name).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
+    stat_this_month = papers.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
     this_month = str(year) + '/' + str(month)
 
     if month > 1:
@@ -364,10 +387,10 @@ def StatView(request, group_name):
     else:
         year = year - 1
         month = 12
-    stat_last_month = get_paper_list(request, group_name).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
+    stat_last_month = papers.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
     last_month = str(year) + '/' + str(month)
 
-    stat_journal = get_paper_list(request, group_name).exclude(journal='').values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
+    stat_journal = papers.exclude(journal='').values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
 
     template = loader.get_template('group/stat.html')
     context = {
@@ -392,7 +415,7 @@ def UserView(request, id, group_name):
             'current_page': 'list',
             'error_message': "Invalid user id!",
         })
-    paper_list = get_paper_list(request, group_name).filter(creator=u[0]).order_by('-create_time', '-pk')
+    paper_list, total_count = get_paper_list(request, group_name).filter(creator=u[0]).order_by('-create_time', '-pk')
     template = loader.get_template('group/list.html')
     if is_xiangma(group_name):
         summary_message = '本页面显示由用户 <b>' + u[0].nickname + '</b> 推荐的文献。'
@@ -402,6 +425,7 @@ def UserView(request, id, group_name):
         'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'user',
+        'total_count': total_count,
         'paper_list': paper_list,
         'summary_messages': summary_message,
     }

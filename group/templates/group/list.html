@@ -2,9 +2,23 @@
 
 {% block content %}
 <div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group_name != "xiangma" %}There are total {{ paper_list|length }} paper(s).{% else %}共有 {{ paper_list|length }} 篇文献。{% endif %}</p>
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group_name != "xiangma" %}There are total {{ total_count }} paper(s).{% else %}共有 {{ total_count }} 篇文献。{% endif %}</p>
 </div>
 {% if paper_list %}
+
+<center>
+Page:
+{% for i in paper_list.adjusted_elided_pages %}
+{% if i == paper_list.paginator.ELLIPSIS %}
+{{ i }}
+{% elif i == paper_list.number %}
+<strong>{{ i }}</strong>
+{% else %}
+<a href="?page={{ i }}">{{ i }}</a>
+{% endif %}
+{% endfor %}
+</center>
+
 {% for paper in paper_list %}
 <div class="paper-item">
   {% include "group/sub/paper-item-as-card.html" %}
