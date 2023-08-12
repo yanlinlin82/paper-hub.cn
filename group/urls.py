@@ -3,15 +3,9 @@ from django.http import HttpResponse
 
 from . import views
 
-def group_list(request):
-    return HttpResponse('group')
-
-def group_view(request, group_name):
-    return HttpResponse('group ' + group_name)
-
 app_name = 'group'
 urlpatterns = [
-    path('', group_list, name='index'),
+    path('', views.IndexView.as_view(), name='index'),
     path('<str:group_name>/', views.All, name='all'),
     path('<str:group_name>/recent', views.Recent, name='recent'),
     path('<str:group_name>/favor', views.Favor, name='favor'),

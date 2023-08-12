@@ -1,0 +1,13 @@
+{% extends "group/base.html" %}{% load group_extras %}
+
+{% block content %}
+{% if group_list %}
+<ul>
+{% for group in group_list %}
+<li><b><a href="{% url "group:all" group_name=group.name %}">{{ group.display_name }}</a></b> (created at {{ group.create_time|date:"Y-m-d" }})<br>{{ group.desc }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No any group yet.</p>
+{% endif %}
+{% endblock content %}

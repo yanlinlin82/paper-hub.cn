@@ -5,18 +5,20 @@ try:
 except ImportError:
     from backports import zoneinfo
 from datetime import datetime, timedelta
+from django.contrib.auth import authenticate, login, logout
+from django.db.models import Count
+from django.db.models.aggregates import Min
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.template import loader
 from django.urls import reverse
-from django.db.models import Count
 from django.utils import timezone
-from django.contrib.auth import authenticate, login, logout
-from django.db.models.aggregates import Min
+from django.views import generic
 
 from view.models import Label, Paper, User, Collection
 from view.forms import PaperForm
 from view.paper import *
+from .models import Group
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
@@ -37,20 +39,26 @@ def GetCurrentUser(request):
     return user_list[0]
 
 def get_paper_list(request, group_name, include_trash=False):
-    if group_name == "xiangma":
-        paper_list = None
-        label_list = Label.objects.filter(name='响马')
-        if label_list.count() > 0:
-            paper_list = label_list[0].paper_set
-        return paper_list
+    group = get_object_or_404(Group, name=group_name)
+    papers = group.papers
+    if not include_trash:
+        papers = papers.filter(delete_time=None)
+    return papers
 
-    u = GetCurrentUser(request)
-    if u is None:
-        u = User()
-    if include_trash:
-        return Paper.objects.filter(creator=u)
-    else:
-        return Paper.objects.filter(creator=u, delete_time=None)
+class IndexView(generic.ListView):
+    template_name = 'group/index.html'
+    context_object_name = 'group_list'
+    def get_queryset(self):
+        return Group.objects.order_by('-create_time')
+    def get_context_data(self, **kwargs):
+        context = {
+            'site_name': get_site_name(''),
+            'current_page': 'index',
+            'group_name': '',
+            'group_list': Group.objects.order_by('-create_time'),
+            'summary_messages': '',
+            }
+        return context
 
 def All(request, group_name):
     paper_list = get_paper_list(request, group_name).order_by('-create_time', '-pk')
