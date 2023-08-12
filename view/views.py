@@ -167,7 +167,7 @@ def RestorePaperView(request, id):
     p = paper_list[0]
     p.delete_time = None
     p.save()
-    return HttpResponseRedirect(reverse('view:paper', args=[id], current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('view:paper', args=[id]))
 
 def DeleteForeverPaperView(request, id):
     if not request.user.is_authenticated:
@@ -184,7 +184,7 @@ def DeleteForeverPaperView(request, id):
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     get_paper_list(request, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('view:index'))
 
 def DeletePaperView(request, id):
     if not request.user.is_authenticated:
@@ -206,7 +206,7 @@ def DeletePaperView(request, id):
         p.save()
     else:
         get_paper_list(request, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('view:index', current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('view:index'))
 
 def EditPaperView(request, id):
     if not request.user.is_authenticated:
@@ -263,7 +263,7 @@ def EditPaperView(request, id):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
-        return HttpResponseRedirect(reverse('view:paper', args=[id], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('view:paper', args=[id]))
     else:
         paper = get_paper_list(request).get(pk=id)
         data = {
@@ -445,7 +445,7 @@ def PaperAdd(request):
         paper.comments = form.cleaned_data['comments']
         paper.save()
 
-        return HttpResponseRedirect(reverse('view:paper', args=[paper.id], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('view:paper', args=[paper.id]))
     else:
         u = User.objects.filter(username=request.user)
         paper = Paper(

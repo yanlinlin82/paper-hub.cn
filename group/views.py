@@ -190,7 +190,7 @@ def SinglePaperView(request, id, group_name):
 
 def RestorePaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args={'group_name':group_name}, current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('group:all', args={'group_name':group_name}))
     paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
@@ -202,11 +202,11 @@ def RestorePaperView(request, id, group_name):
     p = paper_list[0]
     p.delete_time = None
     p.save()
-    return HttpResponseRedirect(reverse('group:paper', args=[id], current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('group:paper', args=[id]))
 
 def DeleteForeverPaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
     paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
@@ -216,11 +216,11 @@ def DeleteForeverPaperView(request, id, group_name):
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('group:all', args=[group_name]))
 
 def DeletePaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
     paper_list = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
@@ -235,11 +235,11 @@ def DeletePaperView(request, id, group_name):
         p.save()
     else:
         get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
+    return HttpResponseRedirect(reverse('group:all', args=[group_name]))
 
 def EditPaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
     paper_list = get_paper_list(request, group_name).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/edit.html', {
@@ -300,7 +300,7 @@ def EditPaperView(request, id, group_name):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
-        return HttpResponseRedirect(reverse('group:paper', args=[id], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('group:paper', args=[id]))
     else:
         paper = get_paper_list(request, group_name).get(pk=id)
         data = {
@@ -453,7 +453,7 @@ def AddUserIfNotExist(a_nickname, a_name, a_weixin_id, a_username):
 def PaperAdd(request, group_name):
     print("PaperAdd:", group_name)
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
@@ -511,7 +511,7 @@ def PaperAdd(request, group_name):
             xiangma.paper_set.add(paper)
             xiangma.save()
 
-        return HttpResponseRedirect(reverse('group:paper', args=[paper.id], current_app=request.resolver_match.namespace))
+        return HttpResponseRedirect(reverse('group:paper', args=[paper.id]))
     else:
         u = User.objects.filter(username=request.user)
         paper = Paper(
