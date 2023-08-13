@@ -1,5 +1,9 @@
 {% extends "group/base.html" %}{% load group_extras %}
 
+{% block nav %}
+<a href="/">Home</a> &gt; Group
+{% endblock nav %}
+
 {% block content %}
 {% if group_list %}
 <ul>

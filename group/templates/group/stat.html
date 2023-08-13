@@ -1,5 +1,10 @@
 {% extends "group/base.html" %}
 
+{% block nav %}
+<a href="/">Home</a> &gt; <a href="/group">Group</a> &gt; {{ group.name }}
+<h2>{{ group.display_name }}</h2>
+{% endblock nav %}
+
 {% block content %}
 <div class="stat">
 
