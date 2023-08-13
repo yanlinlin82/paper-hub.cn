@@ -152,7 +152,7 @@ def SinglePaperView(request, id):
 
 def RestorePaperView(request, id):
     if not request.user.is_authenticated:
-        return render(request, 'view/base.html', {
+        return render(request, 'base.html', {
             'site_name': get_site_name(request),
             'current_page': 'restore_from_trash',
             'error_message': 'No permission! Login first!',
@@ -171,7 +171,7 @@ def RestorePaperView(request, id):
 
 def DeleteForeverPaperView(request, id):
     if not request.user.is_authenticated:
-        return render(request, 'view/base.html', {
+        return render(request, 'base.html', {
             'site_name': get_site_name(request),
             'current_page': 'delete_forever',
             'error_message': 'No permission! Login first!',
@@ -188,7 +188,7 @@ def DeleteForeverPaperView(request, id):
 
 def DeletePaperView(request, id):
     if not request.user.is_authenticated:
-        return render(request, 'view/base.html', {
+        return render(request, 'base.html', {
             'site_name': get_site_name(request),
             'current_page': 'delete',
             'error_message': 'No permission! Login first!',
@@ -302,38 +302,6 @@ def EditPaperView(request, id):
             'form': form,
         }
         return HttpResponse(template.render(context, request))
-
-def StatView(request):
-    stat_all = get_paper_list(request).values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
-
-    today = datetime.today().astimezone(tz_beijing)
-    year = today.year
-    month = today.month
-    stat_this_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
-    this_month = str(year) + '/' + str(month)
-
-    if month > 1:
-        month = month - 1
-    else:
-        year = year - 1
-        month = 12
-    stat_last_month = get_paper_list(request).filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
-    last_month = str(year) + '/' + str(month)
-
-    stat_journal = get_paper_list(request).exclude(journal='').values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
-
-    template = loader.get_template('view/stat.html')
-    context = {
-        'site_name': get_site_name(request),
-        'current_page': 'stat',
-        'stat_all': stat_all,
-        'stat_this_month': stat_this_month,
-        'this_month': this_month,
-        'stat_last_month': stat_last_month,
-        'last_month': last_month,
-        'stat_journal': stat_journal,
-    }
-    return HttpResponse(template.render(context, request))
 
 def UserView(request, id):
     u = User.objects.filter(pk=id)

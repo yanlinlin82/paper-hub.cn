@@ -1,17 +1,17 @@
 {% if group_name == "xiangma" %}
-      <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'group:all' group_name=group_name %}">所有分享</a>
-      <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'group:recent' group_name=group_name %}">本月分享</a>
-      <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'group:stat' group_name=group_name %}">响马榜单</a>
-      {% if user.is_authenticated %}
-      <a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'group:trash' group_name=group_name %}">回收站</a>
-      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'group:add' group_name=group_name %}">新增分享</a>
-      {% endif %}
+<a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'group:all' group_name=group_name %}">所有分享</a>
+<a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'group:recent' group_name=group_name %}">本月分享</a>
+<a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'group:stat' group_name=group_name %}">响马榜单</a>
+{% if user.is_authenticated %}
+<a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'group:trash' group_name=group_name %}">回收站</a>
+<a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'group:add' group_name=group_name %}">新增分享</a>
+{% endif %}
 {% else %}
-      <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'group:all' group_name=group_name %}">All Papers</a>
-      <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'group:recent' group_name=group_name %}">Recent</a>
-      <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'group:stat' group_name=group_name %}">Stat</a>
-  {% if user.is_authenticated %}
-      <a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'group:trash' group_name=group_name %}">Trash</a>
-      <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'group:add' group_name=group_name %}">Add New</a>
-  {% endif %}
+<a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'group:all' group_name=group_name %}">All Papers</a>
+<a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'group:recent' group_name=group_name %}">Recent</a>
+<a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'group:stat' group_name=group_name %}">Stat</a>
+{% if user.is_authenticated %}
+<a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'group:trash' group_name=group_name %}">Trash</a>
+<a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'group:add' group_name=group_name %}">Add New</a>
+{% endif %}
 {% endif %}

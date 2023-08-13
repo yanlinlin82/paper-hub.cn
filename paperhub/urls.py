@@ -16,9 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
 
 def redirect(request):
-    return HttpResponseRedirect('group/xiangma/')
+    return render(request, 'index.html')
 
 urlpatterns = [
     path('', redirect, name='index'),

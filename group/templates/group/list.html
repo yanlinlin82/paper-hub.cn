@@ -1,9 +1,11 @@
-{% extends "group/base.html" %}{% load group_extras %}
+{% extends "base.html" %}
 
 {% block nav %}
 <a href="/">Home</a> &gt; <a href="/group">Group</a> &gt; {{ group.name }}
 <h2>{{ group.display_name }}</h2>
 {% endblock nav %}
+
+{% block menu %}{% include "group/sub/menu.html" %}{% endblock menu %}
 
 {% block content %}
 <div class="page-summary">
@@ -33,5 +35,3 @@ Page:
 <p style="padding:20px; height:200px;">No paper is available.</p>
 {% endif %}
 {% endblock content %}
-
-{% block menu %}{% include "group/sub/menu.html" %}{% endblock menu %}

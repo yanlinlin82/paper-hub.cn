@@ -25,7 +25,17 @@ def label_replace(match, request):
     m2 = re.sub('/', '+', m)
     return '<div class="label"><a href="' + reverse('view:label', kwargs={'name': m2}, current_app=request.resolver_match.namespace) + '">#' + m + '</a></div>'
 
+def label_replace_2(match, request, group_name):
+    m = match.group(1)
+    m2 = re.sub('/', '+', m)
+    return '<div class="label"><a href="' + reverse('group:label', kwargs={'name': m2, 'group_name': group_name}, current_app=request.resolver_match.namespace) + '">#' + m + '</a></div>'
+
 @register.simple_tag(name='format_comments', takes_context=True)
 def format_comments(context, value):
     s = re.sub(r'#([^\s:#\'\"]+)', lambda line: label_replace(line, context['request']), value)
+    return re.sub('\n', '<br>', s)
+
+@register.simple_tag(name='format_comments_2', takes_context=True)
+def format_comments_2(context, value, group_name):
+    s = re.sub(r'#([^\s:#\'\"]+)', lambda line: label_replace_2(line, context['request'], group_name), value)
     return re.sub('\n', '<br>', s)
