@@ -1,9 +1,6 @@
 import re
+import zoneinfo
 
-try:
-    import zoneinfo
-except ImportError:
-    from backports import zoneinfo
 from datetime import datetime, timedelta
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -23,14 +20,6 @@ from .models import Group
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
-def is_xiangma(group_name):
-    return group_name == "xiangma"
-
-def get_site_name(group_name):
-    if is_xiangma(group_name):
-        return '响马读paper'
-    return 'Paper-Hub'
-
 def GetCurrentUser(request):
     if not request.user.is_authenticated:
         return None
@@ -39,12 +28,15 @@ def GetCurrentUser(request):
         return None
     return user_list[0]
 
-def get_paper_list(request, group_name, latest_month=False, latest_week=False, user=None, trash=False):
+def get_paper_list(request, group_name, latest_month=False, latest_week=False, user=None, id=None, trash=False):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers
 
     if user is not None:
         papers = papers.filter(creator=user)
+
+    if id is not None:
+        papers = papers.filter(pk=id)
 
     if trash:
         papers = papers.exclude(delete_time=None)
@@ -86,7 +78,6 @@ class IndexView(generic.ListView):
         return Group.objects.order_by('-create_time')
     def get_context_data(self, **kwargs):
         context = {
-            'site_name': get_site_name(''),
             'current_page': 'index',
             'group_name': '',
             'group_list': Group.objects.order_by('-create_time'),
@@ -100,7 +91,6 @@ def All(request, group_name):
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'all',
         'total_count': total_count,
@@ -111,7 +101,7 @@ def All(request, group_name):
 
 def Recent(request, group_name):
     group = get_object_or_404(Group, name=group_name)
-    if is_xiangma(group_name):
+    if group_name == "xiangma":
         paper_list, total_count = get_paper_list(request, group_name, latest_month=True)
         summary_message = '本页面显示本月的文献分享。'
     else:
@@ -120,7 +110,6 @@ def Recent(request, group_name):
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'recent',
         'total_count': total_count,
@@ -154,7 +143,6 @@ def StatView(request, group_name):
     template = loader.get_template('group/stat.html')
     context = {
         'group': group,
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'stat',
         'stat_all': stat_all,
@@ -172,7 +160,6 @@ def Trash(request, group_name):
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'group/list.html', {
         'group': group,
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'trash',
         'total_count': total_count,
@@ -182,31 +169,26 @@ def Trash(request, group_name):
 
 def PaperAdd(request, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
+        return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
+
     group = get_object_or_404(Group, name=group_name)
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'group/add.html', {
                 'group': group,
-                'site_name': get_site_name(group_name),
                 'group_name': group_name,
                 'current_page': 'add',
                 'error_message': form.errors,
-                'is_xiangma': is_xiangma(group_name),
             })
 
         paper = Paper()
-        if is_xiangma(group_name):
-            paper.creator = AddUserIfNotExist(
-                form.cleaned_data['creator_nickname'],
-                form.cleaned_data['creator_name'],
-                form.cleaned_data['creator_weixin_id'],
-                form.cleaned_data['creator_username']
-            )
-        else:
-            paper.creator = GetCurrentUser(request)
-    
+        paper.creator = AddUserIfNotExist(
+            form.cleaned_data['creator_nickname'],
+            form.cleaned_data['creator_name'],
+            form.cleaned_data['creator_weixin_id'],
+            form.cleaned_data['creator_username']
+        )    
         paper.doi = form.cleaned_data['doi']
         paper.pmid = form.cleaned_data['pmid']
         paper.arxiv_id = form.cleaned_data['arxiv_id']
@@ -226,23 +208,14 @@ def PaperAdd(request, group_name):
         paper.is_favorite = form.cleaned_data['is_favorite']
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
+
+        paper.create_time = form.cleaned_data['create_time']
         paper.save()
 
-        if is_xiangma(group_name):
-            paper.create_time = form.cleaned_data['create_time']
-            paper.save()
+        group.papers.add(paper)
+        group.save()
 
-        if is_xiangma(group_name):
-            label_name = "响马"
-            if Label.objects.filter(name=label_name).count() == 0:
-                xiangma = Label(name = label_name)
-                xiangma.save()
-            else:
-                xiangma = Label.objects.filter(name=label_name)[0]
-            xiangma.paper_set.add(paper)
-            xiangma.save()
-
-        return HttpResponseRedirect(reverse('group:paper', args=[paper.id]))
+        return HttpResponseRedirect(reverse('group:paper', kwargs={'group_name':group_name,'id':paper.id}))
     else:
         u = User.objects.filter(username=request.user)
         paper = Paper(
@@ -262,12 +235,10 @@ def PaperAdd(request, group_name):
         form = PaperForm(data)
         context = {
             'group': group,
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'add',
             'form': form,
             'paper': paper,
-            'is_xiangma': is_xiangma(group_name),
         }
         template = loader.get_template('group/add.html')
         return HttpResponse(template.render(context, request))
@@ -277,22 +248,20 @@ def CollectionViewByID(request, id, group_name):
     if collections.count() <= 0:
         return render(request, 'group/collection.html', {
             'error_message': 'Invalid collection ID: ' + str(id),
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'collection',
         })
     paper_list = collections[0].papers.order_by('-create_time', '-pk')
     template = loader.get_template('group/collection.html')
-    if is_xiangma(group_name):
+    if group_name == "xiangma":
         summary_message = '本页面显示合集 <b>#' + collections[0].name + '</b> 的文献。'
     else:
         summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
     context = {
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'collection',
         'collection': collections[0],
-        'total_count': total_count,
+        'total_count': collections.count(),
         'paper_list': paper_list,
         'summary_messages': summary_message,
     }
@@ -301,12 +270,11 @@ def CollectionViewByID(request, id, group_name):
 def CollectionViewBySlug(request, slug, group_name):
     paper_list, total_count = get_paper_list(request, group_name).order_by('-create_time', '-pk')
     template = loader.get_template('group/list.html')
-    if is_xiangma(group_name):
+    if group_name == "xiangma":
         summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
     else:
         summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
     context = {
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'collection',
         'total_count': total_count,
@@ -321,25 +289,23 @@ def PaperLabelView(request, name, group_name):
     if label_list.count() > 0:
         paper_list = label_list[0].paper_set.all().order_by('-create_time', '-pk')
     template = loader.get_template('group/list.html')
-    if is_xiangma(group_name):
+    if group_name == "xiangma":
         summary_message = '本页面显示标签 <b>' + name + '</b> 的文献。'
     else:
         summary_message = 'This page shows list of label "<b>' + name + '</b>". '
     context = {
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'label',
-        'total_count': total_count,
+        'total_count': label_list.count(),
         'paper_list': paper_list,
         'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id, group_name):
-    paper_list, total_count = get_paper_list(request, group_name).filter(pk=id)
-    if paper_list.count() <= 0:
+    paper_list, total_count = get_paper_list(request, group_name, id=id)
+    if total_count <= 0:
         return render(request, 'group/single.html', {
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'paper',
             'error_message': 'Invalid paper ID: ' + str(id),
@@ -347,7 +313,6 @@ def SinglePaperView(request, id, group_name):
     paper = paper_list[0]
     template = loader.get_template('group/single.html')
     context = {
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'paper',
         'paper': paper,
@@ -356,11 +321,10 @@ def SinglePaperView(request, id, group_name):
 
 def RestorePaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args={'group_name':group_name}))
+        return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
@@ -368,29 +332,27 @@ def RestorePaperView(request, id, group_name):
     p = paper_list[0]
     p.delete_time = None
     p.save()
-    return HttpResponseRedirect(reverse('group:paper', args=[id]))
+    return HttpResponseRedirect(reverse('group:paper', kwargs={'group_name':group_name,'id':id}))
 
 def DeleteForeverPaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
+        return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('group:all', args=[group_name]))
+    return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
 
 def DeletePaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
+        return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/list.html', {
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
@@ -401,51 +363,40 @@ def DeletePaperView(request, id, group_name):
         p.save()
     else:
         get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
-    return HttpResponseRedirect(reverse('group:all', args=[group_name]))
+    return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
 
 def EditPaperView(request, id, group_name):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('group:all', args=[group_name]))
-    paper_list, total_count = get_paper_list(request, group_name).filter(pk=id)
+        return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
+
+    group = get_object_or_404(Group, name=group_name)
+    paper_list = group.papers.filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'group/edit.html', {
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
-            'is_xiangma': is_xiangma(group_name),
         })
+    paper = paper_list[0]
 
     if request.method == 'POST':
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'group/edit.html', {
-                'site_name': get_site_name(group_name),
                 'group_name': group_name,
                 'current_page': 'edit',
                 'error_message': form.errors,
-                'is_xiangma': is_xiangma(group_name),
             })
 
-        if is_xiangma(group_name):
-            u = AddUserIfNotExist(
-                form.cleaned_data['creator_nickname'],
-                form.cleaned_data['creator_name'],
-                form.cleaned_data['creator_weixin_id'],
-                form.cleaned_data['creator_username']
-            )
-        else:
-            u = GetCurrentUser(request)
-        paper_list, total_count = get_paper_list(request, group_name).filter(pk=id)
-        paper_list.update(creator = u)
-
-        paper = paper_list[0]
-        if form.cleaned_data['create_time']:
-            paper.create_time = form.cleaned_data['create_time']
-        if form.cleaned_data['update_time']:
-            paper.update_time = form.cleaned_data['update_time']
-        else:
-            paper.update_time = timezone.now()
+        u = AddUserIfNotExist(
+            form.cleaned_data['creator_nickname'],
+            form.cleaned_data['creator_name'],
+            form.cleaned_data['creator_weixin_id'],
+            form.cleaned_data['creator_username']
+        )
+        paper.creator = u
+        paper.create_time = form.cleaned_data['create_time']
+        paper.update_time = form.cleaned_data['update_time']
         paper.doi = form.cleaned_data['doi']
         paper.pmid = form.cleaned_data['pmid']
         paper.arxiv_id = form.cleaned_data['arxiv_id']
@@ -466,9 +417,8 @@ def EditPaperView(request, id, group_name):
         paper.is_private = form.cleaned_data['is_private']
         paper.comments = form.cleaned_data['comments']
         paper.save()
-        return HttpResponseRedirect(reverse('group:paper', args=[id]))
+        return HttpResponseRedirect(reverse('group:paper', kwargs={'group_name':group_name,'id':id}))
     else:
-        paper = get_paper_list(request, group_name).get(pk=id)
         data = {
             'creator_nickname': paper.creator.nickname,
             'creator_name': paper.creator.name,
@@ -499,12 +449,10 @@ def EditPaperView(request, id, group_name):
         form = PaperForm(data)
         template = loader.get_template('group/edit.html')
         context = {
-            'site_name': get_site_name(group_name),
             'group_name': group_name,
             'current_page': 'edit',
             'paper': paper,
             'form': form,
-            'is_xiangma': is_xiangma(group_name),
         }
         return HttpResponse(template.render(context, request))
 
@@ -512,12 +460,11 @@ def UserView(request, id, group_name):
     user = get_object_or_404(User, pk=id)
     paper_list, total_count = get_paper_list(request, group_name, user=user)
     template = loader.get_template('group/list.html')
-    if is_xiangma(group_name):
+    if group_name == "xiangma":
         summary_message = '本页面显示由用户 <b>' + user.nickname + '</b> 推荐的文献。'
     else:
         summary_message = 'This page shows papers recommended by <b>' + user.nickname + '</b>. '
     context = {
-        'site_name': get_site_name(group_name),
         'group_name': group_name,
         'current_page': 'user',
         'total_count': total_count,

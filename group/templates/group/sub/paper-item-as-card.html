@@ -98,5 +98,5 @@
 <div class="paper-comments-block">
   <hr class="paper-sep-line">
   <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "group:user" id=paper.creator.pk group_name=group_name %}">{{ paper.creator }}</a></b>: {% if group_name != "xiangma" %}{% if paper.create_time|date:'Y-m-d H:i:s' < paper.update_time|date:'Y-m-d H:i:s' %}<i>(updated at {{ paper.update_time|date:'Y-m-d H:i:s' }})</i>{% endif %}{% endif %}</div>
-  <div class="paper-comments">{% autoescape off %}{% format_comments_2 paper.comments group_name %}{% endautoescape %}</div>
+  <div class="paper-comments">{% autoescape off %}{{ paper.comments }}{% endautoescape %}</div>
 </div>

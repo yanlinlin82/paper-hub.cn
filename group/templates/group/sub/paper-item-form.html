@@ -46,7 +46,6 @@ function do_fetch_paper_info() {
     });
 }
 </script>
-{% if is_xiangma %}
 <div class="row">
   <div class="col-25">{{ form.creator_nickname.label_tag }}</div>
   <div class="col-75">{{ form.creator_nickname }}<input type="button" id="fetch_creator" name="fetch_creator" value="Fetch" class="attach_to_text" onclick="javascript:do_fetch_creator_info();"></div>
@@ -63,10 +62,6 @@ function do_fetch_paper_info() {
   <div class="col-25">{{ form.creator_username.label_tag }}</div>
   <div class="col-75">{{ form.creator_username }}</div>
 </div>
-{% else %}
-<input type="hidden" name="content" value="{{value}}">
-{% endif %}
-{% if is_xiangma %}
 <br>
 {% if paper.create_time %}
 <div class="row">
@@ -81,7 +76,6 @@ function do_fetch_paper_info() {
   <div class="col-75">{{ form.update_time }}</div>
 </div>
   {% endif %}
-{% endif %}
 {% endif %}
 <br>
 <div class="row">

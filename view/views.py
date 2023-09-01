@@ -1,9 +1,6 @@
 import re
+import zoneinfo
 
-try:
-    import zoneinfo
-except ImportError:
-    from backports import zoneinfo
 from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -19,9 +16,6 @@ from .forms import PaperForm
 from .paper import *
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
-
-def get_site_name(request):
-    return 'Paper-Hub'
 
 def GetCurrentUser(request):
     if not request.user.is_authenticated:
@@ -44,7 +38,6 @@ def All(request):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('view/list.html')
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'all',
         'paper_list': paper_list,
         'summary_messages': '',
@@ -57,7 +50,6 @@ def Recent(request):
     summary_message = 'This page shows papers in last week. '
     template = loader.get_template('view/list.html')
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'recent',
         'paper_list': paper_list,
         'summary_messages': summary_message
@@ -69,7 +61,6 @@ def Favor(request):
     summary_message = 'This page shows favorite papers. '
     template = loader.get_template('view/list.html')
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'favor',
         'paper_list': paper_list,
         'summary_messages': summary_message
@@ -80,7 +71,6 @@ def Trash(request):
     paper_list = get_paper_list(request, include_trash=True).exclude(delete_time=None).order_by('-create_time', '-pk')
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'view/list.html', {
-        'site_name': get_site_name(request),
         'current_page': 'trash',
         'paper_list': paper_list,
         'summary_messages': summary_message
@@ -91,14 +81,12 @@ def CollectionViewByID(request, id):
     if collections.count() <= 0:
         return render(request, 'view/collection.html', {
             'error_message': 'Invalid collection ID: ' + str(id),
-            'site_name': get_site_name(request),
             'current_page': 'collection',
         })
     paper_list = collections[0].papers.order_by('-create_time', '-pk')
     template = loader.get_template('view/collection.html')
     summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'collection',
         'collection': collections[0],
         'paper_list': paper_list,
@@ -111,7 +99,6 @@ def CollectionViewBySlug(request, slug):
     template = loader.get_template('view/list.html')
     summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'collection',
         'paper_list': paper_list,
         'summary_messages': summary_message,
@@ -126,7 +113,6 @@ def PaperLabelView(request, name):
     template = loader.get_template('view/list.html')
     summary_message = 'This page shows list of label "<b>' + name + '</b>". '
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'label',
         'paper_list': paper_list,
         'summary_messages': summary_message,
@@ -137,14 +123,12 @@ def SinglePaperView(request, id):
     paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'view/single.html', {
-            'site_name': get_site_name(request),
             'current_page': 'paper',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     paper = paper_list[0]
     template = loader.get_template('view/single.html')
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'paper',
         'paper': paper,
     }
@@ -153,14 +137,12 @@ def SinglePaperView(request, id):
 def RestorePaperView(request, id):
     if not request.user.is_authenticated:
         return render(request, 'base.html', {
-            'site_name': get_site_name(request),
             'current_page': 'restore_from_trash',
             'error_message': 'No permission! Login first!',
         })
     paper_list = get_paper_list(request, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'view/list.html', {
-            'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
@@ -172,14 +154,12 @@ def RestorePaperView(request, id):
 def DeleteForeverPaperView(request, id):
     if not request.user.is_authenticated:
         return render(request, 'base.html', {
-            'site_name': get_site_name(request),
             'current_page': 'delete_forever',
             'error_message': 'No permission! Login first!',
         })
     paper_list = get_paper_list(request, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'view/list.html', {
-            'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
@@ -189,14 +169,12 @@ def DeleteForeverPaperView(request, id):
 def DeletePaperView(request, id):
     if not request.user.is_authenticated:
         return render(request, 'base.html', {
-            'site_name': get_site_name(request),
             'current_page': 'delete',
             'error_message': 'No permission! Login first!',
         })
     paper_list = get_paper_list(request, include_trash=True).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'view/list.html', {
-            'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
@@ -211,14 +189,12 @@ def DeletePaperView(request, id):
 def EditPaperView(request, id):
     if not request.user.is_authenticated:
         return render(request, 'view/edit.html', {
-            'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'No permission! Login first!',
         })
     paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'view/edit.html', {
-            'site_name': get_site_name(request),
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
@@ -227,7 +203,6 @@ def EditPaperView(request, id):
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'view/edit.html', {
-                'site_name': get_site_name(request),
                 'current_page': 'edit',
                 'error_message': form.errors,
             })
@@ -296,7 +271,6 @@ def EditPaperView(request, id):
         form = PaperForm(data)
         template = loader.get_template('view/edit.html')
         context = {
-            'site_name': get_site_name(request),
             'current_page': 'edit',
             'paper': paper,
             'form': form,
@@ -307,7 +281,6 @@ def UserView(request, id):
     u = User.objects.filter(pk=id)
     if u.count() <= 0:
         return render(request, 'view/list.html', {
-            'site_name': get_site_name(request),
             'current_page': 'list',
             'error_message': "Invalid user id!",
         })
@@ -315,7 +288,6 @@ def UserView(request, id):
     template = loader.get_template('view/list.html')
     summary_message = 'This page shows papers recommended by <b>' + u[0].nickname + '</b>. '
     context = {
-        'site_name': get_site_name(request),
         'current_page': 'user',
         'paper_list': paper_list,
         'summary_messages': summary_message,
@@ -376,7 +348,6 @@ def AddUserIfNotExist(a_nickname, a_name, a_weixin_id, a_username):
 def PaperAdd(request):
     if not request.user.is_authenticated:
         return render(request, 'view/add.html', {
-            'site_name': get_site_name(request),
             'current_page': 'add',
             'error_message': 'No permission! Login first!',
         })
@@ -384,7 +355,6 @@ def PaperAdd(request):
         form = PaperForm(request.POST)
         if not form.is_valid():
             return render(request, 'view/add.html', {
-                'site_name': get_site_name(request),
                 'current_page': 'add',
                 'error_message': form.errors,
             })
@@ -432,7 +402,6 @@ def PaperAdd(request):
             }
         form = PaperForm(data)
         context = {
-            'site_name': get_site_name(request),
             'current_page': 'add',
             'form': form,
             'paper': paper,
@@ -483,7 +452,6 @@ def Login(request):
             login(request, user)
             return HttpResponseRedirect(request.GET['ref'])
     return render(request, 'view/login.html', {
-        'site_name': get_site_name(request),
         'ref': request.GET['ref'],
     })
 
