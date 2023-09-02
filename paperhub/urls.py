@@ -23,6 +23,7 @@ def redirect(request):
 
 urlpatterns = [
     path('', redirect, name='index'),
+    path('api/', include('api.urls')),
     path('view/', include('view.urls')),
     path('user/', include('user.urls')),
     path('group/', include('group.urls')),

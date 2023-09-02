@@ -1,5 +1,9 @@
+import os
+import sys
 import requests
 import json
+import xmltodict
+import re
 from django.http import JsonResponse
 from .models import CrossRefCache
 import xml.etree.ElementTree as ET
@@ -106,3 +110,118 @@ def query_doi(doi):
         "abstract": abstract,
         "urls": urls,
     }}, status=200)
+
+def eprint(*args, **kwargs): # print to stderr instead of stdout
+    print(*args, file=sys.stderr, **kwargs)
+
+def is_valid_arxiv_id(input_string):
+    pattern = r'^(arXiv:)?\d{4}\.\d{5}$'
+    return re.match(pattern, input_string)
+
+def fetch_and_cache(url, cache_filename):
+    if os.path.exists(cache_filename):
+        # If the cache file exists, load the data from it
+        with open(cache_filename, 'r', encoding='utf-8') as cache_file:
+            data = cache_file.read()
+        eprint(f"Loaded data from cache '{cache_filename}'")
+    else:
+        # If the cache file doesn't exist, fetch data from the URL
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.text
+            # Cache the data to a local file
+            os.makedirs(os.path.dirname(cache_filename), mode=0o755, exist_ok=True)
+            with open(cache_filename, 'w', encoding='utf-8') as cache_file:
+                cache_file.write(data)
+            eprint(f"Fetched data from the URL and cached it: {url}")
+        else:
+            eprint("Failed to fetch data from the URL.")
+            data = None
+    return data
+
+def fetch_json(api_url, cache_filename, is_xml=False):
+    print(api_url)
+    text_data = fetch_and_cache(api_url, cache_filename)
+
+    if is_xml:
+        xml_dict = xmltodict.parse(text_data)
+        text_data = json.dumps(xml_dict)
+
+    try:
+        json_data = json.loads(text_data)
+        return json_data
+    except json.JSONDecodeError as e:
+        eprint(f"Error decoding JSON: {e}")
+        return None
+
+# Function to query paper info by arXiv ID
+def get_paper_info_by_arxiv_id(arxiv_id):
+    cache_filename = "cache/arxiv/" + arxiv_id + ".txt"
+    api_url = f"https://export.arxiv.org/api/query?id_list={arxiv_id}"
+    data = fetch_json(api_url, cache_filename, is_xml=True)
+    if 'feed' in data and 'entry' in data['feed']:
+        paper_info = data['feed']['entry']
+        return paper_info
+    return None
+
+# Function to query paper info by PubMed ID (PMID)
+def get_paper_info_by_pmid(pmid):
+    cache_filename = "cache/pubmed/" + pmid + ".txt"
+    api_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={pmid}&retmode=json"
+    data = fetch_json(api_url, cache_filename)
+    if 'result' in data and pmid in data['result']:
+        paper_info = data['result'][pmid]
+        return paper_info
+    return None
+
+# Function to query paper info by PMC ID
+def get_paper_info_by_pmc_id(pmc_id):
+    cache_filename = "cache/pmc/" + pmc_id + ".txt"
+    api_url = f"https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?ids={pmc_id}&format=json"
+    data = fetch_json(api_url, cache_filename)
+    if 'records' in data and len(data['records']) > 0:
+        paper_info = data['records'][0]
+        return paper_info
+    return None
+
+# Function to query paper info by DOI
+def get_paper_info_by_doi(doi):
+    cache_filename = "cache/doi/" + doi + ".txt"
+    api_url = f"https://api.crossref.org/works/{doi}"
+    data = fetch_json(api_url, cache_filename)
+    if 'message' in data:
+        paper_info = data['message']
+        return paper_info
+    return None
+
+def get_paper_info(identifier):
+    # Check the format of the identifier and call the corresponding function
+    if identifier.startswith("arXiv:"):
+        # arXiv ID
+        identifier = identifier.replace("arXiv:", "")
+        return get_paper_info_by_arxiv_id(identifier)
+    elif identifier.isdigit():
+        # Check if it's a number (PMID)
+        return get_paper_info_by_pmid(identifier)
+    elif identifier.startswith("PMC"):
+        # PMC ID
+        return get_paper_info_by_pmc_id(identifier)
+    else:
+        # DOI
+        return get_paper_info_by_doi(identifier)
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Usage: %s <id>" % sys.argv[0])
+        exit(1)
+
+    identifier = sys.argv[1]
+    paper_info = get_paper_info(identifier)
+
+    if paper_info:
+        print("Title:", paper_info.get('title', 'N/A'))
+        print("Authors:", ', '.join(paper_info.get('author', ['N/A'])))
+        print("Publication Date:", paper_info.get('published', 'N/A'))
+        print("Abstract:", paper_info.get('abstract', 'N/A'))
+    else:
+        print("No information found for the given identifier.")

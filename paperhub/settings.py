@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [ "localhost", "paper-hub.cn" ]
 # Application definition
 
 INSTALLED_APPS = [
+    'api.apps.ApiConfig',
     'view.apps.ViewConfig',
     'user.apps.UserConfig',
     'group.apps.GroupConfig',

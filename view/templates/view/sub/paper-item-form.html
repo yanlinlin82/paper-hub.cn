@@ -7,7 +7,7 @@ function do_fetch_creator_info() {
     alert("Error: fill nickname first!");
     return 1;
   }
-  var url = '{% url "view:ajax_query_user" 0 %}'.replace('0', nickname);
+  var url = '{% url "api:query_user" 0 %}'.replace('0', nickname);
   fetch(url)
     .then(response => response.json())
     .then(data => {
@@ -28,7 +28,7 @@ function do_fetch_paper_info() {
     alert("Error: fill ID first!");
     return 1;
   }
-  var url = '{% url "view:ajax_fetch_paper" 0 %}'.replace('0', id);
+  var url = '{% url "api:query_paper" 0 %}'.replace('0', id);
   fetch(url)
     .then(response => response.json())
     .then(obj => {
