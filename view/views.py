@@ -1,14 +1,12 @@
 import zoneinfo
 
 from datetime import datetime, timedelta
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
-from django.db.models import Count
 from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
-from django.db.models.aggregates import Min
 
 from .models import Label, Paper, User, Collection
 from .forms import PaperForm
