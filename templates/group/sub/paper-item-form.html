@@ -1,8 +1,6 @@
 <script>
-function E(id) { return document.getElementById(id); }
-
 function do_fetch_creator_info() {
-  var nickname = E('id_creator_nickname').value;
+  var nickname = $('#id_creator_nickname').val();
   if (nickname == "") {
     alert("Error: fill nickname first!");
     return 1;
@@ -14,16 +12,16 @@ function do_fetch_creator_info() {
       if (data["error"] != "") {
         alert("Error: " + data["error"]);
       } else {
-        E('id_creator_nickname').value = data["results"]["nickname"];
-        E('id_creator_name').value = data["results"]["name"];
-        E('id_creator_weixin_id').value = data["results"]["weixin_id"];
-        E('id_creator_username').value = data["results"]["username"];
+        $('#id_creator_nickname').val(data["results"]["nickname"]);
+        $('#id_creator_name').val(data["results"]["name"]);
+        $('#id_creator_weixin_id').val(data["results"]["weixin_id"]);
+        $('#id_creator_username').val(data["results"]["username"]);
       }
     });
 }
 
 function do_fetch_paper_info() {
-  var id = E('paper_query_id').value;
+  var id = $('#paper_query_id').val();
   if (id == "") {
     alert("Error: fill ID first!");
     return 1;
@@ -35,13 +33,13 @@ function do_fetch_paper_info() {
       if (obj["error"] != "") {
         alert("Error: " + obj["error"]);
       } else {
-        E('id_doi').value = obj["results"]["doi"];
-        E('id_title').value = obj["results"]["title"];
-        E('id_journal').value = obj["results"]["journal"];
-        E('id_pub_date').value = obj["results"]["pub_date"];
-        E('id_authors').value = obj["results"]["authors"];
-        E('id_abstract').value = obj["results"]["abstract"];
-        E('id_urls').value = obj["results"]["urls"];
+        $('#id_doi').val(obj["results"]["doi"]);
+        $('#id_title').val(obj["results"]["title"]);
+        $('#id_journal').val(obj["results"]["journal"]);
+        $('#id_pub_date').val(obj["results"]["pub_date"]);
+        $('#id_authors').val(obj["results"]["authors"]);
+        $('#id_abstract').val(obj["results"]["abstract"]);
+        $('#id_urls').val(obj["results"]["urls"]);
       }
     });
 }
