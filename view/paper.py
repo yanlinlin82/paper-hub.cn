@@ -114,10 +114,6 @@ def query_doi(doi):
 def eprint(*args, **kwargs): # print to stderr instead of stdout
     print(*args, file=sys.stderr, **kwargs)
 
-def is_valid_arxiv_id(input_string):
-    pattern = r'^(arXiv:)?\d{4}\.\d{5}$'
-    return re.match(pattern, input_string)
-
 def fetch_and_cache(url, cache_filename):
     if os.path.exists(cache_filename):
         # If the cache file exists, load the data from it
@@ -161,8 +157,8 @@ def get_paper_info_by_arxiv_id(arxiv_id):
     data = fetch_json(api_url, cache_filename, is_xml=True)
     if 'feed' in data and 'entry' in data['feed']:
         paper_info = data['feed']['entry']
-        return paper_info
-    return None
+        return paper_info, data
+    return None, f"Query arXiv ID '{arxiv_id}' failed!"
 
 # Function to query paper info by PubMed ID (PMID)
 def get_paper_info_by_pmid(pmid):
@@ -171,8 +167,8 @@ def get_paper_info_by_pmid(pmid):
     data = fetch_json(api_url, cache_filename)
     if 'result' in data and pmid in data['result']:
         paper_info = data['result'][pmid]
-        return paper_info
-    return None
+        return paper_info, data
+    return None, f"Query PubMed ID '{pmid}' failed!"
 
 # Function to query paper info by PMC ID
 def get_paper_info_by_pmc_id(pmc_id):
@@ -181,8 +177,8 @@ def get_paper_info_by_pmc_id(pmc_id):
     data = fetch_json(api_url, cache_filename)
     if 'records' in data and len(data['records']) > 0:
         paper_info = data['records'][0]
-        return paper_info
-    return None
+        return paper_info, data
+    return None, f"Query PMC ID '{pmc_id}' failed!"
 
 # Function to query paper info by DOI
 def get_paper_info_by_doi(doi):
@@ -190,25 +186,73 @@ def get_paper_info_by_doi(doi):
     api_url = f"https://api.crossref.org/works/{doi}"
     data = fetch_json(api_url, cache_filename)
     if 'message' in data:
-        paper_info = data['message']
-        return paper_info
-    return None
+        obj = data['message']
+        type = obj.get('type', '')
+        title = " ".join(obj.get('title', []))
+        journal = " ".join(obj.get('container-title', []))
+        pub_date = obj.get('created', {'date-time':''}).get('date-time', '')[0:10]
+        issue = obj.get('issue', '')
+        volume = obj.get('volume', '')
+        page = obj.get('page', '')
+        abstract = obj.get('abstract', '')
+        authors = "\n".join(node.get('given', '') + ' ' + node.get('family', '') for node in obj.get('author', []))
+        urls = "\n".join(list(np.unique([node["URL"] for node in obj.get('link', [])])))
+
+        paper_info = {
+            'doi': doi,
+            'type': type,
+            'title': title,
+            'journal': journal,
+            'pub_date': pub_date,
+            'issue': issue,
+            'volume': volume,
+            'page': page,
+            'abstract': abstract,
+            'authors': authors,
+            'urls': urls
+        }
+        print(paper_info)
+        #print(data)
+        return paper_info, data
+    return None, f"Query DOI '{doi}' failed!"
 
 def get_paper_info(identifier):
-    # Check the format of the identifier and call the corresponding function
-    if identifier.startswith("arXiv:"):
+    if identifier.startswith("10."):
+        # DOI
+        doi = identifier
+        pattern_arxiv = re.compile('^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
+        m = pattern_arxiv.match(doi)
+        if m:
+            # arXiv ID
+            arxiv_id = m.group(1)
+            return get_paper_info_by_arxiv_id(arxiv_id)
+        return get_paper_info_by_doi(doi)
+    elif re.match(r'^(arXiv:)?\d{4}\.\d{5}$', identifier):
         # arXiv ID
-        identifier = identifier.replace("arXiv:", "")
-        return get_paper_info_by_arxiv_id(identifier)
+        arxiv_id = identifier.replace("arXiv:", "")
+        return get_paper_info_by_arxiv_id(arxiv_id)
     elif identifier.isdigit():
         # Check if it's a number (PMID)
-        return get_paper_info_by_pmid(identifier)
+        pmid = identifier
+        return get_paper_info_by_pmid(pmid)
     elif identifier.startswith("PMC"):
         # PMC ID
-        return get_paper_info_by_pmc_id(identifier)
+        pmc_id = identifier
+        return get_paper_info_by_pmc_id(pmc_id)
     else:
-        # DOI
-        return get_paper_info_by_doi(identifier)
+        # invalid ID
+        return None, f"Invalid paper ID '{identifier}'"
+
+    #pattern_pubmed = re.compile('^[0-9]+$')
+    #if pattern_pubmed.search(id):
+    #    return query_pubmed(id)
+    #pattern_arxiv = re.compile('^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
+    #m = pattern_arxiv.match(id)
+    #if m:
+    #    arxiv_id = m.group(1)
+    #    return query_arxiv(arxiv_id)
+    #else:
+    #    return query_doi(id)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
