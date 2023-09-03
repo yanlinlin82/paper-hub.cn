@@ -33,7 +33,11 @@ function do_fetch_paper_info() {
       if (obj["error"] != "") {
         alert("Error: " + obj["error"]);
       } else {
+        console.log(obj);
         $('#id_doi').val(obj["results"]["doi"]);
+        $('#id_pmid').val(obj["results"]["pmid"]);
+        $('#id_arxiv_id').val(obj["results"]["arxiv_id"]);
+        $('#id_pmc_id').val(obj["results"]["pmc_id"]);
         $('#id_title').val(obj["results"]["title"]);
         $('#id_journal').val(obj["results"]["journal"]);
         $('#id_pub_date').val(obj["results"]["pub_date"]);
