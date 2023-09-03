@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block menu %}{% include "view/sub/menu.html" %}{% endblock menu %}
+{% block menu %}{% include "view/menu.html" %}{% endblock menu %}
 
 {% block content %}
 <div class="page-summary">
@@ -9,7 +9,7 @@
 {% if paper_list %}
 {% for paper in paper_list %}
 <div class="paper-item">
-  {% include "view/sub/paper-item-as-card.html" %}
+  {% include "view/paper-item-as-card.html" %}
 </div>
 {% endfor %}
 {% else %}

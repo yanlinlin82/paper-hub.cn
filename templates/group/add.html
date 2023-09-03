@@ -11,7 +11,7 @@
 <hr>
 {{ form.errors }}
 <form id="paper-form" method="post">{% csrf_token %}
-  {% include "group/sub/paper-item-form.html" %}
+  {% include "group/paper-item-form.html" %}
   <hr>
   <div class="row">
     <div class="col-25"></div>
@@ -21,4 +21,4 @@
 </div>
 {% endblock content %}
 
-{% block menu %}{% include "group/sub/menu.html" %}{% endblock menu %}
+{% block menu %}{% include "group/menu.html" %}{% endblock menu %}

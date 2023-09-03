@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block menu %}{% include "view/sub/menu.html" %}{% endblock menu %}
+{% block menu %}{% include "view/menu.html" %}{% endblock menu %}
 
 {% block content %}
 <div class="container-fluid">
@@ -9,7 +9,7 @@
 {{ form.errors }}
 <form id="paper-form" method="post">
   {% csrf_token %}
-  {% include "view/sub/paper-item-form.html" %}
+  {% include "view/paper-item-form.html" %}
   <hr>
   <div class="row"><input type="submit" value="Save"></div>
 <form>

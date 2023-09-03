@@ -5,7 +5,7 @@
 <h2>{{ group.display_name }}</h2>
 {% endblock nav %}
 
-{% block menu %}{% include "group/sub/menu.html" %}{% endblock menu %}
+{% block menu %}{% include "group/menu.html" %}{% endblock menu %}
 
 {% block content %}
 <div class="page-summary">
@@ -28,7 +28,7 @@ Page:
 
 {% for paper in paper_list %}
 <div class="paper-item">
-  {% include "group/sub/paper-item-as-card.html" %}
+  {% include "group/paper-item-as-card.html" %}
 </div>
 {% endfor %}
 {% else %}
