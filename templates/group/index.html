@@ -1,17 +1,30 @@
 {% extends "base.html" %}
 
+{% block head %}
+<div class="text-center">
+  <h2>Paper-Hub</h2>
+  <p>Sharing papers with ease and joy!</p>
+</div>
+{% endblock head %}
+
 {% block nav %}
 <a href="/">Home</a> &gt; Group
 {% endblock nav %}
 
-{% block content %}
-{% if group_list %}
-<ul>
-{% for group in group_list %}
-<li><b><a href="{% url "group:all" group_name=group.name %}">{{ group.display_name }}</a></b> (created at {{ group.create_time|date:"Y-m-d" }})<br>{{ group.desc }}</li>
-{% endfor %}
-</ul>
-{% else %}
-<p>No any group yet.</p>
-{% endif %}
-{% endblock content %}
+{% block body %}
+<div class="container pb-3">
+  {% if group_list %}
+  {% for group in group_list %}
+  <div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <a class="card-title fs-4" href="{% url "group:all" group_name=group.name %}">{{ group.display_name }}</a>
+      <p class="card-text pt-3">{{ group.desc }}</p>
+      <p class="card-text">(created at {{ group.create_time|date:"Y-m-d" }})</p>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <p>No any group yet.</p>
+  {% endif %}
+</div>
+{% endblock body %}

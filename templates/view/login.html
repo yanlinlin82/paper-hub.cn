@@ -1,61 +1,34 @@
-<!DOCTYPE html>{% load static %}
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Paper-Hub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-  <link rel="stylesheet" href="{% static 'styles.css' %}">
-  <style>
-.login-box {
-  margin: 50px auto;
-  width: 500px;
-  border: 1px solid black;
-  border-top: solid 3px #bf9000;
-  background-color: #eee;
-}
-.login-box .logo {
-  padding: 0 30px;
-  font-family: Helvetica;
-  font-size: 24px;
-  font-weight: 900;
-}
-.login-box input[type=text],
-.login-box input[type=password] {
-  width: 90%;
-}
-  </style>
-</head>
-<body>
-  <div class="login-box">
-    <h1 class="logo">Paper-Hub</h1>
-    <hr>
-    <form method="post">{% csrf_token %}
-      <div class="form-row">
-        <div class="col-25">
-          <label>Username:</label>
-        </div>
-        <div class="col-75">
-          <input type="text" id="username" name="username" placeholder="Username">
-        </div>
+{% extends "base.html" %}
+
+{% block all %}
+<div class="login-box">
+  <h1 class="logo">Paper-Hub</h1>
+  <hr>
+  <form method="post">{% csrf_token %}
+    <div class="form-row">
+      <div class="col-25">
+        <label>Username:</label>
       </div>
-      <div class="form-row">
-        <div class="col-25">
-          <label>Password:</label>
-        </div>
-        <div class="col-75">
-          <input type="password" id="password" name="password" placeholder="Password">
-        </div>
+      <div class="col-75">
+        <input type="text" id="username" name="username" placeholder="Username">
       </div>
-      <div class="form-row">
-        <div class="col-25">
-        </div>
-        <div class="col-75">
-          <input type="hidden" id="ref" name="ref" value="{{ ref }}">
-          <input type="submit" id="login" name="login" value="Login" class="login-submit">
-        </div>
+    </div>
+    <div class="form-row">
+      <div class="col-25">
+        <label>Password:</label>
       </div>
-    </form>
-  </div>
-</body>
-</html>
+      <div class="col-75">
+        <input type="password" id="password" name="password" placeholder="Password">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="col-25">
+      </div>
+      <div class="col-75">
+        <input type="hidden" id="ref" name="ref" value="{{ ref }}">
+        <input type="submit" id="login" name="login" value="Login" class="login-submit">
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock all %}

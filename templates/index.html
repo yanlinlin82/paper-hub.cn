@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
-{% block nav %}
-<a href="/">Home</a> | <a href="/view">Library</a> | <a href="/group">Group</a>
-{% endblock nav %}
+{% block body %}
+<section>
+  <h2>Sharing</h2>
+  <p>Paper-Hub is a free, easy-to-use online tool to help you share research paper with comments.</p>
+  <p>Click <a href="/add">here</a> to find a paper and write comment to share.</p>
+</section>
+
+<section>
+  <h2>Groups</h2>
+  <p>It is also easy to create group for collaboration remotely with project members.</p>
+  <p>Click <a href="/group">here</a> to browse public groups.</p>
+</section>
+{% endblock body %}
