@@ -6,7 +6,6 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-from django.contrib.auth import authenticate, login, logout
 
 from .models import Label, Paper, User, Collection
 from .forms import PaperForm
@@ -405,19 +404,3 @@ def PaperAdd(request):
         }
         template = loader.get_template('view/add.html')
         return HttpResponse(template.render(context, request))
-
-def Login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(request.GET['ref'])
-    return render(request, 'view/login.html', {
-        'ref': request.GET['ref'],
-    })
-
-def Logout(request):
-    logout(request)
-    return HttpResponseRedirect(request.GET['ref'])

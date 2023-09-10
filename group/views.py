@@ -2,7 +2,6 @@ import re
 import zoneinfo
 
 from datetime import datetime, timedelta
-from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count
 from django.db.models.aggregates import Min

@@ -23,6 +23,4 @@ urlpatterns = [
     path('paper/<int:id>', views.SinglePaperView, name='paper'),
     path('user/<int:id>', views.UserView, name='user'),
     path('add', views.PaperAdd, name='add'),
-    path('login', views.Login, name='login'),
-    path('logout', views.Logout, name='logout'),
 ]

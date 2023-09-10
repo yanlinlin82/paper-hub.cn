@@ -1,8 +1,35 @@
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.contrib.auth import authenticate, login, logout
 
-from view.models import Paper, User
+from view.models import User
 from view.paper import *
+
+def Test(request, text):
+    return JsonResponse({
+        'success': True,
+        "text": text
+    })
+
+def Login(request):
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    username = request.POST['username']
+    password = request.POST['password']
+    if username is not None and password is not None:
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'success': True})
+    return JsonResponse({'error':'Login failed!'})
+
+def Logout(request):
+    logout(request)
+    return JsonResponse({'success': True})
 
 def QueryUser(request, user):
     """
@@ -26,17 +53,17 @@ def QueryUser(request, user):
     if u.count() == 0:
         u = User.objects.filter(username=user)
     if u.count() == 0:
-        return JsonResponse({"error": "user '" + user + "' not found."}, status=200)
+        return JsonResponse({"error": "user '" + user + "' not found."})
     else:
         return JsonResponse({
-            "error": "",
+            'success': True,
             "query": user,
             "results": {
                 "nickname": u[0].nickname,
                 "name": u[0].name,
                 "weixin_id": u[0].weixin_id,
                 "username": u[0].username,
-            }}, status=200)
+            }})
 
 def QueryPaper(request, id):
     """
@@ -58,10 +85,13 @@ def QueryPaper(request, id):
     """
     paper_info, raw_dict = get_paper_info(id)
     if paper_info is None:
-        return JsonResponse({"error": raw_dict})
+        return JsonResponse({
+            'success': False,
+            "error": raw_dict
+            })
 
     return JsonResponse({
-        "error": "",
+        'success': True,
         "query": id,
         "raw": raw_dict,
         "results": {
@@ -75,4 +105,4 @@ def QueryPaper(request, id):
             "authors": paper_info.get('authors', ''),
             "abstract": paper_info.get('abstract', ''),
             "urls": paper_info.get('urls', ''),
-        }}, status=200)
+        }})
