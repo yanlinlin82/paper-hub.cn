@@ -23,7 +23,6 @@ urlpatterns = [
     path('about', views.about, name='about'),
     path('api/', include('api.urls')),
     path('view/', include('view.urls')),
-    path('user/', include('user.urls')),
     path('group/', include('group.urls')),
     path('admin/', admin.site.urls),
 ]

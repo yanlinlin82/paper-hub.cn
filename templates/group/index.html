@@ -2,18 +2,26 @@
 
 {% block main %}
 <div class="container pb-3">
-  {% if group_list %}
-  {% for group in group_list %}
-  <div class="card" style="width: 18rem;">
-    <div class="card-body">
-      <a class="card-title fs-4" href="{% url "group:all" group_name=group.name %}">{{ group.display_name }}</a>
-      <p class="card-text pt-3">{{ group.desc }}</p>
-      <p class="card-text">(created at {{ group.create_time|date:"Y-m-d" }})</p>
+  <section>
+    <h2>Motivation</h2>
+    <p>Group is created for people sharing research papers and ideas.</p>
+  </section>
+
+  <section>
+    <h2>Group List</h2>
+    {% if group_list %}
+    {% for group in group_list %}
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <a class="card-title fs-4" href="{% url "group:all" group_name=group.name %}">{{ group.display_name }}</a>
+        <p class="card-text pt-3">{{ group.desc }}</p>
+        <p class="card-text">(created at {{ group.create_time|date:"Y-m-d" }})</p>
+      </div>
     </div>
-  </div>
-  {% endfor %}
-  {% else %}
-  <p>No any group yet.</p>
-  {% endif %}
+    {% endfor %}
+    {% else %}
+    <p>No any group yet.</p>
+    {% endif %}
+  </section>
 </div>
 {% endblock main %}
