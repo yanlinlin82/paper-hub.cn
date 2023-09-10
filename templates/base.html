@@ -41,7 +41,16 @@
         </li>
         {% block navbar %}
         <li class="nav-item">
+          <a class="nav-link" href="{% url 'view:index' %}">Library</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="{% url 'group:index' %}">Groups</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'about' %}">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/yanlinlin.cn/paper-hub.cn/" target="_blank">GitHub</a>
         </li>
         {% endblock navbar %}
       </ul>

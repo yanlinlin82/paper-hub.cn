@@ -15,13 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from django.shortcuts import render
 
-def redirect(request):
-    return render(request, 'index.html')
+from . import views
 
 urlpatterns = [
-    path('', redirect, name='index'),
+    path('', views.index, name='index'),
+    path('about', views.about, name='about'),
     path('api/', include('api.urls')),
     path('view/', include('view.urls')),
     path('user/', include('user.urls')),
