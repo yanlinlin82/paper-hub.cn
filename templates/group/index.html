@@ -1,17 +1,6 @@
 {% extends "base.html" %}
 
-{% block head %}
-<div class="text-center">
-  <h2>Paper-Hub</h2>
-  <p>Sharing papers with ease and joy!</p>
-</div>
-{% endblock head %}
-
-{% block nav %}
-<a href="/">Home</a> &gt; Group
-{% endblock nav %}
-
-{% block body %}
+{% block main %}
 <div class="container pb-3">
   {% if group_list %}
   {% for group in group_list %}
@@ -27,4 +16,4 @@
   <p>No any group yet.</p>
   {% endif %}
 </div>
-{% endblock body %}
+{% endblock main %}

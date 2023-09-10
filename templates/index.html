@@ -1,51 +1,14 @@
 {% extends "base.html" %}
 
-{% block body %}
-<section id="sharing">
-  <h2>Sharing</h2>
-  <p>Paper-Hub is a free, easy-to-use online tool to help you share research paper with comments.</p>
-  <p>Click <a href="/add">here</a> to find a paper and write comment to share.</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-</section>
-
-<section id="library">
-  <h2>Library</h2>
-  <p>It is also easy to create group for collaboration remotely with project members.</p>
-  <p>Click <a href="/group">here</a> to browse public groups.</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-</section>
-
-<section id="groups">
-  <h2>Groups</h2>
-  <p>It is also easy to create group for collaboration remotely with project members.</p>
-  <p>Click <a href="/group">here</a> to browse public groups.</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-  <p>bla bla bla bla bla</p>
-</section>
-{% endblock body %}
+{% block main %}
+<div class="container py-5">
+  <div class="d-flex justify-content-center">
+    <form method="GET">
+      <div class="input-group w-auto">
+        <input id="q" name="q" class="form-control border-dark" type="text" placeholder="Input DOI/arXivID/PMID/PMCID" style="min-width:60%">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock main %}

@@ -2,11 +2,6 @@
 
 {% block menu %}{% include "view/menu.html" %}{% endblock menu %}
 
-{% block head %}
-<h2>Paper-Hub</h2>
-<p>Sharing papers with ease and joy!</p>
-{% endblock head %}
-
 {% block content %}
 <div class="page-summary">
   <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ paper_list|length }} paper(s).</p>
