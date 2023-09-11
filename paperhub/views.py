@@ -12,10 +12,7 @@ def index(request):
             context['error_message'] = f"Failed to query paper info with '{query}'!"
         else:
             context['results'] = [{
-                "doi": paper_info.get('doi', ''),
-                "pmid": paper_info.get('pmid', ''),
-                "arxiv_id": paper_info.get('arxiv_id', ''),
-                "pmc_id": paper_info.get('pmc_id', ''),
+                "id": paper_info.get('id'),
                 "title": paper_info.get('title', ''),
                 "journal": paper_info.get('journal', ''),
                 "pub_date": paper_info.get('pub_date', ''),

@@ -30,23 +30,36 @@
   <ol>
     {% for item in results %}
     <li>
-      <div class="mb-3">
-        <div>
-          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover float-end" href="#" data-bs-toggle="modal" data-bs-target="#shareModal" data-paper-id="{{ item.doi }}">Share</a>
+      <div class="mb-3 px-3">
+        <div class="fs-5">{{ item.title }}</div>
+        <div class="text-secondary fst-italic">
+          {% for author in item.authors %}
+          {{ author }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
         </div>
-        <div class="px-3 pb-3">
-          <div class="fs-5">{{ item.title }}</div>
-          <div class="text-secondary fst-italic">
-            {% for author in item.authors %}
-            {{ author }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-          </div>
-          <div class="text-secondary">
-            <span>{{ item.journal }}</span>
-            <span>{{ item.pub_date }}</span>
-            <span>doi: <a class="link-secondary" href="https://doi.org/{{ item.doi }}" target="_blank">{{ item.doi }}</a></span>
-            <span>PMID: <a class="link-secondary" href="https://pubmed.ncbi.nlm.nih.gov/{{ item.pmid }}/" target="_blank">{{ item.pmid }}</a></span>
-          </div>
+        <div class="text-secondary">
+          <span>{{ item.journal }}</span>
+          <span>{{ item.pub_date }}</span>
+        </div>
+        <div class="text-secondary">
+          {% if item.id.doi %}
+          <span class="me-2">DOI: <a class="link-secondary" href="https://doi.org/{{ item.id.doi }}" target="_blank">{{ item.id.doi }}</a></span>
+          {% endif %}
+          {% if item.id.pmid %}
+          <span class="me-2">PMID: <a class="link-secondary" href="https://pubmed.ncbi.nlm.nih.gov/{{ item.id.pmid }}/" target="_blank">{{ item.id.pmid }}</a></span>
+          {% endif %}
+          {% if item.id.pmcid %}
+          <span class="me-2">PMCID: <a class="link-secondary" href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ item.id.pmcid }}/" target="_blank">{{ item.id.pmcid }}</a></span>
+          {% endif %}
+          {% if item.id.arxiv_id %}
+          <span class="me-2">arXivID: <a class="link-secondary" href="https://arxiv.org/abs/{{ item.id.arxiv_id }}" target="_blank">{{ item.id.arxiv_id }}</a></span>
+          {% endif %}
+          {% if item.id.pii %}
+          <span class="me-2">PII: {{ item.id.pii }}</span>
+          {% endif %}
+        </div>
+        <div class="mt-2">
+          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="#" data-bs-toggle="modal" data-bs-target="#shareModal" data-paper-id="{{ item.doi }}">Share</a>
         </div>
       </div>
     </li>
@@ -106,10 +119,10 @@
   </div>
 </div>
 <script>
-  $('#shareModel').on('shown.bs.modal', function(e) {
-    {% if user.is_authenticated %}
-    $('user').val('{{ user }}');
-    {% endif %}
+  $('#shareModal').on('shown.bs.modal', function(e) {
+    console.log('here');
+    console.log(e);
+    {% if user.is_authenticated %}$('#user').val('{{ user }}');{% endif %}
     var paper_id = $(e.relatedTarget).data('paper-id');
     $(e.currentTarget).find('input[name="doi"]').val(paper_id);
   })

@@ -50,8 +50,10 @@ def get_paper_info_by_arxiv_id(arxiv_id):
     if 'feed' in data and 'entry' in data['feed']:
         obj = data['feed']['entry']
         paper_info = {
-            'doi': f"10.48550/arXiv.{arxiv_id}",
-            'arxiv_id': arxiv_id,
+            'id': {
+                'doi': f"10.48550/arXiv.{arxiv_id}",
+                'arxiv_id': arxiv_id,
+            },
             'title': obj.get('title', ''),
             'journal': 'arXiv',
             'abstract': obj.get('summary', ''),
@@ -62,6 +64,10 @@ def get_paper_info_by_arxiv_id(arxiv_id):
         return paper_info, data
     return None, f"Query arXiv ID '{arxiv_id}' failed!"
 
+def parse_elocation(s):
+    pattern = re.compile(r'(pii|doi):\s*([^\s]+)\s*')
+    return dict(pattern.findall(s))
+
 # Function to query paper info by PubMed ID (PMID)
 def get_paper_info_by_pmid(pmid):
     cache_filename = "cache/pubmed/" + pmid + ".txt"
@@ -70,16 +76,8 @@ def get_paper_info_by_pmid(pmid):
     if 'result' in data and pmid in data['result']:
         obj = data['result'][pmid]
 
-        doi = ''
-        elocationid = obj.get('elocationid')
-        if re.match(r'^doi: ', elocationid):
-            doi = re.sub(r'^doi:\s*', '', elocationid)
-        else:
-            doi = elocationid
-
         paper_info = {
-            'doi': doi,
-            'pmid': pmid,
+            'id': {'pmid': pmid},
             'title': obj.get('title', ''),
             'journal': obj.get('fulljournalname', ''),
             'pub_date': obj.get('pubdate'),
@@ -90,6 +88,13 @@ def get_paper_info_by_pmid(pmid):
             'authors': [node.get('name') for node in obj.get('authors', [])],
             'urls': [f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"],
         }
+
+        elocations = parse_elocation(obj.get('elocationid'))
+        if 'doi' in elocations:
+            paper_info['id']['doi'] = elocations['doi']
+        if 'pii' in elocations:
+            paper_info['id']['pii'] = elocations['pii']
+
         return paper_info, data
     return None, f"Query PubMed ID '{pmid}' failed!"
 
@@ -98,15 +103,29 @@ def get_paper_info_by_pmc_id(pmc_id):
     cache_filename = "cache/pmc/" + pmc_id + ".txt"
     api_url = f"https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?ids={pmc_id}&format=json"
     data = fetch_json(api_url, cache_filename)
+    paper_info = None
     if 'records' in data and len(data['records']) > 0:
         obj = data['records'][0]
+        raw_data = {'pmc': data}
+
         if 'doi' in obj:
             paper_info, doi_data = get_paper_info_by_doi(obj['doi'])
-            return paper_info, {'pmc': data, 'doi': doi_data}
-        if 'pmid' in obj:
+            raw_data['doi'] = doi_data
+        elif 'pmid' in obj:
             paper_info, pmid_data = get_paper_info_by_pmid(obj['pmid'])
-            return paper_info, {'pmc': data, 'pmid': pmid_data}
-    return None, f"Query PMC ID '{pmc_id}' failed!"
+            raw_data['pmid'] = pmid_data
+
+        if 'pmcid' in data['records'][0]:
+            paper_info['id']['pmcid'] = data['records'][0]['pmcid']
+        if 'pmid' in data['records'][0]:
+            paper_info['id']['pmid'] = data['records'][0]['pmid']
+        if 'doi' in data['records'][0]:
+            paper_info['id']['doi'] = data['records'][0]['doi']
+
+    if paper_info is None:
+        return None, f"Query PMC ID '{pmc_id}' failed!"
+    else:
+        return paper_info, raw_data
 
 # Function to query paper info by DOI
 def get_paper_info_by_doi(doi):
@@ -125,7 +144,7 @@ def get_paper_info_by_doi(doi):
         abstract = obj.get('abstract', '')
 
         paper_info = {
-            'doi': doi,
+            'id': {'doi': doi},
             'type': type,
             'title': title,
             'journal': journal,
@@ -174,7 +193,7 @@ Usage: python {sys.argv[0]} <doi/pmid/pmcid/arxivid>
 
 For example:
   1. DOI: 10.1101/2023.09.06.556610
-  2. PMID: 37683932
+  2. PMID: 37683932, 37678251
   3. PMCID: PMC9478175
   4. arXiv ID: 2306.03301
 """)
