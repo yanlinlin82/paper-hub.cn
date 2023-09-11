@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 
 from view.models import User
-from view.paper import *
+from utils.paper import *
 
 def Test(request, text):
     return JsonResponse({

@@ -14,7 +14,7 @@ from django.views import generic
 
 from view.models import Label, Paper, User, Collection
 from view.forms import PaperForm
-from view.paper import *
+from utils.paper import *
 from .models import Group
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")

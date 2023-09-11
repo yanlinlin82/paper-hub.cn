@@ -167,15 +167,19 @@ def get_paper_info(identifier):
         # invalid ID
         return None, f"Invalid paper ID '{identifier}'"
 
-if __name__ == '__main__':
+def main() -> int:
     if len(sys.argv) < 2:
         print(f"Usage: python {sys.argv[0]} <doi/pmid/pmcid/arxivid>")
-        sys.exit(2)
+        return 2
     id = sys.argv[1]
 
     paper_info, raw = get_paper_info(id)
     if paper_info is None:
         print(f"ERROR: Failed to get paper info by {id}", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     print(json.dumps(paper_info))
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

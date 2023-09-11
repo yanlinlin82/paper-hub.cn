@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from view.paper import *
+from utils.paper import *
 
 def index(request):
     context = {}

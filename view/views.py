@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from .models import Label, Paper, User, Collection
 from .forms import PaperForm
-from .paper import *
+from utils.paper import *
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
