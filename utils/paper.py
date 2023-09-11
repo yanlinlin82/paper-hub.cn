@@ -169,7 +169,15 @@ def get_paper_info(identifier):
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print(f"Usage: python {sys.argv[0]} <doi/pmid/pmcid/arxivid>")
+        print(f"""
+Usage: python {sys.argv[0]} <doi/pmid/pmcid/arxivid>
+
+For example:
+  1. DOI: 10.1101/2023.09.06.556610
+  2. PMID: 37683932
+  3. PMCID: PMC9478175
+  4. arXiv ID: 2306.03301
+""")
         return 2
     id = sys.argv[1]
 
