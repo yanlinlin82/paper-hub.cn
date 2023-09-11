@@ -37,9 +37,9 @@ function do_fetch_paper_info() {
         $('#id_title').val(obj["results"]["title"]);
         $('#id_journal').val(obj["results"]["journal"]);
         $('#id_pub_date').val(obj["results"]["pub_date"]);
-        $('#id_authors').val(obj["results"]["authors"]);
+        $('#id_authors').val(obj["results"]["authors"].join("\n"));
         $('#id_abstract').val(obj["results"]["abstract"]);
-        $('#id_urls').val(obj["results"]["urls"]);
+        $('#id_urls').val(obj["results"]["urls"].join("\n"));
       }
     });
 }

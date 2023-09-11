@@ -1,14 +1,55 @@
 {% extends "base.html" %}
 
 {% block main %}
-<div class="container py-5">
-  <div class="d-flex justify-content-center">
-    <form method="GET">
-      <div class="input-group w-auto">
-        <input id="q" name="q" class="form-control border-dark" type="text" placeholder="Input DOI/arXivID/PMID/PMCID" style="min-width:60%">
-        <button type="submit" class="btn btn-primary">Search</button>
-      </div>
+<section>
+  <form class="mb-5" method="GET">
+    <div>
+      <label class="form-label mb-3" for="q">Search a paper for sharing:</label>
     </div>
+    <div class="input-group w-auto mb-3">
+      <input type="text" id="q" name="q" class="form-control border-dark w-50" placeholder="Input DOI/arXivID/PMID/PMCID" value="{{ query }}" required>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+    {% if error_message %}
+    <div class="text-danger">{{ error_message }}</div>
+    {% endif %}
+      <script>
+      $('document').ready(function() {
+        t = $('#q');
+        t.focus()
+        l = t.val().length;
+        t[0].setSelectionRange(l, l);
+      })
+    </script>
   </form>
-</div>
+</section>
+
+{% if query %}
+<section>
+  <p>Found <em>{{ results|length }}</em> result for `<em>{{ query }}</em>':</p>
+  <ol>
+    {% for item in results %}
+    <li>
+      <div class="mb-3">
+        <div><a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover float-end" href="#">Share</a></div>
+        <div class="px-3 pb-3">
+          <div class="fs-5">{{ item.title }}</div>
+          <div class="text-secondary fst-italic">
+            {% for author in item.authors %}
+            {{ author }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </div>
+          <div class="text-secondary">
+            <span>{{ item.journal }}</span>
+            <span>{{ item.pub_date }}</span>
+            <span>doi: <a class="link-secondary" href="https://doi.org/{{ item.doi }}" target="_blank">{{ item.doi }}</a></span>
+            <span>PMID: <a class="link-secondary" href="https://pubmed.ncbi.nlm.nih.gov/{{ item.pmid }}/" target="_blank">{{ item.pmid }}</a></span>
+          </div>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
 {% endblock main %}

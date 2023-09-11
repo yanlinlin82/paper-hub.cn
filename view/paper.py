@@ -4,14 +4,13 @@ import requests
 import json
 import xmltodict
 import re
-import numpy as np
 
 def fetch_and_cache(url, cache_filename):
     if os.path.exists(cache_filename):
         # If the cache file exists, load the data from it
         with open(cache_filename, 'r', encoding='utf-8') as cache_file:
             data = cache_file.read()
-        print(f"Loaded data from cache '{cache_filename}'")
+        print(f"Loaded data from cache '{cache_filename}'", file=sys.stderr)
     else:
         # If the cache file doesn't exist, fetch data from the URL
         response = requests.get(url)
@@ -21,14 +20,16 @@ def fetch_and_cache(url, cache_filename):
             os.makedirs(os.path.dirname(cache_filename), mode=0o755, exist_ok=True)
             with open(cache_filename, 'w', encoding='utf-8') as cache_file:
                 cache_file.write(data)
-            print(f"Fetched data from the URL and cached it: {url}")
+            print(f"Fetched data from the URL and cached it: {url}", file=sys.stderr)
         else:
-            print(f"Failed to fetch data from the URL: {url}")
+            print(f"Failed to fetch data from the URL: {url} (status={response.status_code})", file=sys.stderr)
             data = None
     return data
 
 def fetch_json(api_url, cache_filename, is_xml=False):
     text_data = fetch_and_cache(api_url, cache_filename)
+    if text_data is None:
+        return None
 
     if is_xml:
         xml_dict = xmltodict.parse(text_data)
@@ -38,7 +39,7 @@ def fetch_json(api_url, cache_filename, is_xml=False):
         json_data = json.loads(text_data)
         return json_data
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
+        print(f"Error decoding JSON: {e}", file=sys.stderr)
         return None
 
 # Function to query paper info by arXiv ID
@@ -55,8 +56,8 @@ def get_paper_info_by_arxiv_id(arxiv_id):
             'journal': 'arXiv',
             'abstract': obj.get('summary', ''),
             'pub_date': obj.get('published', ''),
-            'authors': "\n".join([node.get('name') for node in obj.get('author', [])]),
-            'urls': obj.get('id'),
+            'authors': [node.get('name') for node in obj.get('author', [])],
+            'urls': [obj.get('id')],
         }
         return paper_info, data
     return None, f"Query arXiv ID '{arxiv_id}' failed!"
@@ -72,9 +73,9 @@ def get_paper_info_by_pmid(pmid):
         doi = ''
         elocationid = obj.get('elocationid')
         if re.match(r'^doi: ', elocationid):
-            doi = elocationid.replace(r'^doi: ', '')
-
-        authors = "\n".join([node.get('name') for node in obj.get('authors', [])])
+            doi = re.sub(r'^doi:\s*', '', elocationid)
+        else:
+            doi = elocationid
 
         paper_info = {
             'doi': doi,
@@ -86,8 +87,8 @@ def get_paper_info_by_pmid(pmid):
             'volume': obj.get('volume'),
             'page': obj.get('pages'),
             'abstract': '',
-            'authors': authors,
-            'urls': '',
+            'authors': [node.get('name') for node in obj.get('authors', [])],
+            'urls': [f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"],
         }
         return paper_info, data
     return None, f"Query PubMed ID '{pmid}' failed!"
@@ -112,7 +113,7 @@ def get_paper_info_by_doi(doi):
     cache_filename = "cache/doi/" + doi + ".txt"
     api_url = f"https://api.crossref.org/works/{doi}"
     data = fetch_json(api_url, cache_filename)
-    if 'message' in data:
+    if data is not None and 'message' in data:
         obj = data['message']
         type = obj.get('type', '')
         title = " ".join(obj.get('title', []))
@@ -122,8 +123,6 @@ def get_paper_info_by_doi(doi):
         volume = obj.get('volume', '')
         page = obj.get('page', '')
         abstract = obj.get('abstract', '')
-        authors = "\n".join(node.get('given', '') + ' ' + node.get('family', '') for node in obj.get('author', []))
-        urls = "\n".join(list(np.unique([node["URL"] for node in obj.get('link', [])])))
 
         paper_info = {
             'doi': doi,
@@ -135,8 +134,8 @@ def get_paper_info_by_doi(doi):
             'volume': volume,
             'page': page,
             'abstract': abstract,
-            'authors': authors,
-            'urls': urls
+            'authors': [node.get('given', '') + ' ' + node.get('family', '') for node in obj.get('author', [])],
+            'urls': list(dict.fromkeys([node["URL"] for node in obj.get('link', [])]))
         }
         return paper_info, data
     return None, f"Query DOI '{doi}' failed!"
@@ -167,3 +166,16 @@ def get_paper_info(identifier):
     else:
         # invalid ID
         return None, f"Invalid paper ID '{identifier}'"
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print(f"Usage: python {sys.argv[0]} <doi/pmid/pmcid/arxivid>")
+        sys.exit(2)
+    id = sys.argv[1]
+
+    paper_info, raw = get_paper_info(id)
+    if paper_info is None:
+        print(f"ERROR: Failed to get paper info by {id}", file=sys.stderr)
+        sys.exit(1)
+
+    print(json.dumps(paper_info))

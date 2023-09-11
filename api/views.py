@@ -102,7 +102,7 @@ def QueryPaper(request, id):
             "title": paper_info.get('title', ''),
             "journal": paper_info.get('journal', ''),
             "pub_date": paper_info.get('pub_date', ''),
-            "authors": paper_info.get('authors', ''),
+            "authors": paper_info.get('authors', []),
             "abstract": paper_info.get('abstract', ''),
-            "urls": paper_info.get('urls', ''),
+            "urls": paper_info.get('urls', []),
         }})
