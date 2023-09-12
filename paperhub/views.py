@@ -1,7 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.conf import settings
 from utils.paper import *
 
 def index(request):
+    if settings.CONFIG_XIANGMA_GROUP_ONLY:
+        return redirect("group:all", group_name='xiangma')
+
     context = {}
 
     query = request.GET.get('q')

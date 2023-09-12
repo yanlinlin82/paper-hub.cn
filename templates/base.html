@@ -21,6 +21,7 @@
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top py-0">
   <div class="container">
     <a class="navbar-brand" href="/">Paper-Hub</a>
+    {% if not CONFIG_XIANGMA_GROUP_ONLY %}
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar"
       aria-controls="collapsibleNavbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -55,6 +56,7 @@
         {% endblock navbar %}
       </ul>
     </div>
+    {% endif %}
   </div>
 </nav>
 
