@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
-from view.models import User
+from django.utils import timezone
+from view.models import User, Paper
 from utils.paper import get_paper_info
 
 def Login(request):
@@ -99,3 +100,82 @@ def QueryPaper(request, id):
             "abstract": paper_info.get('abstract', ''),
             "urls": paper_info.get('urls', []),
         }})
+
+def DeletePaper(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    paper_id = request.POST['paper_id']
+    papers = Paper.objects.filter(pk=paper_id)
+    if papers.count() <= 0:
+        return JsonResponse({
+            'success': True,
+            'error': f'Paper (pk={paper_id}) does not exist!',
+        })
+
+    p = papers[0]
+    p.delete_time = timezone.now()
+    p.save()
+    
+    return JsonResponse({'success': True})
+
+def RestorePaper(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    paper_id = request.POST['paper_id']
+    papers = Paper.objects.filter(pk=paper_id)
+    if papers.count() <= 0:
+        return JsonResponse({
+            'success': True,
+            'error': f'Paper (pk={paper_id}) does not exist!',
+        })
+
+    p = papers[0]
+    p.delete_time = None
+    p.save()
+    
+    return JsonResponse({'success': True})
+
+def DeletePaperForever(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    paper_id = request.POST['paper_id']
+    papers = Paper.objects.filter(pk=paper_id)
+    if papers.count() <= 0:
+        return JsonResponse({
+            'success': True,
+            'error': f'Paper (pk={paper_id}) does not exist!',
+        })
+
+    Paper.objects.filter(pk=paper_id).delete()
+    
+    return JsonResponse({'success': True})

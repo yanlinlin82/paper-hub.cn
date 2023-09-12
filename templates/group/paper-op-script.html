@@ -1,0 +1,68 @@
+<script>
+function delete_paper(id) {
+  if (confirm('Are you sure to delete the item?')) {
+    $.ajax({
+      url: "{% url 'api:delete_paper' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { paper_id: id },
+      success: function (data) {
+        console.log('ajax return:', data)
+        if (!data.success) {
+          alert('Delete paper failed.')
+        } else {
+          location.reload(false);
+        }
+      },
+      error: function () {
+        // Handle AJAX error
+        alert('An error occurred while processing your request.')
+      }
+    });
+  }
+}
+
+function restore_paper(id) {
+  $.ajax({
+    url: "{% url 'api:restore_paper' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { paper_id: id },
+    success: function (data) {
+      console.log('ajax return:', data)
+      if (!data.success) {
+        alert('Restore paper failed.')
+      } else {
+        location.reload(false);
+      }
+    },
+    error: function () {
+      // Handle AJAX error
+      alert('An error occurred while processing your request.')
+    }
+  });
+}
+
+function delete_paper_forever(id) {
+  if (confirm('Are you sure to delete the item forever?')) {
+    $.ajax({
+      url: "{% url 'api:delete_paper_forever' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { paper_id: id },
+      success: function (data) {
+        console.log('ajax return:', data)
+        if (!data.success) {
+          alert('Delete paper failed.')
+        } else {
+          location.reload(false);
+        }
+      },
+      error: function () {
+        // Handle AJAX error
+        alert('An error occurred while processing your request.')
+      }
+    });
+  }
+}
+</script>

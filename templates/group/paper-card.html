@@ -77,17 +77,17 @@
     {% if user.is_authenticated %}
       {% if current_page == 'trash' %}
         <span class="ms-1">
-          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="#">Restore</a>
+          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:restore_paper({{paper.pk}})">Restore</a>
         </span>
         <span class="ms-1">
-          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="{% url "group:delete_forever" id=paper.pk group_name=group.name %}" onclick="javascript:return(confirm('Sure to delete paper #' + {{ paper.pk }} + ' forever?'));">[Delete Forever]</a>
+          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:delete_paper_forever({{paper.pk}})">Delete Forever</a>
         </span>
       {% else %}
         <span class="ms-1">
           <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="#" data-bs-toggle="modal" data-bs-target="#editModal" data-paper-id="{{ paper.doi }}">Edit</a>
         </span>
         <span class="ms-1">
-          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal" data-paper-id="{{ paper.doi }}">Delete</a>
+          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:delete_paper({{paper.pk}});">Delete</a>
         </span>
       {% endif %}
     {% endif %}
