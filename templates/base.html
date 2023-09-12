@@ -186,6 +186,12 @@ $(document).ready(function () {
   $('#loginModal').on('shown.bs.modal', () => {
     $('#username').focus();
   })
+  $('#loginModal').on('keypress', function (event) {
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if (keycode == '13'){
+      $('#loginButton').click();   
+    }
+  });
   
   $(document).ready(function () {
     $('#loginButton').click(function () {
