@@ -1,9 +1,9 @@
-{% if paper_list.paginator.num_pages > 1 %}
+{% if papers.paginator.num_pages > 1 %}
 <nav>
   <ul class="pagination justify-content-center">
     <li class="page-item">
-      {% if paper_list.has_previous %}
-      <a class="page-link" href="?page={{ paper_list.previous_page_number }}" aria-label="Previous">
+      {% if papers.has_previous %}
+      <a class="page-link" href="?page={{ papers.previous_page_number }}" aria-label="Previous">
         <span aria-hidden="true">&laquo;</span>
       </a>
       {% else %}
@@ -13,11 +13,11 @@
       {% endif %}
     </li>
     {% load paginator %}
-    {% get_elided_page_range paper_list paper_list.number as page_range %}
+    {% get_elided_page_range papers papers.number as page_range %}
     {% for i in page_range %}
-    {% if i == paper_list.paginator.ELLIPSIS %}
+    {% if i == papers.paginator.ELLIPSIS %}
     <li class="page-item"><a class="page-link disabled">{{ i }}</a></li>
-    {% elif i == paper_list.number %}
+    {% elif i == papers.number %}
     <li class="page-item active" aria-current="page">
       <a class="page-link" href="#">{{ i }}</a>
     </li>
@@ -26,8 +26,8 @@
     {% endif %}
     {% endfor %}
     <li class="page-item">
-      {% if paper_list.has_next %}
-      <a class="page-link" href="?page={{ paper_list.next_page_number }}" aria-label="Next">
+      {% if papers.has_next %}
+      <a class="page-link" href="?page={{ papers.next_page_number }}" aria-label="Next">
         <span aria-hidden="true">&raquo;</span>
       </a>
       {% else %}

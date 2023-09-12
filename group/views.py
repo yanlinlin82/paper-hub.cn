@@ -24,7 +24,26 @@ def GetCurrentUser(request):
         return None
     return user_list[0]
 
-def get_paper_list(request, group_name, latest_month=False, latest_week=False, user=None, id=None, trash=False):
+def get_paginated_papers(papers, page_number):
+    if page_number is None:
+        page_number = 1
+
+    p = Paginator(papers, 20)
+    try:
+        papers = p.get_page(page_number)
+    except PageNotAnInteger:
+        page_number = 1
+        papers = p.page(1)
+    except EmptyPage:
+        page_number = p.num_pages
+        papers = p.page(p.num_pages)
+
+    items = list(papers)
+    indices = list(range((papers.number - 1) * p.per_page + 1, papers.number * p.per_page + 1))
+
+    return papers, zip(items, indices)
+
+def get_papers(request, group_name, latest_month=False, latest_week=False, user=None, id=None, trash=False):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers
 
@@ -49,23 +68,8 @@ def get_paper_list(request, group_name, latest_month=False, latest_week=False, u
         papers = papers.filter(create_time__gte=last_week)
 
     papers = papers.order_by('-create_time', '-pk')
-    total_count = papers.count()
-
     page_number = request.GET.get('page')
-    if page_number is None:
-        page_number = 1
-
-    p = Paginator(papers, 20)
-    try:
-        papers = p.get_page(page_number)
-    except PageNotAnInteger:
-        page_number = 1
-        papers = p.page(1)
-    except EmptyPage:
-        page_number = p.num_pages
-        papers = p.page(p.num_pages)
-    papers.page_range = p.get_elided_page_range(page_number, on_each_side=2)
-    return papers, total_count
+    return get_paginated_papers(papers, page_number)
 
 class IndexView(generic.ListView):
     template_name = 'group/index.html'
@@ -82,13 +86,13 @@ class IndexView(generic.ListView):
 
 def All(request, group_name):
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name)
+    papers, items = get_papers(request, group_name)
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
         'current_page': 'all',
-        'total_count': total_count,
-        'paper_list': paper_list,
+        'papers': papers,
+        'items': items,
         'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
@@ -96,17 +100,17 @@ def All(request, group_name):
 def Recent(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     if group_name == "xiangma":
-        paper_list, total_count = get_paper_list(request, group_name, latest_month=True)
+        papers, items = get_papers(request, group_name, latest_month=True)
         summary_message = '本页面显示本月的文献分享。'
     else:
-        paper_list, total_count = get_paper_list(request, group_name, latest_week=True)
+        papers, items = get_papers(request, group_name, latest_week=True)
         summary_message = 'This page shows papers in last week. '
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
         'current_page': 'recent',
-        'total_count': total_count,
-        'paper_list': paper_list,
+        'papers': papers,
+        'items': items,
         'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
@@ -148,13 +152,13 @@ def StatView(request, group_name):
 
 def Trash(request, group_name):
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name, trash=True)
+    papers, items = get_papers(request, group_name, trash=True)
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'trash',
-        'total_count': total_count,
-        'paper_list': paper_list,
+        'papers': papers,
+        'items': items,
         'summary_messages': summary_message
     })
 
@@ -236,12 +240,15 @@ def CollectionViewByID(request, id, group_name):
     group = get_object_or_404(Group, name=group_name)
     collections = Collection.objects.filter(pk=id)
     if collections.count() <= 0:
-        return render(request, 'group/collection.html', {
+        return render(request, 'group/list.html', {
             'error_message': 'Invalid collection ID: ' + str(id),
             'current_page': 'collection',
         })
-    paper_list = collections[0].papers.order_by('-create_time', '-pk')
-    template = loader.get_template('group/collection.html')
+    papers = collections[0].papers.order_by('-create_time', '-pk')
+
+    page_number = request.GET.get('page')
+    papers, items = get_paginated_papers(papers, page_number)
+    template = loader.get_template('group/list.html')
     if group_name == "xiangma":
         summary_message = '本页面显示合集 <b>#' + collections[0].name + '</b> 的文献。'
     else:
@@ -250,15 +257,15 @@ def CollectionViewByID(request, id, group_name):
         'group': group,
         'current_page': 'collection',
         'collection': collections[0],
-        'total_count': collections.count(),
-        'paper_list': paper_list,
+        'papers': papers,
+        'items': items,
         'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
 def CollectionViewBySlug(request, slug, group_name):
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name).order_by('-create_time', '-pk')
+    papers, items = get_papers(request, group_name).order_by('-create_time', '-pk')
     template = loader.get_template('group/list.html')
     if group_name == "xiangma":
         summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
@@ -267,18 +274,22 @@ def CollectionViewBySlug(request, slug, group_name):
     context = {
         'group': group,
         'current_page': 'collection',
-        'total_count': total_count,
-        'paper_list': paper_list,
+        'papers': papers,
+        'items': items,
         'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
 def PaperLabelView(request, name, group_name):
     group = get_object_or_404(Group, name=group_name)
-    paper_list = None
+    papers = None
     label_list = Label.objects.filter(name=name)
     if label_list.count() > 0:
-        paper_list = label_list[0].paper_set.all().order_by('-create_time', '-pk')
+        papers = label_list[0].paper_set.all().order_by('-create_time', '-pk')
+
+    page_number = request.GET.get('page')
+    papers, items = get_paginated_papers(papers, page_number)
+
     template = loader.get_template('group/list.html')
     if group_name == "xiangma":
         summary_message = '本页面显示标签 <b>' + name + '</b> 的文献。'
@@ -287,27 +298,28 @@ def PaperLabelView(request, name, group_name):
     context = {
         'group': group,
         'current_page': 'label',
-        'total_count': label_list.count(),
-        'paper_list': paper_list,
+        'papers': papers,
+        'items': items,
         'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id, group_name):
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name, id=id)
-    if total_count <= 0:
+    papers, items = get_papers(request, group_name, id=id)
+    if papers.paginator.count <= 0:
         return render(request, 'group/single.html', {
             'group': group,
             'current_page': 'paper',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    paper = paper_list[0]
+    paper = papers[0]
     template = loader.get_template('group/single.html')
     context = {
         'group': group,
         'current_page': 'paper',
         'paper': paper,
+        'items': items,
     }
     return HttpResponse(template.render(context, request))
 
@@ -315,14 +327,14 @@ def RestorePaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
-    if paper_list.count() <= 0:
+    papers, items = get_papers(request, group_name, include_trash=True).filter(pk=id)
+    if papers.count() <= 0:
         return render(request, 'group/list.html', {
             'group': group,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    p = paper_list[0]
+    p = papers[0]
     p.delete_time = None
     p.save()
     return HttpResponseRedirect(reverse('group:paper', kwargs={'group_name':group_name,'id':id}))
@@ -331,33 +343,33 @@ def DeleteForeverPaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
-    if paper_list.count() <= 0:
+    papers, items = get_papers(request, group_name, include_trash=True).filter(pk=id)
+    if papers.count() <= 0:
         return render(request, 'group/list.html', {
             'group': group,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
+    get_papers(request, group_name, include_trash=True).filter(pk=id).delete()
     return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
 
 def DeletePaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name, include_trash=True).filter(pk=id)
-    if paper_list.count() <= 0:
+    papers, items = get_papers(request, group_name, include_trash=True).filter(pk=id)
+    if papers.count() <= 0:
         return render(request, 'group/list.html', {
             'group': group,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    p = paper_list[0]
+    p = papers[0]
     if p.delete_time == None:
         p.delete_time = timezone.now()
         p.save()
     else:
-        get_paper_list(request, group_name, include_trash=True).filter(pk=id).delete()
+        get_papers(request, group_name, include_trash=True).filter(pk=id).delete()
     return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
 
 def EditPaperView(request, id, group_name):
@@ -365,14 +377,14 @@ def EditPaperView(request, id, group_name):
         return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
 
     group = get_object_or_404(Group, name=group_name)
-    paper_list = group.papers.filter(pk=id)
-    if paper_list.count() <= 0:
+    papers = group.papers.filter(pk=id)
+    if papers.count() <= 0:
         return render(request, 'group/edit.html', {
             'group': group,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    paper = paper_list[0]
+    paper = papers[0]
 
     if request.method == 'POST':
         form = PaperForm(request.POST)
@@ -454,7 +466,7 @@ def EditPaperView(request, id, group_name):
 def UserView(request, id, group_name):
     user = get_object_or_404(User, pk=id)
     group = get_object_or_404(Group, name=group_name)
-    paper_list, total_count = get_paper_list(request, group_name, user=user)
+    papers, items = get_papers(request, group_name, user=user)
     template = loader.get_template('group/list.html')
     if group_name == "xiangma":
         summary_message = '本页面显示由用户 <b>' + user.nickname + '</b> 推荐的文献。'
@@ -463,8 +475,8 @@ def UserView(request, id, group_name):
     context = {
         'group': group,
         'current_page': 'user',
-        'total_count': total_count,
-        'paper_list': paper_list,
+        'papers': papers,
+        'items': items,
         'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))

@@ -1,17 +1,31 @@
 {% extends "group/base.html" %}
+{% load view_extras %}
+{% load static %}
 
 {% block content %}
 <div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group.name != "xiangma" %}There are total {{ total_count }} paper(s).{% else %}共有 {{ total_count }} 篇文献。{% endif %}</p>
+  <p>
+    {% autoescape off %}{{ summary_messages }}{% endautoescape %}
+    {% if group.name != "xiangma" %}
+    There are total {{ papers.paginator.count }} paper(s).{% if papers.paginator.num_pages > 1 %} This page shows {{ papers.start_index }}-{{ papers.end_index }} of {{ papers.paginator.count }}.{% endif %}
+    {% else %}
+    共有 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
+    {% endif %}
+  </p>
 </div>
-{% if paper_list %}
+{% if papers %}
+
+{% if collection %}
+<h2>{{ collection.name }}</h2>
+<p>创建时间：{{ collection.create_time|date:'Y-m-d H:i:s' }}</p>
+<p>更新时间：{{ collection.update_time|date:'Y-m-d H:i:s' }}</p>
+<p>{{ collection.desc }}</p>
+{% endif %}
 
 {% include "group/paginator.html" %}
 
-{% for paper in paper_list %}
-<div class="paper-item">
-  {% include "group/paper-item-as-card.html" %}
-</div>
+{% for paper, index in items %}
+{% include "group/paper-card.html" %}
 {% endfor %}
 
 {% include "group/paginator.html" %}
