@@ -50,7 +50,11 @@
       {% if paper.is_review %}<span class="badge rounded-pill text-bg-secondary">Review</span>{% endif %}
       {% if paper.is_open %}<span class="badge rounded-pill text-bg-secondary">Open</span>{% endif %}
     </div>
-    <div style="font-size: 14px; float: right; margin-top: -1.5em;"><a id="paper_button_{{ paper.pk }}" href="javascript:toggle({{paper.pk}});">{% if current_page == "paper" %}[Less]{% else %}[More]{% endif %}</a></div>
+    <div style="font-size: 14px; float: right; margin-top: -1.5em;">
+      <a id="paper_button_{{ paper.pk }}" href="javascript:toggle({{paper.pk}});">
+        {% if current_page == "paper" %}[Less]{% else %}[More]{% endif %}
+      </a>
+    </div>
     <script>
       function toggle(id) {
         e = document.getElementById('paper_detail_' + id);
