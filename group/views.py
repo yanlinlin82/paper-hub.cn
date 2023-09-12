@@ -299,9 +299,11 @@ def PaperLabelView(request, name, group_name):
     return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id, group_name):
+    group = get_object_or_404(Group, name=group_name)
     paper_list, total_count = get_paper_list(request, group_name, id=id)
     if total_count <= 0:
         return render(request, 'group/single.html', {
+            'group': group,
             'group_name': group_name,
             'current_page': 'paper',
             'error_message': 'Invalid paper ID: ' + str(id),
@@ -309,6 +311,7 @@ def SinglePaperView(request, id, group_name):
     paper = paper_list[0]
     template = loader.get_template('group/single.html')
     context = {
+        'group': group,
         'group_name': group_name,
         'current_page': 'paper',
         'paper': paper,

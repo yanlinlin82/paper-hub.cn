@@ -1,11 +1,4 @@
-{% extends "base.html" %}
-
-{% block banner %}
-<div class="text-start">
-  <a class="navbar-brand fs-2" href="/group/{{ group.name }}">{{ group.display_name }}</a>
-  <p>{{ group.desc }}</p>
-</div>
-{% endblock banner %}
+{% extends "group/base.html" %}
 
 {% block content %}
 <div class="table-responsive">
@@ -92,5 +85,3 @@
 
 </div>
 {% endblock content %}
-
-{% block menu %}{% include "group/menu.html" %}{% endblock menu %}

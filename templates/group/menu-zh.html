@@ -1,5 +1,4 @@
 <ul class="list-group text-center">
-{% if group_name == "xiangma" %}
   <li class="list-group-item">
     <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'group:all' group_name=group_name %}">所有分享</a>
   </li>
@@ -17,23 +16,4 @@
     <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'group:add' group_name=group_name %}">新增分享</a>
   </li>
   {% endif %}
-{% else %}
-  <li class="list-group-item">
-    <a class="menu-item{% if current_page == "all" %} current-item{% endif %}" href="{% url 'group:all' group_name=group_name %}">All Papers</a>
-  </li>
-  <li class="list-group-item">
-    <a class="menu-item{% if current_page == "recent" %} current-item{% endif %}" href="{% url 'group:recent' group_name=group_name %}">Recent</a>
-  </li>
-  <li class="list-group-item">
-    <a class="menu-item{% if current_page == "stat" %} current-item{% endif %}" href="{% url 'group:stat' group_name=group_name %}">Stat</a>
-  </li>
-  {% if user.is_authenticated %}
-  <li class="list-group-item">
-    <a class="menu-item{% if current_page == "trash" %} current-item{% endif %}" href="{% url 'group:trash' group_name=group_name %}">Trash</a>
-  </li>
-  <li class="list-group-item">
-    <a class="menu-item{% if current_page == "add" %} current-item{% endif %}" href="{% url 'group:add' group_name=group_name %}">Add New</a>
-  </li>
-  {% endif %}
-{% endif %}
 </ul>

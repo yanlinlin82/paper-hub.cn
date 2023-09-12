@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block banner %}
+<div class="text-start">
+  <a class="navbar-brand fs-2" href="/group/{{ group.name }}">{{ group.display_name }}</a>
+  <p>{{ group.desc }}</p>
+</div>
+{% endblock banner %}
+
+{% block menu %}
+  {% if group_name == "xiangma" %}
+    {% include "group/menu-zh.html" %}
+  {% else %}
+    {% include "group/menu-en.html" %}
+  {% endif %}
+{% endblock menu %}
