@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group_name != "xiangma" %}There are total {{ total_count }} paper(s).{% else %}共有 {{ total_count }} 篇文献。{% endif %}</p>
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group.name != "xiangma" %}There are total {{ total_count }} paper(s).{% else %}共有 {{ total_count }} 篇文献。{% endif %}</p>
 </div>
 {% if paper_list %}
 

@@ -2,7 +2,7 @@
 <div class="paper-info-block">
   <div class="paper-op-list">
     <div class="paper-op-list-sub-left">
-      <a href="{% url "group:paper" id=paper.pk group_name=group_name %}">[{{ paper.pk }}]</a>
+      <a href="{% url "group:paper" id=paper.pk group_name=group.name %}">[{{ paper.pk }}]</a>
       {% if user.is_authenticated %}
       <div id="favor_{{ paper.pk }}" class="{% if paper.is_favorite %}starred{% else %}unstarred{% endif %}" onclick="javascript:toggle_favor({{ paper.pk }});">
       </div>
@@ -21,11 +21,11 @@
     <div class="paper-op-list-sub-right">
       {% if user.is_authenticated %}
 {% if current_page == 'trash' %}
-      <a href="{% url "group:restore_from_trash" id=paper.pk group_name=group_name %}">[Restore]</a>
-      <a href="{% url "group:delete_forever" id=paper.pk group_name=group_name %}" onclick="javascript:return(confirm('Sure to delete paper #' + {{ paper.pk }} + ' forever?'));">[Delete Forever]</a>
+      <a href="{% url "group:restore_from_trash" id=paper.pk group_name=group.name %}">[Restore]</a>
+      <a href="{% url "group:delete_forever" id=paper.pk group_name=group.name %}" onclick="javascript:return(confirm('Sure to delete paper #' + {{ paper.pk }} + ' forever?'));">[Delete Forever]</a>
 {% else %}
-      <a href="{% url "group:edit" id=paper.pk group_name=group_name %}">[Edit]</a>
-      <a href="{% url "group:delete" id=paper.pk group_name=group_name %}" onclick="javascript:return(confirm('Sure to remove paper #' + {{ paper.pk }} + '?'));">[Delete]</a>
+      <a href="{% url "group:edit" id=paper.pk group_name=group.name %}">[Edit]</a>
+      <a href="{% url "group:delete" id=paper.pk group_name=group.name %}" onclick="javascript:return(confirm('Sure to remove paper #' + {{ paper.pk }} + '?'));">[Delete]</a>
 {% endif %}
       {% comment %}
       <a href="javascript: share({{ paper.pk }})">[分享]</a>
@@ -96,6 +96,6 @@
 </div>
 <div class="paper-comments-block">
   <hr class="paper-sep-line">
-  <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "group:user" id=paper.creator.pk group_name=group_name %}">{{ paper.creator }}</a></b>: {% if group_name != "xiangma" %}{% if paper.create_time|date:'Y-m-d H:i:s' < paper.update_time|date:'Y-m-d H:i:s' %}<i>(updated at {{ paper.update_time|date:'Y-m-d H:i:s' }})</i>{% endif %}{% endif %}</div>
+  <div class="paper-comments-head">[{{ paper.create_time|date:'Y-m-d H:i:s' }}] <b><a href="{% url "group:user" id=paper.creator.pk group_name=group.name %}">{{ paper.creator }}</a></b>: {% if group.name != "xiangma" %}{% if paper.create_time|date:'Y-m-d H:i:s' < paper.update_time|date:'Y-m-d H:i:s' %}<i>(updated at {{ paper.update_time|date:'Y-m-d H:i:s' }})</i>{% endif %}{% endif %}</div>
   <div class="paper-comments">{% autoescape off %}{{ paper.comments }}{% endautoescape %}</div>
 </div>

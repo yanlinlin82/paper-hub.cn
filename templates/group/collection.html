@@ -3,7 +3,7 @@
 {% block content %}
 {% if paper_list %}
 <p class="page-summary">
-  {% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group_name != "xiangma" %}There are total {{ paper_list|length }} paper(s).{% else %}共有 {{ paper_list|length }} 篇文献。{% endif %}
+  {% autoescape off %}{{ summary_messages }}{% endautoescape %}{% if group.name != "xiangma" %}There are total {{ paper_list|length }} paper(s).{% else %}共有 {{ paper_list|length }} 篇文献。{% endif %}
 </p>
 <h2>{{ collection.name }}</h2>
 <p>创建时间：{{ collection.create_time|date:'Y-m-d H:i:s' }}</p>

@@ -16,7 +16,7 @@
     {% for i in stat_this_month %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td><a href="{% url "group:user" id=i.creator__pk group_name=group_name %}">{{ i.creator__nickname }}</a></td>
+      <td><a href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
       <td>{{ i.creator__count }}</td>
     </tr>
     {% endfor %}
@@ -36,7 +36,7 @@
     {% for i in stat_last_month %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td><a href="{% url "group:user" id=i.creator__pk group_name=group_name %}">{{ i.creator__nickname }}</a></td>
+      <td><a href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
       <td>{{ i.creator__count }}</td>
     </tr>
     {% endfor %}
@@ -56,7 +56,7 @@
     {% for i in stat_all %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td><a href="{% url "group:user" id=i.creator__pk group_name=group_name %}">{{ i.creator__nickname }}</a></td>
+      <td><a href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
       <td>{{ i.creator__count }}</td>
     </tr>
     {% endfor %}
