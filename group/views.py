@@ -64,7 +64,7 @@ def get_paper_list(request, group_name, latest_month=False, latest_week=False, u
     except EmptyPage:
         page_number = p.num_pages
         papers = p.page(p.num_pages)
-    papers.adjusted_elided_pages = p.get_elided_page_range(page_number)
+    papers.page_range = p.get_elided_page_range(page_number, on_each_side=2)
     return papers, total_count
 
 class IndexView(generic.ListView):
