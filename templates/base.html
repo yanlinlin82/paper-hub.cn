@@ -27,7 +27,7 @@
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="collapsibleNavbar">
       <ul class="navbar-nav">
-        {% if not CONFIG_XIANGMA_GROUP_ONLY %}
+        {% if CONFIG_ENABLE_LOGIN %}
         {% if user.is_authenticated %}
         <li class="nav-item">
           <div class="nav-link text-white">{{ user }}</div>
