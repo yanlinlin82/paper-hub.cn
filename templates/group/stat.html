@@ -4,7 +4,7 @@
 <div class="table-responsive">
 
 <table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="fs-4" id="this-month" href="#this-month">本月排名榜({{ this_month }})</a></caption>
+  <caption class="text-center"><a class="link-dark fs-4"id="this-month" href="#this-month">本月排名榜({{ this_month }})</a></caption>
   <thread>
     <tr class="table-dark">
       <th scope="col">排名</th>
@@ -16,7 +16,7 @@
     {% for i in stat_this_month %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td><a href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
+      <td><a class="link-dark" href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
       <td>{{ i.creator__count }}</td>
     </tr>
     {% endfor %}
@@ -24,7 +24,7 @@
 </table>
 
 <table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="fs-4" id="last-month" href="#last-month">上月排名榜({{ last_month }})</a></caption>
+  <caption class="text-center"><a class="link-dark fs-4"id="last-month" href="#last-month">上月排名榜({{ last_month }})</a></caption>
   <thread>
     <tr class="table-dark">
       <th scope="col">排名</th>
@@ -36,7 +36,7 @@
     {% for i in stat_last_month %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td><a href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
+      <td><a class="link-dark" href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
       <td>{{ i.creator__count }}</td>
     </tr>
     {% endfor %}
@@ -44,7 +44,7 @@
 </table>
   
 <table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="fs-4" id="all" href="#all">总排名榜</a></caption>
+  <caption class="text-center"><a class="link-dark fs-4"id="all" href="#all">总排名榜</a></caption>
   <thead>
     <tr class="table-dark">
       <th scope="col">排名</th>
@@ -56,7 +56,7 @@
     {% for i in stat_all %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td><a href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
+      <td><a class="link-dark" href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
       <td>{{ i.creator__count }}</td>
     </tr>
     {% endfor %}
@@ -64,7 +64,7 @@
 </table>
 
 <table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="fs-4" id="journal" href="#journal">杂志排名榜</a></caption>
+  <caption class="text-center"><a class="link-dark fs-4"id="journal" href="#journal">杂志排名榜</a></caption>
   <thead>
     <tr class="table-dark">
       <th scope="col">排名</th>
