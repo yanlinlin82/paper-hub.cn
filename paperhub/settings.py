@@ -135,4 +135,4 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # My settings
-CONFIG_XIANGMA_GROUP_ONLY = True
+CONFIG_XIANGMA_GROUP_ONLY = False
