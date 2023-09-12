@@ -1,15 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
-
 from view.models import User
-from utils.paper import *
-
-def Test(request, text):
-    return JsonResponse({
-        'success': True,
-        "text": text
-    })
+from utils.paper import get_paper_info
 
 def Login(request):
     if request.method != 'POST':

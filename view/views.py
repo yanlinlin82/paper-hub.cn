@@ -1,15 +1,12 @@
 import zoneinfo
-
 from datetime import datetime, timedelta
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-
 from .models import Label, Paper, User, Collection
 from .forms import PaperForm
-from utils.paper import *
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 

@@ -4,7 +4,6 @@ from . import views
 
 app_name = 'api'
 urlpatterns = [
-    path('test/<str:text>', views.Test, name='test'),
     path('login', views.Login, name='login'),
     path('logout', views.Logout, name='logout'),
     path('query/user/<str:user>', views.QueryUser, name='query_user'),

@@ -1,6 +1,5 @@
 import re
 import zoneinfo
-
 from datetime import datetime, timedelta
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count
@@ -11,10 +10,8 @@ from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
-
 from view.models import Label, Paper, User, Collection
 from view.forms import PaperForm
-from utils.paper import *
 from .models import Group
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")

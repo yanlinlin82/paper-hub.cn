@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
-from utils.paper import *
+from utils.paper import get_paper_info
 
 def index(request):
     if settings.CONFIG_XIANGMA_GROUP_ONLY:
