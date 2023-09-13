@@ -25,7 +25,31 @@
 {% include "group/paginator.html" %}
 
 {% for paper, index in items %}
-{% include "group/paper-card.html" %}
+{% load view_extras %}
+{% load static %}
+<div class="border border-1 rounded px-3 pt-3 mb-3 bg-light-hover">
+  <div class="d-flex">
+    <div class="flex-fill">{{ index }}.</div>
+    <div class="flex-grow-1 px-2">
+      <div class="pb-2"><a class="fs-6 text-primary" href="{% url "group:paper" id=paper.pk group_name=group.name %}">{{ paper.title }}</a></div>
+      <div>
+        {{ paper.pub_year }},
+        <i>{{ paper.journal }}</i>.
+        {% include "group/paper-info-id-list.html" %}
+      </div>
+      <div class="py-2">{% include "group/paper-info-badge.html" %}</div>
+
+      <div class="border border-1 mt-3 p-1">
+        <div class="float-end fst-italic">{{ paper.create_time|date:'Y-m-d H:i:s' }}</div>
+        <div class="mb-3"><a class="link-dark" href="{% url "group:user" id=paper.creator.pk group_name=group.name %}">{{ paper.creator }}</a>:</div>
+        <div>{% autoescape off %}{{ paper.comments }}{% endautoescape %}</div>
+      </div>
+    </div>
+  </div>
+  <div class="text-end my-3">
+    {% include "group/paper-info-operators.html" %}
+  </div>
+</div>
 {% endfor %}
 
 {% include "group/paginator.html" %}
