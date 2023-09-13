@@ -1,87 +1,22 @@
 {% extends "group/base.html" %}
 
 {% block content %}
-<div class="container table-responsive">
-
-<table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="link-dark fs-4"id="this-month" href="#this-month">本月排名榜({{ this_month }})</a></caption>
-  <thread>
-    <tr class="table-dark">
-      <th scope="col">排名</th>
-      <th scope="col">分享者</th>
-      <th scope="col">分享数</th>
-    </tr>
-  </thread>
-  <tbody>
-    {% for i in stat_this_month %}
-    <tr>
-      <th scope="row">{{ forloop.counter }}</th>
-      <td><a class="link-dark" href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
-      <td>{{ i.creator__count }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="link-dark fs-4"id="last-month" href="#last-month">上月排名榜({{ last_month }})</a></caption>
-  <thread>
-    <tr class="table-dark">
-      <th scope="col">排名</th>
-      <th scope="col">分享者</th>
-      <th scope="col">分享数</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for i in stat_last_month %}
-    <tr>
-      <th scope="row">{{ forloop.counter }}</th>
-      <td><a class="link-dark" href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
-      <td>{{ i.creator__count }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-  
-<table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="link-dark fs-4"id="all" href="#all">总排名榜</a></caption>
-  <thead>
-    <tr class="table-dark">
-      <th scope="col">排名</th>
-      <th scope="col">分享者</th>
-      <th scope="col">分享数</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for i in stat_all %}
-    <tr>
-      <th scope="row">{{ forloop.counter }}</th>
-      <td><a class="link-dark" href="{% url "group:user" id=i.creator__pk group_name=group.name %}">{{ i.creator__nickname }}</a></td>
-      <td>{{ i.creator__count }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<table class="table table-sm table-bordered table-striped table-hover text-center caption-top">
-  <caption class="text-center"><a class="link-dark fs-4"id="journal" href="#journal">杂志排名榜</a></caption>
-  <thead>
-    <tr class="table-dark">
-      <th scope="col">排名</th>
-      <th scope="col">杂志</th>
-      <th scope="col">分享数</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for i in stat_journal %}
-    <tr>
-      <th scope="row">{{ forloop.counter }}</th>
-      <td>{{ i.journal }}</a></td>
-      <td>{{ i.journal__count }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
+<div class="container">
+  <div class="d-flex flex-wrap">
+    <div class="flex-item col-md-6 col-lg-4 px-3 mx-auto">
+      {% include "group/stat-table.html" with stat=stat_1 %}
+    </div>
+    <div class="flex-item col-md-6 col-lg-4 px-3 mx-auto">
+      {% include "group/stat-table.html" with stat=stat_2 %}
+    </div>
+    <div class="flex-item col-md-6 col-lg-4 px-3 mx-auto">
+      {% include "group/stat-table.html" with stat=stat_3 %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      {% include "group/stat-table.html" with stat=stat_4 %}
+    </div>
+  </div>
 </div>
 {% endblock content %}

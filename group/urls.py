@@ -19,5 +19,9 @@ urlpatterns = [
     path('<str:group_name>/paper/<int:id>', views.SinglePaperView, name='paper'),
     path('<str:group_name>/user/<int:id>', views.UserView, name='user'),
     path('<str:group_name>/stat', views.StatView, name='stat'),
+    path('<str:group_name>/stat/this_month', views.StatThisMonthView, name='stat_this_month'),
+    path('<str:group_name>/stat/last_month', views.StatLastMonthView, name='stat_last_month'),
+    path('<str:group_name>/stat/all', views.StatAllView, name='stat_all'),
+    path('<str:group_name>/stat/journal', views.StatJournalView, name='stat_journal'),
     path('<str:group_name>/add', views.PaperAdd, name='add'),
 ]

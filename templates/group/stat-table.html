@@ -1,0 +1,36 @@
+<table class="table table-sm table-bordered table-striped table-hover text-center caption-top mx-auto">
+  <caption class="text-center">
+    <a class="link-dark fs-4" id="{{stat.name}}" href="#{{stat.name}}">
+      {{stat.title}}
+    </a>
+  </caption>
+  <thread>
+    <tr class="table-dark">
+      {% for name in stat.columns %}
+      <th scope="col">{{name}}</th>
+      {% endfor %}
+    </tr>
+  </thread>
+  <tbody>
+    {% for i in stat.content %}
+    <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>
+      {% if i.id %}
+        <a class="link-dark" href="{% url "group:user" id=i.id group_name=group.name %}">{{i.name}}</a>
+      {% else %}
+        {{i.name}}
+      {% endif %}
+      </td>
+      <td>{{i.count}}</td>
+    </tr>
+    {% endfor %}
+    {% if stat.link %}
+    <tr>
+      <td colspan="3">
+        <a class="link-success" href="{{stat.link}}">完整榜单</a>
+      </td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>

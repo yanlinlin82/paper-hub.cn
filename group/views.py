@@ -121,11 +121,37 @@ def StatView(request, group_name):
 
     stat_all = papers.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
 
+    stat_3 = {
+        'name': 'all',
+        'title': f'总排行榜',
+        'columns': ['排名', '分享者', '分享数'],
+        'content': [{
+            'id': item['creator__pk'],
+            'name': item['creator__nickname'],
+            'count': item['creator__count']
+        } for item in stat_all[:10]],
+    }
+    if stat_all.count() > 10:
+        stat_3['link'] = reverse('group:stat_all', kwargs={'group_name':group_name})
+
     today = datetime.today().astimezone(tz_beijing)
     year = today.year
     month = today.month
     stat_this_month = papers.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
     this_month = str(year) + '/' + str(month)
+
+    stat_1 = {
+        'name': 'this-month',
+        'title': f'本月排行榜({this_month})',
+        'columns': ['排名', '分享者', '分享数'],
+        'content': [{
+            'id': item['creator__pk'],
+            'name': item['creator__nickname'],
+            'count': item['creator__count']
+        } for item in stat_this_month[:10]],
+    }
+    if stat_this_month.count() > 10:
+        stat_1['link'] = reverse('group:stat_this_month', kwargs={'group_name':group_name})
 
     if month > 1:
         month = month - 1
@@ -135,18 +161,158 @@ def StatView(request, group_name):
     stat_last_month = papers.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
     last_month = str(year) + '/' + str(month)
 
+    stat_2 = {
+        'name': 'last-month',
+        'title': f'上月排行榜({last_month})',
+        'columns': ['排名', '分享者', '分享数'],
+        'content': [{
+            'id': item['creator__pk'],
+            'name': item['creator__nickname'],
+            'count': item['creator__count']
+        } for item in stat_last_month[:10]],
+    }
+    if stat_last_month.count() > 10:
+        stat_2['link'] = reverse('group:stat_last_month', kwargs={'group_name':group_name})
+
     stat_journal = papers.exclude(journal='').values('journal').annotate(Count('journal'), min_create_time=Min('create_time')).order_by('-journal__count', 'min_create_time')
+
+    stat_4 = {
+        'name': 'journal',
+        'title': f'杂志排行榜',
+        'columns': ['排名', '杂志', '分享数'],
+        'content': [{
+            'name': item['journal'],
+            'count': item['journal__count']
+        } for item in stat_journal[:10]],
+    }
+    if stat_journal.count() > 10:
+        stat_4['link'] = reverse('group:stat_journal', kwargs={'group_name':group_name})
 
     template = loader.get_template('group/stat.html')
     context = {
         'group': group,
         'current_page': 'stat',
-        'stat_all': stat_all,
-        'stat_this_month': stat_this_month,
-        'this_month': this_month,
-        'stat_last_month': stat_last_month,
-        'last_month': last_month,
-        'stat_journal': stat_journal,
+        'stat_1': stat_1,
+        'stat_2': stat_2,
+        'stat_3': stat_3,
+        'stat_4': stat_4,
+    }
+    return HttpResponse(template.render(context, request))
+
+def StatThisMonthView(request, group_name):
+    group = get_object_or_404(Group, name=group_name)
+    papers = group.papers.filter(delete_time=None)
+
+    today = datetime.today().astimezone(tz_beijing)
+    year = today.year
+    month = today.month
+    stat_this_month = papers.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
+    this_month = str(year) + '/' + str(month)
+
+    stat = {
+        'name': 'this-month',
+        'title': f'本月排行榜({this_month})',
+        'columns': ['排名', '分享者', '分享数'],
+        'content': [{
+            'id': item['creator__pk'],
+            'name': item['creator__nickname'],
+            'count': item['creator__count']
+        } for item in stat_this_month],
+    }
+
+    template = loader.get_template('group/stat-single.html')
+    context = {
+        'group': group,
+        'current_page': 'stat',
+        'stat': stat,
+    }
+    return HttpResponse(template.render(context, request))
+
+def StatLastMonthView(request, group_name):
+    group = get_object_or_404(Group, name=group_name)
+    papers = group.papers.filter(delete_time=None)
+
+    today = datetime.today().astimezone(tz_beijing)
+    year = today.year
+    month = today.month
+
+    if month > 1:
+        month = month - 1
+    else:
+        year = year - 1
+        month = 12
+    stat_last_month = papers.filter(create_time__year=year, create_time__month=month).values('creator__nickname', 'creator__pk').annotate(Count('creator'), min_create_time=Min('create_time')).order_by('-creator__count', 'min_create_time')
+    last_month = str(year) + '/' + str(month)
+
+    stat = {
+        'name': 'last-month',
+        'title': f'上月排行榜({last_month})',
+        'columns': ['排名', '分享者', '分享数'],
+        'content': [{
+            'id': item['creator__pk'],
+            'name': item['creator__nickname'],
+            'count': item['creator__count']
+        } for item in stat_last_month],
+    }
+
+    template = loader.get_template('group/stat-single.html')
+    context = {
+        'group': group,
+        'current_page': 'stat',
+        'stat': stat,
+    }
+    return HttpResponse(template.render(context, request))
+
+def StatAllView(request, group_name):
+    group = get_object_or_404(Group, name=group_name)
+    papers = group.papers.filter(delete_time=None)
+
+    stat_all = papers.values('creator__nickname', 'creator__pk').annotate(Count('creator')).order_by('-creator__count')
+
+    stat = {
+        'name': 'all',
+        'title': f'总排行榜',
+        'columns': ['排名', '分享者', '分享数'],
+        'content': [{
+            'id': item['creator__pk'],
+            'name': item['creator__nickname'],
+            'count': item['creator__count']
+        } for item in stat_all],
+    }
+
+    template = loader.get_template('group/stat-single.html')
+    context = {
+        'group': group,
+        'current_page': 'stat',
+        'stat': stat,
+    }
+    return HttpResponse(template.render(context, request))
+
+def StatJournalView(request, group_name):
+    group = get_object_or_404(Group, name=group_name)
+    papers = group.papers.filter(delete_time=None)
+
+    stat_journal = papers\
+        .exclude(journal='')\
+        .values('journal')\
+        .annotate(Count('journal'), min_create_time=Min('create_time'))\
+        .order_by('-journal__count', 'min_create_time')
+
+    stat = {
+        'name': 'journal',
+        'title': f'杂志排行榜',
+        'columns': ['排名', '杂志', '分享数'],
+        'content': [{
+            'name': item['journal'],
+            'count': item['journal__count']
+        } for item in stat_journal],
+    }
+
+    template = loader.get_template('group/stat-single.html')
+    context = {
+        'group': group,
+        'current_page': 'stat',
+        'stat': stat,
     }
     return HttpResponse(template.render(context, request))
 
