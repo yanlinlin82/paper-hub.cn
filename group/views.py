@@ -1,9 +1,3 @@
-import re
-import zoneinfo
-from datetime import datetime, timedelta
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Count
-from django.db.models.aggregates import Min
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.template import loader
@@ -13,63 +7,7 @@ from django.views import generic
 from view.models import Label, Paper, User, Collection
 from view.forms import PaperForm
 from .models import Group
-
-tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
-
-def GetCurrentUser(request):
-    if not request.user.is_authenticated:
-        return None
-    user_list = User.objects.filter(username=request.user.username)
-    if user_list.count() <= 0:
-        return None
-    return user_list[0]
-
-def get_paginated_papers(papers, page_number):
-    if page_number is None:
-        page_number = 1
-
-    p = Paginator(papers, 20)
-    try:
-        papers = p.get_page(page_number)
-    except PageNotAnInteger:
-        page_number = 1
-        papers = p.page(1)
-    except EmptyPage:
-        page_number = p.num_pages
-        papers = p.page(p.num_pages)
-
-    items = list(papers)
-    indices = list(range((papers.number - 1) * p.per_page + 1, papers.number * p.per_page + 1))
-
-    return papers, zip(items, indices)
-
-def get_papers(request, group_name, latest_month=False, latest_week=False, user=None, id=None, trash=False):
-    group = get_object_or_404(Group, name=group_name)
-    papers = group.papers
-
-    if user is not None:
-        papers = papers.filter(creator=user)
-
-    if id is not None:
-        papers = papers.filter(pk=id)
-
-    if trash:
-        papers = papers.exclude(delete_time=None)
-    else:
-        papers = papers.filter(delete_time=None)
-
-    if latest_month:
-        today = datetime.today().astimezone(tz_beijing)
-        year = today.year
-        month = today.month
-        papers = papers.filter(create_time__year=year, create_time__month=month)
-    elif latest_week:
-        last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
-        papers = papers.filter(create_time__gte=last_week)
-
-    papers = papers.order_by('-create_time', '-pk')
-    page_number = request.GET.get('page')
-    return get_paginated_papers(papers, page_number)
+from .papers import *
 
 class IndexView(generic.ListView):
     template_name = 'group/index.html'
@@ -86,7 +24,7 @@ class IndexView(generic.ListView):
 
 def All(request, group_name):
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name)
+    papers, items = filter_papers(group.papers, request.GET.get('page'))
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
@@ -100,10 +38,10 @@ def All(request, group_name):
 def Recent(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     if group_name == "xiangma":
-        papers, items = get_papers(request, group_name, latest_month=True)
+        papers, items = filter_papers(group.papers, request.GET.get('page'), latest_month=True)
         summary_message = '本页面显示本月的文献分享。'
     else:
-        papers, items = get_papers(request, group_name, latest_week=True)
+        papers, items = filter_papers(group.papers, request.GET.get('page'), latest_week=True)
         summary_message = 'This page shows papers in last week. '
     template = loader.get_template('group/list.html')
     context = {
@@ -114,121 +52,6 @@ def Recent(request, group_name):
         'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
-
-def get_stat_all(papers, group_name, top_n = None):
-    stat_all = papers\
-        .values('creator__nickname', 'creator__pk')\
-        .annotate(Count('creator'))\
-        .order_by('-creator__count')
-
-    if top_n is None:
-        top_n = stat_all.count()
-
-    stat = {
-        'name': 'all',
-        'title': f'总排行榜',
-        'columns': ['排名', '分享者', '分享数'],
-        'content': [{
-            'id': item['creator__pk'],
-            'name': item['creator__nickname'],
-            'count': item['creator__count']
-        } for item in stat_all[:top_n]],
-    }
-    if stat_all.count() > top_n:
-        stat['link'] = reverse('group:stat_all', kwargs={'group_name':group_name})
-
-    return stat
-
-def get_stat_this_month(papers, group_name, top_n = None):
-    today = datetime.today().astimezone(tz_beijing)
-    year = today.year
-    month = today.month
-
-    stat_this_month = papers\
-        .filter(create_time__year=year, create_time__month=month)\
-        .values('creator__nickname', 'creator__pk')\
-        .annotate(Count('creator'), min_create_time=Min('create_time'))\
-        .order_by('-creator__count', 'min_create_time')
-
-    if top_n is None:
-        top_n = stat_this_month.count()
-
-    this_month = str(year) + '/' + str(month)
-
-    stat = {
-        'name': 'this-month',
-        'title': f'本月排行榜({this_month})',
-        'columns': ['排名', '分享者', '分享数'],
-        'content': [{
-            'id': item['creator__pk'],
-            'name': item['creator__nickname'],
-            'count': item['creator__count']
-        } for item in stat_this_month[:top_n]],
-    }
-    if stat_this_month.count() > top_n:
-        stat['link'] = reverse('group:stat_this_month', kwargs={'group_name':group_name})
-
-    return stat
-
-def get_stat_last_month(papers, group_name, top_n = None):
-    today = datetime.today().astimezone(tz_beijing)
-    year = today.year
-    month = today.month
-    if month > 1:
-        month = month - 1
-    else:
-        year = year - 1
-        month = 12
-
-    stat_last_month = papers\
-        .filter(create_time__year=year, create_time__month=month)\
-        .values('creator__nickname', 'creator__pk')\
-        .annotate(Count('creator'), min_create_time=Min('create_time'))\
-        .order_by('-creator__count', 'min_create_time')
-
-    if top_n is None:
-        top_n = stat_last_month.count()
-
-    last_month = str(year) + '/' + str(month)
-
-    stat = {
-        'name': 'last-month',
-        'title': f'上月排行榜({last_month})',
-        'columns': ['排名', '分享者', '分享数'],
-        'content': [{
-            'id': item['creator__pk'],
-            'name': item['creator__nickname'],
-            'count': item['creator__count']
-        } for item in stat_last_month[:10]],
-    }
-    if stat_last_month.count() > top_n:
-        stat['link'] = reverse('group:stat_last_month', kwargs={'group_name':group_name})
-
-    return stat
-
-def get_stat_journal(papers, group_name, top_n = None):
-    stat_journal = papers\
-        .exclude(journal='')\
-        .values('journal')\
-        .annotate(Count('journal'), min_create_time=Min('create_time'))\
-        .order_by('-journal__count', 'min_create_time')
-
-    if top_n is None:
-        top_n = stat_journal.count()
-
-    stat = {
-        'name': 'journal',
-        'title': f'杂志排行榜',
-        'columns': ['排名', '杂志', '分享数'],
-        'content': [{
-            'name': item['journal'],
-            'count': item['journal__count']
-        } for item in stat_journal[:top_n]],
-    }
-    if stat_journal.count() > top_n:
-        stat['link'] = reverse('group:stat_journal', kwargs={'group_name':group_name})
-
-    return stat
 
 def StatView(request, group_name):
     group = get_object_or_404(Group, name=group_name)
@@ -300,7 +123,7 @@ def StatJournalView(request, group_name):
 
 def Trash(request, group_name):
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name, trash=True)
+    papers, items = filter_papers(group.papers, request.GET.get('page'), trash=True)
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'group/list.html', {
         'group': group,
@@ -413,7 +236,7 @@ def CollectionViewByID(request, id, group_name):
 
 def CollectionViewBySlug(request, slug, group_name):
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name).order_by('-create_time', '-pk')
+    papers, items = filter_papers(group.papers, request.GET.get('page')).order_by('-create_time', '-pk')
     template = loader.get_template('group/list.html')
     if group_name == "xiangma":
         summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
@@ -454,7 +277,7 @@ def PaperLabelView(request, name, group_name):
 
 def SinglePaperView(request, id, group_name):
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name, id=id)
+    papers, items = filter_papers(group.papers, request.GET.get('page'), id=id)
     if papers.paginator.count <= 0:
         return render(request, 'group/single.html', {
             'group': group,
@@ -475,7 +298,7 @@ def RestorePaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name, include_trash=True).filter(pk=id)
+    papers, items = filter_papers(group.papers, request.GET.get('page'), include_trash=True).filter(pk=id)
     if papers.count() <= 0:
         return render(request, 'group/list.html', {
             'group': group,
@@ -491,21 +314,21 @@ def DeleteForeverPaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name, include_trash=True).filter(pk=id)
+    papers, items = filter_papers(group.papers, request.GET.get('page'), include_trash=True).filter(pk=id)
     if papers.count() <= 0:
         return render(request, 'group/list.html', {
             'group': group,
             'current_page': 'edit',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    get_papers(request, group_name, include_trash=True).filter(pk=id).delete()
+    filter_papers(group.papers, request.GET.get('page'), include_trash=True).filter(pk=id).delete()
     return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
 
 def DeletePaperView(request, id, group_name):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name, include_trash=True).filter(pk=id)
+    papers, items = filter_papers(group.papers, request.GET.get('page'), include_trash=True).filter(pk=id)
     if papers.count() <= 0:
         return render(request, 'group/list.html', {
             'group': group,
@@ -517,7 +340,7 @@ def DeletePaperView(request, id, group_name):
         p.delete_time = timezone.now()
         p.save()
     else:
-        get_papers(request, group_name, include_trash=True).filter(pk=id).delete()
+        filter_papers(group.papers, request.GET.get('page'), include_trash=True).filter(pk=id).delete()
     return HttpResponseRedirect(reverse('group:all', kwargs={'group_name':group_name}))
 
 def EditPaperView(request, id, group_name):
@@ -614,7 +437,7 @@ def EditPaperView(request, id, group_name):
 def UserView(request, id, group_name):
     user = get_object_or_404(User, pk=id)
     group = get_object_or_404(Group, name=group_name)
-    papers, items = get_papers(request, group_name, user=user)
+    papers, items = filter_papers(group.papers, request.GET.get('page'), user=user)
     template = loader.get_template('group/list.html')
     if group_name == "xiangma":
         summary_message = '本页面显示由用户 <b>' + user.nickname + '</b> 推荐的文献。'
