@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 
+
+# My settings
+CONFIG_ENABLE_LOGIN = True
+CONFIG_XIANGMA_GROUP_ONLY = True
+CONFIG_DEPLOY_TO_SUB_DIR = False
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,10 +31,9 @@ SECRET_KEY = 'django-insecure-+ok)4@*0gfr5a7=+%gr7!rs^mwl!vqp&=d78^b%59erdjb9px+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-DEV = True
 
 ALLOWED_HOSTS = [ "localhost", "paper-hub.cn", "yanlinlin.cn" ]
-if DEV:
+if CONFIG_DEPLOY_TO_SUB_DIR:
     FORCE_SCRIPT_NAME = '/paper-hub'
 
 # Application definition
@@ -126,7 +132,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root') # Use `python manager.py collectstatic` before deploy
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
@@ -137,7 +143,3 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# My settings
-CONFIG_ENABLE_LOGIN = True
-CONFIG_XIANGMA_GROUP_ONLY = True
