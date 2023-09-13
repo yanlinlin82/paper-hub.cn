@@ -24,9 +24,11 @@ SECRET_KEY = 'django-insecure-+ok)4@*0gfr5a7=+%gr7!rs^mwl!vqp&=d78^b%59erdjb9px+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEV = True
 
-ALLOWED_HOSTS = [ "localhost", "paper-hub.cn" ]
-
+ALLOWED_HOSTS = [ "localhost", "paper-hub.cn", "yanlinlin.cn" ]
+if DEV:
+    FORCE_SCRIPT_NAME = '/paper-hub'
 
 # Application definition
 
@@ -123,6 +125,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [

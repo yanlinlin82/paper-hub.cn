@@ -3,3 +3,4 @@ __pycache__
 db.sqlite3.bak*
 cache/
 .vscode/
+static_root/
