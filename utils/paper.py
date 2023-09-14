@@ -4,6 +4,21 @@ import requests
 import json
 import xmltodict
 import re
+import datetime
+
+def extract_year_from_dict(data, key):
+    format_strings = ['%Y-%m-%d', '%m/%d/%Y',
+                      '%d-%b-%Y', '%Y %b %d', '%b %d, %Y', '%d %b, %Y',
+                      '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%SZ']
+    if key in data:
+        for format_string in format_strings:
+            try:
+                date_value = datetime.datetime.strptime(data[key], format_string)
+                year = date_value.year
+                return year
+            except ValueError:
+                pass  # continue to the next format string
+    return None
 
 def fetch_and_cache(url, cache_filename):
     if os.path.exists(cache_filename):
@@ -57,7 +72,7 @@ def get_paper_info_by_arxiv_id(arxiv_id):
             'title': obj.get('title', ''),
             'journal': 'arXiv',
             'abstract': obj.get('summary', ''),
-            'pub_date': obj.get('published', ''),
+            'pub_year': extract_year_from_dict(obj, 'published'),
             'authors': [node.get('name') for node in obj.get('author', [])],
             'urls': [obj.get('id')],
         }
@@ -80,7 +95,7 @@ def get_paper_info_by_pmid(pmid):
             'id': {'pmid': pmid},
             'title': obj.get('title', ''),
             'journal': obj.get('fulljournalname', ''),
-            'pub_date': obj.get('pubdate'),
+            'pub_year': extract_year_from_dict(obj, 'pubdate'),
             'issue': obj.get('issue'),
             'volume': obj.get('volume'),
             'page': obj.get('pages'),
@@ -137,7 +152,8 @@ def get_paper_info_by_doi(doi):
         type = obj.get('type', '')
         title = " ".join(obj.get('title', []))
         journal = " ".join(obj.get('container-title', []))
-        pub_date = obj.get('created', {'date-time':''}).get('date-time', '')[0:10]
+        if 'created' in obj:
+            pub_year = extract_year_from_dict(obj['created'], 'date-time')
         issue = obj.get('issue', '')
         volume = obj.get('volume', '')
         page = obj.get('page', '')
@@ -148,7 +164,7 @@ def get_paper_info_by_doi(doi):
             'type': type,
             'title': title,
             'journal': journal,
-            'pub_date': pub_date,
+            'pub_year': pub_year,
             'issue': issue,
             'volume': volume,
             'page': page,

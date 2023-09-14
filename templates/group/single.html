@@ -15,7 +15,7 @@
         {% include "group/paper-info-id-list.html" %}
       </div>
       <div class="py-2">{% include "group/paper-info-badge.html" %}</div>
-      <div class="fs-5 fw-bold py-2">{{ paper.title }}</div>
+      <div class="fs-5 fw-bold py-2" id="paper-title-{{paper.pk}}">{{ paper.title }}</div>
 
       <div class="mt-3">
         {{ paper.authors|show_author_list }}

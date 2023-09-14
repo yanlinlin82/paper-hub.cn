@@ -37,6 +37,7 @@ class Paper(models.Model):
 
     # paper info
     journal = models.CharField(max_length=200, default='')
+    pub_year = models.IntegerField(blank=True, null=True, default=None)
     pub_date = models.DateField(blank=True, null=True, default=None)
     title = models.CharField(max_length=500, default='')
     authors = models.CharField(max_length=4000, default='')
@@ -54,11 +55,8 @@ class Paper(models.Model):
     comments = models.CharField(max_length=65536, default='')
     labels = models.ManyToManyField(Label)
 
-    def pub_year(self):
-        return self.pub_date.year if self.pub_date else ''
-
     def __str__(self):
-        return self.creator.nickname + ': ' + str(self.pub_year()) + ' - ' + self.journal + ' - ' + self.title
+        return self.creator.nickname + ': ' + str(self.pub_year) + ' - ' + self.journal + ' - ' + self.title
 
 class Collection(models.Model):
     name = models.CharField(max_length=100, default="")

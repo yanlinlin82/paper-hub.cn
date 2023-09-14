@@ -19,7 +19,7 @@ def index(request):
                 "id": paper_info.get('id'),
                 "title": paper_info.get('title', ''),
                 "journal": paper_info.get('journal', ''),
-                "pub_date": paper_info.get('pub_date', ''),
+                "pub_year": paper_info.get('pub_year', ''),
                 "authors": paper_info.get('authors', []),
                 "abstract": paper_info.get('abstract', ''),
                 "urls": paper_info.get('urls', []),

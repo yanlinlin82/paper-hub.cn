@@ -70,7 +70,7 @@ def QueryPaper(request, id):
             "doi"     : "...", /* DOI，唯一标识，据此可查询到信息 */
             "title"   : "...", /* 文献标题 */
             "journal" : "...", /* 杂志名称 */
-            "pub_date": "...", /* 发表日期 */
+            "pub_year": "...", /* 发表年份 */
             "authors" : "...", /* 作者列表，半角逗号或回车隔开 */
             "abstract": "...", /* 摘要 */
             "urls"    : "...", /* 超链接，回车隔开 */
@@ -95,11 +95,42 @@ def QueryPaper(request, id):
             "pmc_id": paper_info.get('pmc_id', ''),
             "title": paper_info.get('title', ''),
             "journal": paper_info.get('journal', ''),
-            "pub_date": paper_info.get('pub_date', ''),
+            "pub_year": paper_info.get('pub_year', ''),
             "authors": paper_info.get('authors', []),
             "abstract": paper_info.get('abstract', ''),
             "urls": paper_info.get('urls', []),
         }})
+
+def EditPaper(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    id = request.POST['id']
+    papers = Paper.objects.filter(pk=id)
+    if papers.count() <= 0:
+        return JsonResponse({
+            'success': True,
+            'error': f'Paper (pk={id}) does not exist!',
+        })
+
+    print(request.POST)
+    p = papers[0]
+    p.title = request.POST['title']
+    p.pub_year = request.POST['pub_year']
+    p.journal = request.POST['journal']
+    p.comments = request.POST['comment']
+    p.save()
+
+    return JsonResponse({'success': True})
 
 def DeletePaper(request):
     if not request.user.is_authenticated:

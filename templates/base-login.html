@@ -27,17 +27,18 @@
   </div>
 </div>
 <script>
-$('#loginModal').on('shown.bs.modal', () => {
-  $('#username').focus();
-})
-$('#loginModal').on('keypress', function (event) {
-  var keycode = (event.keyCode ? event.keyCode : event.which);
-  if (keycode == '13'){
-    $('#loginButton').click();   
-  }
-});
+$(document).ready(function() {
+  $('#loginModal').on('shown.bs.modal', () => {
+    $('#username').focus();
+  })
 
-$(document).ready(function () {
+  $('#loginModal').on('keypress', function (event) {
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if (keycode == '13'){
+      $('#loginButton').click();   
+    }
+  });
+
   $('#loginButton').click(function () {
     function csrfSafeMethod(method) {
       // these HTTP methods do not require CSRF protection
