@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.db.models import Count
 from django.db.models.aggregates import Min
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .models import CustomCheckInInterval
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
@@ -80,13 +81,45 @@ def get_stat_all(papers, group_name, top_n = None):
 
     return stat
 
+def get_last_month(year, month):
+    if month > 1:
+        month = month - 1
+    else:
+        year = year - 1
+        month = 12
+    return year, month
+
+def get_next_month(year, month):
+    if month < 12:
+        month = month + 1
+    else:
+        year = year + 1
+        month = 1
+    return year, month
+
+def get_deadline(year, month):
+    m = CustomCheckInInterval.objects.filter(year=year, month=month)
+    if m.count() > 0:
+        return m[0].deadline
+    return datetime(*get_next_month(year, month), 1)
+
+def get_check_in_interval(year, month):
+    start_time = get_deadline(*get_last_month(year, month))
+    end_time = get_deadline(year, month)
+    return start_time, end_time
+
 def get_stat_this_month(papers, group_name, top_n = None):
     today = datetime.today().astimezone(tz_beijing)
     year = today.year
     month = today.month
 
+    start_time, end_time = get_check_in_interval(year, month)
+    print("This month:")
+    print(start_time)
+    print(end_time)
+
     stat_this_month = papers\
-        .filter(create_time__year=year, create_time__month=month)\
+        .filter(create_time__gte=start_time, create_time__lt=end_time)\
         .values('creator__nickname', 'creator__pk')\
         .annotate(Count('creator'), min_create_time=Min('create_time'))\
         .order_by('-creator__count', 'min_create_time')
@@ -117,14 +150,15 @@ def get_stat_last_month(papers, group_name, top_n = None):
     today = datetime.today().astimezone(tz_beijing)
     year = today.year
     month = today.month
-    if month > 1:
-        month = month - 1
-    else:
-        year = year - 1
-        month = 12
+    year, month = get_last_month(year, month)
+
+    start_time, end_time = get_check_in_interval(year, month)
+    print("Last month:")
+    print(start_time)
+    print(end_time)
 
     stat_last_month = papers\
-        .filter(create_time__year=year, create_time__month=month)\
+        .filter(create_time__gte=start_time, create_time__lt=end_time)\
         .values('creator__nickname', 'creator__pk')\
         .annotate(Count('creator'), min_create_time=Min('create_time'))\
         .order_by('-creator__count', 'min_create_time')

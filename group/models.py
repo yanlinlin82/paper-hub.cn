@@ -12,3 +12,8 @@ class Group(models.Model):
     papers = models.ManyToManyField(Paper)
     def __str__(self):
         return self.display_name + " (" + self.name + ")"
+
+class CustomCheckInInterval(models.Model):
+    year = models.IntegerField()
+    month = models.IntegerField()
+    deadline = models.DateTimeField()

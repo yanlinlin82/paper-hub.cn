@@ -10,21 +10,25 @@
     </tr>
   </thread>
   <tbody>
-    {% for i in stat.content %}
-    <tr>
-      <th scope="row">{{ forloop.counter }}</th>
-      <td>
-      {% if i.link %}
-        <a class="link-dark" href="{{i.link}}">{{i.name}}</a>
-      {% elif i.id %}
-        <a class="link-dark" href="{% url "group:user" id=i.id group_name=group.name %}">{{i.name}}</a>
-      {% else %}
-        {{i.name}}
-      {% endif %}
-      </td>
-      <td>{{i.count}}</td>
-    </tr>
-    {% endfor %}
+    {% if not stat.content %}
+      <tr><td colspan="3">尚无任何记录</td></tr>
+    {% else %}
+      {% for i in stat.content %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>
+        {% if i.link %}
+          <a class="link-dark" href="{{i.link}}">{{i.name}}</a>
+        {% elif i.id %}
+          <a class="link-dark" href="{% url "group:user" id=i.id group_name=group.name %}">{{i.name}}</a>
+        {% else %}
+          {{i.name}}
+        {% endif %}
+        </td>
+        <td>{{i.count}}</td>
+      </tr>
+      {% endfor %}
+    {% endif %}
     {% if stat.full_rank %}
     <tr>
       <td colspan="3">
