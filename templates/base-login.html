@@ -1,0 +1,91 @@
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="loginModalLabel">Login</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="loginForm" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required />
+          </div>
+          <input type="hidden" id="ref" name="ref" value="{{ ref }}" />
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancer</button>
+        <button type="button" class="btn btn-primary" id="loginButton">Login</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $('#loginModal').on('shown.bs.modal', () => {
+    $('#username').focus();
+  })
+  $('#loginModal').on('keypress', function (event) {
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if (keycode == '13'){
+      $('#loginButton').click();   
+    }
+  });
+  
+  $(document).ready(function () {
+    $('#loginButton').click(function () {
+      function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
+      }
+      var csrf_token = $("input[name='csrfmiddlewaretoken']").val();
+      $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader('X-CSRFToken', csrf_token)
+          }
+        }
+      })
+
+      var username = $('#username').val()
+      var password = $('#password').val()
+      $.ajax({
+        url: "{% url 'api:login' %}",
+        type: 'POST',
+        data: {
+          username: username,
+          password: password
+        },
+        success: function (data) {
+          console.log('ajax return:', data)
+          if (!data.success) {
+            alert('Login failed. Please check your credentials.')
+          } else {
+            location.reload(false);
+          }
+        },
+        error: function () {
+          // Handle AJAX error
+          alert('An error occurred while processing your request.')
+        }
+      })
+    })
+  })
+
+  function logout() {
+    if (confirm('Are you sure you want to log out?')) {
+      $.ajax({
+        url: "{% url 'api:logout' %}",
+        success: function (data) {
+          location.reload(false);
+        }
+      });
+    }
+  }
+</script>
