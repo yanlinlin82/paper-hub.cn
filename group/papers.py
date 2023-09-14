@@ -8,6 +8,11 @@ from .models import CustomCheckInInterval
 
 tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
 
+def get_this_week_start_time():
+    today = datetime.today().astimezone(tz_beijing)
+    start_time = today - timedelta(days=7)
+    return start_time
+
 def get_paginated_papers(papers, page_number):
     if page_number is None:
         page_number = 1
@@ -27,29 +32,25 @@ def get_paginated_papers(papers, page_number):
 
     return papers, zip(items, indices)
 
-def filter_papers(papers, page_number, latest_month=False, latest_week=False, user=None, id=None, trash=False, journal_name=None):
-    if user is not None:
-        papers = papers.filter(creator=user)
-
+def filter_papers(papers, page_number, id=None, user=None, trash=False, journal_name=None, start_time=None, end_time=None):
     if id is not None:
         papers = papers.filter(pk=id)
+
+    if user is not None:
+        papers = papers.filter(creator=user)
 
     if trash:
         papers = papers.exclude(delete_time=None)
     else:
         papers = papers.filter(delete_time=None)
 
-    if latest_month:
-        today = datetime.today().astimezone(tz_beijing)
-        year = today.year
-        month = today.month
-        papers = papers.filter(create_time__year=year, create_time__month=month)
-    elif latest_week:
-        last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
-        papers = papers.filter(create_time__gte=last_week)
-
     if journal_name is not None:
         papers = papers.filter(journal=journal_name)
+
+    if start_time is not None:
+        papers = papers.filter(create_time__gte=start_time)
+    if end_time is not None:
+        papers = papers.filter(create_time__lt=end_time)
 
     papers = papers.order_by('-create_time', '-pk')
     return get_paginated_papers(papers, page_number)
@@ -81,6 +82,10 @@ def get_stat_all(papers, group_name, top_n = None):
 
     return stat
 
+def get_this_month():
+    today = datetime.today().astimezone(tz_beijing)
+    return today.year, today.month
+
 def get_last_month(year, month):
     if month > 1:
         month = month - 1
@@ -109,14 +114,8 @@ def get_check_in_interval(year, month):
     return start_time, end_time
 
 def get_stat_this_month(papers, group_name, top_n = None):
-    today = datetime.today().astimezone(tz_beijing)
-    year = today.year
-    month = today.month
-
+    year, month = get_this_month()
     start_time, end_time = get_check_in_interval(year, month)
-    print("This month:")
-    print(start_time)
-    print(end_time)
 
     stat_this_month = papers\
         .filter(create_time__gte=start_time, create_time__lt=end_time)\
@@ -153,9 +152,6 @@ def get_stat_last_month(papers, group_name, top_n = None):
     year, month = get_last_month(year, month)
 
     start_time, end_time = get_check_in_interval(year, month)
-    print("Last month:")
-    print(start_time)
-    print(end_time)
 
     stat_last_month = papers\
         .filter(create_time__gte=start_time, create_time__lt=end_time)\

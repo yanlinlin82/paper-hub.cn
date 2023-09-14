@@ -37,16 +37,43 @@ def All(request, group_name):
 
 def Recent(request, group_name):
     group = get_object_or_404(Group, name=group_name)
-    if group_name == "xiangma":
-        papers, items = filter_papers(group.papers, request.GET.get('page'), latest_month=True)
-        summary_message = '本页面显示本月的文献分享。'
-    else:
-        papers, items = filter_papers(group.papers, request.GET.get('page'), latest_week=True)
-        summary_message = 'This page shows papers in last week. '
+    start_time = get_this_week_start_time()
+    papers, items = filter_papers(group.papers, request.GET.get('page'), start_time=start_time)
+    summary_message = 'This page shows papers in last week. '
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
         'current_page': 'recent',
+        'papers': papers,
+        'items': items,
+        'summary_messages': summary_message
+    }
+    return HttpResponse(template.render(context, request))
+
+def ThisMonth(request, group_name):
+    group = get_object_or_404(Group, name=group_name)
+    start_time, end_time = get_check_in_interval(*get_this_month())
+    papers, items = filter_papers(group.papers, request.GET.get('page'), start_time=start_time)
+    summary_message = '本页面显示本月的文献分享。'
+    template = loader.get_template('group/list.html')
+    context = {
+        'group': group,
+        'current_page': 'this_month',
+        'papers': papers,
+        'items': items,
+        'summary_messages': summary_message
+    }
+    return HttpResponse(template.render(context, request))
+
+def LastMonth(request, group_name):
+    group = get_object_or_404(Group, name=group_name)
+    start_time, end_time = get_check_in_interval(*get_last_month(*get_this_month()))
+    papers, items = filter_papers(group.papers, request.GET.get('page'), start_time=start_time, end_time=end_time)
+    summary_message = '本页面显示上月的文献分享。'
+    template = loader.get_template('group/list.html')
+    context = {
+        'group': group,
+        'current_page': 'last_month',
         'papers': papers,
         'items': items,
         'summary_messages': summary_message

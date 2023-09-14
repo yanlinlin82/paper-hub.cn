@@ -1,8 +1,10 @@
 <div class="list-group text-center">
   <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}"
     href="{% url 'group:all' group_name=group.name %}">所有分享</a>
-  <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}"
-    href="{% url 'group:recent' group_name=group.name %}">本月分享</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "this_month" %}active{% endif %}"
+    href="{% url 'group:this_month' group_name=group.name %}">本月分享</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "last_month" %}active{% endif %}"
+    href="{% url 'group:last_month' group_name=group.name %}">上月分享</a>
   <a class="list-group-item list-group-item-action {% if current_page == "stat" %}active{% endif %}"
     href="{% url 'group:stat' group_name=group.name %}">响马榜单</a>
   {% if user.is_authenticated %}
