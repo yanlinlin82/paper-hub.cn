@@ -58,10 +58,13 @@ def get_stat_all(papers, group_name, top_n = None):
 
     if top_n is None:
         top_n = stat_all.count()
+        title = '总排名（完整榜单）'
+    else:
+        title = '总排名（Top10）'
 
     stat = {
         'name': 'all',
-        'title': f'总排行榜',
+        'title': title,
         'columns': ['排名', '分享者', '分享数'],
         'content': [{
             'id': item['creator__pk'],
@@ -85,14 +88,16 @@ def get_stat_this_month(papers, group_name, top_n = None):
         .annotate(Count('creator'), min_create_time=Min('create_time'))\
         .order_by('-creator__count', 'min_create_time')
 
+    this_month = str(year) + '/' + str(month)
     if top_n is None:
         top_n = stat_this_month.count()
-
-    this_month = str(year) + '/' + str(month)
+        title = f'本月排名（{this_month}，完整榜单）'
+    else:
+        title = f'本月排名（{this_month}，Top10）'
 
     stat = {
         'name': 'this-month',
-        'title': f'本月排行榜({this_month})',
+        'title': title,
         'columns': ['排名', '分享者', '分享数'],
         'content': [{
             'id': item['creator__pk'],
@@ -121,20 +126,22 @@ def get_stat_last_month(papers, group_name, top_n = None):
         .annotate(Count('creator'), min_create_time=Min('create_time'))\
         .order_by('-creator__count', 'min_create_time')
 
+    last_month = str(year) + '/' + str(month)
     if top_n is None:
         top_n = stat_last_month.count()
-
-    last_month = str(year) + '/' + str(month)
+        title = f'上月排名（{last_month}，完整榜单）'
+    else:
+        title = f'上月排名（{last_month}，Top10）'
 
     stat = {
         'name': 'last-month',
-        'title': f'上月排行榜({last_month})',
+        'title': title,
         'columns': ['排名', '分享者', '分享数'],
         'content': [{
             'id': item['creator__pk'],
             'name': item['creator__nickname'],
             'count': item['creator__count']
-        } for item in stat_last_month[:10]],
+        } for item in stat_last_month[:top_n]],
     }
     if stat_last_month.count() > top_n:
         stat['link'] = reverse('group:stat_last_month', kwargs={'group_name':group_name})
@@ -150,10 +157,13 @@ def get_stat_journal(papers, group_name, top_n = None):
 
     if top_n is None:
         top_n = stat_journal.count()
+        title = '杂志排名（完整榜单）'
+    else:
+        title = '杂志排名（Top10）'
 
     stat = {
         'name': 'journal',
-        'title': f'杂志排行榜',
+        'title': title,
         'columns': ['排名', '杂志', '分享数'],
         'content': [{
             'name': item['journal'],
