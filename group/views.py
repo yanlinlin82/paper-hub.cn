@@ -434,6 +434,23 @@ def EditPaperView(request, id, group_name):
         }
         return HttpResponse(template.render(context, request))
 
+def PaperJournal(request, group_name, journal_name):
+    group = get_object_or_404(Group, name=group_name)
+    papers, items = filter_papers(group.papers, request.GET.get('page'), journal_name=journal_name)
+    template = loader.get_template('group/list.html')
+    if group_name == "xiangma":
+        summary_message = '本页面显示发表在 <b>' + journal_name + '</b> 杂志的文献。'
+    else:
+        summary_message = 'This page shows papers recommended by <b>' + user.nickname + '</b>. '
+    context = {
+        'group': group,
+        'current_page': 'user',
+        'papers': papers,
+        'items': items,
+        'summary_messages': summary_message,
+    }
+    return HttpResponse(template.render(context, request))
+
 def UserView(request, id, group_name):
     user = get_object_or_404(User, pk=id)
     group = get_object_or_404(Group, name=group_name)

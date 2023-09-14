@@ -26,7 +26,7 @@ def get_paginated_papers(papers, page_number):
 
     return papers, zip(items, indices)
 
-def filter_papers(papers, page_number, latest_month=False, latest_week=False, user=None, id=None, trash=False):
+def filter_papers(papers, page_number, latest_month=False, latest_week=False, user=None, id=None, trash=False, journal_name=None):
     if user is not None:
         papers = papers.filter(creator=user)
 
@@ -46,6 +46,9 @@ def filter_papers(papers, page_number, latest_month=False, latest_week=False, us
     elif latest_week:
         last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
         papers = papers.filter(create_time__gte=last_week)
+
+    if journal_name is not None:
+        papers = papers.filter(journal=journal_name)
 
     papers = papers.order_by('-create_time', '-pk')
     return get_paginated_papers(papers, page_number)
@@ -73,7 +76,7 @@ def get_stat_all(papers, group_name, top_n = None):
         } for item in stat_all[:top_n]],
     }
     if stat_all.count() > top_n:
-        stat['link'] = reverse('group:stat_all', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:stat_all', kwargs={'group_name':group_name})
 
     return stat
 
@@ -106,7 +109,7 @@ def get_stat_this_month(papers, group_name, top_n = None):
         } for item in stat_this_month[:top_n]],
     }
     if stat_this_month.count() > top_n:
-        stat['link'] = reverse('group:stat_this_month', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:stat_this_month', kwargs={'group_name':group_name})
 
     return stat
 
@@ -144,7 +147,7 @@ def get_stat_last_month(papers, group_name, top_n = None):
         } for item in stat_last_month[:top_n]],
     }
     if stat_last_month.count() > top_n:
-        stat['link'] = reverse('group:stat_last_month', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:stat_last_month', kwargs={'group_name':group_name})
 
     return stat
 
@@ -166,11 +169,12 @@ def get_stat_journal(papers, group_name, top_n = None):
         'title': title,
         'columns': ['排名', '杂志', '分享数'],
         'content': [{
+            'link': reverse('group:journal', kwargs={'group_name':group_name,'journal_name':item['journal']}),
             'name': item['journal'],
             'count': item['journal__count']
         } for item in stat_journal[:top_n]],
     }
     if stat_journal.count() > top_n:
-        stat['link'] = reverse('group:stat_journal', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:stat_journal', kwargs={'group_name':group_name})
 
     return stat

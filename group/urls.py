@@ -1,6 +1,4 @@
-from django.urls import path
-from django.http import HttpResponse
-
+from django.urls import path, re_path
 from . import views
 
 app_name = 'group'
@@ -18,6 +16,7 @@ urlpatterns = [
     path('<str:group_name>/paper/<int:id>/delete', views.DeletePaperView, name='delete'),
     path('<str:group_name>/paper/<int:id>', views.SinglePaperView, name='paper'),
     path('<str:group_name>/user/<int:id>', views.UserView, name='user'),
+    re_path(r'^(?P<group_name>[^/]+)/journal/(?P<journal_name>.+)', views.PaperJournal, name='journal'),
     path('<str:group_name>/stat', views.StatView, name='stat'),
     path('<str:group_name>/stat/this_month', views.StatThisMonthView, name='stat_this_month'),
     path('<str:group_name>/stat/last_month', views.StatLastMonthView, name='stat_last_month'),
