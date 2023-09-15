@@ -203,7 +203,11 @@ function delete_paper(id) {
         if (!data.success) {
           alert('Delete paper failed!\n' + data.error);
         } else {
+          {% if current_page == 'paper' %}
+          location.href = "{% url 'group:all' group_name=group.name %}";
+          {% else %}
           location.reload(false);
+          {% endif %}
         }
       },
       error: function () {
