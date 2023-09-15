@@ -1,0 +1,125 @@
+<div class="modal fade" id="shareModal" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareModalLabel">Share Paper</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="shareForm" method="post">
+          {% csrf_token %}
+          <div class="row">
+            <div class="form-group">
+              <label class="mt-3">
+                <div class="fs-5" id="shareModelTitle"></div>
+                <div class="text-secondary fst-italic" id="shareModelAuthors"></div>
+                <div class="text-secondary">
+                  <span id="shareModelPubYear"></span>,
+                  <span id="shareModelJournal"></span>
+                </div>
+              </label>
+            </div>
+          </div>
+          {% if user.is_authenticated %}
+          <input type="hidden" id="paperEditModalUsername" value="{{user}}">
+          {% else %}
+          <div class="mb-3 form-group">
+            <label class="mt-3" for="paperEditModalUsername">Username</label>
+            <input type="text" class="form-control" id="paperEditModalUsername" name="paperEditModalUsername" required>
+          </div>
+          {% endif %}
+          <div class="form-group">
+            <label class="mt-3" for="shareModalComment">Comment</label>
+            <textarea class="form-control" id="shareModalComment" name="shareModalComment" rows="10" required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancer</button>
+        <button type="button" class="btn btn-primary" id="shareModalShare">Share</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function get_paper_id(id) {
+  var paper_id = '';
+  if ($('#paper-doi-' + id)) {
+    paper_id = $('#paper-doi-' + id).text();
+  } else if ($('#paper-pmid-' + id)) {
+    paper_id = $('#paper-pmid-' + id).text();
+  } else if ($('#paper-pmcid-' + id)) {
+    paper_id = $('#paper-pmcid-' + id).text();
+  } else if ($('#paper-arxiv-id-' + id)) {
+    paper_id = $('#paper-arxiv-id-' + id).text();
+  } else if ($('#paper-cnki-id-' + id)) {
+    paper_id = $('#paper-cnki-id-' + id).text();
+  }
+  return paper_id;
+}
+
+function share_paper(id) {
+  console.log('share_paper(' + id + ')');
+  $('#shareModelTitle').text($('#paper-title-' + id).text());
+  $('#shareModelAuthors').text($('#paper-authors-' + id).text());
+  $('#shareModelPubYear').text($('#paper-pub-year-' + id).text());
+  $('#shareModelJournal').text($('#paper-journal-' + id).text());
+  $('#shareModal').modal('show');
+}
+
+$(document).ready(function() {
+  $('#shareModal').on('shown.bs.modal', () => {
+    $('#shareModalPaperID').focus();
+  })
+
+  $('#shareModalQuery').click(function () {
+    paper_id = $('#shareModalPaperID').val();
+    url = "{% url 'api:query_paper' 'xxxxxx' %}".replace('xxxxxx', paper_id);
+    $.ajax({
+      url: url,
+      success: function (data) {
+        console.log('ajax return:', data)
+        if (!data.success) {
+          alert('Edit paper failed.')
+        } else {
+          $('#shareModalTitle').val(data.results.title);
+          $('#shareModalPubYear').val(data.results.pub_year);
+          $('#shareModalJournal').val(data.results.journal);
+        }
+      },
+      error: function () {
+        // Handle AJAX error
+        alert('An error occurred while processing your request.')
+      }
+    })
+  })
+
+  $('#shareModalShare').click(function () {
+    $.ajax({
+      url: "{% url 'api:edit_paper' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: {
+        id: $('#shareModalPk').val(),
+        paper_id: $('#shareModalPaperID').val(),
+        title: $('#shareModalTitle').val(),
+        pub_year: $('#shareModalPubYear').val(),
+        journal: $('#shareModalJournal').val(),
+        comment: $('#shareModalComment').val()
+      },
+      success: function (data) {
+        console.log('ajax return:', data)
+        if (!data.success) {
+          alert('Edit paper failed.')
+        } else {
+          location.reload(false);
+        }
+      },
+      error: function () {
+        // Handle AJAX error
+        alert('An error occurred while processing your request.')
+      }
+    })
+  })
+})
+</script>

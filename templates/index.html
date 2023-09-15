@@ -2,26 +2,28 @@
 
 {% block main %}
 <section>
-  <form class="mb-5" method="GET">
-    <div>
-      <label class="form-label mb-3" for="q">Search a paper for sharing:</label>
-    </div>
-    <div class="input-group w-auto mb-3">
-      <input type="text" id="q" name="q" class="form-control border-dark w-50" placeholder="Input DOI/arXivID/PMID/PMCID" value="{{ query }}" required>
-      <button type="submit" class="btn btn-primary">Search</button>
-    </div>
-    {% if error_message %}
-    <div class="text-danger">{{ error_message }}</div>
-    {% endif %}
-      <script>
-      $('document').ready(function() {
-        t = $('#q');
-        t.focus()
-        l = t.val().length;
-        t[0].setSelectionRange(l, l);
-      })
-    </script>
-  </form>
+  <div class="row">
+    <form class="col-md-8 mb-5 mx-auto" method="GET">
+      <div>
+        <label class="form-label mb-3" for="q">Search a paper for sharing:</label>
+      </div>
+      <div class="input-group w-auto mb-3">
+        <input type="text" id="q" name="q" class="form-control border-dark w-50" placeholder="Input DOI/arXivID/PMID/PMCID" value="{{ query }}" required>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+      {% if error_message %}
+      <div class="text-danger">{{ error_message }}</div>
+      {% endif %}
+        <script>
+        $('document').ready(function() {
+          t = $('#q');
+          t.focus()
+          l = t.val().length;
+          t[0].setSelectionRange(l, l);
+        })
+      </script>
+    </form>
+  </div>
 </section>
 
 {% if query %}
@@ -31,15 +33,15 @@
     {% for item in results %}
     <li>
       <div class="mb-3 px-3">
-        <div class="fs-5">{{ item.title }}</div>
-        <div class="text-secondary fst-italic">
+        <div class="fs-5" id="paper-title-{{forloop.counter}}">{{ item.title }}</div>
+        <div class="text-secondary fst-italic" id="paper-authors-{{forloop.counter}}">
           {% for author in item.authors %}
           {{ author }}{% if not forloop.last %}, {% endif %}
           {% endfor %}
         </div>
         <div class="text-secondary">
-          <span>{{ item.journal }}</span>
-          <span>{{ item.pub_year }}</span>
+          <span id="paper-pub-year-{{forloop.counter}}">{{ item.pub_year }}</span>,
+          <span id="paper-journal-{{forloop.counter}}">{{ item.journal }}</span>
         </div>
         <div class="text-secondary">
           {% if item.id.doi %}
@@ -59,7 +61,7 @@
           {% endif %}
         </div>
         <div class="mt-2">
-          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="#" data-bs-toggle="modal" data-bs-target="#shareModal" data-paper-id="{{ item.doi }}">Share</a>
+          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:share_paper({{forloop.counter}});">Share</a>
         </div>
       </div>
     </li>
@@ -67,65 +69,6 @@
   </ol>
 </section>
 
-<!-- Share Modal -->
-<div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title text-center" id="shareModalLabel">Share</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="shareForm" method="post">
-          <div class="form-group">
-            <label for="user">User</label>
-            <input type="text" class="form-control" id="user" name="user" required />
-          </div>
-          <div class="form-group">
-            <label for="comment">Comment</label>
-            <input type="text" class="form-control" id="comment" name="comment" required />
-          </div>
-          <div class="form-group">
-            <label for="doi">DOI</label>
-            <input type="text" class="form-control" id="doi" name="doi" required />
-          </div>
-          <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" class="form-control" id="title" name="title" required />
-          </div>
-          <div class="form-group">
-            <label for="journal">Journal</label>
-            <input type="text" class="form-control" id="journal" name="journal" required />
-          </div>
-          <div class="form-group">
-            <label for="pub-date">Publication Date</label>
-            <input type="text" class="form-control" id="pub-date" name="pub-date" required />
-          </div>
-          <div class="form-group">
-            <label for="authors">Authors</label>
-            <input type="text" class="form-control" id="authors" name="authors" required />
-          </div>
-          <div class="form-group">
-            <label for="abstract">Abstract</label>
-            <input type="text" class="form-control" id="abstract" name="abstract" required />
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancer</button>
-        <button type="button" class="btn btn-primary" id="shareButton">Share</button>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
-  $('#shareModal').on('shown.bs.modal', function(e) {
-    console.log('here');
-    console.log(e);
-    {% if user.is_authenticated %}$('#user').val('{{ user }}');{% endif %}
-    var paper_id = $(e.relatedTarget).data('paper-id');
-    $(e.currentTarget).find('input[name="doi"]').val(paper_id);
-  })
-</script>
+{% include "index-share-dialog.html" %}
 {% endif %}
 {% endblock main %}
