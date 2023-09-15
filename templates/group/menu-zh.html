@@ -13,7 +13,5 @@
   {% if user.is_authenticated %}
   <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}"
     href="{% url 'group:trash' group_name=group.name %}">回收站</a>
-  <a class="list-group-item list-group-item-action {% if current_page == "add" %}active{% endif %}"
-    href="{% url 'group:add' group_name=group.name %}">新增分享</a>
   {% endif %}
 </div>

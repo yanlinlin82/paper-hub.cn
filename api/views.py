@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from view.models import User, Paper
-from utils.paper import get_paper_info
+from group.models import Group
+from utils.paper import get_paper_info, convert_string_to_datetime
 
 def Login(request):
     if request.method != 'POST':
@@ -92,7 +93,7 @@ def QueryPaper(request, id):
             "doi": paper_info.get('doi', ''),
             "pmid": paper_info.get('pmid', ''),
             "arxiv_id": paper_info.get('arxiv_id', ''),
-            "pmc_id": paper_info.get('pmc_id', ''),
+            "pmcid": paper_info.get('pmcid', ''),
             "title": paper_info.get('title', ''),
             "journal": paper_info.get('journal', ''),
             "pub_year": paper_info.get('pub_year', ''),
@@ -114,21 +115,72 @@ def AddPaper(request):
             'error': 'POST method required!'
             })
 
-    id = request.POST['id']
-    papers = Paper.objects.filter(pk=id)
-    if papers.count() <= 0:
-        return JsonResponse({
-            'success': True,
-            'error': f'Paper (pk={id}) does not exist!',
-        })
+    try:
+        s = request.POST['username']
+        if User.objects.filter(nickname=s).count() > 0:
+            user = User.objects.get(nickname=s)
+        elif User.objects.filter(name=s).count() > 0:
+            user = User.objects.get(name=s)
+        elif User.objects.filter(weixin_id=s) > 0:
+            user = User.objects.get(weixin_id=s)
+        elif User.objects.filter(username=s).count() > 0:
+            user = User.objects.get(username=s)
+        else:
+            user = User(username=s, nickname=s)
+            user.save()
 
-    print(request.POST)
-    p = papers[0]
-    p.title = request.POST['title']
-    p.pub_year = request.POST['pub_year']
-    p.journal = request.POST['journal']
-    p.comments = request.POST['comment']
-    p.save()
+        if 'create_time' in request.POST:
+            s = request.POST['create_time']
+            create_time = convert_string_to_datetime(s)
+            if create_time is None:
+                return JsonResponse({
+                    'success': False,
+                    'error': f"Invalid format of 'create_time': '{s}'!"
+                    })
+            create_time = timezone.make_aware(create_time, timezone.get_current_timezone())
+        else:
+            create_time = timezone.now()
+
+        p = Paper(
+            creator = user,
+            create_time = create_time,
+            update_time = create_time,
+            is_private = True)
+
+        p.title = request.POST['title']
+        p.pub_year = request.POST['pub_year']
+        p.journal = request.POST['journal']
+        p.comments = request.POST['comment']
+
+        paper_id = request.POST['paper_id']
+        paper_info, raw_dict = get_paper_info(paper_id)
+        if paper_info is not None:
+            p.doi = paper_info['id'].get('doi', '')
+            p.pmid = paper_info['id'].get('pmid', '')
+            p.arxiv_id = paper_info['id'].get('arxiv_id', '')
+            p.pmcid = paper_info['id'].get('pmcid', '')
+            p.cnki_id = paper_info['id'].get('cnki_id', '')
+            p.authors = "\n".join(paper_info.get('authors', []))
+            p.abstract = paper_info.get('abstract', '')
+            p.keywords = "\n".join(paper_info.get('keywords', []))
+            p.urls = "\n".join(paper_info.get('urls', []))
+            p.is_preprint = False
+            p.is_review = False
+            p.is_open = False
+            p.is_favorite = False
+        p.save()
+
+        group_name = request.POST['group_name']
+        if group_name:
+            group = Group.objects.get(name=group_name)
+        group.papers.add(p)
+        group.save()
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
 
     return JsonResponse({'success': True})
 
@@ -139,27 +191,20 @@ def EditPaper(request):
             'error': 'User is not authenticated!',
         })
 
-    if request.method != 'POST':
+    try:
+        id = request.POST['id']
+        #paper_id = request.POST['paper_id']  # TODO: query paper info
+        p = Paper.objects.get(pk=id)
+        p.title = request.POST['title']
+        p.pub_year = request.POST['pub_year']
+        p.journal = request.POST['journal']
+        p.comments = request.POST['comment']
+        p.save()
+    except Exception as e:
         return JsonResponse({
             'success': False,
-            'error': 'POST method required!'
-            })
-
-    id = request.POST['id']
-    papers = Paper.objects.filter(pk=id)
-    if papers.count() <= 0:
-        return JsonResponse({
-            'success': True,
-            'error': f'Paper (pk={id}) does not exist!',
+            'error': f"An error occurred: {e}"
         })
-
-    print(request.POST)
-    p = papers[0]
-    p.title = request.POST['title']
-    p.pub_year = request.POST['pub_year']
-    p.journal = request.POST['journal']
-    p.comments = request.POST['comment']
-    p.save()
 
     return JsonResponse({'success': True})
 
@@ -170,24 +215,17 @@ def DeletePaper(request):
             'error': 'User is not authenticated!',
         })
 
-    if request.method != 'POST':
+    try:
+        id = request.POST['paper_id']
+        p = Paper.objects.get(pk=id)
+        p.delete_time = timezone.now()
+        p.save()
+    except Exception as e:
         return JsonResponse({
             'success': False,
-            'error': 'POST method required!'
-            })
-
-    paper_id = request.POST['paper_id']
-    papers = Paper.objects.filter(pk=paper_id)
-    if papers.count() <= 0:
-        return JsonResponse({
-            'success': True,
-            'error': f'Paper (pk={paper_id}) does not exist!',
+            'error': f"An error occurred: {e}"
         })
 
-    p = papers[0]
-    p.delete_time = timezone.now()
-    p.save()
-    
     return JsonResponse({'success': True})
 
 def RestorePaper(request):
@@ -197,24 +235,17 @@ def RestorePaper(request):
             'error': 'User is not authenticated!',
         })
 
-    if request.method != 'POST':
+    try:
+        id = request.POST['paper_id']
+        p = Paper.objects.get(pk=id)
+        p.delete_time = None
+        p.save()
+    except Exception as e:
         return JsonResponse({
             'success': False,
-            'error': 'POST method required!'
-            })
-
-    paper_id = request.POST['paper_id']
-    papers = Paper.objects.filter(pk=paper_id)
-    if papers.count() <= 0:
-        return JsonResponse({
-            'success': True,
-            'error': f'Paper (pk={paper_id}) does not exist!',
+            'error': f"An error occurred: {e}"
         })
 
-    p = papers[0]
-    p.delete_time = None
-    p.save()
-    
     return JsonResponse({'success': True})
 
 def DeletePaperForever(request):
@@ -224,20 +255,14 @@ def DeletePaperForever(request):
             'error': 'User is not authenticated!',
         })
 
-    if request.method != 'POST':
+    try:
+        id = request.POST['paper_id']
+        Paper.objects.get(pk=id)
+        Paper.objects.filter(pk=id).delete()
+    except Exception as e:
         return JsonResponse({
             'success': False,
-            'error': 'POST method required!'
-            })
-
-    paper_id = request.POST['paper_id']
-    papers = Paper.objects.filter(pk=paper_id)
-    if papers.count() <= 0:
-        return JsonResponse({
-            'success': True,
-            'error': f'Paper (pk={paper_id}) does not exist!',
+            'error': f"An error occurred: {e}"
         })
 
-    Paper.objects.filter(pk=paper_id).delete()
-    
     return JsonResponse({'success': True})

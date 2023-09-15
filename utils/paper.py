@@ -6,19 +6,26 @@ import xmltodict
 import re
 import datetime
 
-def extract_year_from_dict(data, key):
+def convert_string_to_datetime(s):
     format_strings = ['%Y-%m-%d', '%m/%d/%Y',
                       '%d-%b-%Y', '%Y %b %d', '%b %d, %Y', '%d %b, %Y',
-                      '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%SZ']
-    if key in data:
-        for format_string in format_strings:
-            try:
-                date_value = datetime.datetime.strptime(data[key], format_string)
-                year = date_value.year
-                return year
-            except ValueError:
-                pass  # continue to the next format string
+                      '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%SZ',
+                      '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%SZ']
+    for format_string in format_strings:
+        try:
+            dt = datetime.datetime.strptime(s, format_string)
+            return dt
+        except ValueError:
+            pass  # continue to the next format string
     return None
+
+def extract_year_from_dict(data, key):
+    if key not in data:
+        return None
+    dt = convert_string_to_datetime(data[key])
+    if dt is None:
+        return None
+    return dt.year
 
 def fetch_and_cache(url, cache_filename):
     if os.path.exists(cache_filename):
@@ -114,9 +121,9 @@ def get_paper_info_by_pmid(pmid):
     return None, f"Query PubMed ID '{pmid}' failed!"
 
 # Function to query paper info by PMC ID
-def get_paper_info_by_pmc_id(pmc_id):
-    cache_filename = "cache/pmc/" + pmc_id + ".txt"
-    api_url = f"https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?ids={pmc_id}&format=json"
+def get_paper_info_by_pmcid(pmcid):
+    cache_filename = "cache/pmc/" + pmcid + ".txt"
+    api_url = f"https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?ids={pmcid}&format=json"
     data = fetch_json(api_url, cache_filename)
     paper_info = None
     if 'records' in data and len(data['records']) > 0:
@@ -138,7 +145,7 @@ def get_paper_info_by_pmc_id(pmc_id):
             paper_info['id']['doi'] = data['records'][0]['doi']
 
     if paper_info is None:
-        return None, f"Query PMC ID '{pmc_id}' failed!"
+        return None, f"Query PMC ID '{pmcid}' failed!"
     else:
         return paper_info, raw_data
 
@@ -196,8 +203,8 @@ def get_paper_info(identifier):
         return get_paper_info_by_pmid(pmid)
     elif identifier.startswith("PMC"):
         # PMC ID
-        pmc_id = identifier
-        return get_paper_info_by_pmc_id(pmc_id)
+        pmcid = identifier
+        return get_paper_info_by_pmcid(pmcid)
     else:
         # invalid ID
         return None, f"Invalid paper ID '{identifier}'"
