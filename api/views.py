@@ -101,6 +101,37 @@ def QueryPaper(request, id):
             "urls": paper_info.get('urls', []),
         }})
 
+def AddPaper(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    id = request.POST['id']
+    papers = Paper.objects.filter(pk=id)
+    if papers.count() <= 0:
+        return JsonResponse({
+            'success': True,
+            'error': f'Paper (pk={id}) does not exist!',
+        })
+
+    print(request.POST)
+    p = papers[0]
+    p.title = request.POST['title']
+    p.pub_year = request.POST['pub_year']
+    p.journal = request.POST['journal']
+    p.comments = request.POST['comment']
+    p.save()
+
+    return JsonResponse({'success': True})
+
 def EditPaper(request):
     if not request.user.is_authenticated:
         return JsonResponse({
