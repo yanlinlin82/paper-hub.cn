@@ -151,7 +151,7 @@ def StatJournalView(request, group_name):
 def Trash(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'), trash=True)
-    summary_message = 'Papers in this folder will be removed after 30 days automatically.'
+    summary_message = '回收站中的内容将在30后自动删除！'
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'trash',
@@ -173,10 +173,7 @@ def CollectionViewByID(request, id, group_name):
     page_number = request.GET.get('page')
     papers, items = get_paginated_papers(papers, page_number)
     template = loader.get_template('group/list.html')
-    if group_name == "xiangma":
-        summary_message = '本页面显示合集 <b>#' + collections[0].name + '</b> 的文献。'
-    else:
-        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
+    summary_message = '本页面显示合集 <b>#' + collections[0].name + '</b> 的文献。'
     context = {
         'group': group,
         'current_page': 'collection',
@@ -191,10 +188,7 @@ def CollectionViewBySlug(request, slug, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page')).order_by('-create_time', '-pk')
     template = loader.get_template('group/list.html')
-    if group_name == "xiangma":
-        summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
-    else:
-        summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
+    summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
     context = {
         'group': group,
         'current_page': 'collection',
@@ -215,10 +209,7 @@ def PaperLabelView(request, name, group_name):
     papers, items = get_paginated_papers(papers, page_number)
 
     template = loader.get_template('group/list.html')
-    if group_name == "xiangma":
-        summary_message = '本页面显示标签 <b>' + name + '</b> 的文献。'
-    else:
-        summary_message = 'This page shows list of label "<b>' + name + '</b>". '
+    summary_message = '本页面显示标签 <b>' + name + '</b> 的文献。'
     context = {
         'group': group,
         'current_page': 'label',
@@ -251,10 +242,7 @@ def PaperJournal(request, group_name, journal_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'), journal_name=journal_name)
     template = loader.get_template('group/list.html')
-    if group_name == "xiangma":
-        summary_message = '本页面显示发表在 <b>' + journal_name + '</b> 杂志的文献。'
-    else:
-        summary_message = 'This page shows papers recommended by <b>' + user.nickname + '</b>. '
+    summary_message = '本页面显示发表在 <b>' + journal_name + '</b> 杂志的文献。'
     context = {
         'group': group,
         'current_page': 'user',
@@ -269,10 +257,7 @@ def UserView(request, id, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'), user=user)
     template = loader.get_template('group/list.html')
-    if group_name == "xiangma":
-        summary_message = '本页面显示由用户 <b>' + user.nickname + '</b> 推荐的文献。'
-    else:
-        summary_message = 'This page shows papers recommended by <b>' + user.nickname + '</b>. '
+    summary_message = '本页面显示由用户 <b>' + user.nickname + '</b> 推荐的文献。'
     context = {
         'group': group,
         'current_page': 'user',

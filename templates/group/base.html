@@ -8,9 +8,5 @@
 {% endblock banner %}
 
 {% block menu %}
-  {% if group.name == "xiangma" %}
-    {% include "group/menu-zh.html" %}
-  {% else %}
-    {% include "group/menu-en.html" %}
-  {% endif %}
+  {% include "group/menu.html" %}
 {% endblock menu %}

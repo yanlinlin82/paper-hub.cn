@@ -6,11 +6,7 @@
 <div class="page-summary">
   <p>
     {% autoescape off %}{{ summary_messages }}{% endautoescape %}
-    {% if group.name != "xiangma" %}
-    There are total {{ papers.paginator.count }} paper(s).{% if papers.paginator.num_pages > 1 %} This page shows {{ papers.start_index }}-{{ papers.end_index }} of {{ papers.paginator.count }}.{% endif %}
-    {% else %}
-    共有 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
-    {% endif %}
+    当前共有 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
   </p>
 </div>
 {% if papers %}
@@ -57,7 +53,7 @@
 {% include "group/paginator.html" %}
 
 {% else %}
-<p style="padding:20px; height:200px;">No paper is available.</p>
+<p style="padding:20px; height:200px;">暂无任何内容。</p>
 {% endif %}
 
 {% include "group/paper-op-script.html" %}
