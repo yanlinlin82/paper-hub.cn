@@ -5,6 +5,7 @@ import json
 import xmltodict
 import re
 import datetime
+from paperhub import settings
 
 def convert_string_to_datetime(s):
     format_strings = ['%Y-%m-%d', '%m/%d/%Y',
@@ -39,7 +40,7 @@ def fetch_and_cache(url, cache_filename):
         if response.status_code == 200:
             data = response.text
             # Cache the data to a local file
-            os.makedirs(os.path.dirname(cache_filename), mode=0o755, exist_ok=True)
+            os.makedirs(os.path.dirname(cache_filename), mode=0o775, exist_ok=True)
             with open(cache_filename, 'w', encoding='utf-8') as cache_file:
                 cache_file.write(data)
             print(f"Fetched data from the URL and cached it: {url}", file=sys.stderr)
@@ -66,7 +67,7 @@ def fetch_json(api_url, cache_filename, is_xml=False):
 
 # Function to query paper info by arXiv ID
 def get_paper_info_by_arxiv_id(arxiv_id):
-    cache_filename = "cache/arxiv/" + arxiv_id + ".txt"
+    cache_filename = os.path.join(settings.BASE_DIR, "cache/arxiv/" + arxiv_id + ".txt")
     api_url = f"https://export.arxiv.org/api/query?id_list={arxiv_id}"
     data = fetch_json(api_url, cache_filename, is_xml=True)
     if 'feed' in data and 'entry' in data['feed']:
@@ -92,7 +93,8 @@ def parse_elocation(s):
 
 # Function to query paper info by PubMed ID (PMID)
 def get_paper_info_by_pmid(pmid):
-    cache_filename = "cache/pubmed/" + pmid + ".txt"
+    cache_filename = os.path.join(settings.BASE_DIR, "cache/pubmed/" + pmid + ".txt")
+    print(f'cache filename: {cache_filename}')
     api_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id={pmid}&retmode=json"
     data = fetch_json(api_url, cache_filename)
     if 'result' in data and pmid in data['result']:
@@ -122,7 +124,7 @@ def get_paper_info_by_pmid(pmid):
 
 # Function to query paper info by PMC ID
 def get_paper_info_by_pmcid(pmcid):
-    cache_filename = "cache/pmc/" + pmcid + ".txt"
+    cache_filename = os.path.join(settings.BASE_DIR, "cache/pmc/" + pmcid + ".txt")
     api_url = f"https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?ids={pmcid}&format=json"
     data = fetch_json(api_url, cache_filename)
     paper_info = None
@@ -151,7 +153,7 @@ def get_paper_info_by_pmcid(pmcid):
 
 # Function to query paper info by DOI
 def get_paper_info_by_doi(doi):
-    cache_filename = "cache/doi/" + doi + ".txt"
+    cache_filename = os.path.join(settings.BASE_DIR, "cache/doi/" + doi + ".txt")
     api_url = f"https://api.crossref.org/works/{doi}"
     data = fetch_json(api_url, cache_filename)
     if data is not None and 'message' in data:
