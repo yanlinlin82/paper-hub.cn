@@ -20,13 +20,6 @@ class User(models.Model):
     def __str__(self):
         return self.nickname
 
-class Label(models.Model):
-    name = models.CharField(max_length=200, default='')
-    desc = models.CharField(max_length=2000, default='', blank=True)
-    owner = models.CharField(max_length=100, default='', blank=True) # link to User.username
-    def __str__(self):
-        return self.name
-
 class Paper(models.Model):
     # creation info
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -59,26 +52,6 @@ class Paper(models.Model):
     is_private = models.BooleanField(default=True)
     is_favorite = models.BooleanField(default=False)
     comments = models.CharField(max_length=65536, default='', blank=True)
-    labels = models.ManyToManyField(Label)
 
     def __str__(self):
         return self.creator.nickname + ': ' + str(self.pub_year) + ' - ' + self.journal + ' - ' + self.title
-
-class Collection(models.Model):
-    name = models.CharField(max_length=100, default='')
-    slug = models.CharField(max_length=200, default='')
-    desc = models.CharField(max_length=50000, default='', blank=True)
-    parent = models.IntegerField(default=0)
-
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
-    create_time = models.DateTimeField(default=timezone.now)
-    update_time = models.DateTimeField(default=timezone.now)
-
-    papers = models.ManyToManyField(Paper)
-    order_fields = models.CharField(max_length=1000, default='')
-
-    is_private = models.BooleanField(default=True)
-    members = models.ManyToManyField(User, related_name='members')
-
-    def __str__(self):
-        return self.name + ' (with ' + str(self.papers.count()) + ' paper(s), owned by ' + str(self.owner) + ')'

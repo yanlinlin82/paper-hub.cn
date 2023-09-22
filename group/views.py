@@ -4,8 +4,7 @@ from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
 from django.views import generic
-from view.models import Label, Paper, User, Collection
-from view.forms import PaperForm
+from view.models import User
 from .models import Group
 from .papers import *
 
@@ -159,65 +158,6 @@ def Trash(request, group_name):
         'items': items,
         'summary_messages': summary_message
     })
-
-def CollectionViewByID(request, id, group_name):
-    group = get_object_or_404(Group, name=group_name)
-    collections = Collection.objects.filter(pk=id)
-    if collections.count() <= 0:
-        return render(request, 'group/list.html', {
-            'error_message': 'Invalid collection ID: ' + str(id),
-            'current_page': 'collection',
-        })
-    papers = collections[0].papers.order_by('-create_time', '-pk')
-
-    page_number = request.GET.get('page')
-    papers, items = get_paginated_papers(papers, page_number)
-    template = loader.get_template('group/list.html')
-    summary_message = '本页面显示合集 <b>#' + collections[0].name + '</b> 的文献。'
-    context = {
-        'group': group,
-        'current_page': 'collection',
-        'collection': collections[0],
-        'papers': papers,
-        'items': items,
-        'summary_messages': summary_message,
-    }
-    return HttpResponse(template.render(context, request))
-
-def CollectionViewBySlug(request, slug, group_name):
-    group = get_object_or_404(Group, name=group_name)
-    papers, items = filter_papers(group.papers, request.GET.get('page')).order_by('-create_time', '-pk')
-    template = loader.get_template('group/list.html')
-    summary_message = '本页面显示列表 <b>#' + str(id) + '</b> 的文献。'
-    context = {
-        'group': group,
-        'current_page': 'collection',
-        'papers': papers,
-        'items': items,
-        'summary_messages': summary_message,
-    }
-    return HttpResponse(template.render(context, request))
-
-def PaperLabelView(request, name, group_name):
-    group = get_object_or_404(Group, name=group_name)
-    papers = None
-    label_list = Label.objects.filter(name=name)
-    if label_list.count() > 0:
-        papers = label_list[0].paper_set.all().order_by('-create_time', '-pk')
-
-    page_number = request.GET.get('page')
-    papers, items = get_paginated_papers(papers, page_number)
-
-    template = loader.get_template('group/list.html')
-    summary_message = '本页面显示标签 <b>' + name + '</b> 的文献。'
-    context = {
-        'group': group,
-        'current_page': 'label',
-        'papers': papers,
-        'items': items,
-        'summary_messages': summary_message,
-    }
-    return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id, group_name):
     group = get_object_or_404(Group, name=group_name)

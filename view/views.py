@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-from .models import Label, Paper, User, Collection
+from .models import Paper, User
 from .forms import PaperForm
 from paperhub import settings
 
@@ -67,49 +67,6 @@ def Trash(request):
         'paper_list': paper_list,
         'summary_messages': summary_message
     })
-
-def CollectionViewByID(request, id):
-    collections = Collection.objects.filter(pk=id)
-    if collections.count() <= 0:
-        return render(request, 'view/collection.html', {
-            'error_message': 'Invalid collection ID: ' + str(id),
-            'current_page': 'collection',
-        })
-    paper_list = collections[0].papers.order_by('-create_time', '-pk')
-    template = loader.get_template('view/collection.html')
-    summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
-    context = {
-        'current_page': 'collection',
-        'collection': collections[0],
-        'paper_list': paper_list,
-        'summary_messages': summary_message,
-    }
-    return HttpResponse(template.render(context, request))
-
-def CollectionViewBySlug(request, slug):
-    paper_list = get_paper_list(request).order_by('-create_time', '-pk')
-    template = loader.get_template('view/list.html')
-    summary_message = 'This page shows list <b>#' + str(id) + '</b>. '
-    context = {
-        'current_page': 'collection',
-        'paper_list': paper_list,
-        'summary_messages': summary_message,
-    }
-    return HttpResponse(template.render(context, request))
-
-def PaperLabelView(request, name):
-    paper_list = None
-    label_list = Label.objects.filter(name=name)
-    if label_list.count() > 0:
-        paper_list = label_list[0].paper_set.all().order_by('-create_time', '-pk')
-    template = loader.get_template('view/list.html')
-    summary_message = 'This page shows list of label "<b>' + name + '</b>". '
-    context = {
-        'current_page': 'label',
-        'paper_list': paper_list,
-        'summary_messages': summary_message,
-    }
-    return HttpResponse(template.render(context, request))
 
 def SinglePaperView(request, id):
     paper_list = get_paper_list(request).filter(pk=id)

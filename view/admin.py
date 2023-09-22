@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import User, Label, Paper, Collection
+from .models import User, Paper
 
 class UserAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -15,6 +15,4 @@ class UserAdmin(admin.ModelAdmin):
         return super().formfield_for_dbfield(db_field, **kwargs)
 
 admin.site.register(User, UserAdmin)
-admin.site.register(Label)
 admin.site.register(Paper)
-admin.site.register(Collection)
