@@ -183,12 +183,7 @@ def AddPaper(request):
             p.cnki_id = paper_info['id'].get('cnki_id', '')
             p.authors = "\n".join(paper_info.get('authors', []))
             p.abstract = paper_info.get('abstract', '')
-            p.keywords = "\n".join(paper_info.get('keywords', []))
             p.urls = "\n".join(paper_info.get('urls', []))
-            p.is_preprint = False
-            p.is_review = False
-            p.is_open = False
-            p.is_favorite = False
         p.save()
 
         group_name = request.POST['group_name']

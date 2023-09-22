@@ -22,30 +22,22 @@ class Paper(models.Model):
     update_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
 
-    # index id
+    # paper info
+    journal = models.CharField(max_length=200, default='', blank=True)
+    pub_year = models.IntegerField(blank=True, null=True, default=None)
+    title = models.CharField(max_length=500, default='')
+    authors = models.CharField(max_length=4000, default='', blank=True)
+    abstract = models.CharField(max_length=4000, default='', blank=True)
+    urls = models.CharField(max_length=1000, default='', blank=True)
+
+    # paper id
     doi = models.CharField(max_length=100, default='', blank=True)
     pmid = models.CharField(max_length=20, default='', blank=True)
     arxiv_id = models.CharField(max_length=30, default='', blank=True)
     pmcid = models.CharField(max_length=100, default='', blank=True)
     cnki_id = models.CharField(max_length=100, default='', blank=True) # CNKI CJFD ID
 
-    # paper info
-    journal = models.CharField(max_length=200, default='', blank=True)
-    pub_year = models.IntegerField(blank=True, null=True, default=None)
-    pub_date = models.DateField(blank=True, null=True, default=None)
-    title = models.CharField(max_length=500, default='')
-    authors = models.CharField(max_length=4000, default='', blank=True)
-    abstract = models.CharField(max_length=4000, default='', blank=True)
-    keywords = models.CharField(max_length=1000, default='', blank=True)
-    urls = models.CharField(max_length=1000, default='', blank=True)
-    full_text = models.FileField(default='', blank=True)
-    is_preprint = models.BooleanField(default=False)
-    is_review = models.BooleanField(default=False)
-    is_open = models.BooleanField(default=False)
-
     # user comments
-    is_private = models.BooleanField(default=True)
-    is_favorite = models.BooleanField(default=False)
     comments = models.CharField(max_length=65536, default='', blank=True)
 
     def __str__(self):
