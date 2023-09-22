@@ -5,6 +5,34 @@ from django.utils import timezone
 from view.models import User, Paper
 from group.models import Group
 from utils.paper import get_paper_info, convert_string_to_datetime
+import requests
+import json
+from decouple import config
+
+def WeiXinLogin(request):
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    APPID = config('WX_APPID')
+    SECRET = config('WX_SECRET')
+    wx_login_code = request['POST'].code
+
+    url = f'https://api.weixin.qq.com/sns/jscode2session'\
+        '?appid={APPID}&secret={SECRET}&js_code={wx_login_code}'\
+        '&grant_type=authorization_code'
+    response = requests.get(url)
+    if response.status_code != 200:
+        return JsonResponse({'error':'Login failed!'})
+
+    res = json.loads(response.text)
+    openid = res.data.openid
+    session_key = res.data.session_key
+
+    print(f"result: openid={openid}, session_key={session_key}")
+    return JsonResponse({'success': True})
 
 def Login(request):
     if request.method != 'POST':

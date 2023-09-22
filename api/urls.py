@@ -13,4 +13,5 @@ urlpatterns = [
     path('delete_paper', views.DeletePaper, name='delete_paper'),
     path('restore_paper', views.RestorePaper, name='restore_paper'),
     path('delete_paper_forever', views.DeletePaperForever, name='delete_paper_forever'),
+    path('wx_login', views.WeiXinLogin, name='wx_login'),
 ]
