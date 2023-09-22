@@ -7,8 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 from .models import Label, Paper, User, Collection
 from .forms import PaperForm
-
-tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
+from paperhub import settings
 
 def GetCurrentUser(request):
     if not request.user.is_authenticated:
@@ -38,7 +37,7 @@ def All(request):
     return HttpResponse(template.render(context, request))
 
 def Recent(request):
-    last_week = datetime.now().astimezone(tz_beijing) - timedelta(days=7)
+    last_week = datetime.now().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE)) - timedelta(days=7)
     paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     summary_message = 'This page shows papers in last week. '
     template = loader.get_template('view/list.html')

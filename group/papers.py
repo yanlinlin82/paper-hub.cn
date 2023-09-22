@@ -5,11 +5,10 @@ from django.db.models import Count
 from django.db.models.aggregates import Min
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import CustomCheckInInterval
-
-tz_beijing = zoneinfo.ZoneInfo("Asia/Shanghai")
+from paperhub import settings
 
 def get_this_week_start_time():
-    today = datetime.today().astimezone(tz_beijing)
+    today = datetime.today().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE))
     start_time = today - timedelta(days=7)
     return start_time
 
@@ -83,7 +82,7 @@ def get_stat_all(papers, group_name, top_n = None):
     return stat
 
 def get_this_month():
-    today = datetime.today().astimezone(tz_beijing)
+    today = datetime.today().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE))
     return today.year, today.month
 
 def get_last_month(year, month):
@@ -106,7 +105,7 @@ def get_deadline(year, month):
     m = CustomCheckInInterval.objects.filter(year=year, month=month)
     if m.count() > 0:
         return m[0].deadline
-    return datetime(*get_next_month(year, month), 1).astimezone(tz_beijing)
+    return datetime(*get_next_month(year, month), 1).astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE))
 
 def get_check_in_interval(year, month):
     start_time = get_deadline(*get_last_month(year, month))
@@ -146,7 +145,7 @@ def get_stat_this_month(papers, group_name, top_n = None):
     return stat
 
 def get_stat_last_month(papers, group_name, top_n = None):
-    today = datetime.today().astimezone(tz_beijing)
+    today = datetime.today().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE))
     year = today.year
     month = today.month
     year, month = get_last_month(year, month)
