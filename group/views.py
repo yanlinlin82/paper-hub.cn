@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.views import generic
 from view.models import User
 from .models import Group
-from .papers import *
+from utils.paper import filter_papers, get_this_week_start_time, get_check_in_interval, get_this_month, get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal, get_last_month
 
 class IndexView(generic.ListView):
     template_name = 'group/index.html'
