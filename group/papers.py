@@ -106,7 +106,7 @@ def get_deadline(year, month):
     m = CustomCheckInInterval.objects.filter(year=year, month=month)
     if m.count() > 0:
         return m[0].deadline
-    return datetime(*get_next_month(year, month), 1)
+    return datetime(*get_next_month(year, month), 1).astimezone(tz_beijing)
 
 def get_check_in_interval(year, month):
     start_time = get_deadline(*get_last_month(year, month))
