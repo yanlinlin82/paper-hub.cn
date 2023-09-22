@@ -1,6 +1,4 @@
-{% extends "base.html" %}
-
-{% block menu %}{% include "view/menu.html" %}{% endblock menu %}
+{% extends "view/base.html" %}
 
 {% block content %}
 <div class="page-summary">
@@ -9,7 +7,7 @@
 {% if paper_list %}
 {% for paper in paper_list %}
 <div class="paper-item">
-  {% include "view/paper-item-as-card.html" %}
+  {{ paper }}
 </div>
 {% endfor %}
 {% else %}

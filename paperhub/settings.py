@@ -15,7 +15,7 @@ from pathlib import Path
 
 # My settings
 CONFIG_ENABLE_LOGIN = True
-CONFIG_XIANGMA_GROUP_ONLY = True
+CONFIG_XIANGMA_GROUP_ONLY = False
 CONFIG_DEPLOY_TO_SUB_DIR = False
 
 

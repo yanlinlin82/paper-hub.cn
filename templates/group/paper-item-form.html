@@ -13,8 +13,6 @@ function do_fetch_creator_info() {
         alert("Error: " + data["error"]);
       } else {
         $('#id_creator_nickname').val(data["results"]["nickname"]);
-        $('#id_creator_name').val(data["results"]["name"]);
-        $('#id_creator_weixin_id').val(data["results"]["weixin_id"]);
         $('#id_creator_username').val(data["results"]["username"]);
       }
     });

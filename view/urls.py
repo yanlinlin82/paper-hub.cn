@@ -15,9 +15,7 @@ urlpatterns = [
     path('trash', views.Trash, name='trash'),
     path('trash/<int:id>/restore', views.RestorePaperView, name='restore_from_trash'),
     path('trash/<int:id>/delete', views.DeleteForeverPaperView, name='delete_forever'),
-    path('paper/<int:id>/edit', views.EditPaperView, name='edit'),
     path('paper/<int:id>/delete', views.DeletePaperView, name='delete'),
     path('paper/<int:id>', views.SinglePaperView, name='paper'),
     path('user/<int:id>', views.UserView, name='user'),
-    path('add', views.PaperAdd, name='add'),
 ]

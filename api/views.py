@@ -58,23 +58,18 @@ def QueryUser(request, user):
     """
     Return JSON:
     {
+        "success": True/False,
         "error": "...", /* empty if succeed */
         "query": "...", /* 查询词 */
         "results": {
             "nickname" : "...", /* 昵称 */
-            "name"     : "...", /* 姓名 */
-            "weixin_id": "...", /* 微信ID */
             "username" : "...", /* 用户名 */
         }
     }
     """
     u = User.objects.filter(nickname=user)
     if u.count() == 0:
-        u = User.objects.filter(name=user)
-    if u.count() == 0:
-        u = User.objects.filter(weixin_id=user)
-    if u.count() == 0:
-        u = User.objects.filter(username=user)
+        u = User.objects.filter(auth_user__username=user)
     if u.count() == 0:
         return JsonResponse({"error": "user '" + user + "' not found."})
     else:
@@ -83,9 +78,7 @@ def QueryUser(request, user):
             "query": user,
             "results": {
                 "nickname": u[0].nickname,
-                "name": u[0].name,
-                "weixin_id": u[0].weixin_id,
-                "username": u[0].username,
+                "username": u[0].auth_user.username,
             }})
 
 def QueryPaper(request, id):

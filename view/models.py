@@ -6,16 +6,11 @@ class User(models.Model):
     auth_user = models.OneToOneField(AuthUser, on_delete=models.CASCADE,
                                      related_name='custom_user', null=True)
 
+    create_time = models.DateTimeField(default=timezone.now)
+    nickname = models.CharField(max_length=100, default='', blank=True)
+
     wx_openid = models.CharField(max_length=100, default='', blank=True)
     wx_unionid = models.CharField(max_length=100, default='', blank=True)
-
-    username = models.CharField(max_length=100, default='', blank=True) # unique symbol, link to authorization table
-    name = models.CharField(max_length=100, default='', blank=True)
-    nickname = models.CharField(max_length=100, default='', blank=True)
-    weixin_id = models.CharField(max_length=100, default='', blank=True)
-
-    create_time = models.DateTimeField(default=timezone.now)
-    last_login_time = models.DateTimeField(null=True, default=None)
 
     def __str__(self):
         return self.nickname
@@ -25,7 +20,7 @@ class Paper(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(default=timezone.now)
-    delete_time = models.DateTimeField(null=True, default=None)
+    delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
 
     # index id
     doi = models.CharField(max_length=100, default='', blank=True)

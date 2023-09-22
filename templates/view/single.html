@@ -1,11 +1,9 @@
-{% extends "base.html" %}
-
-{% block menu %}{% include "view/menu.html" %}{% endblock menu %}
+{% extends "view/base.html" %}
 
 {% block content %}
 {% if paper %}
 <div class="paper-item">
-  {% include "view/paper-item-as-card.html" %}
+  {{ paper }}
 </div>
 {% else %}
 <p>Invalid paper ID.</p>

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block menu %}
+<div class="list-group text-center">
+  <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}"
+    href="{% url 'view:all' %}">All Papers</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}"
+    href="{% url 'view:recent' %}">Recent</a>
+    {% if user.is_authenticated %}
+    <a class="list-group-item list-group-item-action {% if current_page == "favor" %}active{% endif %}"
+    href="{% url 'view:favor' %}">Favorites</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}"
+    href="{% url 'view:trash' %}">Trash</a>
+  {% endif %}
+</div>
+{% endblock menu %}
