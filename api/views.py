@@ -9,7 +9,7 @@ import requests
 import json
 from decouple import config
 
-def WeiXinLogin(request):
+def wx_login(request):
     if request.method != 'POST':
         return JsonResponse({
             'success': False,
@@ -34,7 +34,7 @@ def WeiXinLogin(request):
     print(f"result: openid={openid}, session_key={session_key}")
     return JsonResponse({'success': True})
 
-def Login(request):
+def do_login(request):
     if request.method != 'POST':
         return JsonResponse({
             'success': False,
@@ -50,11 +50,11 @@ def Login(request):
             return JsonResponse({'success': True})
     return JsonResponse({'error':'Login failed!'})
 
-def Logout(request):
+def do_logout(request):
     logout(request)
     return JsonResponse({'success': True})
 
-def QueryUser(request, user):
+def query_user(request, user):
     """
     Return JSON:
     {
@@ -81,7 +81,7 @@ def QueryUser(request, user):
                 "username": u[0].auth_user.username,
             }})
 
-def QueryPaper(request, id):
+def query_paper(request, id):
     """
     Return JSON:
     {
@@ -123,7 +123,7 @@ def QueryPaper(request, id):
             "urls": paper_info.get('urls', []),
         }})
 
-def AddPaper(request):
+def add_paper(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -199,7 +199,7 @@ def AddPaper(request):
 
     return JsonResponse({'success': True})
 
-def EditPaper(request):
+def edit_paper(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -223,7 +223,7 @@ def EditPaper(request):
 
     return JsonResponse({'success': True})
 
-def DeletePaper(request):
+def delete_paper(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -243,7 +243,7 @@ def DeletePaper(request):
 
     return JsonResponse({'success': True})
 
-def RestorePaper(request):
+def restore_paper(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -263,7 +263,7 @@ def RestorePaper(request):
 
     return JsonResponse({'success': True})
 
-def DeletePaperForever(request):
+def delete_paper_forever(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,

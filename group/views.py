@@ -21,7 +21,7 @@ class IndexView(generic.ListView):
             }
         return context
 
-def All(request, group_name):
+def all_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'))
     template = loader.get_template('group/list.html')
@@ -34,7 +34,7 @@ def All(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def Recent(request, group_name):
+def recent_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     start_time = get_this_week_start_time()
     papers, items = filter_papers(group.papers, request.GET.get('page'), start_time=start_time)
@@ -49,7 +49,7 @@ def Recent(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def ThisMonth(request, group_name):
+def this_month_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     start_time, end_time = get_check_in_interval(*get_this_month())
     papers, items = filter_papers(group.papers, request.GET.get('page'), start_time=start_time)
@@ -64,7 +64,7 @@ def ThisMonth(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def LastMonth(request, group_name):
+def last_month_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     start_time, end_time = get_check_in_interval(*get_last_month(*get_this_month()))
     papers, items = filter_papers(group.papers, request.GET.get('page'), start_time=start_time, end_time=end_time)
@@ -79,7 +79,7 @@ def LastMonth(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def StatView(request, group_name):
+def stat_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers.filter(delete_time=None)
 
@@ -99,7 +99,7 @@ def StatView(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def StatThisMonthView(request, group_name):
+def stat_this_month_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers.filter(delete_time=None)
     stat = get_stat_this_month(papers, group_name)
@@ -111,7 +111,7 @@ def StatThisMonthView(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def StatLastMonthView(request, group_name):
+def stat_last_month_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers.filter(delete_time=None)
     stat = get_stat_last_month(papers, group_name)
@@ -123,7 +123,7 @@ def StatLastMonthView(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def StatAllView(request, group_name):
+def stat_all_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers.filter(delete_time=None)
     stat = get_stat_all(papers, group_name)
@@ -135,7 +135,7 @@ def StatAllView(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def StatJournalView(request, group_name):
+def stat_journal_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers = group.papers.filter(delete_time=None)
     stat = get_stat_journal(papers, group_name)
@@ -147,7 +147,7 @@ def StatJournalView(request, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def Trash(request, group_name):
+def trash_page(request, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'), trash=True)
     summary_message = '回收站中的内容将在30后自动删除！'
@@ -159,7 +159,7 @@ def Trash(request, group_name):
         'summary_messages': summary_message
     })
 
-def SinglePaperView(request, id, group_name):
+def single_page(request, id, group_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'), id=id)
     if papers.paginator.count <= 0:
@@ -178,7 +178,7 @@ def SinglePaperView(request, id, group_name):
     }
     return HttpResponse(template.render(context, request))
 
-def PaperJournal(request, group_name, journal_name):
+def journal_page(request, group_name, journal_name):
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'), journal_name=journal_name)
     template = loader.get_template('group/list.html')
@@ -192,7 +192,7 @@ def PaperJournal(request, group_name, journal_name):
     }
     return HttpResponse(template.render(context, request))
 
-def UserView(request, id, group_name):
+def user_page(request, id, group_name):
     user = get_object_or_404(User, pk=id)
     group = get_object_or_404(Group, name=group_name)
     papers, items = filter_papers(group.papers, request.GET.get('page'), user=user)

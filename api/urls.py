@@ -4,14 +4,14 @@ from . import views
 
 app_name = 'api'
 urlpatterns = [
-    path('login', views.Login, name='login'),
-    path('logout', views.Logout, name='logout'),
-    path('query/user/<str:user>', views.QueryUser, name='query_user'),
-    re_path(r'^query/paper/(?P<id>.+)', views.QueryPaper, name='query_paper'),
-    path('add_paper', views.AddPaper, name='add_paper'),
-    path('edit_paper', views.EditPaper, name='edit_paper'),
-    path('delete_paper', views.DeletePaper, name='delete_paper'),
-    path('restore_paper', views.RestorePaper, name='restore_paper'),
-    path('delete_paper_forever', views.DeletePaperForever, name='delete_paper_forever'),
-    path('wx_login', views.WeiXinLogin, name='wx_login'),
+    path('login', views.do_login, name='login'),
+    path('logout', views.do_logout, name='logout'),
+    path('query/user/<str:user>', views.query_user, name='query_user'),
+    re_path(r'^query/paper/(?P<id>.+)', views.query_paper, name='query_paper'),
+    path('add_paper', views.add_paper, name='add_paper'),
+    path('edit_paper', views.edit_paper, name='edit_paper'),
+    path('delete_paper', views.delete_paper, name='delete_paper'),
+    path('restore_paper', views.restore_paper, name='restore_paper'),
+    path('delete_paper_forever', views.delete_paper_forever, name='delete_paper_forever'),
+    path('wx_login', views.wx_login, name='wx_login'),
 ]

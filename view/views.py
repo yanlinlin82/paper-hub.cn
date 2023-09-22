@@ -16,7 +16,7 @@ def get_paper_list(request, include_trash=False):
     else:
         return Paper.objects.filter(creator__auth_user__username=request.user.username, delete_time=None)
 
-def All(request):
+def all_page(request):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')
     template = loader.get_template('view/list.html')
     context = {
@@ -26,7 +26,7 @@ def All(request):
     }
     return HttpResponse(template.render(context, request))
 
-def Recent(request):
+def recent_page(request):
     last_week = datetime.now().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE)) - timedelta(days=7)
     paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     summary_message = 'This page shows papers in last week. '
@@ -38,7 +38,7 @@ def Recent(request):
     }
     return HttpResponse(template.render(context, request))
 
-def Trash(request):
+def trash_page(request):
     paper_list = get_paper_list(request, include_trash=True).exclude(delete_time=None).order_by('-create_time', '-pk')
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'view/list.html', {
@@ -47,7 +47,7 @@ def Trash(request):
         'summary_messages': summary_message
     })
 
-def SinglePaperView(request, id):
+def single_page(request, id):
     paper_list = get_paper_list(request).filter(pk=id)
     if paper_list.count() <= 0:
         return render(request, 'view/single.html', {
