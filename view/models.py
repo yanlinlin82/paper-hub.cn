@@ -1,23 +1,29 @@
-import datetime
-from email.policy import default
-from statistics import mode
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User as AuthUser
 
 class User(models.Model):
-    username = models.CharField(max_length=100, default='') # unique symbol, link to authorization table
-    name = models.CharField(max_length=100, default='')
-    nickname = models.CharField(max_length=100, default='')
-    weixin_id = models.CharField(max_length=100, default='')
+    auth_user = models.OneToOneField(AuthUser, on_delete=models.CASCADE,
+                                     related_name='custom_user', null=True)
+
+    wx_openid = models.CharField(max_length=100, default='', blank=True)
+    wx_unionid = models.CharField(max_length=100, default='', blank=True)
+
+    username = models.CharField(max_length=100, default='', blank=True) # unique symbol, link to authorization table
+    name = models.CharField(max_length=100, default='', blank=True)
+    nickname = models.CharField(max_length=100, default='', blank=True)
+    weixin_id = models.CharField(max_length=100, default='', blank=True)
+
     create_time = models.DateTimeField(default=timezone.now)
     last_login_time = models.DateTimeField(null=True, default=None)
+
     def __str__(self):
         return self.nickname
 
 class Label(models.Model):
     name = models.CharField(max_length=200, default='')
-    desc = models.CharField(max_length=2000, default='')
-    owner = models.CharField(max_length=100, default='') # link to User.username
+    desc = models.CharField(max_length=2000, default='', blank=True)
+    owner = models.CharField(max_length=100, default='', blank=True) # link to User.username
     def __str__(self):
         return self.name
 
@@ -29,22 +35,22 @@ class Paper(models.Model):
     delete_time = models.DateTimeField(null=True, default=None)
 
     # index id
-    doi = models.CharField(max_length=100, default='')
-    pmid = models.CharField(max_length=20, default='')
-    arxiv_id = models.CharField(max_length=30, default='')
-    pmcid = models.CharField(max_length=100, default='')
-    cnki_id = models.CharField(max_length=100, default='') # CNKI CJFD ID
+    doi = models.CharField(max_length=100, default='', blank=True)
+    pmid = models.CharField(max_length=20, default='', blank=True)
+    arxiv_id = models.CharField(max_length=30, default='', blank=True)
+    pmcid = models.CharField(max_length=100, default='', blank=True)
+    cnki_id = models.CharField(max_length=100, default='', blank=True) # CNKI CJFD ID
 
     # paper info
-    journal = models.CharField(max_length=200, default='')
+    journal = models.CharField(max_length=200, default='', blank=True)
     pub_year = models.IntegerField(blank=True, null=True, default=None)
     pub_date = models.DateField(blank=True, null=True, default=None)
     title = models.CharField(max_length=500, default='')
-    authors = models.CharField(max_length=4000, default='')
-    abstract = models.CharField(max_length=4000, default='')
-    keywords = models.CharField(max_length=1000, default='')
-    urls = models.CharField(max_length=1000, default='')
-    full_text = models.FileField(default='')
+    authors = models.CharField(max_length=4000, default='', blank=True)
+    abstract = models.CharField(max_length=4000, default='', blank=True)
+    keywords = models.CharField(max_length=1000, default='', blank=True)
+    urls = models.CharField(max_length=1000, default='', blank=True)
+    full_text = models.FileField(default='', blank=True)
     is_preprint = models.BooleanField(default=False)
     is_review = models.BooleanField(default=False)
     is_open = models.BooleanField(default=False)
@@ -52,16 +58,16 @@ class Paper(models.Model):
     # user comments
     is_private = models.BooleanField(default=True)
     is_favorite = models.BooleanField(default=False)
-    comments = models.CharField(max_length=65536, default='')
+    comments = models.CharField(max_length=65536, default='', blank=True)
     labels = models.ManyToManyField(Label)
 
     def __str__(self):
         return self.creator.nickname + ': ' + str(self.pub_year) + ' - ' + self.journal + ' - ' + self.title
 
 class Collection(models.Model):
-    name = models.CharField(max_length=100, default="")
-    slug = models.CharField(max_length=200, default="")
-    desc = models.CharField(max_length=50000, default="")
+    name = models.CharField(max_length=100, default='')
+    slug = models.CharField(max_length=200, default='')
+    desc = models.CharField(max_length=50000, default='', blank=True)
     parent = models.IntegerField(default=0)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owner')
@@ -69,7 +75,7 @@ class Collection(models.Model):
     update_time = models.DateTimeField(default=timezone.now)
 
     papers = models.ManyToManyField(Paper)
-    order_fields = models.CharField(max_length=1000, default="")
+    order_fields = models.CharField(max_length=1000, default='')
 
     is_private = models.BooleanField(default=True)
     members = models.ManyToManyField(User, related_name='members')
