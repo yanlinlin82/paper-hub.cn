@@ -165,8 +165,7 @@ def AddPaper(request):
         p = Paper(
             creator = user,
             create_time = create_time,
-            update_time = create_time,
-            is_private = True)
+            update_time = create_time)
 
         p.title = request.POST['title']
         p.pub_year = request.POST['pub_year']
