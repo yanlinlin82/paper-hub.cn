@@ -1,7 +1,9 @@
 import requests
 import json
-from datetime import datetime
+import zoneinfo
 from decouple import config
+from paperhub import settings
+from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
@@ -315,7 +317,7 @@ def fetch_paper_list(request):
             'success': True,
             'results': [{
                 'creator': p.creator.nickname,
-                'create_time': p.create_time.strftime("%Y-%m-%d %H:%M"),
+                'create_time': timezone.localtime(p.create_time, timezone=zoneinfo.ZoneInfo(settings.TIME_ZONE)).strftime("%Y-%m-%d %H:%M"),
                 'pub_year': p.pub_year,
                 'title': p.title,
                 'journal': p.journal,
