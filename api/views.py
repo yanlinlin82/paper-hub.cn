@@ -1,3 +1,7 @@
+import requests
+import json
+from datetime import datetime
+from decouple import config
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
@@ -5,9 +9,6 @@ from django.utils import timezone
 from view.models import User, Paper
 from group.models import Group
 from utils.paper import get_paper_info, convert_string_to_datetime
-import requests
-import json
-from decouple import config
 from utils.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 
 def wx_login(request):
@@ -295,6 +296,35 @@ def fetch_rank_list(request):
         return JsonResponse({
             'success': True,
             'results': [stat_1, stat_2, stat_3, stat_4]
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+def fetch_paper_list(request):
+    try:
+        group_name = 'xiangma'
+        group = Group.objects.get(name=group_name)
+        papers = group.papers\
+            .filter(delete_time=None)\
+            .order_by('-create_time', '-pk')
+
+        return JsonResponse({
+            'success': True,
+            'results': [{
+                'creator': p.creator.nickname,
+                'create_time': p.create_time.strftime("%Y-%m-%d %H:%M"),
+                'pub_year': p.pub_year,
+                'title': p.title,
+                'journal': p.journal,
+                'comments': p.comments,
+                'doi': p.doi,
+                'pmid': p.pmid,
+                'arxiv_id': p.arxiv_id,
+                'pmcid': p.pmcid,
+            } for p in papers[:10]]
         })
     except Exception as e:
         return JsonResponse({
