@@ -13,7 +13,7 @@
   <a class="list-group-item list-group-item-action list-group-item-warning" href="javascript:add_paper();">分享打卡</a>
 </div>
 {% endif %}
-<div class="list-group text-center">
+<div class="list-group text-center flex-md-column flex-row">
   <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}"
     href="{% url 'group:all' group_name=group.name %}">所有分享</a>
   <a class="list-group-item list-group-item-action {% if current_page == "this_month" %}active{% endif %}"

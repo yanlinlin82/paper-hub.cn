@@ -40,7 +40,7 @@
         <div class="mb-3">
           <a class="link-dark fw-bold" href="{% url "group:user" id=paper.creator.pk group_name=group.name %}" id="paper-user-{{paper.pk}}">{{ paper.creator }}</a>:
         </div>
-        <div id="paper-comment-{{paper.pk}}">{{ paper.comments }}</div>
+        <div id="paper-comment-{{paper.pk}}" style="overflow-wrap:anywhere">{{ paper.comments }}</div>
       </div>
     </div>
   </div>
