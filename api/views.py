@@ -8,6 +8,7 @@ from utils.paper import get_paper_info, convert_string_to_datetime
 import requests
 import json
 from decouple import config
+from utils.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 
 def wx_login(request):
     if request.method != 'POST':
@@ -279,3 +280,24 @@ def delete_paper_forever(request):
         })
 
     return JsonResponse({'success': True})
+
+def fetch_rank_list(request):
+    try:
+        group_name = 'xiangma'
+        group = Group.objects.get(name=group_name)
+        papers = group.papers.filter(delete_time=None)
+
+        stat_1 = get_stat_this_month(papers, group_name, top_n=10)
+        stat_2 = get_stat_last_month(papers, group_name, top_n=10)
+        stat_3 = get_stat_all(papers, group_name, top_n=10)
+        stat_4 = get_stat_journal(papers, group_name, top_n=10)
+
+        return JsonResponse({
+            'success': True,
+            'results': [stat_1, stat_2, stat_3, stat_4]
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })

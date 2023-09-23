@@ -14,4 +14,5 @@ urlpatterns = [
     path('restore_paper', views.restore_paper, name='restore_paper'),
     path('delete_paper_forever', views.delete_paper_forever, name='delete_paper_forever'),
     path('wx_login', views.wx_login, name='wx_login'),
+    path('fetch_rank_list', views.fetch_rank_list, name='fetch_rank_list'),
 ]
