@@ -35,20 +35,18 @@ def wx_login(request):
     return JsonResponse({'success': True})
 
 def do_login(request):
-    if request.method != 'POST':
-        return JsonResponse({
-            'success': False,
-            'error': 'POST method required!'
-            })
-
-    username = request.POST['username']
-    password = request.POST['password']
-    if username is not None and password is not None:
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return JsonResponse({'success': True})
-    return JsonResponse({'error':'Login failed!'})
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        if username is not None and password is not None:
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return JsonResponse({'success': True})
+    return JsonResponse({
+        'success': False,
+        'error': 'Login failed. Please check your credentials.'
+        })
 
 def do_logout(request):
     logout(request)
