@@ -16,4 +16,5 @@ urlpatterns = [
     path('wx_login', views.wx_login, name='wx_login'),
     path('fetch_rank_list', views.fetch_rank_list, name='fetch_rank_list'),
     path('fetch_paper_list', views.fetch_paper_list, name='fetch_paper_list'),
+    path('ask_chat_gpt/<int:paper_id>', views.ask_chat_gpt, name='ask_chat_gpt'),
 ]

@@ -6,3 +6,5 @@ cache/
 static_root/
 .env
 venv/
+openai/constants.py
+openai/venv/

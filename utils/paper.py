@@ -12,6 +12,7 @@ from django.db.models.aggregates import Min
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from group.models import CustomCheckInInterval
 from paperhub import settings
+import requests
 
 def convert_string_to_datetime(s):
     format_strings = ['%Y-%m-%d', '%m/%d/%Y',
@@ -439,6 +440,38 @@ def get_stat_journal(papers, group_name, top_n = None):
         stat['full_rank'] = reverse('group:stat_journal', kwargs={'group_name':group_name})
 
     return stat
+
+def get_abstract_by_pmid(pmid):
+    pubmed_url = f'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml'
+    response = requests.get(pubmed_url)
+
+    if response.status_code == 200:
+        # Parse the PubMed XML response
+        xml_data = response.text
+        abstract_start = xml_data.find('<AbstractText>') + len('<AbstractText>')
+        abstract_end = xml_data.find('</AbstractText>')
+        abstract = xml_data[abstract_start:abstract_end].strip()
+        return abstract
+
+    return None
+
+def get_abstract_by_doi(doi):
+    pubmed_url = f'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term={doi}&retmode=json'
+    response = requests.get(pubmed_url)
+
+    if response.status_code == 200:
+        # Parse the PubMed API response
+        pubmed_data = response.json()
+        print('esearch returned:', pubmed_data)
+
+        # Check if any PubMed records were found
+        if 'esearchresult' in pubmed_data and 'idlist' in pubmed_data['esearchresult']:
+            pubmed_ids = pubmed_data['esearchresult']['idlist']
+            print('pubmed_ids:', pubmed_ids)
+
+            return get_abstract_by_pmid(pubmed_ids[0])
+
+    return None
 
 if __name__ == '__main__':
     sys.exit(main())

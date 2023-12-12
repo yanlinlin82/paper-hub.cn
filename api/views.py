@@ -1,3 +1,6 @@
+import os
+import subprocess
+import tempfile
 import requests
 import json
 import zoneinfo
@@ -12,6 +15,7 @@ from view.models import User, Paper
 from group.models import Group
 from utils.paper import get_paper_info, convert_string_to_datetime
 from utils.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
+from utils.paper import get_abstract_by_doi
 
 def wx_login(request):
     if request.method != 'POST':
@@ -333,3 +337,46 @@ def fetch_paper_list(request):
             'success': False,
             'error': f"An error occurred: {e}"
         })
+
+def ask_chat_gpt(request, paper_id):
+    paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({"error": "paper not found."})
+    if paper.abstract == "":
+        if paper.doi != "":
+            abstract = get_abstract_by_doi(paper.doi)
+            paper.abstract = abstract
+            paper.save()
+    else:
+        abstract = paper.abstract
+
+    # Write the abstract to a temporary file
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
+        temp_file.write(paper.title + '\n')
+        temp_file.write(abstract)
+        temp_file_path = temp_file.name
+        print('temp_file_path:', temp_file_path)
+
+    # Set the environment variable
+    os.environ['ALL_PROXY'] = 'socks5://localhost:1090/'
+
+    python_path = os.path.abspath('openai/venv/bin/python')
+    script_path = os.path.abspath('openai/test.py')
+
+    try:
+        # Call the other Python script with the temporary file as input
+        result = subprocess.run([python_path, script_path, temp_file_path], capture_output=True, text=True)
+        print('result:', result)
+
+        # Get the return value from stdout
+        answer = result.stdout.strip()
+        print('answer:', answer)
+    except Exception as e:
+        return JsonResponse({"error": f"An error occurred: {e}"})
+    finally:
+        # Remove the temporary file
+        os.remove(temp_file_path)
+
+    os.environ['ALL_PROXY'] = ''
+    data = {"abstract": abstract, "answer": answer}
+    return JsonResponse(data)

@@ -61,4 +61,23 @@
 </div>
 
 {% include "group/paper-op-script.html" %}
+
+<button type="button" id="ask-chat-gpt" class="btn btn-outline-info btn-sm">Ask Chat GPT</button>
+<textarea id="chat-gpt-answer" class="form-control" style="width:100%;min-height:200px;"></textarea>
+
+<script>
+document.getElementById('ask-chat-gpt').addEventListener('click', function() {
+  // Get the paper ID from your Django server (replace 'your-django-endpoint' with the actual endpoint)
+  fetch('/api/ask_chat_gpt/{{paper.pk}}')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        document.getElementById('chat-gpt-answer').value = data.answer;
+      })
+      .catch(error => {
+          console.error('Error fetching paper ID and abstract from Django:', error);
+      });
+});
+</script>
+
 {% endblock content %}
