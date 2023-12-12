@@ -5,3 +5,4 @@ cache/
 .vscode/
 static_root/
 .env
+venv/
