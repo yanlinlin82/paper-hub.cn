@@ -16,7 +16,6 @@ from pathlib import Path
 # My settings
 CONFIG_ENABLE_LOGIN = True
 CONFIG_XIANGMA_GROUP_ONLY = True
-CONFIG_DEPLOY_TO_SUB_DIR = False
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,9 +31,7 @@ SECRET_KEY = 'django-insecure-+ok)4@*0gfr5a7=+%gr7!rs^mwl!vqp&=d78^b%59erdjb9px+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ "localhost", "paper-hub.cn", "yanlinlin.cn" ]
-if CONFIG_DEPLOY_TO_SUB_DIR:
-    FORCE_SCRIPT_NAME = '/paper-hub'
+ALLOWED_HOSTS = [ "localhost", "127.0.0.1", "paper-hub.cn" ]
 
 # Application definition
 

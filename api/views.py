@@ -16,31 +16,63 @@ from group.models import Group
 from utils.paper import get_paper_info, convert_string_to_datetime
 from utils.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from utils.paper import get_abstract_by_doi
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def wx_login(request):
     if request.method != 'POST':
-        return JsonResponse({
-            'success': False,
-            'error': 'POST method required!'
-            })
+        return JsonResponse({'success': False, 'error': 'POST method required!'})
+
+    try:
+        json_data = json.loads(request.body.decode('utf-8'))
+        wx_code = json_data.get('code', '')
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
 
     APPID = config('WX_APPID')
     SECRET = config('WX_SECRET')
-    wx_login_code = request['POST'].code
 
-    url = f'https://api.weixin.qq.com/sns/jscode2session'\
-        '?appid={APPID}&secret={SECRET}&js_code={wx_login_code}'\
+    url = 'https://api.weixin.qq.com/sns/jscode2session'\
+        f'?appid={APPID}&secret={SECRET}&js_code={wx_code}'\
         '&grant_type=authorization_code'
+    #print(f'[REQUEST] {url}')
     response = requests.get(url)
+    #print(f'[RESPONSE] {response.status_code} {response.text}')
     if response.status_code != 200:
-        return JsonResponse({'error':'Login failed!'})
+        return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
+    session_key = response.json().get('session_key', '')
+    openid = response.json().get('openid', '')
+    print('wx_code:', wx_code)
+    print('session_key:', session_key)
+    print('openid:', openid)
 
-    res = json.loads(response.text)
-    openid = res.data.openid
-    session_key = res.data.session_key
+    nickname = ''
+    papers = []
+    users = User.objects.filter(wx_openid=openid)
+    if users.count() > 0:
+        user = users[0]
+        nickname = user.nickname
 
-    print(f"result: openid={openid}, session_key={session_key}")
-    return JsonResponse({'success': True})
+        tz = zoneinfo.ZoneInfo(settings.TIME_ZONE)
+        papers = [{
+            'id': item.id,
+            'create_time': timezone.localtime(item.create_time, timezone=tz).strftime("%Y-%m-%d %H:%M"),
+            'title': item.title,
+            'pub_year': item.pub_year,
+            'journal': item.journal,
+            'doi': item.doi,
+            'pmid': item.pmid,
+            'arxiv_id': item.arxiv_id,
+            'pmcid': item.pmcid,
+            'cnki_id': item.cnki_id,
+            'comments': item.comments,
+        } for item in Paper.objects.filter(creator=user)]
+
+    return JsonResponse({
+        'success': True,
+        'nickname': nickname,
+        'papers': papers,
+    })
 
 def do_login(request):
     if request.method == 'POST':

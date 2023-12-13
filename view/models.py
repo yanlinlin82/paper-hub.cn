@@ -5,13 +5,9 @@ from django.contrib.auth.models import User as AuthUser
 class User(models.Model):
     auth_user = models.OneToOneField(AuthUser, on_delete=models.CASCADE,
                                      related_name='custom_user', null=True)
-
     create_time = models.DateTimeField(default=timezone.now)
     nickname = models.CharField(max_length=100, default='', blank=True)
-
     wx_openid = models.CharField(max_length=100, default='', blank=True)
-    wx_unionid = models.CharField(max_length=100, default='', blank=True)
-
     def __str__(self):
         return self.nickname
 

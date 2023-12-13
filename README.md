@@ -46,3 +46,11 @@
     pip install openai
     pip install socksio
     ```
+
+5. Configure server side for mini program
+
+    ```sh
+    $ cat .env
+    WX_APPID = xxxxxx
+    WX_SECRET = xxxxxx
+    ```
