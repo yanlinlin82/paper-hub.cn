@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User as AuthUser
+import uuid
+from datetime import timedelta
+from paperhub import settings
 
 class User(models.Model):
     auth_user = models.OneToOneField(AuthUser, on_delete=models.CASCADE,
@@ -8,8 +11,24 @@ class User(models.Model):
     create_time = models.DateTimeField(default=timezone.now)
     nickname = models.CharField(max_length=100, default='', blank=True)
     wx_openid = models.CharField(max_length=100, default='', blank=True)
+
     def __str__(self):
         return self.nickname
+
+class UserSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    session_key = models.CharField(max_length=255)
+    token = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(days=settings.SESSION_COOKIE_AGE)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.user.nickname + ': ' + str(self.token)
 
 class Paper(models.Model):
     # creation info
