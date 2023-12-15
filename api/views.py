@@ -358,7 +358,11 @@ def delete_paper_forever(request):
     return JsonResponse({'success': True})
 
 def fetch_rank_list(request):
-    token = request.GET.get('token')
+    json_data = getattr(request, 'json_data', None)
+    if not json_data:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    token = json_data.get('token')
     if not token or not is_token_valid(token):
         return HttpResponseForbidden('Invalid or expired token')
 
@@ -383,7 +387,11 @@ def fetch_rank_list(request):
         })
 
 def fetch_paper_list(request):
-    token = request.GET.get('token')
+    json_data = getattr(request, 'json_data', None)
+    if not json_data:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    token = json_data.get('token')
     if not token or not is_token_valid(token):
         return HttpResponseForbidden('Invalid or expired token')
 
