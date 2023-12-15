@@ -462,11 +462,16 @@ def submit_comment(request):
         title = json_data.get('title')
         pub_year = json_data.get('pub_year')
         journal = json_data.get('journal')
+        nickname = json_data.get('nickname')
         comments = json_data.get('comment')
 
         paper_info, raw_dict = get_paper_info(paper_id)
 
         user = UserSession.objects.get(token=token).user
+        if user.nickname != nickname:
+            user.nickname = nickname
+            user.save()
+
         now = timezone.now()
         paper = Paper(creator=user,
                       create_time=now,
