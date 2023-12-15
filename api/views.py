@@ -423,6 +423,82 @@ def fetch_paper_list(request):
             'error': f"An error occurred: {e}"
         })
 
+def fetch_paper_info(request):
+    json_data = getattr(request, 'json_data', None)
+    if not json_data:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    token = json_data.get('token')
+    if not token or not is_token_valid(token):
+        return HttpResponseForbidden('Invalid or expired token')
+
+    paper_id = json_data.get('paper_id')
+    paper_info, raw_dict = get_paper_info(paper_id)
+    if paper_info is None:
+        return JsonResponse({
+            'success': False,
+            "error": raw_dict
+            })
+
+    return JsonResponse({
+        'success': True,
+        "results": {
+            "title": paper_info.get('title', ''),
+            "journal": paper_info.get('journal', ''),
+            "pub_year": paper_info.get('pub_year', ''),
+        }})
+
+def submit_comment(request):
+    json_data = getattr(request, 'json_data', None)
+    if not json_data:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    token = json_data.get('token')
+    if not token or not is_token_valid(token):
+        return HttpResponseForbidden('Invalid or expired token')
+
+    try:
+        paper_id = json_data.get('paper_id')
+        title = json_data.get('title')
+        pub_year = json_data.get('pub_year')
+        journal = json_data.get('journal')
+        comments = json_data.get('comment')
+
+        paper_info, raw_dict = get_paper_info(paper_id)
+
+        user = UserSession.objects.get(token=token).user
+        now = timezone.now()
+        paper = Paper(creator=user,
+                      create_time=now,
+                      update_time=now,
+                      title=title or paper_info['title'],
+                      pub_year=pub_year or paper_info['pub_year'],
+                      journal=journal or paper_info['journal'],
+                      comments=comments)
+        if paper_info is not None:
+            paper.doi = paper_info['id'].get('doi', '')
+            paper.pmid = paper_info['id'].get('pmid', '')
+            paper.arxiv_id = paper_info['id'].get('arxiv_id', '')
+            paper.pmcid = paper_info['id'].get('pmcid', '')
+            paper.cnki_id = paper_info['id'].get('cnki_id', '')
+            paper.authors = "\n".join(paper_info.get('authors', []))
+            paper.abstract = paper_info.get('abstract', '')
+            paper.urls = "\n".join(paper_info.get('urls', []))
+
+        paper.save()
+
+        group = Group.objects.get(name='xiangma')
+        group.papers.add(paper)
+        group.save()
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+    return JsonResponse({'success': True})
+
 def ask_chat_gpt(request, paper_id):
     paper = Paper.objects.get(pk=paper_id)
     if paper is None:

@@ -17,5 +17,7 @@ urlpatterns = [
     path('update_nickname', views.update_nickname, name='update_nickname'),
     path('fetch_rank_list', views.fetch_rank_list, name='fetch_rank_list'),
     path('fetch_paper_list', views.fetch_paper_list, name='fetch_paper_list'),
+    path('fetch_paper_info', views.fetch_paper_info, name='fetch_paper_info'),
+    path('submit_comment', views.submit_comment, name='submit_comment'),
     path('ask_chat_gpt/<int:paper_id>', views.ask_chat_gpt, name='ask_chat_gpt'),
 ]
