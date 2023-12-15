@@ -112,14 +112,18 @@ def update_nickname(request):
     return JsonResponse({'success': True})
 
 def do_login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        if username is not None and password is not None:
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return JsonResponse({'success': True})
+    json_data = getattr(request, 'json_data', None)
+    if not json_data:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    username = json_data.get('username')
+    password = json_data.get('password')
+    if username is not None and password is not None:
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'success': True})
+
     return JsonResponse({
         'success': False,
         'error': 'Login failed. Please check your credentials.'

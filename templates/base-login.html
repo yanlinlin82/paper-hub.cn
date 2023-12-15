@@ -54,25 +54,30 @@ $(document).ready(function() {
 
     var username = $('#username').val()
     var password = $('#password').val()
-    $.ajax({
-      url: "{% url 'api:login' %}",
-      type: 'POST',
-      data: {
+
+    fetch("{% url 'api:login' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrf_token
+      },
+      body: JSON.stringify({
         username: username,
         password: password
-      },
-      success: function (data) {
-        console.log('ajax return:', data)
-        if (!data.success) {
-          alert('Login failed. Please check your credentials.')
-        } else {
-          location.reload(false);
-        }
-      },
-      error: function () {
-        // Handle AJAX error
-        alert('An error occurred while processing your request.')
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('fetch return:', data)
+      if (!data.success) {
+        alert('Login failed. Please check your credentials.')
+      } else {
+        location.reload(false);
       }
+    })
+    .catch(error => {
+      // Handle fetch error
+      alert('An error occurred while processing your request.')
     })
   })
 })
