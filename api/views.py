@@ -41,7 +41,7 @@ def wx_login(request):
     if not wx_code:
         return JsonResponse({'error': 'Invalid wx_code'}, status=400)
 
-    APPID = config('WX_APPID')
+    APPID = config('WX_APP_ID')
     SECRET = config('WX_SECRET')
 
     url = 'https://api.weixin.qq.com/sns/jscode2session'\

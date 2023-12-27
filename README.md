@@ -53,7 +53,7 @@ An easy way to read and share papers for scientific research
 
     ```sh
     $ cat .env
-    WX_APPID = xxxxxx
+    WX_APP_ID = xxxxxx
     WX_SECRET = xxxxxx
     ```
 
