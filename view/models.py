@@ -4,8 +4,10 @@ from django.contrib.auth.models import User as AuthUser
 import uuid
 from datetime import timedelta
 from paperhub import settings
+from django.db import models
+from django.utils import timezone
 
-class User(models.Model):
+class UserProfile(models.Model):
     auth_user = models.OneToOneField(AuthUser, on_delete=models.CASCADE,
                                      related_name='custom_user', null=True)
     create_time = models.DateTimeField(default=timezone.now)
@@ -16,7 +18,7 @@ class User(models.Model):
         return self.nickname
 
 class UserSession(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     session_key = models.CharField(max_length=255)
     token = models.UUIDField(default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -32,7 +34,7 @@ class UserSession(models.Model):
 
 class Paper(models.Model):
     # creation info
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
     update_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
@@ -57,3 +59,18 @@ class Paper(models.Model):
 
     def __str__(self):
         return self.creator.nickname + ': ' + str(self.pub_year) + ' - ' + self.journal + ' - ' + self.title
+
+class GroupProfile(models.Model):
+    name = models.CharField(max_length=64, default='')
+    display_name = models.CharField(max_length=128, default='')
+    desc = models.CharField(max_length=2000, default='')
+    create_time = models.DateTimeField(default=timezone.now)
+    members = models.ManyToManyField(UserProfile)
+    papers = models.ManyToManyField(Paper)
+    def __str__(self):
+        return self.display_name + " (" + self.name + ")"
+
+class CustomCheckInInterval(models.Model):
+    year = models.IntegerField()
+    month = models.IntegerField()
+    deadline = models.DateTimeField()

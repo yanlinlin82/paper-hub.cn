@@ -11,11 +11,10 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
-from view.models import User, Paper, UserSession
-from group.models import Group
-from utils.paper import get_paper_info, convert_string_to_datetime
-from utils.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
-from utils.paper import get_abstract_by_doi
+from view.models import UserProfile, Paper, UserSession, GroupProfile
+from api.paper import get_paper_info, convert_string_to_datetime
+from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
+from api.paper import get_abstract_by_doi
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from django.http import HttpResponseForbidden
@@ -56,9 +55,9 @@ def wx_login(request):
 
     nickname = ''
     papers = []
-    users = User.objects.filter(wx_openid=openid)
+    users = UserProfile.objects.filter(wx_openid=openid)
     if users.count() == 0:
-        user = User(wx_openid=openid)
+        user = UserProfile(wx_openid=openid)
         user.save()
     else:
         user = users[0]
@@ -159,9 +158,9 @@ def query_user(request, user):
         }
     }
     """
-    u = User.objects.filter(nickname=user)
+    u = UserProfile.objects.filter(nickname=user)
     if u.count() == 0:
-        u = User.objects.filter(auth_user__username=user)
+        u = UserProfile.objects.filter(auth_user__username=user)
     if u.count() == 0:
         return JsonResponse({"error": "user '" + user + "' not found."})
     else:
@@ -230,16 +229,16 @@ def add_paper(request):
 
     try:
         s = request.POST['username']
-        if User.objects.filter(nickname=s).count() > 0:
-            user = User.objects.get(nickname=s)
-        elif User.objects.filter(name=s).count() > 0:
-            user = User.objects.get(name=s)
-        elif User.objects.filter(weixin_id=s) > 0:
-            user = User.objects.get(weixin_id=s)
-        elif User.objects.filter(username=s).count() > 0:
-            user = User.objects.get(username=s)
+        if UserProfile.objects.filter(nickname=s).count() > 0:
+            user = UserProfile.objects.get(nickname=s)
+        elif UserProfile.objects.filter(name=s).count() > 0:
+            user = UserProfile.objects.get(name=s)
+        elif UserProfile.objects.filter(weixin_id=s) > 0:
+            user = UserProfile.objects.get(weixin_id=s)
+        elif UserProfile.objects.filter(username=s).count() > 0:
+            user = UserProfile.objects.get(username=s)
         else:
-            user = User(username=s, nickname=s)
+            user = UserProfile(username=s, nickname=s)
             user.save()
 
         if 'create_time' in request.POST:
@@ -279,7 +278,7 @@ def add_paper(request):
 
         group_name = request.POST['group_name']
         if group_name:
-            group = Group.objects.get(name=group_name)
+            group = GroupProfile.objects.get(name=group_name)
         group.papers.add(p)
         group.save()
 
@@ -385,7 +384,7 @@ def fetch_rank_list(request):
 
     try:
         group_name = 'xiangma'
-        group = Group.objects.get(name=group_name)
+        group = GroupProfile.objects.get(name=group_name)
         papers = group.papers.filter(delete_time=None)
 
         stat_1 = get_stat_this_month(papers, group_name, top_n=10)
@@ -414,7 +413,7 @@ def fetch_paper_list(request):
 
     try:
         group_name = 'xiangma'
-        group = Group.objects.get(name=group_name)
+        group = GroupProfile.objects.get(name=group_name)
         papers = group.papers\
             .filter(delete_time=None)\
             .order_by('-create_time', '-pk')
@@ -509,7 +508,7 @@ def submit_comment(request):
 
         paper.save()
 
-        group = Group.objects.get(name='xiangma')
+        group = GroupProfile.objects.get(name='xiangma')
         group.papers.add(paper)
         group.save()
 

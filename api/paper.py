@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.db.models import Count
 from django.db.models.aggregates import Min
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from group.models import CustomCheckInInterval
+from view.models import CustomCheckInInterval
 from paperhub import settings
 import requests
 

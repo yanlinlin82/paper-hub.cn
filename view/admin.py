@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import User, UserSession, Paper
+from .models import UserProfile, UserSession, Paper, GroupProfile, CustomCheckInInterval
 
 class UserAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -14,6 +14,8 @@ class UserAdmin(admin.ModelAdmin):
             kwargs['required'] = False
         return super().formfield_for_dbfield(db_field, **kwargs)
 
-admin.site.register(User, UserAdmin)
+admin.site.register(UserProfile, UserAdmin)
 admin.site.register(UserSession)
 admin.site.register(Paper)
+admin.site.register(GroupProfile)
+admin.site.register(CustomCheckInInterval)

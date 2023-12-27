@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-from .models import Paper, User
+from .models import Paper, UserProfile
 from paperhub import settings
 
 def get_paper_list(request, include_trash=False):
