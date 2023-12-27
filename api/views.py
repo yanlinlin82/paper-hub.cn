@@ -21,11 +21,23 @@ from datetime import datetime
 from django.http import HttpResponseForbidden
 from django.middleware.csrf import get_token
 
+def parse_request(request):
+    if request.content_type != 'application/json':
+        return None, JsonResponse({'error': 'Invalid content type'}, status=400)
+    try:
+        json_data = json.loads(request.body.decode('utf-8'))
+        print('json_data:', json_data)
+        return json_data, None
+    except json.JSONDecodeError:
+        pass
+    return None, JsonResponse({'error': 'Invalid JSON'}, status=400)
+
 @csrf_exempt
 def wx_login(request):
-    json_data = getattr(request, 'json_data', None)
-    if not json_data:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
+
     wx_code = json_data.get('code', '')
     if not wx_code:
         return JsonResponse({'error': 'Invalid wx_code'}, status=400)
@@ -89,9 +101,9 @@ def is_token_valid(token):
         return False
 
 def update_nickname(request):
-    json_data = getattr(request, 'json_data', None)
-    if not json_data:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
 
     token = json_data.get('token')
     if not token or not is_token_valid(token):
@@ -112,14 +124,15 @@ def update_nickname(request):
     return JsonResponse({'success': True})
 
 def do_login(request):
-    json_data = getattr(request, 'json_data', None)
-    if not json_data:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
 
     username = json_data.get('username')
     password = json_data.get('password')
     if username is not None and password is not None:
         user = authenticate(request, username=username, password=password)
+        print('user:', user)
         if user is not None:
             login(request, user)
             return JsonResponse({'success': True})
@@ -362,9 +375,9 @@ def delete_paper_forever(request):
     return JsonResponse({'success': True})
 
 def fetch_rank_list(request):
-    json_data = getattr(request, 'json_data', None)
-    if not json_data:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
 
     token = json_data.get('token')
     if not token or not is_token_valid(token):
@@ -391,9 +404,9 @@ def fetch_rank_list(request):
         })
 
 def fetch_paper_list(request):
-    json_data = getattr(request, 'json_data', None)
-    if not json_data:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
 
     token = json_data.get('token')
     if not token or not is_token_valid(token):
@@ -428,9 +441,9 @@ def fetch_paper_list(request):
         })
 
 def fetch_paper_info(request):
-    json_data = getattr(request, 'json_data', None)
-    if not json_data:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
 
     token = json_data.get('token')
     if not token or not is_token_valid(token):
@@ -453,9 +466,9 @@ def fetch_paper_info(request):
         }})
 
 def submit_comment(request):
-    json_data = getattr(request, 'json_data', None)
-    if not json_data:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
 
     token = json_data.get('token')
     if not token or not is_token_valid(token):
