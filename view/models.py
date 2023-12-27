@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User as AuthUser
+from django.contrib.auth.models import User
 import uuid
 from datetime import timedelta
 from paperhub import settings
@@ -8,9 +8,8 @@ from django.db import models
 from django.utils import timezone
 
 class UserProfile(models.Model):
-    auth_user = models.OneToOneField(AuthUser, on_delete=models.CASCADE,
-                                     related_name='custom_user', null=True)
-    create_time = models.DateTimeField(default=timezone.now)
+    auth_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='custom_user', null=True)
+    create_time = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=100, default='', blank=True)
     wx_openid = models.CharField(max_length=100, default='', blank=True)
 
@@ -26,7 +25,7 @@ class UserSession(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
-            self.expires_at = timezone.now() + timedelta(days=settings.SESSION_COOKIE_AGE)
+            self.expires_at = timezone.now() + timedelta(hours=settings.SESSION_EXPIRE_HOURS)
         super().save(*args, **kwargs)
 
     def __str__(self):
