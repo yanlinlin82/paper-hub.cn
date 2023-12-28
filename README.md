@@ -9,7 +9,12 @@ An easy way to read and share papers for scientific research
     ```sh
     python -m venv venv
     . venv/bin/activate
-    pip install requests django python-decouple xmltodict
+    pip install django
+    pip install python-dotenv
+    pip install requests
+    pip install xmltodict
+    pip install openai
+    pip install socksio
     ```
 
 2. Prepare static files:
@@ -37,24 +42,14 @@ An easy way to read and share papers for scientific research
     </Directory>
     ```
 
-4. Configure OpenAI API:
-
-    ```sh
-    mkdir openai
-    cd openai
-    python -m venv venv
-    . venv/bin/activate
-    pip install --upgrade pip
-    pip install openai
-    pip install socksio
-    ```
-
-5. Configure server side for mini program
+4. Configure server side for mini program
 
     ```sh
     $ cat .env
-    WX_APP_ID = xxxxxx
-    WX_SECRET = xxxxxx
+    OPENAI_API_KEY=sk-xxxxxx
+    ALL_PROXY=xxxxxx
+    WX_APP_ID=xxxxxx
+    WX_SECRET=xxxxxx
     ```
 
 ## How to setup a development environment (Optional)
@@ -67,7 +62,7 @@ An easy way to read and share papers for scientific research
     python manage.py runserver
     ```
 
-2. Use SSH start to reverse tunnel (take 'paper-hub.cn' as example).
+2. Use SSH start to reverse tunnel (take 'paper-hub.cn' as an example).
 
     ```sh
     # run this command in another new terminal

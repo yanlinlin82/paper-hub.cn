@@ -14,7 +14,10 @@ class UserProfile(models.Model):
     wx_openid = models.CharField(max_length=100, default='', blank=True)
 
     def __str__(self):
-        return self.nickname
+        s = self.nickname
+        if self.wx_openid:
+            s += ' (openid:' + self.wx_openid + ')'
+        return s
 
 class UserSession(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)

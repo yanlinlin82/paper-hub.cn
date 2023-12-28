@@ -4,7 +4,7 @@ import tempfile
 import requests
 import json
 import zoneinfo
-from decouple import config
+from dotenv import load_dotenv
 from paperhub import settings
 from django.utils import timezone
 from django.http import JsonResponse
@@ -16,9 +16,12 @@ from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
 from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime
 from django.http import HttpResponseForbidden
 from django.middleware.csrf import get_token
+from openai import OpenAI
+
+env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
+load_dotenv(env_file)
 
 def parse_request(request):
     if request.content_type != 'application/json':
@@ -41,11 +44,13 @@ def wx_login(request):
     if not wx_code:
         return JsonResponse({'error': 'Invalid wx_code'}, status=400)
 
-    APPID = config('WX_APP_ID')
-    SECRET = config('WX_SECRET')
+    APP_ID = os.getenv('WX_APP_ID')
+    SECRET = os.getenv('WX_SECRET')
+    if not APP_ID or not SECRET:
+        return JsonResponse({'error': 'Invalid APP_ID or SECRET'}, status=400)
 
     url = 'https://api.weixin.qq.com/sns/jscode2session'\
-        f'?appid={APPID}&secret={SECRET}&js_code={wx_code}'\
+        f'?appid={APP_ID}&secret={SECRET}&js_code={wx_code}'\
         '&grant_type=authorization_code'
     response = requests.get(url)
     if response.status_code != 200:
@@ -532,30 +537,17 @@ def ask_chat_gpt(request, paper_id):
     else:
         abstract = paper.abstract
 
-    # Write the abstract to a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
-        temp_file.write(paper.title + '\n')
-        temp_file.write(abstract)
-        temp_file_path = temp_file.name
-
-    # Set the environment variable
-    os.environ['ALL_PROXY'] = 'socks5://localhost:1090/'
-
-    python_path = os.path.abspath('openai/venv/bin/python')
-    script_path = os.path.abspath('openai/test.py')
-
-    try:
-        # Call the other Python script with the temporary file as input
-        result = subprocess.run([python_path, script_path, temp_file_path], capture_output=True, text=True)
-
-        # Get the return value from stdout
-        answer = result.stdout.strip()
-    except Exception as e:
-        return JsonResponse({"error": f"An error occurred: {e}"})
-    finally:
-        # Remove the temporary file
-        os.remove(temp_file_path)
-
-    os.environ['ALL_PROXY'] = ''
-    data = {"abstract": abstract, "answer": answer}
-    return JsonResponse(data)
+    in_msg = [
+        {"role": "system", "content": "This is a scientific paper reading assistance chatbot, using mainly Chinese to chat with user."},
+        {"role": "system", "content": "You can ask questions about the paper, or ask for a summary of the paper."},
+        {"role": "user", "content": f"We are now talking about this paper:\n\nTitle: {paper.title}\n\nAbstract:\n{paper.abstract}\n\nPlease summarize this paper in Chinese."},
+    ]
+    print('in_msg:', in_msg)
+    client = OpenAI()
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=in_msg,
+    )
+    out_msg = completion.choices[0].message.content
+    print('out_msg:', out_msg)
+    return JsonResponse({'answer': out_msg})
