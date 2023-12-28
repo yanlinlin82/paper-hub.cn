@@ -18,7 +18,8 @@ from api.paper import get_abstract_by_doi
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseForbidden
 from django.middleware.csrf import get_token
-from openai import OpenAI
+import openai
+import httpx
 
 env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(env_file)
@@ -543,7 +544,11 @@ def ask_chat_gpt(request, paper_id):
         {"role": "user", "content": f"We are now talking about this paper:\n\nTitle: {paper.title}\n\nAbstract:\n{paper.abstract}\n\nPlease summarize this paper in Chinese."},
     ]
     print('in_msg:', in_msg)
-    client = OpenAI()
+    proxy_url = os.environ.get("OPENAI_PROXY_URL")
+    if proxy_url is None or proxy_url == "":
+        client = openai.OpenAI()
+    else:
+        client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=in_msg,

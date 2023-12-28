@@ -62,6 +62,7 @@
 
 {% include "group/paper-op-script.html" %}
 
+{% if user.is_authenticated %}
 <button type="button" id="ask-chat-gpt" class="btn btn-outline-info btn-sm">Ask ChatGPT to Summarize</button>
 <textarea id="chat-gpt-answer" class="form-control" style="width:100%;min-height:200px;"></textarea>
 
@@ -78,5 +79,6 @@ document.getElementById('ask-chat-gpt').addEventListener('click', function() {
       });
 });
 </script>
+{% endif %}
 
 {% endblock content %}

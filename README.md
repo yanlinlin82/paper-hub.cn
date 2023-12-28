@@ -15,6 +15,7 @@ An easy way to read and share papers for scientific research
     pip install xmltodict
     pip install openai
     pip install socksio
+    pip install PySocks
     ```
 
 2. Prepare static files:
@@ -47,7 +48,7 @@ An easy way to read and share papers for scientific research
     ```sh
     $ cat .env
     OPENAI_API_KEY=sk-xxxxxx
-    ALL_PROXY=xxxxxx
+    OPENAI_PROXY_URL=xxxxxx
     WX_APP_ID=xxxxxx
     WX_SECRET=xxxxxx
     ```
