@@ -9,6 +9,7 @@ An easy way to read and share papers for scientific research
     ```sh
     python -m venv venv
     . venv/bin/activate
+    pip install --upgrade pip
     pip install django
     pip install python-dotenv
     pip install requests
