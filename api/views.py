@@ -24,6 +24,13 @@ import httpx
 env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
 load_dotenv(env_file)
 
+@csrf_exempt
+def wx(request):
+    return JsonResponse({
+        'success': True,
+        'debug': settings.WX_MINI_PROGRAM_DEBUG
+    })
+
 def parse_request(request):
     if request.content_type != 'application/json':
         return None, JsonResponse({'error': 'Invalid content type'}, status=400)

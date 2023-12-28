@@ -13,6 +13,7 @@ urlpatterns = [
     path('delete_paper', views.delete_paper, name='delete_paper'),
     path('restore_paper', views.restore_paper, name='restore_paper'),
     path('delete_paper_forever', views.delete_paper_forever, name='delete_paper_forever'),
+    path('wx', views.wx, name='wx'),
     path('wx_login', views.wx_login, name='wx_login'),
     path('update_nickname', views.update_nickname, name='update_nickname'),
     path('fetch_rank_list', views.fetch_rank_list, name='fetch_rank_list'),

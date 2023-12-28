@@ -143,3 +143,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 SESSION_EXPIRE_HOURS = 6
+
+WX_MINI_PROGRAM_DEBUG = True
