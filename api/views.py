@@ -244,14 +244,10 @@ def add_paper(request):
         s = request.POST['username']
         if UserProfile.objects.filter(nickname=s).count() > 0:
             user = UserProfile.objects.get(nickname=s)
-        elif UserProfile.objects.filter(name=s).count() > 0:
-            user = UserProfile.objects.get(name=s)
-        elif UserProfile.objects.filter(weixin_id=s) > 0:
-            user = UserProfile.objects.get(weixin_id=s)
-        elif UserProfile.objects.filter(username=s).count() > 0:
-            user = UserProfile.objects.get(username=s)
+        elif UserProfile.objects.filter(auth_user__username=s).count() > 0:
+            user = UserProfile.objects.get(auth_user__username=s)
         else:
-            user = UserProfile(username=s, nickname=s)
+            user = UserProfile(nickname=s)
             user.save()
 
         if 'create_time' in request.POST:
@@ -434,6 +430,7 @@ def fetch_paper_list(request):
         return JsonResponse({
             'success': True,
             'results': [{
+                'id': p.pk,
                 'creator': p.creator.nickname,
                 'create_time': timezone.localtime(p.create_time, timezone=zoneinfo.ZoneInfo(settings.TIME_ZONE)).strftime("%Y-%m-%d %H:%M"),
                 'pub_year': p.pub_year,
