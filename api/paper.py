@@ -302,6 +302,7 @@ def get_stat_all(papers, group_name, top_n = None):
     stat = {
         'name': 'all',
         'title': title,
+        'total_count': stat_all.count(),
         'columns': ['排名', '分享者', '分享数'],
         'content': [{
             'id': item['creator__pk'],
@@ -365,6 +366,7 @@ def get_stat_this_month(papers, group_name, top_n = None):
     stat = {
         'name': 'this-month',
         'title': title,
+        'total_count': stat_this_month.count(),
         'columns': ['排名', '分享者', '分享数'],
         'content': [{
             'id': item['creator__pk'],
@@ -401,6 +403,7 @@ def get_stat_last_month(papers, group_name, top_n = None):
     stat = {
         'name': 'last-month',
         'title': title,
+        'total_count': stat_last_month.count(),
         'columns': ['排名', '分享者', '分享数'],
         'content': [{
             'id': item['creator__pk'],
@@ -429,6 +432,7 @@ def get_stat_journal(papers, group_name, top_n = None):
     stat = {
         'name': 'journal',
         'title': title,
+        'total_count': stat_journal.count(),
         'columns': ['排名', '杂志', '分享数'],
         'content': [{
             'link': reverse('group:journal', kwargs={'group_name':group_name,'journal_name':item['journal']}),
