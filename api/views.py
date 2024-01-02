@@ -382,6 +382,45 @@ def delete_paper_forever(request):
 
     return JsonResponse({'success': True})
 
+def fetch_rank_full_list(request):
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
+
+    token = json_data.get('token')
+    if not token or not is_token_valid(token):
+        return HttpResponseForbidden('Invalid or expired token')
+
+    try:
+        group_name = 'xiangma'
+        group = GroupProfile.objects.get(name=group_name)
+        papers = group.papers.filter(delete_time=None)
+
+        index = json_data.get('index', 0)
+        if index == 0:
+            stat = get_stat_this_month(papers, group_name)
+        elif index == 1:
+            stat = get_stat_last_month(papers, group_name)
+        elif index == 2:
+            stat = get_stat_all(papers, group_name)
+        elif index == 3:
+            stat = get_stat_journal(papers, group_name)
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': f"Invalid index: {index}"
+            })
+
+        return JsonResponse({
+            'success': True,
+            'results': stat
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
 def fetch_rank_list(request):
     json_data, response = parse_request(request)
     if json_data is None:

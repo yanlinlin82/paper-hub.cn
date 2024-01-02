@@ -17,6 +17,7 @@ urlpatterns = [
     path('wx_login', views.wx_login, name='wx_login'),
     path('update_nickname', views.update_nickname, name='update_nickname'),
     path('fetch_rank_list', views.fetch_rank_list, name='fetch_rank_list'),
+    path('fetch_rank_full_list', views.fetch_rank_full_list, name='fetch_rank_full_list'),
     path('fetch_paper_list', views.fetch_paper_list, name='fetch_paper_list'),
     path('fetch_paper_info', views.fetch_paper_info, name='fetch_paper_info'),
     path('submit_comment', views.submit_comment, name='submit_comment'),
