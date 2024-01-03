@@ -30,7 +30,6 @@ def parse_request(request):
         return None, JsonResponse({'error': 'Invalid content type'}, status=400)
     try:
         json_data = json.loads(request.body.decode('utf-8'))
-        print('json_data:', json_data)
         return json_data, None
     except json.JSONDecodeError:
         pass
@@ -57,11 +56,14 @@ def wx_login(request):
     response = requests.get(url)
     if response.status_code != 200:
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
+    if response.json().get('errcode', 0) != 0:
+        return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
     session_key = response.json().get('session_key', '')
     openid = response.json().get('openid', '')
+    if session_key == '' or openid == '':
+        return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
 
     nickname = ''
-    papers = []
     users = UserProfile.objects.filter(wx_openid=openid)
     if users.count() == 0:
         user = UserProfile(wx_openid=openid)
@@ -123,7 +125,6 @@ def do_login(request):
     password = json_data.get('password')
     if username is not None and password is not None:
         user = authenticate(request, username=username, password=password)
-        print('user:', user)
         if user is not None:
             login(request, user)
             return JsonResponse({'success': True})
@@ -440,7 +441,6 @@ def fetch_paper_list(request):
 
     group_name = json_data.get('group_name')
     mode = json_data.get('mode', 0)
-    print('group_name:', group_name, ', mode:', mode)
 
     try:
         group = GroupProfile.objects.get(name=group_name)
@@ -598,7 +598,6 @@ def ask_chat_gpt(request, paper_id):
         {"role": "system", "content": "You can ask questions about the paper, or ask for a summary of the paper."},
         {"role": "user", "content": f"We are now talking about this paper:\n\nTitle: {paper.title}\n\nAbstract:\n{paper.abstract}\n\nPlease summarize this paper in Chinese."},
     ]
-    print('in_msg:', in_msg)
     proxy_url = os.environ.get("OPENAI_PROXY_URL")
     if proxy_url is None or proxy_url == "":
         client = openai.OpenAI()
@@ -609,5 +608,4 @@ def ask_chat_gpt(request, paper_id):
         messages=in_msg,
     )
     out_msg = completion.choices[0].message.content
-    print('out_msg:', out_msg)
     return JsonResponse({'answer': out_msg})
