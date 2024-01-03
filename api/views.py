@@ -76,21 +76,6 @@ def wx_login(request):
         user = users[0]
         nickname = user.nickname
 
-        tz = zoneinfo.ZoneInfo(settings.TIME_ZONE)
-        papers = [{
-            'id': item.id,
-            'create_time': timezone.localtime(item.create_time, timezone=tz).strftime("%Y-%m-%d %H:%M"),
-            'title': item.title,
-            'pub_year': item.pub_year,
-            'journal': item.journal,
-            'doi': item.doi,
-            'pmid': item.pmid,
-            'arxiv_id': item.arxiv_id,
-            'pmcid': item.pmcid,
-            'cnki_id': item.cnki_id,
-            'comments': item.comments,
-        } for item in Paper.objects.filter(creator=user)]
-
     UserSession.objects.filter(user=user).delete()
     session = UserSession(user=user, session_key=session_key)
     session.save()
@@ -100,7 +85,7 @@ def wx_login(request):
         'nickname': nickname,
         'csrfToken': get_token(request),
         'token': str(session.token),
-        'papers': papers,
+        'debug': user.debug_mode
     })
 
 def is_token_valid(token):
