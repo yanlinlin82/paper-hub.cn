@@ -459,11 +459,44 @@ def fetch_paper_list(request):
     if not token or not is_token_valid(token):
         return HttpResponseForbidden('Invalid or expired token')
 
+    group_name = json_data.get('group_name')
+    mode = json_data.get('mode', 0)
+    print('group_name:', group_name, ', mode:', mode)
+
     try:
-        group_name = 'xiangma'
         group = GroupProfile.objects.get(name=group_name)
         papers = group.papers\
-            .filter(delete_time=None)\
+            .filter(delete_time=None)
+        
+        if mode == 0: # all
+            pass
+        elif mode == 1: # this month
+            papers = papers\
+                .filter(create_time__year=timezone.now().year,
+                        create_time__month=timezone.now().month)
+        elif mode == 2: # last month
+            year = timezone.now().year
+            month = timezone.now().month
+            if month == 1:
+                year -= 1
+                month = 12
+            else:
+                month -= 1
+            papers = papers\
+                .filter(create_time__year=year,
+                        create_time__month=month)
+        elif mode == 3: # user own
+            token = json_data.get('token')
+            user = UserSession.objects.get(token=token).user
+            papers = papers\
+                .filter(creator=user)
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': f"Invalid mode: {mode}"
+            })
+
+        papers = papers\
             .order_by('-create_time', '-pk')
 
         return JsonResponse({
