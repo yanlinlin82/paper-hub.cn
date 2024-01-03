@@ -32,6 +32,7 @@ An easy way to read and share papers for scientific research
     WSGIDaemonProcess paperhub python-home=/var/www/paper-hub.cn/venv python-path=/var/www/paper-hub.cn
     WSGIProcessGroup paperhub
     WSGIScriptAlias / /var/www/paper-hub.cn/paperhub/wsgi.py
+    WSGIPassAuthorization On
     <Directory /var/www/paper-hub.cn/paperhub/>
         <Files wsgi.py>
             Require all granted

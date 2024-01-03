@@ -57,6 +57,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://servicewechat.com',
+]
+
 ROOT_URLCONF = 'paperhub.urls'
 
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
