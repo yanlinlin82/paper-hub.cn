@@ -52,6 +52,7 @@ An easy way to read and share papers for scientific research
     OPENAI_PROXY_URL=xxxxxx
     WX_APP_ID=xxxxxx
     WX_SECRET=xxxxxx
+    WX_DEBUG=False
     ```
 
 ## How to setup a development environment (Optional)

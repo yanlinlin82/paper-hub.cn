@@ -1,10 +1,7 @@
 import os
-import subprocess
-import tempfile
 import requests
 import json
 import zoneinfo
-from dotenv import load_dotenv
 from paperhub import settings
 from django.utils import timezone
 from django.http import JsonResponse
@@ -21,14 +18,11 @@ from django.middleware.csrf import get_token
 import openai
 import httpx
 
-env_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-load_dotenv(env_file)
-
 @csrf_exempt
 def wx(request):
     return JsonResponse({
         'success': True,
-        'debug': settings.WX_MINI_PROGRAM_DEBUG
+        'debug': (os.getenv('WX_DEBUG', 'False') == 'True')
     })
 
 def parse_request(request):
