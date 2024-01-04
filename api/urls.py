@@ -21,5 +21,5 @@ urlpatterns = [
     path('fetch_paper_list', views.fetch_paper_list, name='fetch_paper_list'),
     path('fetch_paper_info', views.fetch_paper_info, name='fetch_paper_info'),
     path('submit_comment', views.submit_comment, name='submit_comment'),
-    path('ask_chat_gpt/<int:paper_id>', views.ask_chat_gpt, name='ask_chat_gpt'),
+    path('summarize_by_gpt', views.summarize_by_gpt, name='summarize_by_gpt'),
 ]

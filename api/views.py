@@ -610,31 +610,52 @@ def submit_comment(request):
 
     return JsonResponse({'success': True})
 
-def ask_chat_gpt(request, paper_id):
-    paper = Paper.objects.get(pk=paper_id)
-    if paper is None:
-        return JsonResponse({"error": "paper not found."})
-    if paper.abstract == "":
-        if paper.doi != "":
-            abstract = get_abstract_by_doi(paper.doi)
-            paper.abstract = abstract
-            paper.save()
-    else:
-        abstract = paper.abstract
+def summarize_by_gpt(request):
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
 
-    in_msg = [
-        {"role": "system", "content": "This is a scientific paper reading assistance chatbot, using mainly Chinese to chat with user."},
-        {"role": "system", "content": "You can ask questions about the paper, or ask for a summary of the paper."},
-        {"role": "user", "content": f"We are now talking about this paper:\n\nTitle: {paper.title}\n\nAbstract:\n{paper.abstract}\n\nPlease summarize this paper in Chinese."},
-    ]
-    proxy_url = os.environ.get("OPENAI_PROXY_URL")
-    if proxy_url is None or proxy_url == "":
-        client = openai.OpenAI()
-    else:
-        client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=in_msg,
-    )
-    out_msg = completion.choices[0].message.content
-    return JsonResponse({'answer': out_msg})
+    token = json_data.get('token')
+    if not token or not is_token_valid(token):
+        return HttpResponseForbidden('Invalid or expired token')
+
+    try:
+        group_name = json_data.get('group_name')
+        group = GroupProfile.objects.get(name=group_name)
+        if group is None:
+            return JsonResponse({
+                'success': False,
+                'error': f"Group not found: {group_name}"
+            })
+
+        paper_id = json_data.get('paper_id')
+        paper, raw_dict = get_paper_info(paper_id)
+        print('paper:', paper)
+        if paper is None:
+            return JsonResponse({"error": "paper not found."})
+        if paper['abstract'] == "":
+            paper['abstract'] = get_abstract_by_doi(paper['id']['doi'])
+
+        in_msg = [
+            {"role": "system", "content": "This is a scientific paper reading assistance chatbot, using mainly Chinese to chat with user."},
+            {"role": "system", "content": "You can ask questions about the paper, or ask for a summary of the paper."},
+            {"role": "user", "content": f"We are now talking about this paper:\n\nTitle: {paper['title']}\n\nAbstract:\n{paper['abstract']}\n\nPlease summarize this paper in Chinese."},
+        ]
+        print('in_msg:', in_msg)
+        proxy_url = os.environ.get("OPENAI_PROXY_URL")
+        if proxy_url is None or proxy_url == "":
+            client = openai.OpenAI()
+        else:
+            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=in_msg,
+        )
+        out_msg = completion.choices[0].message.content
+        print('out_msg:', out_msg)
+        return JsonResponse({'answer': out_msg})
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
