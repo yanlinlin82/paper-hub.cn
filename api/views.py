@@ -372,8 +372,14 @@ def fetch_rank_full_list(request):
         return HttpResponseForbidden('Invalid or expired token')
 
     try:
-        group_name = 'xiangma'
+        group_name = json_data.get('group_name')
         group = GroupProfile.objects.get(name=group_name)
+        if group is None:
+            return JsonResponse({
+                'success': False,
+                'error': f"Group not found: {group_name}"
+            })
+
         papers = group.papers.filter(delete_time=None)
 
         index = json_data.get('index', 0)
@@ -412,8 +418,14 @@ def fetch_rank_list(request):
         return HttpResponseForbidden('Invalid or expired token')
 
     try:
-        group_name = 'xiangma'
+        group_name = json_data.get('group_name')
         group = GroupProfile.objects.get(name=group_name)
+        if group is None:
+            return JsonResponse({
+                'success': False,
+                'error': f"Group not found: {group_name}"
+            })
+
         papers = group.papers.filter(delete_time=None)
 
         stat_1 = get_stat_this_month(papers, group_name, top_n=10)
@@ -448,13 +460,18 @@ def fetch_paper_list(request):
     if not token or not is_token_valid(token):
         return HttpResponseForbidden('Invalid or expired token')
 
-    group_name = json_data.get('group_name')
-    mode = json_data.get('mode', 0)
-
     try:
+        group_name = json_data.get('group_name')
         group = GroupProfile.objects.get(name=group_name)
+        if group is None:
+            return JsonResponse({
+                'success': False,
+                'error': f"Group not found: {group_name}"
+            })
+
         papers = group.papers.filter(delete_time=None)
         
+        mode = json_data.get('mode', 0)
         if mode == 0: # all
             pass
         elif mode == 1: # this month
@@ -540,6 +557,14 @@ def submit_comment(request):
         return HttpResponseForbidden('Invalid or expired token')
 
     try:
+        group_name = json_data.get('group_name')
+        group = GroupProfile.objects.get(name=group_name)
+        if group is None:
+            return JsonResponse({
+                'success': False,
+                'error': f"Group not found: {group_name}"
+            })
+
         paper_id = json_data.get('paper_id')
         title = json_data.get('title')
         pub_year = json_data.get('pub_year')
@@ -574,7 +599,6 @@ def submit_comment(request):
 
         paper.save()
 
-        group = GroupProfile.objects.get(name='xiangma')
         group.papers.add(paper)
         group.save()
 
