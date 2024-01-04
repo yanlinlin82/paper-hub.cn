@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
-from view.models import UserProfile, Paper, UserSession, GroupProfile
+from view.models import UserProfile, UserAlias, UserSession, Paper, GroupProfile
 from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
@@ -402,6 +402,7 @@ def fetch_rank_full_list(request):
         })
 
 def fetch_rank_list(request):
+    print('fetch_rank_list', request)
     json_data, response = parse_request(request)
     if json_data is None:
         return response
@@ -430,6 +431,14 @@ def fetch_rank_list(request):
             'error': f"An error occurred: {e}"
         })
 
+def get_user_aliases(user):
+    aliases = [user]
+    for alias in UserAlias.objects.filter(user=user):
+        aliases.append(alias.alias)
+    for alias in UserAlias.objects.filter(alias=user):
+        aliases.append(alias.user)
+    return aliases
+
 def fetch_paper_list(request):
     json_data, response = parse_request(request)
     if json_data is None:
@@ -444,15 +453,12 @@ def fetch_paper_list(request):
 
     try:
         group = GroupProfile.objects.get(name=group_name)
-        papers = group.papers\
-            .filter(delete_time=None)
+        papers = group.papers.filter(delete_time=None)
         
         if mode == 0: # all
             pass
         elif mode == 1: # this month
-            papers = papers\
-                .filter(create_time__year=timezone.now().year,
-                        create_time__month=timezone.now().month)
+            papers = papers.filter(create_time__year=timezone.now().year, create_time__month=timezone.now().month)
         elif mode == 2: # last month
             year = timezone.now().year
             month = timezone.now().month
@@ -461,22 +467,21 @@ def fetch_paper_list(request):
                 month = 12
             else:
                 month -= 1
-            papers = papers\
-                .filter(create_time__year=year,
-                        create_time__month=month)
+            papers = papers.filter(create_time__year=year, create_time__month=month)
         elif mode == 3: # user own
             token = json_data.get('token')
             user = UserSession.objects.get(token=token).user
-            papers = papers\
-                .filter(creator=user)
+            aliases = get_user_aliases(user)
+            print('aliases:', aliases)
+            papers = papers.filter(creator__in=aliases)
+            print('papers:', papers)
         else:
             return JsonResponse({
                 'success': False,
                 'error': f"Invalid mode: {mode}"
             })
 
-        papers = papers\
-            .order_by('-create_time', '-pk')
+        papers = papers.order_by('-create_time', '-pk')
 
         return JsonResponse({
             'success': True,

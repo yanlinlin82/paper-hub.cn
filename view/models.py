@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 import uuid
 from datetime import timedelta
 from paperhub import settings
@@ -19,6 +20,28 @@ class UserProfile(models.Model):
         if self.wx_openid:
             s += ' (openid:' + self.wx_openid + ')'
         return s
+
+class UserAlias(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='primary')
+    alias = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='alias_for')
+
+    class Meta:
+        unique_together = ('user', 'alias')
+
+    def clean(self):
+        if self.user == self.alias:
+            raise ValidationError("User cannot alias themselves.")
+        if UserAlias.objects.filter(alias=self.user).exists():
+            raise ValidationError("A primary user cannot be an alias to another user.")
+        if UserAlias.objects.filter(user=self.alias).exists():
+            raise ValidationError("An alias cannot be a primary user.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(UserAlias, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.user + ' <-> ' + self.user
 
 class UserSession(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
