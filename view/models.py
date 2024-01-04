@@ -41,7 +41,7 @@ class UserAlias(models.Model):
         super(UserAlias, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.user + ' <-> ' + self.user
+        return str(self.user) + ' <-> ' + str(self.alias)
 
 class UserSession(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
