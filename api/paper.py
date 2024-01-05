@@ -18,7 +18,8 @@ def convert_string_to_datetime(s):
     format_strings = ['%Y-%m-%d', '%m/%d/%Y',
                       '%d-%b-%Y', '%Y %b %d', '%b %d, %Y', '%d %b, %Y',
                       '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%SZ',
-                      '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%SZ']
+                      '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%SZ',
+                      '%Y']
     for format_string in format_strings:
         try:
             dt = datetime.strptime(s, format_string)
@@ -57,20 +58,17 @@ def fetch_and_cache(url, cache_filename):
     return data
 
 def fetch_json(api_url, cache_filename, is_xml=False):
-    text_data = fetch_and_cache(api_url, cache_filename)
-    if text_data is None:
-        return None
-
-    if is_xml:
-        xml_dict = xmltodict.parse(text_data)
-        text_data = json.dumps(xml_dict)
-
-    try:
-        json_data = json.loads(text_data)
-        return json_data
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}", file=sys.stderr)
-        return None
+    txt = fetch_and_cache(api_url, cache_filename)
+    if txt is not None:
+        try:
+            if is_xml:
+                return xmltodict.parse(txt)
+            else:
+                return json.loads(txt)
+        except:
+            print(f"Error parsing JSON/XML: {txt}", file=sys.stderr)
+            return None
+    return None
 
 # Function to query paper info by arXiv ID
 def get_paper_info_by_arxiv_id(arxiv_id):
@@ -445,18 +443,37 @@ def get_stat_journal(papers, group_name, top_n = None):
 
     return stat
 
+def find_key_in_dict(dct, target_key):
+    """Recursively search for a target_key in the dictionary."""
+    if target_key in dct:  # Base case: key is found at the current level
+        return dct[target_key]
+
+    for key, value in dct.items():
+        if isinstance(value, dict):  # If the value is a dictionary, go deeper
+            result = find_key_in_dict(value, target_key)
+            if result is not None:
+                return result
+
+    return None  # If the key was never found
+
 def get_abstract_by_pmid(pmid):
+    cache_filename = os.path.join(settings.BASE_DIR, "cache/pubmed/" + pmid + ".abs.txt")
+    print(f'cache filename: {cache_filename}')
     pubmed_url = f'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=xml'
-    response = requests.get(pubmed_url)
-
-    if response.status_code == 200:
-        # Parse the PubMed XML response
-        xml_data = response.text
-        abstract_start = xml_data.find('<AbstractText>') + len('<AbstractText>')
-        abstract_end = xml_data.find('</AbstractText>')
-        abstract = xml_data[abstract_start:abstract_end].strip()
-        return abstract
-
+    data = fetch_json(pubmed_url, cache_filename, is_xml=True)
+    if data is not None:
+        abstract = find_key_in_dict(data, 'AbstractText')
+        if abstract is not None:
+            txt = ''
+            for item in abstract:
+                if isinstance(item, dict):
+                    if '#text' in item:
+                        if '@Label' in item:
+                            txt += item['@Label'] + ': '
+                        txt += item['#text']
+                else:
+                    txt += item
+            return txt
     return None
 
 def get_abstract_by_doi(doi):
