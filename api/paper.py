@@ -15,11 +15,22 @@ from paperhub import settings
 import requests
 
 def convert_string_to_datetime(s):
-    format_strings = ['%Y-%m-%d', '%m/%d/%Y',
-                      '%d-%b-%Y', '%Y %b %d', '%b %d, %Y', '%d %b, %Y',
-                      '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M:%SZ',
-                      '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%SZ',
-                      '%Y']
+    format_strings = [
+        '%Y-%m-%d %H:%M:%SZ',
+        '%Y-%m-%d %H:%M:%S',
+        '%Y-%m-%d %H:%M',
+        '%Y-%m-%dT%H:%M:%SZ',
+        '%Y-%m-%dT%H:%M:%S',
+        '%Y-%m-%dT%H:%M',
+        '%Y-%m-%d',
+        '%m/%d/%Y',
+        '%d-%b-%Y',
+        '%Y %b %d',
+        '%b %d, %Y',
+        '%d %b, %Y',
+        '%Y %b',
+        '%Y'
+    ]
     for format_string in format_strings:
         try:
             dt = datetime.strptime(s, format_string)

@@ -639,7 +639,7 @@ def summarize_by_gpt(request):
         in_msg = [
             {"role": "system", "content": "This is a scientific paper reading assistance chatbot, using mainly Chinese to chat with user."},
             {"role": "system", "content": "You can ask questions about the paper, or ask for a summary of the paper."},
-            {"role": "user", "content": f"We are now talking about this paper:\n\nTitle: {paper['title']}\n\nAbstract:\n{paper['abstract']}\n\nPlease summarize this paper in Chinese."},
+            {"role": "user", "content": f"Please summarize and comment on the following paper in Chinese:\n\nTitle: {paper['title']}\n\nAbstract:\n{paper['abstract']}"},
         ]
         print('in_msg:', in_msg)
         proxy_url = os.environ.get("OPENAI_PROXY_URL")
