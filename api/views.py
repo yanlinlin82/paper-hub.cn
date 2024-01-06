@@ -489,9 +489,7 @@ def fetch_paper_list(request):
             token = json_data.get('token')
             user = UserSession.objects.get(token=token).user
             aliases = get_user_aliases(user)
-            print('aliases:', aliases)
             papers = papers.filter(creator__in=aliases)
-            print('papers:', papers)
         else:
             return JsonResponse({
                 'success': False,
@@ -500,6 +498,8 @@ def fetch_paper_list(request):
 
         papers = papers.order_by('-create_time', '-pk')
 
+        index = json_data.get('index', 0)
+        end_index = index + 10
         return JsonResponse({
             'success': True,
             'results': [{
@@ -514,7 +514,7 @@ def fetch_paper_list(request):
                 'pmid': p.pmid,
                 'arxiv_id': p.arxiv_id,
                 'pmcid': p.pmcid,
-            } for p in papers[:10]]
+            } for p in papers[index:end_index]]
         })
     except Exception as e:
         return JsonResponse({
