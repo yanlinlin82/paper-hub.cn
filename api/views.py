@@ -223,9 +223,9 @@ def add_paper(request):
     try:
         s = request.POST['username']
         if UserProfile.objects.filter(nickname=s).count() > 0:
-            user = UserProfile.objects.get(nickname=s)
+            user = UserProfile.objects.filter(nickname=s)[0]
         elif UserProfile.objects.filter(auth_user__username=s).count() > 0:
-            user = UserProfile.objects.get(auth_user__username=s)
+            user = UserProfile.objects.filter(auth_user__username=s)[0]
         else:
             user = UserProfile(nickname=s)
             user.save()
