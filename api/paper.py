@@ -201,6 +201,7 @@ def get_paper_info_by_doi(doi):
     return None, f"Query DOI '{doi}' failed!"
 
 def get_paper_info(identifier):
+    print('get_paper_info:', identifier)
     if identifier.startswith("10."):
         # DOI
         doi = identifier

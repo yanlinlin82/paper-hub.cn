@@ -72,8 +72,8 @@ def wx_login(request):
         user = users[0]
         nickname = user.nickname
 
-    UserSession.objects.filter(user=user).delete()
-    session = UserSession(user=user, session_key=session_key)
+    UserSession.objects.filter(user=user, client_type='weixin').delete()
+    session = UserSession(user=user, session_key=session_key, client_type='weixin')
     session.save()
 
     return JsonResponse({
@@ -123,16 +123,28 @@ def do_login(request):
 
     username = json_data.get('username')
     password = json_data.get('password')
-    if username is not None and password is not None:
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return JsonResponse({'success': True})
+    if username is None or password is None:
+        return JsonResponse({'error': 'Invalid username or password'}, status=400)
 
+    user = authenticate(request, username=username, password=password)
+    if user is None:
+        return JsonResponse({
+            'success': False,
+            'error': 'Login failed. Please check your credentials.'
+            })
+
+    UserSession.objects.filter(user=user.custom_user, client_type='website').delete()
+    session = UserSession(user=user.custom_user, client_type='website')
+    session.save()
+
+    login(request, user)
     return JsonResponse({
-        'success': False,
-        'error': 'Login failed. Please check your credentials.'
-        })
+        'success': True,
+        'nickname': user.custom_user.nickname,
+        'csrfToken': get_token(request),
+        'token': str(session.token),
+        'debug': user.custom_user.debug_mode
+    })
 
 def do_logout(request):
     logout(request)
@@ -616,6 +628,7 @@ def summarize_by_gpt(request):
         return response
 
     token = json_data.get('token')
+    print('token:', token)
     if not token or not is_token_valid(token):
         return HttpResponseForbidden('Invalid or expired token')
 
@@ -629,6 +642,7 @@ def summarize_by_gpt(request):
             })
 
         paper_id = json_data.get('paper_id')
+        print('paper_id:', paper_id)
         paper, raw_dict = get_paper_info(paper_id)
         print('paper:', paper)
         if paper is None:

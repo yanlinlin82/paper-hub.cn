@@ -44,11 +44,17 @@ class UserAlias(models.Model):
         return str(self.user) + ' <-> ' + str(self.alias)
 
 class UserSession(models.Model):
+    CLIENT_TYPES = (
+        ('website', '网页端'),
+        ('weixin', '微信小程序'),
+    )
+
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     session_key = models.CharField(max_length=255)
     token = models.UUIDField(default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+    client_type = models.CharField(max_length=10, choices=CLIENT_TYPES)
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
@@ -56,7 +62,7 @@ class UserSession(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.user.nickname + ': ' + str(self.token)
+        return f"{self.user.nickname}: {self.token} - {self.get_client_type_display()}"
 
 class Paper(models.Model):
     # creation info

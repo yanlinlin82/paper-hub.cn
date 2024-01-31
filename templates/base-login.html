@@ -72,12 +72,13 @@ $(document).ready(function() {
       if (!data.success) {
         alert('Login failed. Please check your credentials.')
       } else {
+        setCookie('token', data.token, 1);
         location.reload(false);
       }
     })
     .catch(error => {
       // Handle fetch error
-      alert('An error occurred while processing your request.')
+      alert('An error occurred while processing your request.', error)
     })
   })
 })
