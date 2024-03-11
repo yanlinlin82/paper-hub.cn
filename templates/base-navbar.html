@@ -26,9 +26,11 @@
         <li class="nav-item">
           <a class="nav-link" href="{% url 'index' %}">Home</a>
         </li>
+        {% if user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'view:index' %}">Library</a>
         </li>
+        {% endif %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'group:index' %}">Groups</a>
         </li>
