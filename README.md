@@ -7,22 +7,21 @@ An easy way to read and share papers for scientific research
 1. Prepare virtual environment (venv):
 
     ```sh
-    python -m venv venv
-    . venv/bin/activate
+    python -m venv .venv
+    . .venv/bin/activate
     pip install --upgrade pip
+    pip install PySocks
     pip install django
     pip install python-dotenv
     pip install requests
     pip install xmltodict
     pip install openai
-    pip install socksio
-    pip install PySocks
     ```
 
 2. Prepare static files:
 
     ```sh
-    python manager collectstatic
+    python manage.py collectstatic
     ```
 
 3. Configure Apache (take '/var/www/paper-hub.cn/' as example):

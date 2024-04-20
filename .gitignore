@@ -2,9 +2,6 @@
 __pycache__
 db.sqlite3.bak*
 cache/
-.vscode/
 static_root/
 .env
-venv/
-openai/constants.py
-openai/venv/
+.venv/
