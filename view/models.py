@@ -13,12 +13,15 @@ class UserProfile(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=100, default='', blank=True)
     wx_openid = models.CharField(max_length=100, default='', blank=True)
+    wx_unionid = models.CharField(max_length=100, default='', blank=True)
     debug_mode = models.BooleanField(default=False)
 
     def __str__(self):
         s = self.nickname
         if self.wx_openid:
             s += ' (openid:' + self.wx_openid + ')'
+        if self.wx_unionid:
+            s += ' (unionid:' + self.wx_unionid + ')'
         return s
 
 class UserAlias(models.Model):

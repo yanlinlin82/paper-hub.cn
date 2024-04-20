@@ -18,13 +18,8 @@ from django.middleware.csrf import get_token
 import openai
 import httpx
 from urllib.parse import quote
-
-@csrf_exempt
-def wx(request):
-    return JsonResponse({
-        'success': True,
-        'debug': (os.getenv('WX_DEBUG', 'False') == 'True')
-    })
+import random
+import string
 
 def parse_request(request):
     if request.content_type != 'application/json':
@@ -60,14 +55,14 @@ def wx_login(request):
     if response.json().get('errcode', 0) != 0:
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
     session_key = response.json().get('session_key', '')
-    openid = response.json().get('openid', '')
-    if session_key == '' or openid == '':
+    unionid = response.json().get('unionid', '')
+    if session_key == '' or unionid == '':
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
 
     nickname = ''
-    users = UserProfile.objects.filter(wx_openid=openid)
+    users = UserProfile.objects.filter(wx_unionid=unionid)
     if users.count() == 0:
-        user = UserProfile(wx_openid=openid)
+        user = UserProfile(wx_unionid=unionid)
         user.save()
     else:
         user = users[0]
@@ -684,18 +679,41 @@ def get_weixin_qr(request):
     url = f"https://open.weixin.qq.com/connect/qrconnect?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope=snsapi_login&state={state}#wechat_redirect"
     print('get_weixin_qr:', url)
     return JsonResponse({'url': url})
-# https://paper-hub.cn/weixin_callback/?code=031BLc0w35MhD232M40w37kyoZ0BLc0O&state=None
 
 def weixin_callback(request):
     code = request.GET.get('code')
-    state = request.GET.get('state')
     appid = os.getenv('WEB_APP_ID')
     secret = os.getenv('WEB_APP_SECRET')
     token_url = f"https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code"
     response = requests.get(token_url)
     data = response.json()
-    access_token = data.get('access_token')
+    print('weixin_callback:', data)
+    #access_token = data.get('access_token')
+    #expires_in = data.get('expires_in')
     openid = data.get('openid')
+    #refresh_token = data.get('refresh_token')
+    #scope = data.get('scope')
+    unionid = data.get('unionid')
+    if openid is None or unionid is None:
+        return JsonResponse({'error': 'Invalid openid or unionid'}, status=400)
+    
+    users = UserProfile.objects.filter(wx_unionid=unionid)
+    if users.count() == 0:
+        def generate_random_nickname():
+            letters = string.ascii_letters
+            return '用户-' + ''.join(random.choice(letters) for _ in range(10))
+        while True:
+            nickname = generate_random_nickname()
+            if UserProfile.objects.filter(nickname=nickname).count() == 0:
+                break
+        user = UserProfile(nickname=nickname, wx_unionid=unionid)
+        user.save()
+    else:
+        user = users[0]
 
-    # 使用 access_token 和 openid 获取用户信息，这里可以添加逻辑来创建或更新用户信息
-    return HttpResponseRedirect(state)
+    UserSession.objects.filter(user=user, client_type='website').delete()
+    session = UserSession(user=user, session_key='', client_type='website')
+    session.save()
+
+    redirect_to = request.GET.get('state')
+    return HttpResponseRedirect(redirect_to)
