@@ -22,4 +22,6 @@ urlpatterns = [
     path('fetch_paper_info', views.fetch_paper_info, name='fetch_paper_info'),
     path('submit_comment', views.submit_comment, name='submit_comment'),
     path('summarize_by_gpt', views.summarize_by_gpt, name='summarize_by_gpt'),
+    path('get-weixin-qr/', views.get_weixin_qr, name='get_weixin_qr'),
+    path('weixin_callback/', views.weixin_callback, name='weixin_callback'),
 ]

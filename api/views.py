@@ -13,10 +13,11 @@ from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.middleware.csrf import get_token
 import openai
 import httpx
+from urllib.parse import quote
 
 @csrf_exempt
 def wx(request):
@@ -673,3 +674,28 @@ def summarize_by_gpt(request):
             'success': False,
             'error': f"An error occurred: {e}"
         })
+
+def get_weixin_qr(request):
+    appid = os.getenv('WEB_APP_ID')
+    web_domain = os.getenv('WEB_DOMAIN')
+    redirect_uri = quote(f'https://{web_domain}/api/weixin_callback/')
+    current_url = request.GET.get('current_url', f'https://{web_domain}/')
+    state = quote(current_url)
+    url = f"https://open.weixin.qq.com/connect/qrconnect?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope=snsapi_login&state={state}#wechat_redirect"
+    print('get_weixin_qr:', url)
+    return JsonResponse({'url': url})
+# https://paper-hub.cn/weixin_callback/?code=031BLc0w35MhD232M40w37kyoZ0BLc0O&state=None
+
+def weixin_callback(request):
+    code = request.GET.get('code')
+    state = request.GET.get('state')
+    appid = os.getenv('WEB_APP_ID')
+    secret = os.getenv('WEB_APP_SECRET')
+    token_url = f"https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code"
+    response = requests.get(token_url)
+    data = response.json()
+    access_token = data.get('access_token')
+    openid = data.get('openid')
+
+    # 使用 access_token 和 openid 获取用户信息，这里可以添加逻辑来创建或更新用户信息
+    return HttpResponseRedirect(state)
