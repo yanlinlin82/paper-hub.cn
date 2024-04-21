@@ -20,6 +20,9 @@ import httpx
 from urllib.parse import quote
 import random
 import string
+from django.db.models import Q
+from django.contrib.auth.models import User
+import datetime
 
 def parse_request(request):
     if request.content_type != 'application/json':
@@ -688,7 +691,7 @@ def weixin_callback(request):
     response = requests.get(token_url)
     data = response.json()
     print('weixin_callback:', data)
-    #access_token = data.get('access_token')
+    access_token = data.get('access_token')
     #expires_in = data.get('expires_in')
     openid = data.get('openid')
     #refresh_token = data.get('refresh_token')
@@ -697,23 +700,47 @@ def weixin_callback(request):
     if openid is None or unionid is None:
         return JsonResponse({'error': 'Invalid openid or unionid'}, status=400)
     
-    users = UserProfile.objects.filter(wx_unionid=unionid)
-    if users.count() == 0:
-        def generate_random_nickname():
+    userinfo_url = f"https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}"
+    response2 = requests.get(userinfo_url)
+    print('=============', datetime.datetime.now())
+    print('response2.content:', response2.content)
+    print('response2.text:', response2.text)
+    print('response2.headers:', response2.headers)
+    nickname = str.encode(response2.json()['nickname'], 'latin1').decode('utf8')
+    print('nickname:', nickname)
+    
+    profiles = UserProfile.objects.filter(
+        Q(wx_unionid=unionid) | Q(wx_openid=openid)
+    )
+    if profiles.count() == 0:
+        def generate_random_username():
             letters = string.ascii_letters
-            return '用户-' + ''.join(random.choice(letters) for _ in range(10))
-        while True:
-            nickname = generate_random_nickname()
-            if UserProfile.objects.filter(nickname=nickname).count() == 0:
-                break
-        user = UserProfile(nickname=nickname, wx_unionid=unionid)
+            return 'u-' + ''.join(random.choice(letters) for _ in range(10))
+        def get_unique_random_username():
+            while True:
+                username = generate_random_username()
+                if User.objects.filter(username=username).count() == 0:
+                    return username
+        username = get_unique_random_username()      
+        user = User(username=username)
         user.save()
+        profile = UserProfile(auth_user=user, nickname=nickname, wx_openid=openid, wx_unionid=unionid)
+        profile.save()
     else:
-        user = users[0]
+        profile = profiles[0]
+        user = profile.auth_user
+        if profile.nickname != nickname:
+            profile.nickname = nickname
+            profile.save()
+        if profile.wx_openid != openid or profile.wx_unionid != unionid:
+            profile.wx_openid = openid
+            profile.wx_unionid = unionid
+            profile.save()
 
-    UserSession.objects.filter(user=user, client_type='website').delete()
-    session = UserSession(user=user, session_key='', client_type='website')
+    UserSession.objects.filter(user=profile, client_type='website').delete()
+    session = UserSession(user=profile, session_key='', client_type='website')
     session.save()
 
+    login(request, user)
     redirect_to = request.GET.get('state')
     return HttpResponseRedirect(redirect_to)

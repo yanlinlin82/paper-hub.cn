@@ -10,7 +10,7 @@
         {% if CONFIG_ENABLE_LOGIN %}
         {% if user.is_authenticated %}
         <li class="nav-item">
-          <div class="nav-link text-white">{{ user }}</div>
+          <div class="nav-link text-white">{{ user.custom_user.nickname }}</div>
         </li>
         {% endif %}
         <li class="nav-item">
