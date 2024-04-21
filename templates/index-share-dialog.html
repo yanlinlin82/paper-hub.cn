@@ -20,7 +20,7 @@
               </label>
             </div>
           </div>
-          {% if user.is_authenticated %}
+          {% if user.is_authenticated and user.is_superuser %}
           <input type="hidden" id="paperEditModalUsername" value="{{user}}">
           {% else %}
           <div class="mb-3 form-group">

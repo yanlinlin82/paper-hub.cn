@@ -6,7 +6,7 @@
     href="{% url 'view:all' %}">All Papers</a>
   <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}"
     href="{% url 'view:recent' %}">Recent</a>
-{% if user.is_authenticated %}
+{% if user.is_authenticated and user.is_superuser %}
   <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}"
     href="{% url 'view:trash' %}">Trash</a>
 {% endif %}
