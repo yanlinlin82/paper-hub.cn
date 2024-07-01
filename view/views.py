@@ -56,6 +56,17 @@ def recommendations_page(request):
     }
     return HttpResponse(template.render(context, request))
 
+def recommendations_page_trash(request):
+    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=False)
+    for item in item_list:
+        item.author_list = item.paper.authors.split('\n')
+    template = loader.get_template('view/recommendations.html')
+    context = {
+        'current_page': 'recommendations-trash',
+        'item_list': item_list,
+    }
+    return HttpResponse(template.render(context, request))
+
 def trackings_page(request):
     item_list = PaperTracking.objects.filter(user__auth_user__username=request.user.username)
     template = loader.get_template('view/trackings.html')

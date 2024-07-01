@@ -118,6 +118,7 @@ class Recommendation(models.Model): # recommended by system (daily automatically
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
+    delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
     trackings = models.ManyToManyField(PaperTracking, blank=True)
 
 class Review(models.Model):

@@ -46,10 +46,10 @@
 </nav>
 
 <div class="bg-primary text-white">
-  <div class="container px-3 py-3 text-center">
+  <div class="container px-3 py-3">
     {% block banner %}
-    <h2>Paper-Hub</h2>
-    <p>Sharing papers with ease and joy!</p>
+    <h2>文献宝盒</h2>
+    <p>一个便捷的用于文献收藏、分享、社群打卡的轻量级在线平台</p>
     {% endblock banner %}
   </div>
 </div>
@@ -65,6 +65,8 @@
           href="{% url 'search' %}">文献搜索</a>
         <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}"
           href="{% url 'recommendations' %}">文献推荐</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "recommendations-trash" %}active{% endif %}"
+          href="{% url 'recommendations-trash' %}">回收站</a>
         <a class="list-group-item list-group-item-action {% if current_page == "trackings" %}active{% endif %}"
           href="{% url 'trackings' %}">推荐规则</a>
       </div>
