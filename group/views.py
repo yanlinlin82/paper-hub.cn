@@ -7,18 +7,8 @@ from django.views import generic
 from view.models import UserProfile, GroupProfile
 from api.paper import filter_reviews, get_this_week_start_time, get_check_in_interval, get_this_month, get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal, get_last_month
 
-class IndexView(generic.ListView):
-    template_name = 'group/index.html'
-    context_object_name = 'group_list'
-    def get_queryset(self):
-        return GroupProfile.objects.order_by('-create_time')
-    def get_context_data(self, **kwargs):
-        context = {
-            'current_page': 'index',
-            'group_list': GroupProfile.objects.order_by('-create_time'),
-            'summary_messages': '',
-            }
-        return context
+def index_page(request):
+    return HttpResponseRedirect('xiangma')
 
 def all_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
@@ -26,7 +16,7 @@ def all_page(request, group_name):
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
-        'current_page': 'all',
+        'current_page': 'group_all',
         'reviews': reviews,
         'items': items,
         'summary_messages': '',
@@ -41,7 +31,7 @@ def recent_page(request, group_name):
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
-        'current_page': 'recent',
+        'current_page': 'group_recent',
         'reviews': reviews,
         'items': items,
         'summary_messages': summary_message
@@ -56,7 +46,7 @@ def this_month_page(request, group_name):
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
-        'current_page': 'this_month',
+        'current_page': 'group_this_month',
         'reviews': reviews,
         'items': items,
         'summary_messages': summary_message
@@ -71,7 +61,7 @@ def last_month_page(request, group_name):
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
-        'current_page': 'last_month',
+        'current_page': 'group_last_month',
         'reviews': reviews,
         'items': items,
         'summary_messages': summary_message
@@ -90,7 +80,7 @@ def stat_page(request, group_name):
     template = loader.get_template('group/stat.html')
     context = {
         'group': group,
-        'current_page': 'stat',
+        'current_page': 'group_stat',
         'stat_1': stat_1,
         'stat_2': stat_2,
         'stat_3': stat_3,
@@ -105,7 +95,7 @@ def stat_this_month_page(request, group_name):
     template = loader.get_template('group/stat-single.html')
     context = {
         'group': group,
-        'current_page': 'stat',
+        'current_page': 'group_stat',
         'stat': stat,
     }
     return HttpResponse(template.render(context, request))
@@ -117,7 +107,7 @@ def stat_last_month_page(request, group_name):
     template = loader.get_template('group/stat-single.html')
     context = {
         'group': group,
-        'current_page': 'stat',
+        'current_page': 'group_stat',
         'stat': stat,
     }
     return HttpResponse(template.render(context, request))
@@ -129,7 +119,7 @@ def stat_all_page(request, group_name):
     template = loader.get_template('group/stat-single.html')
     context = {
         'group': group,
-        'current_page': 'stat',
+        'current_page': 'group_stat',
         'stat': stat,
     }
     return HttpResponse(template.render(context, request))
@@ -141,7 +131,7 @@ def stat_journal_page(request, group_name):
     template = loader.get_template('group/stat-single.html')
     context = {
         'group': group,
-        'current_page': 'stat',
+        'current_page': 'group_stat',
         'stat': stat,
     }
     return HttpResponse(template.render(context, request))
@@ -152,7 +142,7 @@ def trash_page(request, group_name):
     summary_message = '回收站中的内容将在30后自动删除！'
     return render(request, 'group/list.html', {
         'group': group,
-        'current_page': 'trash',
+        'current_page': 'group_trash',
         'reviews': reviews,
         'items': items,
         'summary_messages': summary_message
@@ -164,14 +154,14 @@ def single_page(request, id, group_name):
     if reviews.paginator.count <= 0:
         return render(request, 'group/single.html', {
             'group': group,
-            'current_page': 'paper',
+            'current_page': 'group_paper',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
     review = reviews[0]
     template = loader.get_template('group/single.html')
     context = {
         'group': group,
-        'current_page': 'paper',
+        'current_page': 'group_paper',
         'review': review,
         'items': items,
     }
@@ -184,7 +174,7 @@ def journal_page(request, group_name, journal_name):
     summary_message = '本页面显示发表在 <b>' + journal_name + '</b> 杂志的文献。'
     context = {
         'group': group,
-        'current_page': 'user',
+        'current_page': 'group_user',
         'reviews': reviews,
         'items': items,
         'summary_messages': summary_message,
@@ -199,7 +189,7 @@ def user_page(request, id, group_name):
     summary_message = '本页面显示由用户 <b>' + user.nickname + '</b> 推荐的文献。'
     context = {
         'group': group,
-        'current_page': 'user',
+        'current_page': 'group_user',
         'reviews': reviews,
         'items': items,
         'summary_messages': summary_message,

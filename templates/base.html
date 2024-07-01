@@ -26,25 +26,12 @@
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="collapsibleNavbar">
       <ul class="navbar-nav">
-        {% block navbar %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'group:index' %}">社群</a>
-        </li>
-        {% if not CONFIG_XIANGMA_GROUP_ONLY %}
-        {% if user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'view:index' %}">文献库</a>
-        </li>
-        {% endif %}
-        {% endif %}
-        {% endblock navbar %}
         {% if user.is_authenticated %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             {{ user.custom_user.nickname }}
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'view:trackings' %}">设置文献推荐</a></li>
             <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>
           </ul>
         </li>
@@ -71,8 +58,50 @@
   {% block main %}
   <div class="row">
     <nav class="bg-light col-md-3 col-lg-2 d-md-block">
-      {% block menu %}
-      {% endblock menu %}
+      {% if not CONFIG_XIANGMA_GROUP_ONLY %}
+      <div class="list-group text-center">
+        <a class="list-group-item list-group-item-dark">探索发现</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "search" %}active{% endif %}"
+          href="{% url 'search' %}">文献搜索</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}"
+          href="{% url 'recommendations' %}">文献推荐</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "trackings" %}active{% endif %}"
+          href="{% url 'trackings' %}">推荐规则</a>
+      </div>
+      
+      <br>
+      <div class="list-group text-center">
+        <a class="list-group-item list-group-item-dark">个人文献库</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}"
+          href="{% url 'all' %}">全部文献</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}"
+          href="{% url 'recent' %}">近期文献</a>
+      {% if user.is_authenticated and user.is_superuser %}
+        <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}"
+          href="{% url 'trash' %}">回收站</a>
+      {% endif %}
+      </div>
+      {% endif %}
+      
+      <br>
+      <div class="list-group text-center flex-md-column flex-row">
+        <a class="list-group-item list-group-item-dark">社群</a>
+        {% if user.is_authenticated and user.is_superuser %}
+        <a class="list-group-item list-group-item-action" href="javascript:add_review();">分享打卡</a>
+        {% endif %}
+        <a class="list-group-item list-group-item-action {% if current_page == "group_all" %}active{% endif %}"
+          href="{% url 'group:all' group_name=group_name %}">所有分享</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_this_month" %}active{% endif %}"
+          href="{% url 'group:this_month' group_name=group_name %}">本月分享</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_last_month" %}active{% endif %}"
+          href="{% url 'group:last_month' group_name=group_name %}">上月分享</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_stat" %}active{% endif %}"
+          href="{% url 'group:stat' group_name=group_name %}">响马榜单</a>
+        {% if user.is_authenticated and user.is_superuser %}
+        <a class="list-group-item list-group-item-action {% if current_page == "group_trash" %}active{% endif %}"
+          href="{% url 'group:trash' group_name=group_name %}">回收站</a>
+        {% endif %}
+      </div>
     </nav>
     <div class="col-md-9 col-lg-10 ms-sm-auto">
       <div class="content">

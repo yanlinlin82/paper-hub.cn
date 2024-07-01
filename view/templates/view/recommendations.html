@@ -1,4 +1,4 @@
-{% extends "view/base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 <div class="container">
@@ -11,7 +11,14 @@
 {% for item in item_list %}
 <br>
 <div class="card px-2 mx-2">
-  <div class="fs-5">{{ forloop.counter }}. {{ item.paper.title }}</div>
+  <div>
+    {{ forloop.counter }}.
+    {{ item.create_time | date:"Y-m-d H:i" }} 由系统推荐。
+    <a href="#">加入收藏</a>
+    <a href="#">稍后再看</a>
+    <a href="#">删除</a>
+  </div>
+  <div class="fs-5">{{ item.paper.title }}</div>
   <div>
     {% for t in item.trackings.all %}
     <span class="badge" style="background-color:{{t.label.color}}">{{ t.label.name }}</span>
@@ -23,7 +30,7 @@
     {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
     {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
   </p>
-  <p>{{ item.author_list|join:", " }}</p>
+  <p>{{ item.author_list | join:", " }}</p>
   {% if item.paper.abstract %}
   <p><b>Abstract:</b> {{ item.paper.abstract }}</p>
   {% endif %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block main %}
+{% block content %}
 <section>
   <div class="row">
     <form class="col-md-8 mb-5 mx-auto" method="GET">
@@ -61,7 +61,7 @@
           {% endif %}
         </div>
         <div class="mt-2">
-          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:share_paper({{forloop.counter}});">Share</a>
+          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:share_review({{forloop.counter}});">Share</a>
         </div>
       </div>
     </li>
@@ -113,7 +113,7 @@
   </div>
 </div>
 <script>
-function get_paper_id(id) {
+function get_review_id(id) {
   var paper_id = '';
   if ($('#paper-doi-' + id)) {
     paper_id = $('#paper-doi-' + id).text();
@@ -129,8 +129,8 @@ function get_paper_id(id) {
   return paper_id;
 }
 
-function share_paper(id) {
-  console.log('share_paper(' + id + ')');
+function share_review(id) {
+  console.log('share_review(' + id + ')');
   $('#shareModelTitle').text($('#paper-title-' + id).text());
   $('#shareModelAuthors').text($('#paper-authors-' + id).text());
   $('#shareModelPubYear').text($('#paper-pub-year-' + id).text());
@@ -145,7 +145,7 @@ $(document).ready(function() {
 
   $('#shareModalQuery').click(function () {
     paper_id = $('#shareModalPaperID').val();
-    url = "{% url 'api:query_paper' 'xxxxxx' %}".replace('xxxxxx', paper_id);
+    url = "{% url 'api:query_review' 'xxxxxx' %}".replace('xxxxxx', paper_id);
     $.ajax({
       url: url,
       success: function (data) {
@@ -167,7 +167,7 @@ $(document).ready(function() {
 
   $('#shareModalShare').click(function () {
     $.ajax({
-      url: "{% url 'api:edit_paper' %}",
+      url: "{% url 'api:edit_review' %}",
       type: 'POST',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
       data: {
@@ -196,4 +196,4 @@ $(document).ready(function() {
 </script>
 
 {% endif %}
-{% endblock main %}
+{% endblock content %}

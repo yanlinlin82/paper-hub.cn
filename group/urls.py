@@ -3,7 +3,7 @@ from . import views
 
 app_name = 'group'
 urlpatterns = [
-    path('', views.IndexView.as_view(), name='index'),
+    path('', views.index_page, name='index'),
     path('<str:group_name>/', views.all_page, name='all'),
     path('<str:group_name>/recent', views.recent_page, name='recent'),
     path('<str:group_name>/this_month', views.this_month_page, name='this_month'),

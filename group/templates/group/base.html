@@ -6,23 +6,3 @@
   <p>{{ group.desc }}</p>
 </div>
 {% endblock banner %}
-
-{% block menu %}
-<div class="list-group text-center flex-md-column flex-row">
-  {% if user.is_authenticated and user.is_superuser %}
-  <a class="list-group-item list-group-item-action list-group-item-warning" href="javascript:add_paper();">分享打卡</a>
-  {% endif %}
-  <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}"
-    href="{% url 'group:all' group_name=group.name %}">所有分享</a>
-  <a class="list-group-item list-group-item-action {% if current_page == "this_month" %}active{% endif %}"
-    href="{% url 'group:this_month' group_name=group.name %}">本月分享</a>
-  <a class="list-group-item list-group-item-action {% if current_page == "last_month" %}active{% endif %}"
-    href="{% url 'group:last_month' group_name=group.name %}">上月分享</a>
-  <a class="list-group-item list-group-item-action {% if current_page == "stat" %}active{% endif %}"
-    href="{% url 'group:stat' group_name=group.name %}">响马榜单</a>
-  {% if user.is_authenticated and user.is_superuser %}
-  <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}"
-    href="{% url 'group:trash' group_name=group.name %}">回收站</a>
-  {% endif %}
-</div>
-{% endblock menu %}

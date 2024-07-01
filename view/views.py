@@ -7,6 +7,9 @@ from django.urls import reverse
 from django.utils import timezone
 from .models import Review, Recommendation, PaperTracking
 from paperhub import settings
+from django.shortcuts import render, redirect
+from django.conf import settings
+from api.paper import get_paper_info
 
 def get_review_list(request, include_trash=False):
     if not request.user.is_authenticated:
@@ -15,6 +18,32 @@ def get_review_list(request, include_trash=False):
         return Review.objects.filter(creator__auth_user__username=request.user.username)
     else:
         return Review.objects.filter(creator__auth_user__username=request.user.username, delete_time=None)
+
+def search_page(request):
+    if settings.CONFIG_XIANGMA_GROUP_ONLY:
+        return redirect("group:all", group_name='xiangma')
+
+    context = {
+        'current_page': 'search',
+    }
+
+    query = request.GET.get('q')
+    if query is not None:
+        context['query'] = query
+        paper_info, raw_dict = get_paper_info(query)
+        if paper_info is None:
+            context['error_message'] = f"Failed to query paper info with '{query}'!"
+        else:
+            context['results'] = [{
+                "id": paper_info.get('id'),
+                "title": paper_info.get('title', ''),
+                "journal": paper_info.get('journal', ''),
+                "pub_year": paper_info.get('pub_year', ''),
+                "authors": paper_info.get('authors', []),
+                "abstract": paper_info.get('abstract', ''),
+                "urls": paper_info.get('urls', []),
+            }]
+    return render(request, 'view/search.html', context)
 
 def recommendations_page(request):
     item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username)
