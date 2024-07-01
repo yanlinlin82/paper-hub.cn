@@ -1,25 +1,35 @@
 {% extends "view/base.html" %}
 
 {% block content %}
+<div class="container">
+  <h1>文献推荐</h1>
+</div>
 <div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ paper_list|length }} paper(s).</p>
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}当前共推荐 {{ item_list | length }} 篇文献.</p>
 </div>
 {% if item_list %}
 {% for item in item_list %}
 <br>
 <div class="card px-2 mx-2">
-  <p>{{ item.pk }}.</p>
-  <p>
+  <div class="fs-5">{{ forloop.counter }}. {{ item.paper.title }}</div>
+  <div>
     {% for t in item.trackings.all %}
     <span class="badge" style="background-color:{{t.label.color}}">{{ t.label.name }}</span>
     {% endfor %}
+  </div>
+  <p>
+    {{ item.paper.journal }},
+    {{ item.paper.pub_year }}.
+    {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
+    {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
   </p>
-  <p>{{ item.paper.pub_year }}</p>
-  <p>{{ item.paper.journal }}</p>
-  <p><b>{{ item.paper.title }}</b></p>
-  <p>{{ item.paper.authors }}</p>
+  <p>{{ item.author_list|join:", " }}</p>
+  {% if item.paper.abstract %}
   <p><b>Abstract:</b> {{ item.paper.abstract }}</p>
+  {% endif %}
+  {% if item.paper.keywords %}
   <p><b>Keywords:</b> {{ item.paper.keywords }}</p>
+  {% endif %}
 </div>
 {% endfor %}
 {% else %}

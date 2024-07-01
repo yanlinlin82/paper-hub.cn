@@ -1,27 +1,28 @@
 {% extends "view/base.html" %}
 
 {% block content %}
+<h1>文献追踪规则</h1>
 <div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ item_list | length }} tracking rule(s).</p>
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}共有 {{ item_list | length }} 条文献追踪规则.</p>
 </div>
 {% if item_list %}
 <table class="table">
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">Label</th>
-      <th scope="col">Type</th>
-      <th scope="col">Value</th>
-      <th scope="col">Memo</th>
+      <th scope="col">类型</th>
+      <th scope="col">条件值</th>
+      <th scope="col">标签</th>
+      <th scope="col">备注</th>
     </tr>
   </thead>
   <tbody>
 {% for item in item_list %}
 <tr>
   <th scope="row">{{ item.pk }}</th>
-  <td><span class="badge" style="background-color:{{item.label.color}}">{{ item.label.name }}</span></td>
   <td>{{ item.type }}</td>
   <td>{{ item.value }}</td>
+  <td><span class="badge" style="background-color:{{item.label.color}}">{{ item.label.name }}</span></td>
   <td>{{ item.memo }}</td>
 </tr>
 {% endfor %}

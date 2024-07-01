@@ -18,6 +18,8 @@ def get_review_list(request, include_trash=False):
 
 def recommendations_page(request):
     item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username)
+    for item in item_list:
+        item.author_list = item.paper.authors.split('\n')
     template = loader.get_template('view/recommendations.html')
     context = {
         'current_page': 'recommendations',

@@ -3,7 +3,7 @@
 {% block menu %}
 <div class="list-group text-center">
   <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}"
-    href="{% url 'view:recommendations' %}">推荐文献</a>
+    href="{% url 'view:recommendations' %}">文献推荐</a>
   <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}"
     href="{% url 'view:all' %}">全部文献</a>
   <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}"
