@@ -1,0 +1,5 @@
+django
+python-dotenv
+requests
+xmltodict
+openai

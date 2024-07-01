@@ -10,12 +10,7 @@ An easy way to read and share papers for scientific research
     python -m venv .venv
     . .venv/bin/activate
     pip install --upgrade pip
-    pip install PySocks
-    pip install django
-    pip install python-dotenv
-    pip install requests
-    pip install xmltodict
-    pip install openai
+    pip install -r requirements.txt
     ```
 
 2. Prepare static files:
