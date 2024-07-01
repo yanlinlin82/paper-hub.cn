@@ -1,12 +1,9 @@
 {% extends "base.html" %}
 
+{% block page_title %}文献推荐{% if current_page == "recommendations-trash" %}（回收站）{% endif %}{% endblock page_title %}
+{% block page_subtitle %}{% autoescape off %}{{ summary_messages }}{% endautoescape %}当前共推荐 {{ item_list | length }} 篇文献.{% endblock page_subtitle %}
+
 {% block content %}
-<div class="container">
-  <h1>文献推荐</h1>
-</div>
-<div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}当前共推荐 {{ item_list | length }} 篇文献.</p>
-</div>
 {% if item_list %}
 {% for item in item_list %}
 <br>
@@ -44,6 +41,12 @@
 </div>
 {% endfor %}
 {% else %}
-<p style="padding:20px; height:200px;">No recommendation item is available.</p>
+<div class="container">
+  <div class="d-flex">
+    <div class="flex-fill text-middle">
+      暂无推荐文献。建议<a href="{% url "trackings" %}">添加推荐规则</a>，以便后续系统识别到符合条件的文献时进行推送。
+    </div>
+  </div>
+</div>
 {% endif %}
 {% endblock content %}

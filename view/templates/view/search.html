@@ -5,11 +5,11 @@
   <div class="row">
     <form class="col-md-8 mb-5 mx-auto" method="GET">
       <div>
-        <label class="form-label mb-3" for="q">Search a paper for sharing:</label>
+        <label class="form-label mb-3" for="q">通过文献编号搜索文献进行分享：</label>
       </div>
       <div class="input-group w-auto mb-3">
-        <input type="text" id="q" name="q" class="form-control border-dark w-50" placeholder="Input DOI/arXivID/PMID/PMCID" value="{{ query }}" required>
-        <button type="submit" class="btn btn-primary">Search</button>
+        <input type="text" id="q" name="q" class="form-control border-dark w-50" placeholder="请输入DOI/arXivID/PMID/PMCID" value="{{ query }}" required>
+        <button type="submit" class="btn btn-primary">搜索</button>
       </div>
       {% if error_message %}
       <div class="text-danger">{{ error_message }}</div>

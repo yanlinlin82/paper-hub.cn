@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 
+{% block page_title %}文献追踪规则{% endblock page_title %}
+{% block page_subtitle %}{% autoescape off %}{{ summary_messages }}{% endautoescape %}共有 {{ item_list | length }} 条文献追踪规则.{% endblock page_subtitle %}
+
 {% block content %}
-<h1>文献追踪规则</h1>
-<div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}共有 {{ item_list | length }} 条文献追踪规则.</p>
-</div>
 {% if item_list %}
 <table class="table">
   <thead>
