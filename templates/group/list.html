@@ -6,10 +6,10 @@
 <div class="page-summary">
   <p>
     {% autoescape off %}{{ summary_messages }}{% endautoescape %}
-    当前共有 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
+    当前共有 {{ reviews.paginator.count }} 篇文献{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。
   </p>
 </div>
-{% if papers %}
+{% if reviews %}
 
 {% if collection %}
 <h2>{{ collection.name }}</h2>
@@ -20,32 +20,32 @@
 
 {% include "group/paginator.html" %}
 
-{% for paper, index in items %}
+{% for review, index in items %}
 {% load view_extras %}
 {% load static %}
 <div class="border border-1 rounded px-3 pt-3 mb-3 bg-light-hover">
   <div class="d-flex">
     <div class="flex-fill">{{ index }}.</div>
     <div class="flex-grow-1 px-2">
-      <div class="pb-2"><a class="fs-6 text-primary" href="{% url "group:paper" id=paper.pk group_name=group.name %}" id="paper-title-{{paper.pk}}">{{paper.title}}</a></div>
+      <div class="pb-2"><a class="fs-6 text-primary" href="{% url "group:review" id=review.pk group_name=group.name %}" id="review-title-{{review.pk}}">{{review.paper.title}}</a></div>
       <div>
-        <span id="paper-pub-year-{{paper.pk}}">{{paper.pub_year}}</span>,
-        <span id="paper-journal-{{paper.pk}}" class="fst-italic">{{ paper.journal }}</span>.
-        {% include "group/paper-info-id-list.html" %}
+        <span id="review-pub-year-{{review.pk}}">{{review.paper.pub_year}}</span>,
+        <span id="review-journal-{{review.pk}}" class="fst-italic">{{ review.paper.journal }}</span>.
+        {% include "group/review-info-id-list.html" %}
       </div>
-      <div class="py-2">{% include "group/paper-info-badge.html" %}</div>
+      <div class="py-2">{% include "group/review-info-badge.html" %}</div>
 
       <div class="border border-1 mt-3 p-1">
-        <div class="float-end fst-italic" id="paper-create-time-{{paper.pk}}">{{ paper.create_time|date:'Y-m-d H:i:s' }}</div>
+        <div class="float-end fst-italic" id="review-create-time-{{review.pk}}">{{ review.create_time|date:'Y-m-d H:i:s' }}</div>
         <div class="mb-3">
-          <a class="link-dark fw-bold" href="{% url "group:user" id=paper.creator.pk group_name=group.name %}" id="paper-user-{{paper.pk}}">{{ paper.creator }}</a>:
+          <a class="link-dark fw-bold" href="{% url "group:user" id=review.creator.pk group_name=group.name %}" id="review-user-{{review.pk}}">{{ review.creator }}</a>:
         </div>
-        <div id="paper-comment-{{paper.pk}}" style="overflow-wrap:anywhere">{{ paper.comments }}</div>
+        <div id="review-comment-{{review.pk}}" style="overflow-wrap:anywhere">{{ review.comments }}</div>
       </div>
     </div>
   </div>
   <div class="text-end my-3">
-    {% include "group/paper-info-operators.html" %}
+    {% include "group/review-info-operators.html" %}
   </div>
 </div>
 {% endfor %}
@@ -56,5 +56,5 @@
 <p style="padding:20px; height:200px;">暂无任何内容。</p>
 {% endif %}
 
-{% include "group/paper-op-script.html" %}
+{% include "group/review-op-script.html" %}
 {% endblock content %}

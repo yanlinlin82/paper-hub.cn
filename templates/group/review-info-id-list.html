@@ -1,0 +1,24 @@
+{% if review.doi %}
+DOI:
+<a class="link-success" href="https://doi.org/{{ review.doi }}" target="_blank" id="review-doi-{{review.pk}}">{{ review.doi }}</a>
+{% endif %}
+
+{% if review.pmid %}
+PMID:
+<a class="link-success" href="http://www.ncbi.nlm.nih.gov/pubmed/{{ review.pmid }}" target="_blank" id="review-pmid-{{review.pk}}">{{ review.pmid }}</a>
+{% endif %}
+
+{% if review.pmcid %}
+PMCID:
+<a class="link-success" href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ review.pmcid }}" target="_blank" id="review-pmcid-{{review.pk}}">{{ review.pmcid }}</a>
+{% endif %}
+
+{% if review.arxiv_id %}
+arXiv ID:
+<a class="link-success" href="https://arxiv.org/abs/{{ review.arxiv_id }}" target="_blank" id="review-arxiv-id-{{review.pk}}">{{ review.arxiv_id }}</a>
+{% endif %}
+
+{% if review.cnki_id %}
+CNKI ID:
+<a class="link-success" href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{ review.cnki_id }}" target="_blank" id="review-cnki-id-{{review.pk}}">{{ review.cnki_id|escape }}</a>
+{% endif %}

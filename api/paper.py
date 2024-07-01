@@ -255,50 +255,50 @@ def get_this_week_start_time():
     start_time = today - timedelta(days=7)
     return start_time
 
-def get_paginated_papers(papers, page_number):
+def get_paginated_reviews(reviews, page_number):
     if page_number is None:
         page_number = 1
 
-    p = Paginator(papers, 20)
+    p = Paginator(reviews, 20)
     try:
-        papers = p.get_page(page_number)
+        reviews = p.get_page(page_number)
     except PageNotAnInteger:
         page_number = 1
-        papers = p.page(1)
+        reviews = p.page(1)
     except EmptyPage:
         page_number = p.num_pages
-        papers = p.page(p.num_pages)
+        reviews = p.page(p.num_pages)
 
-    items = list(papers)
-    indices = list(range((papers.number - 1) * p.per_page + 1, papers.number * p.per_page + 1))
+    items = list(reviews)
+    indices = list(range((reviews.number - 1) * p.per_page + 1, reviews.number * p.per_page + 1))
 
-    return papers, zip(items, indices)
+    return reviews, zip(items, indices)
 
-def filter_papers(papers, page_number, id=None, user=None, trash=False, journal_name=None, start_time=None, end_time=None):
+def filter_reviews(reviews, page_number, id=None, user=None, trash=False, journal_name=None, start_time=None, end_time=None):
     if id is not None:
-        papers = papers.filter(pk=id)
+        reviews = reviews.filter(pk=id)
 
     if user is not None:
-        papers = papers.filter(creator=user)
+        reviews = reviews.filter(creator=user)
 
     if trash:
-        papers = papers.exclude(delete_time=None)
+        reviews = reviews.exclude(delete_time=None)
     else:
-        papers = papers.filter(delete_time=None)
+        reviews = reviews.filter(delete_time=None)
 
     if journal_name is not None:
-        papers = papers.filter(journal=journal_name)
+        reviews = reviews.filter(journal=journal_name)
 
     if start_time is not None:
-        papers = papers.filter(create_time__gte=start_time)
+        reviews = reviews.filter(create_time__gte=start_time)
     if end_time is not None:
-        papers = papers.filter(create_time__lt=end_time)
+        reviews = reviews.filter(create_time__lt=end_time)
 
-    papers = papers.order_by('-create_time', '-pk')
-    return get_paginated_papers(papers, page_number)
+    reviews = reviews.order_by('-create_time', '-pk')
+    return get_paginated_reviews(reviews, page_number)
 
-def get_stat_all(papers, group_name, top_n = None):
-    stat_all = papers\
+def get_stat_all(reviews, group_name, top_n = None):
+    stat_all = reviews\
         .values('creator__nickname', 'creator__pk')\
         .annotate(Count('creator'))\
         .order_by('-creator__count')
@@ -356,11 +356,11 @@ def get_check_in_interval(year, month):
     end_time = get_deadline(year, month)
     return start_time, end_time
 
-def get_stat_this_month(papers, group_name, top_n = None):
+def get_stat_this_month(reviews, group_name, top_n = None):
     year, month = get_this_month()
     start_time, end_time = get_check_in_interval(year, month)
 
-    stat_this_month = papers\
+    stat_this_month = reviews\
         .filter(create_time__gte=start_time, create_time__lt=end_time)\
         .values('creator__nickname', 'creator__pk')\
         .annotate(Count('creator'), min_create_time=Min('create_time'))\
@@ -389,7 +389,7 @@ def get_stat_this_month(papers, group_name, top_n = None):
 
     return stat
 
-def get_stat_last_month(papers, group_name, top_n = None):
+def get_stat_last_month(reviews, group_name, top_n = None):
     today = datetime.today().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE))
     year = today.year
     month = today.month
@@ -397,7 +397,7 @@ def get_stat_last_month(papers, group_name, top_n = None):
 
     start_time, end_time = get_check_in_interval(year, month)
 
-    stat_last_month = papers\
+    stat_last_month = reviews\
         .filter(create_time__gte=start_time, create_time__lt=end_time)\
         .values('creator__nickname', 'creator__pk')\
         .annotate(Count('creator'), min_create_time=Min('create_time'))\
@@ -426,12 +426,12 @@ def get_stat_last_month(papers, group_name, top_n = None):
 
     return stat
 
-def get_stat_journal(papers, group_name, top_n = None):
-    stat_journal = papers\
-        .exclude(journal='')\
-        .values('journal')\
-        .annotate(Count('journal'), min_create_time=Min('create_time'))\
-        .order_by('-journal__count', 'min_create_time')
+def get_stat_journal(reviews, group_name, top_n = None):
+    stat_journal = reviews\
+        .exclude(paper__journal='')\
+        .values('paper__journal')\
+        .annotate(Count('paper__journal'), min_create_time=Min('create_time'))\
+        .order_by('-paper__journal__count', 'min_create_time')
 
     if top_n is None:
         top_n = stat_journal.count()
@@ -445,9 +445,9 @@ def get_stat_journal(papers, group_name, top_n = None):
         'total_count': stat_journal.count(),
         'columns': ['排名', '杂志', '分享数'],
         'content': [{
-            'link': reverse('group:journal', kwargs={'group_name':group_name,'journal_name':item['journal']}),
-            'name': item['journal'],
-            'count': item['journal__count']
+            'link': reverse('group:journal', kwargs={'group_name':group_name,'journal_name':item['paper__journal']}),
+            'name': item['paper__journal'],
+            'count': item['paper__journal__count']
         } for item in stat_journal[:top_n]],
     }
     if stat_journal.count() > top_n:

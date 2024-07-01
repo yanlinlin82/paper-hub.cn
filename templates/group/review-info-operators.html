@@ -1,0 +1,17 @@
+{% if user.is_authenticated and user.is_superuser %}
+{% if current_page == 'trash' %}
+  <span class="ms-1">
+    <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:restore_review({{review.pk}})">Restore</a>
+  </span>
+  <span class="ms-1">
+    <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:delete_review_forever({{review.pk}})">Delete Forever</a>
+  </span>
+{% else %}
+  <span class="ms-1">
+    <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:edit_review({{review.pk}})">Edit</a>
+  </span>
+  <span class="ms-1">
+    <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:delete_review({{review.pk}});">Delete</a>
+  </span>
+{% endif %}
+{% endif %}

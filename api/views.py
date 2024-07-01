@@ -176,7 +176,7 @@ def query_user(request, user):
                 "username": u[0].auth_user.username,
             }})
 
-def query_paper(request, id):
+def query_review(request, id):
     """
     Return JSON:
     {
@@ -194,8 +194,8 @@ def query_paper(request, id):
         }
     }
     """
-    paper_info, raw_dict = get_paper_info(id)
-    if paper_info is None:
+    review_info, raw_dict = get_paper_info(id)
+    if review_info is None:
         return JsonResponse({
             'success': False,
             "error": raw_dict
@@ -206,19 +206,19 @@ def query_paper(request, id):
         "query": id,
         "raw": raw_dict,
         "results": {
-            "doi": paper_info.get('doi', ''),
-            "pmid": paper_info.get('pmid', ''),
-            "arxiv_id": paper_info.get('arxiv_id', ''),
-            "pmcid": paper_info.get('pmcid', ''),
-            "title": paper_info.get('title', ''),
-            "journal": paper_info.get('journal', ''),
-            "pub_year": paper_info.get('pub_year', ''),
-            "authors": paper_info.get('authors', []),
-            "abstract": paper_info.get('abstract', ''),
-            "urls": paper_info.get('urls', []),
+            "doi": review_info.get('doi', ''),
+            "pmid": review_info.get('pmid', ''),
+            "arxiv_id": review_info.get('arxiv_id', ''),
+            "pmcid": review_info.get('pmcid', ''),
+            "title": review_info.get('title', ''),
+            "journal": review_info.get('journal', ''),
+            "pub_year": review_info.get('pub_year', ''),
+            "authors": review_info.get('authors', []),
+            "abstract": review_info.get('abstract', ''),
+            "urls": review_info.get('urls', []),
         }})
 
-def add_paper(request):
+def add_review(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -263,23 +263,23 @@ def add_paper(request):
         p.journal = request.POST['journal']
         p.comments = request.POST['comment']
 
-        paper_id = request.POST['paper_id']
-        paper_info, raw_dict = get_paper_info(paper_id)
-        if paper_info is not None:
-            p.doi = paper_info['id'].get('doi', '')
-            p.pmid = paper_info['id'].get('pmid', '')
-            p.arxiv_id = paper_info['id'].get('arxiv_id', '')
-            p.pmcid = paper_info['id'].get('pmcid', '')
-            p.cnki_id = paper_info['id'].get('cnki_id', '')
-            p.authors = "\n".join(paper_info.get('authors', []))
-            p.abstract = paper_info.get('abstract', '')
-            p.urls = "\n".join(paper_info.get('urls', []))
+        review_id = request.POST['review_id']
+        review_info, raw_dict = get_paper_info(review_id)
+        if review_info is not None:
+            p.doi = review_info['id'].get('doi', '')
+            p.pmid = review_info['id'].get('pmid', '')
+            p.arxiv_id = review_info['id'].get('arxiv_id', '')
+            p.pmcid = review_info['id'].get('pmcid', '')
+            p.cnki_id = review_info['id'].get('cnki_id', '')
+            p.authors = "\n".join(review_info.get('authors', []))
+            p.abstract = review_info.get('abstract', '')
+            p.urls = "\n".join(review_info.get('urls', []))
         p.save()
 
         group_name = request.POST['group_name']
         if group_name:
             group = GroupProfile.objects.get(name=group_name)
-        group.papers.add(p)
+        group.reviews.add(p)
         group.save()
 
     except Exception as e:
@@ -290,7 +290,7 @@ def add_paper(request):
 
     return JsonResponse({'success': True})
 
-def edit_paper(request):
+def edit_review(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -299,7 +299,7 @@ def edit_paper(request):
 
     try:
         id = request.POST['id']
-        #paper_id = request.POST['paper_id']  # TODO: query paper info
+        #review_id = request.POST['review_id']  # TODO: query review info
         p = Review.objects.get(pk=id)
         p.title = request.POST['title']
         p.pub_year = request.POST['pub_year']
@@ -314,7 +314,7 @@ def edit_paper(request):
 
     return JsonResponse({'success': True})
 
-def delete_paper(request):
+def delete_review(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -322,7 +322,7 @@ def delete_paper(request):
         })
 
     try:
-        id = request.POST['paper_id']
+        id = request.POST['review_id']
         p = Review.objects.get(pk=id)
         p.delete_time = timezone.now()
         p.save()
@@ -334,7 +334,7 @@ def delete_paper(request):
 
     return JsonResponse({'success': True})
 
-def restore_paper(request):
+def restore_review(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -342,7 +342,7 @@ def restore_paper(request):
         })
 
     try:
-        id = request.POST['paper_id']
+        id = request.POST['review_id']
         p = Review.objects.get(pk=id)
         p.delete_time = None
         p.save()
@@ -354,7 +354,7 @@ def restore_paper(request):
 
     return JsonResponse({'success': True})
 
-def delete_paper_forever(request):
+def delete_review_forever(request):
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
@@ -362,7 +362,7 @@ def delete_paper_forever(request):
         })
 
     try:
-        id = request.POST['paper_id']
+        id = request.POST['review_id']
         Review.objects.get(pk=id)
         Review.objects.filter(pk=id).delete()
     except Exception as e:
@@ -391,17 +391,17 @@ def fetch_rank_full_list(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        papers = group.papers.filter(delete_time=None)
+        reviews = group.reviews.filter(delete_time=None)
 
         index = json_data.get('index', 0)
         if index == 0:
-            stat = get_stat_this_month(papers, group_name)
+            stat = get_stat_this_month(reviews, group_name)
         elif index == 1:
-            stat = get_stat_last_month(papers, group_name)
+            stat = get_stat_last_month(reviews, group_name)
         elif index == 2:
-            stat = get_stat_all(papers, group_name)
+            stat = get_stat_all(reviews, group_name)
         elif index == 3:
-            stat = get_stat_journal(papers, group_name)
+            stat = get_stat_journal(reviews, group_name)
         else:
             return JsonResponse({
                 'success': False,
@@ -437,12 +437,12 @@ def fetch_rank_list(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        papers = group.papers.filter(delete_time=None)
+        reviews = group.reviews.filter(delete_time=None)
 
-        stat_1 = get_stat_this_month(papers, group_name, top_n=10)
-        stat_2 = get_stat_last_month(papers, group_name, top_n=10)
-        stat_3 = get_stat_all(papers, group_name, top_n=10)
-        stat_4 = get_stat_journal(papers, group_name, top_n=10)
+        stat_1 = get_stat_this_month(reviews, group_name, top_n=10)
+        stat_2 = get_stat_last_month(reviews, group_name, top_n=10)
+        stat_3 = get_stat_all(reviews, group_name, top_n=10)
+        stat_4 = get_stat_journal(reviews, group_name, top_n=10)
 
         return JsonResponse({
             'success': True,
@@ -462,7 +462,7 @@ def get_user_aliases(user):
         aliases.append(alias.user)
     return aliases
 
-def fetch_paper_list(request):
+def fetch_review_list(request):
     json_data, response = parse_request(request)
     if json_data is None:
         return response
@@ -480,13 +480,13 @@ def fetch_paper_list(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        papers = group.papers.filter(delete_time=None)
+        reviews = group.reviews.filter(delete_time=None)
         
         mode = json_data.get('mode', 0)
         if mode == 0: # all
             pass
         elif mode == 1: # this month
-            papers = papers.filter(create_time__year=timezone.now().year, create_time__month=timezone.now().month)
+            reviews = reviews.filter(create_time__year=timezone.now().year, create_time__month=timezone.now().month)
         elif mode == 2: # last month
             year = timezone.now().year
             month = timezone.now().month
@@ -495,19 +495,19 @@ def fetch_paper_list(request):
                 month = 12
             else:
                 month -= 1
-            papers = papers.filter(create_time__year=year, create_time__month=month)
+            reviews = reviews.filter(create_time__year=year, create_time__month=month)
         elif mode == 3: # user own
             token = json_data.get('token')
             user = UserSession.objects.get(token=token).user
             aliases = get_user_aliases(user)
-            papers = papers.filter(creator__in=aliases)
+            reviews = reviews.filter(creator__in=aliases)
         else:
             return JsonResponse({
                 'success': False,
                 'error': f"Invalid mode: {mode}"
             })
 
-        papers = papers.order_by('-create_time', '-pk')
+        reviews = reviews.order_by('-create_time', '-pk')
 
         index = json_data.get('index', 0)
         end_index = index + 10
@@ -525,7 +525,7 @@ def fetch_paper_list(request):
                 'pmid': p.pmid,
                 'arxiv_id': p.arxiv_id,
                 'pmcid': p.pmcid,
-            } for p in papers[index:end_index]]
+            } for p in reviews[index:end_index]]
         })
     except Exception as e:
         return JsonResponse({
@@ -533,7 +533,7 @@ def fetch_paper_list(request):
             'error': f"An error occurred: {e}"
         })
 
-def fetch_paper_info(request):
+def fetch_review_info(request):
     json_data, response = parse_request(request)
     if json_data is None:
         return response
@@ -542,9 +542,9 @@ def fetch_paper_info(request):
     if not token or not is_token_valid(token):
         return HttpResponseForbidden('Invalid or expired token')
 
-    paper_id = json_data.get('paper_id')
-    paper_info, raw_dict = get_paper_info(paper_id)
-    if paper_info is None:
+    review_id = json_data.get('review_id')
+    review_info, raw_dict = get_paper_info(review_id)
+    if review_info is None:
         return JsonResponse({
             'success': False,
             "error": raw_dict
@@ -553,9 +553,9 @@ def fetch_paper_info(request):
     return JsonResponse({
         'success': True,
         "results": {
-            "title": paper_info.get('title', ''),
-            "journal": paper_info.get('journal', ''),
-            "pub_year": paper_info.get('pub_year', ''),
+            "title": review_info.get('title', ''),
+            "journal": review_info.get('journal', ''),
+            "pub_year": review_info.get('pub_year', ''),
         }})
 
 def submit_comment(request):
@@ -576,14 +576,14 @@ def submit_comment(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        paper_id = json_data.get('paper_id')
+        review_id = json_data.get('review_id')
         title = json_data.get('title')
         pub_year = json_data.get('pub_year')
         journal = json_data.get('journal')
         nickname = json_data.get('nickname')
         comments = json_data.get('comment')
 
-        paper_info, raw_dict = get_paper_info(paper_id)
+        review_info, raw_dict = get_paper_info(review_id)
 
         user = UserSession.objects.get(token=token).user
         if user.nickname != nickname:
@@ -591,26 +591,26 @@ def submit_comment(request):
             user.save()
 
         now = timezone.now()
-        paper = Review(creator=user,
+        review = Review(creator=user,
                       create_time=now,
                       update_time=now,
-                      title=title or paper_info['title'],
-                      pub_year=pub_year or paper_info['pub_year'],
-                      journal=journal or paper_info['journal'],
+                      title=title or review_info['title'],
+                      pub_year=pub_year or review_info['pub_year'],
+                      journal=journal or review_info['journal'],
                       comments=comments)
-        if paper_info is not None:
-            paper.doi = paper_info['id'].get('doi', '')
-            paper.pmid = paper_info['id'].get('pmid', '')
-            paper.arxiv_id = paper_info['id'].get('arxiv_id', '')
-            paper.pmcid = paper_info['id'].get('pmcid', '')
-            paper.cnki_id = paper_info['id'].get('cnki_id', '')
-            paper.authors = "\n".join(paper_info.get('authors', []))
-            paper.abstract = paper_info.get('abstract', '')
-            paper.urls = "\n".join(paper_info.get('urls', []))
+        if review_info is not None:
+            review.doi = review_info['id'].get('doi', '')
+            review.pmid = review_info['id'].get('pmid', '')
+            review.arxiv_id = review_info['id'].get('arxiv_id', '')
+            review.pmcid = review_info['id'].get('pmcid', '')
+            review.cnki_id = review_info['id'].get('cnki_id', '')
+            review.authors = "\n".join(review_info.get('authors', []))
+            review.abstract = review_info.get('abstract', '')
+            review.urls = "\n".join(review_info.get('urls', []))
 
-        paper.save()
+        review.save()
 
-        group.papers.add(paper)
+        group.reviews.add(review)
         group.save()
 
     except Exception as e:
@@ -640,19 +640,19 @@ def summarize_by_gpt(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        paper_id = json_data.get('paper_id')
-        print('paper_id:', paper_id)
-        paper, raw_dict = get_paper_info(paper_id)
-        print('paper:', paper)
-        if paper is None:
-            return JsonResponse({"error": "paper not found."})
-        if paper['abstract'] == "":
-            paper['abstract'] = get_abstract_by_doi(paper['id']['doi'])
+        review_id = json_data.get('review_id')
+        print('review_id:', review_id)
+        review, raw_dict = get_paper_info(review_id)
+        print('review:', review)
+        if review is None:
+            return JsonResponse({"error": "review not found."})
+        if review['abstract'] == "":
+            review['abstract'] = get_abstract_by_doi(review['id']['doi'])
 
         in_msg = [
-            {"role": "system", "content": "This is a scientific paper reading assistance chatbot, using mainly Chinese to chat with user."},
-            {"role": "system", "content": "You can ask questions about the paper, or ask for a summary of the paper."},
-            {"role": "user", "content": f"Please summarize and comment on the following paper in Chinese:\n\nTitle: {paper['title']}\n\nAbstract:\n{paper['abstract']}"},
+            {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
+            {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
+            {"role": "user", "content": f"Please summarize and comment on the following review in Chinese:\n\nTitle: {review['title']}\n\nAbstract:\n{review['abstract']}"},
         ]
         print('in_msg:', in_msg)
         proxy_url = os.environ.get("OPENAI_PROXY_URL")
