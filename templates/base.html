@@ -89,7 +89,8 @@
       <div class="list-group text-center flex-md-column flex-row">
         <a class="list-group-item list-group-item-dark">社群</a>
         {% if user.is_authenticated and user.is_superuser %}
-        <a class="list-group-item list-group-item-action" href="javascript:add_review();">分享打卡</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_my_sharing" %}active{% endif %}"
+          href="{% url 'group:my_sharing' group_name=group_name %}">我的分享</a>
         {% endif %}
         <a class="list-group-item list-group-item-action {% if current_page == "group_all" %}active{% endif %}"
           href="{% url 'group:all' group_name=group_name %}">所有分享</a>

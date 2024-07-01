@@ -10,6 +10,20 @@ from api.paper import filter_reviews, get_this_week_start_time, get_check_in_int
 def index_page(request):
     return HttpResponseRedirect('xiangma')
 
+def my_sharing_page(request, group_name):
+    group = get_object_or_404(GroupProfile, name=group_name)
+    user = UserProfile.objects.get(auth_user=request.user)
+    reviews, items = filter_reviews(group.reviews, request.GET.get('page'), user=user)
+    template = loader.get_template('group/list.html')
+    context = {
+        'group': group,
+        'current_page': 'group_my_sharing',
+        'reviews': reviews,
+        'items': items,
+        'summary_messages': '',
+    }
+    return HttpResponse(template.render(context, request))
+
 def all_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews, items = filter_reviews(group.reviews, request.GET.get('page'))
