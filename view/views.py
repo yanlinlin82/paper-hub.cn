@@ -8,7 +8,7 @@ from django.utils import timezone
 from .models import Review, Recommendation, PaperTracking
 from paperhub import settings
 
-def get_paper_list(request, include_trash=False):
+def get_review_list(request, include_trash=False):
     if not request.user.is_authenticated:
         return None
     if include_trash:
@@ -35,47 +35,55 @@ def trackings_page(request):
     return HttpResponse(template.render(context, request))
 
 def all_page(request):
-    paper_list = get_paper_list(request).order_by('-create_time', '-pk')
+    review_list = get_review_list(request)
+    if review_list is not None:
+        review_list = review_list.order_by('-create_time', '-pk')
     template = loader.get_template('view/list.html')
     context = {
         'current_page': 'all',
-        'paper_list': paper_list,
+        'review_list': review_list,
         'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
 
 def recent_page(request):
     last_week = datetime.now().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE)) - timedelta(days=7)
-    paper_list = get_paper_list(request).filter(create_time__gte=last_week).order_by('-create_time', '-pk')
+    review_list = get_review_list(request)
+    if review_list is not None:
+        review_list = review_list.filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     summary_message = 'This page shows papers in last week. '
     template = loader.get_template('view/list.html')
     context = {
         'current_page': 'recent',
-        'paper_list': paper_list,
+        'review_list': review_list,
         'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
 
 def trash_page(request):
-    paper_list = get_paper_list(request, include_trash=True).exclude(delete_time=None).order_by('-create_time', '-pk')
+    review_list = get_review_list(request, include_trash=True)
+    if review_list is not None:
+        review_list = review_list.exclude(delete_time=None).order_by('-create_time', '-pk')
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'view/list.html', {
         'current_page': 'trash',
-        'paper_list': paper_list,
+        'review_list': review_list,
         'summary_messages': summary_message
     })
 
 def single_page(request, id):
-    paper_list = get_paper_list(request).filter(pk=id)
-    if paper_list.count() <= 0:
+    review_list = get_review_list(request)
+    if review_list is not None:
+        review_list = review_list.filter(pk=id)
+    if review_list.count() <= 0:
         return render(request, 'view/single.html', {
             'current_page': 'paper',
             'error_message': 'Invalid paper ID: ' + str(id),
         })
-    paper = paper_list[0]
+    review = review_list[0]
     template = loader.get_template('view/single.html')
     context = {
         'current_page': 'paper',
-        'paper': paper,
+        'review': review,
     }
     return HttpResponse(template.render(context, request))

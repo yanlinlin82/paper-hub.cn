@@ -1,11 +1,11 @@
 {% extends "view/base.html" %}
 
 {% block content %}
-{% if paper %}
+{% if review %}
 <div class="paper-item">
-  {{ paper }}
+  {{ review }}
 </div>
 {% else %}
-<p>Invalid paper ID.</p>
+<p>Invalid review ID.</p>
 {% endif %}
 {% endblock content %}

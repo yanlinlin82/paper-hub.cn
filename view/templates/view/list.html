@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="page-summary">
-  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ paper_list|length }} paper(s).</p>
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ review_list|length }} paper(s).</p>
 </div>
-{% if paper_list %}
+{% if review_list %}
 <table class="table">
   <thead>
     <tr>
@@ -16,7 +16,7 @@
     </tr>
   </thead>
   <tbody>
-{% for review in paper_list %}
+{% for review in review_list %}
 <div class="paper-item">
   <tr>
     <th scope="row">{{ review.pk }}</th>
