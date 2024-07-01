@@ -69,6 +69,7 @@ class UserSession(models.Model):
 
 class Paper(models.Model):
     journal = models.CharField(max_length=200, default='', blank=True)
+    pub_date = models.CharField(max_length=50, default='', blank=True)
     pub_year = models.IntegerField(blank=True, null=True, default=None)
     title = models.CharField(max_length=500, default='')
     authors = models.CharField(max_length=4000, default='', blank=True)
@@ -83,6 +84,34 @@ class Paper(models.Model):
 
     def __str__(self):
         return f'{self.pub_year}, {self.journal}, {self.title}'
+
+class Label(models.Model): # every user has his own labels
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    name = models.CharField(max_length=128, default='')
+    color = models.CharField(max_length=7, default='#B6CFF5') # light blue
+    desc = models.CharField(max_length=2000, default='')
+
+class PaperTracking(models.Model): # every user has his own paper tracking rules
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    type = models.CharField(max_length=20, default='read') # keyword, author, institute, journal, cite
+    value = models.CharField(max_length=100, default='', blank=True)
+    label = models.ForeignKey(Label, on_delete=models.CASCADE)
+    memo = models.CharField(max_length=2000, default='', blank=True)
+
+class PaperLabel(models.Model):
+    label = models.ForeignKey(Label, on_delete=models.CASCADE)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('label', 'paper')
+
+Label.papers = models.ManyToManyField(Paper, through=PaperLabel, related_name='labels')
+
+class Recommendation(models.Model): # recommended by system (daily automatically)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    create_time = models.DateTimeField(default=timezone.now)
+    trackings = models.ManyToManyField(PaperTracking, blank=True)
 
 class Review(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
