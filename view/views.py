@@ -9,7 +9,7 @@ from .models import Review, Recommendation, PaperTracking
 from paperhub import settings
 from django.shortcuts import render, redirect
 from django.conf import settings
-from api.paper import get_paper_info
+from api.paper import get_paper_info, get_paginated_reviews
 
 def get_review_list(request, include_trash=False):
     if not request.user.is_authenticated:
@@ -49,10 +49,15 @@ def recommendations_page(request):
     item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username)
     for item in item_list:
         item.author_list = item.paper.authors.split('\n')
+
+    page_number = request.GET.get('page')
+    reviews, items = get_paginated_reviews(item_list, page_number)
+
     template = loader.get_template('view/recommendations.html')
     context = {
         'current_page': 'recommendations',
-        'item_list': item_list,
+        'reviews': reviews,
+        'items': items,
     }
     return HttpResponse(template.render(context, request))
 
