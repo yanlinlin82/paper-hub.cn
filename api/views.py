@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
-from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile
+from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation
 from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
@@ -365,6 +365,139 @@ def delete_review_forever(request):
         id = request.POST['review_id']
         Review.objects.get(pk=id)
         Review.objects.filter(pk=id).delete()
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+    return JsonResponse({'success': True})
+
+def add_recommendation(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+    
+    try:
+        rmd_id = request.POST['recommendation_id']
+        rmd = Recommendation.objects.get(pk=rmd_id)
+
+        user = request.user.custom_user
+        if user != rmd.user:
+            return JsonResponse({
+                'success': False,
+                'error': 'User is not the creator of the recommendation!',
+            })
+
+        print(f'add_recommendation: {rmd_id} {rmd}')
+        review_list = Review.objects.filter(creator=user, paper__pk=rmd.paper.pk)
+        if review_list.count() > 0:
+            review = review_list[0]
+        else:
+            review = Review(paper = rmd.paper, creator = user)
+            review.save()
+
+        for i in rmd.trackings.all():
+            review.labels.add(i.label.pk)
+        review.save()
+
+        rmd.delete_time = timezone.now()
+        rmd.save()
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+    return JsonResponse({'success': True})
+
+def delete_recommendation(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+    
+    try:
+        rmd_id = request.POST['recommendation_id']
+        rmd = Recommendation.objects.get(pk=rmd_id)
+
+        user = request.user.custom_user
+        if user != rmd.user:
+            return JsonResponse({
+                'success': False,
+                'error': 'User is not the creator of the recommendation!',
+            })
+
+        print(f'delete_recommendation: {rmd_id} {rmd}')
+
+        rmd.delete_time = timezone.now()
+        rmd.save()
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+    return JsonResponse({'success': True})
+
+def restore_recommendation(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+    
+    try:
+        rmd_id = request.POST['recommendation_id']
+        rmd = Recommendation.objects.get(pk=rmd_id)
+
+        user = request.user.custom_user
+        if user != rmd.user:
+            return JsonResponse({
+                'success': False,
+                'error': 'User is not the creator of the recommendation!',
+            })
+
+        print(f'restore_recommendation: {rmd_id} {rmd}')
+
+        rmd.delete_time = None
+        rmd.save()
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+    return JsonResponse({'success': True})
+
+def delete_permanently_recommendation(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+    
+    try:
+        rmd_id = request.POST['recommendation_id']
+        rmd = Recommendation.objects.get(pk=rmd_id)
+
+        user = request.user.custom_user
+        if user != rmd.user:
+            return JsonResponse({
+                'success': False,
+                'error': 'User is not the creator of the recommendation!',
+            })
+
+        print(f'delete_permanently_recommendation: {rmd_id} {rmd}')
+
+        rmd.delete()
+
     except Exception as e:
         return JsonResponse({
             'success': False,

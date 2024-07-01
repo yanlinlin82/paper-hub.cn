@@ -35,13 +35,121 @@
     <div class="d-flex my-2">
       <div class="text-start align-self-end">推送时间：{{ item.create_time | date:"Y-m-d H:i" }}</div>
       <div class="flex-fill text-end align-self-end">
-        <a class="btn btn-primary" href="#">加入个人文献库</a>
-        <a class="btn btn-danger" href="#">删除</a>
+        {% if current_page == "recommendations" %}
+        <a class="btn btn-primary" href="javascript:add_recommendation({{item.pk}})">加入个人文献库</a>
+        <a class="btn btn-danger" href="javascript:delete_recommendation({{item.pk}})">删除</a>
+        {% else %}
+        <a class="btn btn-primary" href="javascript:restore_recommendation({{item.pk}})">恢复</a>
+        <a class="btn btn-danger" href="javascript:delete_permanently_recommendation({{item.pk}})">彻底删除</a>
+        {% endif %}
       </div>
     </div>
   </div>
 </div>
 {% endfor %}
+<script>
+
+function add_recommendation(id) {
+  if (confirm('Are you sure to add the item?')) {
+    $.ajax({
+      url: "{% url 'api:add_recommendation' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { recommendation_id: id },
+      success: function (data) {
+        if (!data.success) {
+          alert('Delete recommendation failed!\n' + data.error);
+        } else {
+          {% if current_page == 'recommendations' %}
+          location.href = "{% url 'recommendations' %}";
+          {% else %}
+          location.reload(false);
+          {% endif %}
+        }
+      },
+      error: function () {
+        alert('An error occurred while processing your request.');
+      }
+    });
+  }
+}
+
+function delete_recommendation(id) {
+  if (confirm('Are you sure to delete the item?')) {
+    $.ajax({
+      url: "{% url 'api:delete_recommendation' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { recommendation_id: id },
+      success: function (data) {
+        if (!data.success) {
+          alert('Delete recommendation failed!\n' + data.error);
+        } else {
+          {% if current_page == 'recommendations' %}
+          location.href = "{% url 'recommendations' %}";
+          {% else %}
+          location.reload(false);
+          {% endif %}
+        }
+      },
+      error: function () {
+        alert('An error occurred while processing your request.');
+      }
+    });
+  }
+}
+
+function restore_recommendation(id) {
+  if (confirm('Are you sure to restore the item?')) {
+    $.ajax({
+      url: "{% url 'api:restore_recommendation' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { recommendation_id: id },
+      success: function (data) {
+        if (!data.success) {
+          alert('Restore recommendation failed!\n' + data.error);
+        } else {
+          {% if current_page == 'recommendations' %}
+          location.href = "{% url 'recommendations' %}";
+          {% else %}
+          location.reload(false);
+          {% endif %}
+        }
+      },
+      error: function () {
+        alert('An error occurred while processing your request.');
+      }
+    });
+  }
+}
+
+function delete_permanently_recommendation(id) {
+  if (confirm('Are you sure to delete the item permanently?')) {
+    $.ajax({
+      url: "{% url 'api:delete_permanently_recommendation' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { recommendation_id: id },
+      success: function (data) {
+        if (!data.success) {
+          alert('Delete permanently recommendation failed!\n' + data.error);
+        } else {
+          {% if current_page == 'recommendations' %}
+          location.href = "{% url 'recommendations' %}";
+          {% else %}
+          location.reload(false);
+          {% endif %}
+        }
+      },
+      error: function () {
+        alert('An error occurred while processing your request.');
+      }
+    });
+  }
+}
+
+</script>
 {% else %}
 <div class="container">
   <div class="d-flex">

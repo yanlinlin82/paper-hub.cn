@@ -16,8 +16,9 @@
       {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
     </div>
     <div class="mt-2">
-      {% for t in item.trackings.all %}
-      <span class="badge" style="background-color:{{t.label.color}}">{{ t.label.name }}</span>
+      labels:
+      {% for t in item.labels.all %}
+      <span class="badge" style="background-color:{{t.color}}">{{ t.name }}</span>
       {% endfor %}
     </div>
     <div class="fs-5 my-3"><b>{{ item.paper.title }}</b></div>
@@ -28,6 +29,11 @@
     {% endif %}
     {% if item.paper.keywords %}
     <p><b>Keywords:</b> {{ item.paper.keywords }}</p>
+    {% endif %}
+
+    {% if item.comments %}
+    <hr>
+    <p>{{ item.comments }}</p>
     {% endif %}
   </div>
 </div>

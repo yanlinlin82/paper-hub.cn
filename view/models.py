@@ -105,15 +105,6 @@ class PaperTracking(models.Model): # every user has his own paper tracking rules
     label = models.ForeignKey(Label, on_delete=models.CASCADE)
     memo = models.CharField(max_length=2000, default='', blank=True)
 
-class PaperLabel(models.Model):
-    label = models.ForeignKey(Label, on_delete=models.CASCADE)
-    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('label', 'paper')
-
-Label.papers = models.ManyToManyField(Paper, through=PaperLabel, related_name='labels')
-
 class Recommendation(models.Model): # recommended by system (daily automatically)
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
@@ -130,6 +121,7 @@ class Review(models.Model):
     delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
 
     comments = models.CharField(max_length=65536, default='', blank=True)
+    labels = models.ManyToManyField(Label, blank=True, related_name='reviews')
 
     def __str__(self):
         return f'{self.creator.nickname}: {self.paper}'

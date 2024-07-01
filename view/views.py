@@ -46,7 +46,7 @@ def search_page(request):
     return render(request, 'view/search.html', context)
 
 def recommendations_page(request):
-    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username)
+    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=True).order_by('-create_time', '-pk')
     for item in item_list:
         item.author_list = item.paper.authors.split('\n')
 
@@ -62,13 +62,18 @@ def recommendations_page(request):
     return HttpResponse(template.render(context, request))
 
 def recommendations_page_trash(request):
-    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=False)
+    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=False).order_by('-delete_time', '-pk')
     for item in item_list:
         item.author_list = item.paper.authors.split('\n')
+
+    page_number = request.GET.get('page')
+    reviews, items = get_paginated_reviews(item_list, page_number)
+
     template = loader.get_template('view/recommendations.html')
     context = {
         'current_page': 'recommendations-trash',
-        'item_list': item_list,
+        'reviews': reviews,
+        'items': items,
     }
     return HttpResponse(template.render(context, request))
 
