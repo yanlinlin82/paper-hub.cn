@@ -5,16 +5,16 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-from .models import Paper, UserProfile
+from .models import Review, UserProfile
 from paperhub import settings
 
 def get_paper_list(request, include_trash=False):
     if not request.user.is_authenticated:
         return None
     if include_trash:
-        return Paper.objects.filter(creator__auth_user__username=request.user.username)
+        return Review.objects.filter(creator__auth_user__username=request.user.username)
     else:
-        return Paper.objects.filter(creator__auth_user__username=request.user.username, delete_time=None)
+        return Review.objects.filter(creator__auth_user__username=request.user.username, delete_time=None)
 
 def all_page(request):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')

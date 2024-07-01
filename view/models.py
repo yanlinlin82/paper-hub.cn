@@ -67,7 +67,7 @@ class UserSession(models.Model):
     def __str__(self):
         return f"{self.user.nickname}: {self.token} - {self.get_client_type_display()}"
 
-class Paper(models.Model):
+class Review(models.Model):
     # creation info
     creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
@@ -101,7 +101,7 @@ class GroupProfile(models.Model):
     desc = models.CharField(max_length=2000, default='')
     create_time = models.DateTimeField(default=timezone.now)
     members = models.ManyToManyField(UserProfile)
-    papers = models.ManyToManyField(Paper)
+    papers = models.ManyToManyField(Review)
     def __str__(self):
         return self.display_name + " (" + self.name + ")"
 

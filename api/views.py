@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
-from view.models import UserProfile, UserAlias, UserSession, Paper, GroupProfile
+from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile
 from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
@@ -253,7 +253,7 @@ def add_paper(request):
         else:
             create_time = timezone.now()
 
-        p = Paper(
+        p = Review(
             creator = user,
             create_time = create_time,
             update_time = create_time)
@@ -300,7 +300,7 @@ def edit_paper(request):
     try:
         id = request.POST['id']
         #paper_id = request.POST['paper_id']  # TODO: query paper info
-        p = Paper.objects.get(pk=id)
+        p = Review.objects.get(pk=id)
         p.title = request.POST['title']
         p.pub_year = request.POST['pub_year']
         p.journal = request.POST['journal']
@@ -323,7 +323,7 @@ def delete_paper(request):
 
     try:
         id = request.POST['paper_id']
-        p = Paper.objects.get(pk=id)
+        p = Review.objects.get(pk=id)
         p.delete_time = timezone.now()
         p.save()
     except Exception as e:
@@ -343,7 +343,7 @@ def restore_paper(request):
 
     try:
         id = request.POST['paper_id']
-        p = Paper.objects.get(pk=id)
+        p = Review.objects.get(pk=id)
         p.delete_time = None
         p.save()
     except Exception as e:
@@ -363,8 +363,8 @@ def delete_paper_forever(request):
 
     try:
         id = request.POST['paper_id']
-        Paper.objects.get(pk=id)
-        Paper.objects.filter(pk=id).delete()
+        Review.objects.get(pk=id)
+        Review.objects.filter(pk=id).delete()
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -591,7 +591,7 @@ def submit_comment(request):
             user.save()
 
         now = timezone.now()
-        paper = Paper(creator=user,
+        paper = Review(creator=user,
                       create_time=now,
                       update_time=now,
                       title=title or paper_info['title'],
