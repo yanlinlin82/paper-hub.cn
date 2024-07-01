@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-from .models import Review, UserProfile
+from .models import Review, Recommendation, PaperTracking
 from paperhub import settings
 
 def get_paper_list(request, include_trash=False):
@@ -15,6 +15,24 @@ def get_paper_list(request, include_trash=False):
         return Review.objects.filter(creator__auth_user__username=request.user.username)
     else:
         return Review.objects.filter(creator__auth_user__username=request.user.username, delete_time=None)
+
+def recommendations_page(request):
+    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username)
+    template = loader.get_template('view/recommendations.html')
+    context = {
+        'current_page': 'recommendations',
+        'item_list': item_list,
+    }
+    return HttpResponse(template.render(context, request))
+
+def trackings_page(request):
+    item_list = PaperTracking.objects.filter(user__auth_user__username=request.user.username)
+    template = loader.get_template('view/trackings.html')
+    context = {
+        'current_page': 'trackings',
+        'item_list': item_list,
+    }
+    return HttpResponse(template.render(context, request))
 
 def all_page(request):
     paper_list = get_paper_list(request).order_by('-create_time', '-pk')

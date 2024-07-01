@@ -1,0 +1,33 @@
+{% extends "view/base.html" %}
+
+{% block content %}
+<div class="page-summary">
+  <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ item_list | length }} tracking rule(s).</p>
+</div>
+{% if item_list %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Label</th>
+      <th scope="col">Type</th>
+      <th scope="col">Value</th>
+      <th scope="col">Memo</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for item in item_list %}
+<tr>
+  <th scope="row">{{ item.pk }}</th>
+  <td><span class="badge" style="background-color:{{item.label.color}}">{{ item.label.name }}</span></td>
+  <td>{{ item.type }}</td>
+  <td>{{ item.value }}</td>
+  <td>{{ item.memo }}</td>
+</tr>
+{% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="padding:20px; height:200px;">No tracking rule is available.</p>
+{% endif %}
+{% endblock content %}

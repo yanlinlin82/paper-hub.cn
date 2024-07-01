@@ -5,11 +5,30 @@
   <p>{% autoescape off %}{{ summary_messages }}{% endautoescape %}There are total {{ paper_list|length }} paper(s).</p>
 </div>
 {% if paper_list %}
-{% for paper in paper_list %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Pub Year</th>
+      <th scope="col">Journal</th>
+      <th scope="col">Title</th>
+      <th scope="col">DOI</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for review in paper_list %}
 <div class="paper-item">
-  {{ paper }}
-</div>
+  <tr>
+    <th scope="row">{{ review.pk }}</th>
+    <td>{{ review.paper.pub_year }}</td>
+    <td>{{ review.paper.journal }}</td>
+    <td>{{ review.paper.title }}</td>
+    <td>{{ review.paper.doi }}</td>
+  </tr>
+  </div>
 {% endfor %}
+</tbody>
+</table>
 {% else %}
 <p style="padding:20px; height:200px;">No paper is available.</p>
 {% endif %}

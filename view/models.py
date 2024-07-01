@@ -68,19 +68,21 @@ class UserSession(models.Model):
         return f"{self.user.nickname}: {self.token} - {self.get_client_type_display()}"
 
 class Paper(models.Model):
-    journal = models.CharField(max_length=200, default='', blank=True)
-    pub_date = models.CharField(max_length=50, default='', blank=True)
+    journal = models.CharField(max_length=256, default='', blank=True)
+    pub_date = models.CharField(max_length=64, default='', blank=True)
     pub_year = models.IntegerField(blank=True, null=True, default=None)
-    title = models.CharField(max_length=500, default='')
-    authors = models.CharField(max_length=4000, default='', blank=True)
-    abstract = models.CharField(max_length=4000, default='', blank=True)
-    urls = models.CharField(max_length=1000, default='', blank=True)
+    title = models.CharField(max_length=4096, default='')
+    authors = models.CharField(max_length=65536, default='', blank=True)
+    institutes = models.CharField(max_length=65536, default='', blank=True)
+    abstract = models.CharField(max_length=65536, default='', blank=True)
+    keywords = models.CharField(max_length=65536, default='', blank=True)
+    urls = models.CharField(max_length=65536, default='', blank=True)
 
-    doi = models.CharField(max_length=100, default='', blank=True)
-    pmid = models.CharField(max_length=20, default='', blank=True)
-    arxiv_id = models.CharField(max_length=30, default='', blank=True)
-    pmcid = models.CharField(max_length=100, default='', blank=True)
-    cnki_id = models.CharField(max_length=100, default='', blank=True) # CNKI CJFD ID
+    doi = models.CharField(max_length=128, default='', blank=True)
+    pmid = models.CharField(max_length=128, default='', blank=True)
+    arxiv_id = models.CharField(max_length=128, default='', blank=True)
+    pmcid = models.CharField(max_length=128, default='', blank=True)
+    cnki_id = models.CharField(max_length=128, default='', blank=True) # CNKI CJFD ID
 
     def __str__(self):
         return f'{self.pub_year}, {self.journal}, {self.title}'

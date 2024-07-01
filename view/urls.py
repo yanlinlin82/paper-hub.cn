@@ -9,6 +9,8 @@ def redirect(request):
 app_name = 'view'
 urlpatterns = [
     path('', redirect, name='index'),
+    path('recommendations', views.recommendations_page, name='recommendations'),
+    path('trackings', views.trackings_page, name='trackings'),
     path('all', views.all_page, name='all'),
     path('recent', views.recent_page, name='recent'),
     path('trash', views.trash_page, name='trash'),
