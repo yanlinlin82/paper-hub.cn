@@ -9,6 +9,11 @@ django.setup()
 
 from view.models import PaperTracking, UserProfile, Paper, Label, Recommendation, RecommendationDetails
 
+def check_pd_na(x):
+    if pd.isna(x):
+        return ''
+    return x
+
 def import_excel(excel_file):
     u = UserProfile.objects.get(pk=1)
     a = pd.read_excel(excel_file) # eg. "/work/Research/PubMed-Mining/out.xlsx"
@@ -25,17 +30,19 @@ def import_excel(excel_file):
         if cnt % 100 == 0:
             print(f'Processed {cnt} recommendations ...')
 
-        paper_list = Paper.objects.filter(doi = i['doi'])
+        doi = check_pd_na(i['doi'])
+        pmid = check_pd_na(i['pmid'])
+        paper_list = Paper.objects.filter(doi = doi, pmid = pmid)
         if len(paper_list) == 0:
             pub_year = None
             pub_date = ''
             if not pd.isna(i['date']):
                 pub_year = int(i['date'])
                 pub_date = str(i['date'])
-            p = Paper(journal = i['journal'], pub_year = pub_year, pub_date = pub_date, \
-                    title = i['title'], authors = i['author'], institutes = i['institutes'], \
-                    abstract = i['abstract'], keywords = i['keywords'], \
-                    doi = i['doi'], pmid = i['pmid'])
+            p = Paper(journal = check_pd_na(i['journal']), pub_year = pub_year, pub_date = pub_date, \
+                    title = check_pd_na(i['title']), authors = check_pd_na(i['author']), institutes = check_pd_na(i['institutes']), \
+                    abstract = check_pd_na(i['abstract']), keywords = check_pd_na(i['keywords']), \
+                    doi = doi, pmid = pmid)
             p.save()
             new += 1
         else:
