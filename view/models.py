@@ -88,7 +88,7 @@ class Paper(models.Model):
         return f'{self.pub_year}, {self.journal}, {self.title}'
 
 class PaperTranslation(models.Model):
-    paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='translations')
+    paper = models.OneToOneField(Paper, on_delete=models.CASCADE, related_name='translation')
     title_cn = models.CharField(max_length=4096, default='', blank=True)
     abstract_cn = models.CharField(max_length=65536, default='', blank=True)
 

@@ -45,9 +45,19 @@ An easy way to read and share papers for scientific research
     $ cat .env
     OPENAI_API_KEY=sk-xxxxxx
     OPENAI_PROXY_URL=xxxxxx
-    WX_APP_ID=xxxxxx
+
+    WX_APP_ID=wxxxxx
     WX_SECRET=xxxxxx
     WX_DEBUG=False
+
+    WEB_APP_ID=wxxxxx
+    WEB_APP_SECRET=xxxxxx
+    WEB_DOMAIN=paper-hub.cn
+
+    AZURE_KEY=xxxxxx
+    AZURE_ENDPOINT=https://api.cognitive.microsofttranslator.com
+    AZURE_LOCATION=eastus
+    AZURE_PATH=/translate
     ```
 
 ## How to setup a development environment (Optional)

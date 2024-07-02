@@ -25,8 +25,8 @@
     </div>
     <div class="fs-5 my-3">
       <p><b>{{ item.paper.title }}</b><a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译</a></p>
-      {% if item.translation.title_cn %}
-      <p><b>{{ item.translation.title_cn }}</b></p>
+      {% if item.paper.translation and item.paper.translation.title_cn %}
+      <p><b>{{ item.paper.translation.title_cn }}</b></p>
       {% endif %}
     </div>
     
@@ -34,8 +34,8 @@
     {% if item.paper.abstract %}
     <div class="my-3">
       <p><b>Abstract:</b> {{ item.paper.abstract }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译</a></p>
-      {% if item.translation.abstract_cn %}
-      <p><b>{{ item.translation.abstract_cn }}</b></p>
+      {% if item.paper.translation and item.paper.translation.abstract_cn %}
+      <p>{{ item.paper.translation.abstract_cn }}</p>
       {% endif %}
     </div>
     {% endif %}
@@ -169,6 +169,7 @@ function translate_title(paper_id) {
     headers: { "X-CSRFToken": '{{csrf_token}}' },
     data: { paper_id: paper_id },
     success: function (data) {
+      console.log(data)
       if (!data.success) {
         alert('Translate title failed!\n' + data.error);
       } else {

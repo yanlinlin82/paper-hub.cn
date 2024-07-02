@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
-from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper
+from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
 from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
@@ -882,81 +882,97 @@ def weixin_callback(request):
     redirect_to = request.GET.get('state')
     return HttpResponseRedirect(redirect_to)
 
-def translate_title(request):
+import requests, uuid, json
+
+def translate_text(s):
     try:
-        print('translate_title:', request)
-        paper_id = request.POST['paper_id']
-        print('paper_id:', paper_id)
+        AZURE_KEY = os.getenv('AZURE_KEY')
+        AZURE_ENDPOINT = os.getenv('AZURE_ENDPOINT')
+        AZURE_LOCATION = os.getenv('AZURE_LOCATION')
+        AZURE_PATH = '/translate'
+        constructed_url = AZURE_ENDPOINT + AZURE_PATH
 
-        paper = Paper.objects.get(pk=paper_id)
-        title = paper.title
-        print('to translate:', title)
+        params = {
+            'api-version': '3.0',
+            'from': 'en',
+            'to': 'zh-Hans',
+        }
 
-        in_msg = [
-            {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
-            {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
-            {"role": "user", "content": f"Please translate the title of the paper: {title}"},
-        ]
-        print('in_msg:', in_msg)
-        proxy_url = os.environ.get("OPENAI_PROXY_URL")
-        print(f'proxy_url: {proxy_url}')
-        if proxy_url is None or proxy_url == "":
-            client = openai.OpenAI()
-        else:
-            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
-        print(f'client: {client}')
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=in_msg,
-        )
-        print(f'completion: {completion}')
-        out_msg = completion.choices[0].message.content
-        print('out_msg:', out_msg)
-        return JsonResponse({'answer': out_msg})
+        headers = {
+            'Ocp-Apim-Subscription-Key': AZURE_KEY,
+            # location required if you're using a multi-service or regional (not global) resource.
+            'Ocp-Apim-Subscription-Region': AZURE_LOCATION,
+            'Content-type': 'application/json',
+            'X-ClientTraceId': str(uuid.uuid4())
+        }
+
+        # You can pass more than one object in body.
+        body = [{'text': s}]
+
+        request = requests.post(constructed_url, params=params, headers=headers, json=body)
+        response = request.json()
+
+        #print(json.dumps(response, sort_keys=True, ensure_ascii=False, indent=4, separators=(',', ': ')))
+        return True, response[0]['translations'][0]['text']
     except Exception as e:
+        return False, f"An error occurred: {e}"
+
+def translate_title(request):
+    print('translate_title:', request)
+    paper_id = request.POST['paper_id']
+    print('paper_id:', paper_id)
+
+    paper = Paper.objects.get(pk=paper_id)
+    pt = getattr(paper, 'translation', None)
+    if pt and pt.title_cn:
+        print(f'already translated: {pt.title_cn}')
+        return JsonResponse({'success': True, 'answer': pt.title_cn})
+
+    title = paper.title
+    print('to translate:', title)
+
+    success, result_text = translate_text(title)
+    print(f'translate_text: {success} {result_text}')
+
+    if not success:
         return JsonResponse({
             'success': False,
-            'error': f"An error occurred: {e}"
+            'error': result_text
         })
+    else:
+        if not pt:
+            pt = PaperTranslation(paper=paper, title_cn=result_text)
+        else:
+            pt.title_cn = result_text
+        pt.save()
+        return JsonResponse({'success': True, 'answer': result_text})
 
 def translate_abstract(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
+    print('translate_abstract:', request)
+    paper_id = request.POST['paper_id']
+    print('paper_id:', paper_id)
 
-    token = json_data.get('token')
-    print('token:', token)
-    if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+    paper = Paper.objects.get(pk=paper_id)
+    pt = getattr(paper, 'translation', None)
+    if pt and pt.abstract_cn:
+        print(f'already translated: {pt.abstract_cn}')
+        return JsonResponse({'success': True, 'answer': pt.abstract_cn})
 
-    try:
-        paper_id = json_data.get('paper_id')
-        print('paper_id:', paper_id)
+    abstract = paper.abstract
+    print('to translate:', abstract)
 
-        paper = Paper.objects.get(pk=paper_id)
-        abstract = paper.abstract
-        print('to translate:', abstract)
+    success, result_text = translate_text(abstract)
+    print(f'translate_text: {success} {result_text}')
 
-        in_msg = [
-            {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
-            {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
-            {"role": "user", "content": f"Please translate the abstract of the paper:\n{abstract}\n"},
-        ]
-        print('in_msg:', in_msg)
-        proxy_url = os.environ.get("OPENAI_PROXY_URL")
-        if proxy_url is None or proxy_url == "":
-            client = openai.OpenAI()
-        else:
-            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=in_msg,
-        )
-        out_msg = completion.choices[0].message.content
-        print('out_msg:', out_msg)
-        return JsonResponse({'answer': out_msg})
-    except Exception as e:
+    if not success:
         return JsonResponse({
             'success': False,
-            'error': f"An error occurred: {e}"
+            'error': result_text
         })
+    else:
+        if not pt:
+            pt = PaperTranslation(paper=paper, abstract_cn=result_text)
+        else:
+            pt.abstract_cn = result_text
+        pt.save()
+        return JsonResponse({'success': True, 'answer': result_text})
