@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
-from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation
+from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper
 from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
@@ -25,10 +25,14 @@ from django.contrib.auth.models import User
 import datetime
 
 def parse_request(request):
+    print('parse_request:', request)
+    print(f'request.content_type = {request.content_type}')
     if request.content_type != 'application/json':
         return None, JsonResponse({'error': 'Invalid content type'}, status=400)
     try:
+        print(f'parse_request: {request.body}')
         json_data = json.loads(request.body.decode('utf-8'))
+        print(f'parse_request: {json_data}')
         return json_data, None
     except json.JSONDecodeError:
         pass
@@ -877,3 +881,82 @@ def weixin_callback(request):
     login(request, user)
     redirect_to = request.GET.get('state')
     return HttpResponseRedirect(redirect_to)
+
+def translate_title(request):
+    try:
+        print('translate_title:', request)
+        paper_id = request.POST['paper_id']
+        print('paper_id:', paper_id)
+
+        paper = Paper.objects.get(pk=paper_id)
+        title = paper.title
+        print('to translate:', title)
+
+        in_msg = [
+            {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
+            {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
+            {"role": "user", "content": f"Please translate the title of the paper: {title}"},
+        ]
+        print('in_msg:', in_msg)
+        proxy_url = os.environ.get("OPENAI_PROXY_URL")
+        print(f'proxy_url: {proxy_url}')
+        if proxy_url is None or proxy_url == "":
+            client = openai.OpenAI()
+        else:
+            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
+        print(f'client: {client}')
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=in_msg,
+        )
+        print(f'completion: {completion}')
+        out_msg = completion.choices[0].message.content
+        print('out_msg:', out_msg)
+        return JsonResponse({'answer': out_msg})
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+def translate_abstract(request):
+    json_data, response = parse_request(request)
+    if json_data is None:
+        return response
+
+    token = json_data.get('token')
+    print('token:', token)
+    if not token or not is_token_valid(token):
+        return HttpResponseForbidden('Invalid or expired token')
+
+    try:
+        paper_id = json_data.get('paper_id')
+        print('paper_id:', paper_id)
+
+        paper = Paper.objects.get(pk=paper_id)
+        abstract = paper.abstract
+        print('to translate:', abstract)
+
+        in_msg = [
+            {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
+            {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
+            {"role": "user", "content": f"Please translate the abstract of the paper:\n{abstract}\n"},
+        ]
+        print('in_msg:', in_msg)
+        proxy_url = os.environ.get("OPENAI_PROXY_URL")
+        if proxy_url is None or proxy_url == "":
+            client = openai.OpenAI()
+        else:
+            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=in_msg,
+        )
+        out_msg = completion.choices[0].message.content
+        print('out_msg:', out_msg)
+        return JsonResponse({'answer': out_msg})
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })

@@ -10,7 +10,7 @@
 
 {% for item in reviews %}
 <div class="card p-2 m-3 d-flex flex-row">
-  <div class="p-2 text-start">{{ forloop.counter }}.</div>
+  <div class="p-2 text-start">{{ item.display_index }}.</div>
   <div class="p-2 flex-fill text-start">
     <div class="text-start">
       {{ item.paper.journal }},
@@ -19,15 +19,25 @@
       {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
     </div>
     <div class="mt-2">
-      {% for t in item.trackings.all %}
-      <span class="badge" style="background-color:{{t.label.color}}">{{ t.label.name }}</span>
+      {% for d in item.details.all %}
+      <a class="badge" style="background-color:{{d.label.color}}" data-bs-toggle="tooltip" title="{{d.recommend_time | date:"Y-m-d H:i"}}" href="#">{{ d.label.name }}</a>
       {% endfor %}
     </div>
-    <div class="fs-5 my-3"><b>{{ item.paper.title }}</b></div>
+    <div class="fs-5 my-3">
+      <p><b>{{ item.paper.title }}</b><a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译</a></p>
+      {% if item.translation.title_cn %}
+      <p><b>{{ item.translation.title_cn }}</b></p>
+      {% endif %}
+    </div>
     
     <p>{{ item.author_list | join:", " }}</p>
     {% if item.paper.abstract %}
-    <p><b>Abstract:</b> {{ item.paper.abstract }}</p>
+    <div class="my-3">
+      <p><b>Abstract:</b> {{ item.paper.abstract }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译</a></p>
+      {% if item.translation.abstract_cn %}
+      <p><b>{{ item.translation.abstract_cn }}</b></p>
+      {% endif %}
+    </div>
     {% endif %}
     {% if item.paper.keywords %}
     <p><b>Keywords:</b> {{ item.paper.keywords }}</p>
@@ -47,6 +57,9 @@
   </div>
 </div>
 {% endfor %}
+
+{% include "group/paginator.html" %}
+
 <script>
 
 function add_recommendation(id) {
@@ -147,6 +160,52 @@ function delete_permanently_recommendation(id) {
       }
     });
   }
+}
+
+function translate_title(paper_id) {
+  $.ajax({
+    url: "{% url 'api:translate_title' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { paper_id: paper_id },
+    success: function (data) {
+      if (!data.success) {
+        alert('Translate title failed!\n' + data.error);
+      } else {
+        {% if current_page == 'recommendations' %}
+        location.href = "{% url 'recommendations' %}";
+        {% else %}
+        location.reload(false);
+        {% endif %}
+      }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
+}
+
+function translate_abstract(paper_id) {
+  $.ajax({
+    url: "{% url 'api:translate_abstract' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { paper_id: paper_id },
+    success: function (data) {
+      if (!data.success) {
+        alert('Translate title failed!\n' + data.error);
+      } else {
+        {% if current_page == 'recommendations' %}
+        location.href = "{% url 'recommendations' %}";
+        {% else %}
+        location.reload(false);
+        {% endif %}
+      }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
 }
 
 </script>

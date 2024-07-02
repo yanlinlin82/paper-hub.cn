@@ -27,4 +27,6 @@ urlpatterns = [
     path('summarize_by_gpt', views.summarize_by_gpt, name='summarize_by_gpt'),
     path('get-weixin-qr/', views.get_weixin_qr, name='get_weixin_qr'),
     path('weixin_callback/', views.weixin_callback, name='weixin_callback'),
+    path('translate_title', views.translate_title, name='translate_title'),
+    path('translate_abstract', views.translate_abstract, name='translate_abstract'),
 ]

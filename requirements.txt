@@ -5,3 +5,5 @@ xmltodict
 openai
 pandas
 openpyxl
+socksio
+httpcore[socks]

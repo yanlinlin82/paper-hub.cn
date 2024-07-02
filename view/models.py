@@ -110,7 +110,14 @@ class Recommendation(models.Model): # recommended by system (daily automatically
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
-    trackings = models.ManyToManyField(PaperTracking, blank=True)
+
+class RecommendationDetails(models.Model):
+    recommendation = models.ForeignKey(Recommendation, on_delete=models.CASCADE, related_name='details')
+    recommend_time = models.DateTimeField(default=timezone.now)
+    type = models.CharField(max_length=20, default='read') # keyword, author, institute, journal, cite
+    value = models.CharField(max_length=100, default='', blank=True)
+    label = models.ForeignKey(Label, on_delete=models.CASCADE)
+    memo = models.CharField(max_length=2000, default='', blank=True)
 
 class Review(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)

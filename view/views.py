@@ -53,6 +53,9 @@ def recommendations_page(request):
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(item_list, page_number)
 
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+
     template = loader.get_template('view/recommendations.html')
     context = {
         'current_page': 'recommendations',
