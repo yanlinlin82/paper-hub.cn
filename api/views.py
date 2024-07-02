@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
-from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
+from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, RecommendationDetails, Paper, PaperTranslation
 from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
@@ -403,7 +403,7 @@ def add_recommendation(request):
             review = Review(paper = rmd.paper, creator = user)
             review.save()
 
-        for i in rmd.trackings.all():
+        for i in rmd.details.all():
             review.labels.add(i.label.pk)
         review.save()
 

@@ -9,7 +9,7 @@
 {% include "group/paginator.html" %}
 
 {% for item in reviews %}
-<div class="card p-2 m-3 d-flex flex-row">
+<div id="card_{{item.pk}}" class="card p-2 m-3 d-flex flex-row">
   <div class="p-2 text-start">{{ item.display_index }}.</div>
   <div class="p-2 flex-fill text-start">
     <div class="text-start">
@@ -23,24 +23,28 @@
       <a class="badge" style="background-color:{{d.label.color}}" data-bs-toggle="tooltip" title="{{d.recommend_time | date:"Y-m-d H:i"}}" href="#">{{ d.label.name }}</a>
       {% endfor %}
     </div>
-    <div class="fs-5 my-3">
-      <p><b>{{ item.paper.title }}</b><a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译</a></p>
+    <div class="fs-5 my-3 fw-bold">
+      <div>{{ item.paper.title }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译标题</a></div>
+      <div id="title_cn_{{ item.paper.pk }}">
       {% if item.paper.translation and item.paper.translation.title_cn %}
-      <p><b>{{ item.paper.translation.title_cn }}</b></p>
+      {{ item.paper.translation.title_cn }}
       {% endif %}
+      </div>
     </div>
     
-    <p>{{ item.author_list | join:", " }}</p>
+    <div>{{ item.author_list | join:", " }}</div>
     {% if item.paper.abstract %}
     <div class="my-3">
-      <p><b>Abstract:</b> {{ item.paper.abstract }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译</a></p>
+      <div><b>Abstract:</b> {{ item.paper.abstract }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译摘要</a></div>
+      <div id="abstract_cn_{{ item.paper.pk }}">
       {% if item.paper.translation and item.paper.translation.abstract_cn %}
-      <p>{{ item.paper.translation.abstract_cn }}</p>
+      {{ item.paper.translation.abstract_cn }}
       {% endif %}
+      </div>
     </div>
     {% endif %}
     {% if item.paper.keywords %}
-    <p><b>Keywords:</b> {{ item.paper.keywords }}</p>
+    <div><b>Keywords:</b> {{ item.paper.keywords }}</div>
     {% endif %}
     <div class="d-flex my-2">
       <div class="text-start align-self-end">推送时间：{{ item.create_time | date:"Y-m-d H:i" }}</div>
@@ -73,11 +77,7 @@ function add_recommendation(id) {
         if (!data.success) {
           alert('Delete recommendation failed!\n' + data.error);
         } else {
-          {% if current_page == 'recommendations' %}
-          location.href = "{% url 'recommendations' %}";
-          {% else %}
-          location.reload(false);
-          {% endif %}
+          $('#card_' + id).remove();
         }
       },
       error: function () {
@@ -98,11 +98,7 @@ function delete_recommendation(id) {
         if (!data.success) {
           alert('Delete recommendation failed!\n' + data.error);
         } else {
-          {% if current_page == 'recommendations' %}
-          location.href = "{% url 'recommendations' %}";
-          {% else %}
-          location.reload(false);
-          {% endif %}
+          $('#card_' + id).remove();
         }
       },
       error: function () {
@@ -123,11 +119,7 @@ function restore_recommendation(id) {
         if (!data.success) {
           alert('Restore recommendation failed!\n' + data.error);
         } else {
-          {% if current_page == 'recommendations' %}
-          location.href = "{% url 'recommendations' %}";
-          {% else %}
-          location.reload(false);
-          {% endif %}
+          $('#card_' + id).remove();
         }
       },
       error: function () {
@@ -148,11 +140,7 @@ function delete_permanently_recommendation(id) {
         if (!data.success) {
           alert('Delete permanently recommendation failed!\n' + data.error);
         } else {
-          {% if current_page == 'recommendations' %}
-          location.href = "{% url 'recommendations' %}";
-          {% else %}
-          location.reload(false);
-          {% endif %}
+          $('#card_' + id).remove();
         }
       },
       error: function () {
@@ -163,6 +151,8 @@ function delete_permanently_recommendation(id) {
 }
 
 function translate_title(paper_id) {
+  $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+
   $.ajax({
     url: "{% url 'api:translate_title' %}",
     type: 'POST',
@@ -173,11 +163,7 @@ function translate_title(paper_id) {
       if (!data.success) {
         alert('Translate title failed!\n' + data.error);
       } else {
-        {% if current_page == 'recommendations' %}
-        location.href = "{% url 'recommendations' %}";
-        {% else %}
-        location.reload(false);
-        {% endif %}
+        $('#title_cn_' + paper_id).html(data.answer);
       }
     },
     error: function () {
@@ -187,6 +173,8 @@ function translate_title(paper_id) {
 }
 
 function translate_abstract(paper_id) {
+  $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+
   $.ajax({
     url: "{% url 'api:translate_abstract' %}",
     type: 'POST',
@@ -196,11 +184,7 @@ function translate_abstract(paper_id) {
       if (!data.success) {
         alert('Translate title failed!\n' + data.error);
       } else {
-        {% if current_page == 'recommendations' %}
-        location.href = "{% url 'recommendations' %}";
-        {% else %}
-        location.reload(false);
-        {% endif %}
+        $('#abstract_cn_' + paper_id).html(data.answer);
       }
     },
     error: function () {
