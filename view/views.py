@@ -93,10 +93,17 @@ def all_page(request):
     review_list = get_review_list(request)
     if review_list is not None:
         review_list = review_list.order_by('-create_time', '-pk')
+    for item in review_list:
+        item.author_list = item.paper.authors.split('\n')
+
+    page_number = request.GET.get('page')
+    reviews, items = get_paginated_reviews(review_list, page_number)
+
     template = loader.get_template('view/list.html')
     context = {
         'current_page': 'all',
-        'review_list': review_list,
+        'reviews': reviews,
+        'items': items,
         'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
@@ -106,11 +113,18 @@ def recent_page(request):
     review_list = get_review_list(request)
     if review_list is not None:
         review_list = review_list.filter(create_time__gte=last_week).order_by('-create_time', '-pk')
+    for item in review_list:
+        item.author_list = item.paper.authors.split('\n')
+
+    page_number = request.GET.get('page')
+    reviews, items = get_paginated_reviews(review_list, page_number)
+
     summary_message = 'This page shows papers in last week. '
     template = loader.get_template('view/list.html')
     context = {
         'current_page': 'recent',
-        'review_list': review_list,
+        'reviews': reviews,
+        'items': items,
         'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
@@ -119,10 +133,17 @@ def trash_page(request):
     review_list = get_review_list(request, include_trash=True)
     if review_list is not None:
         review_list = review_list.exclude(delete_time=None).order_by('-create_time', '-pk')
+    for item in review_list:
+        item.author_list = item.paper.authors.split('\n')
+
+    page_number = request.GET.get('page')
+    reviews, items = get_paginated_reviews(review_list, page_number)
+
     summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'view/list.html', {
         'current_page': 'trash',
-        'review_list': review_list,
+        'reviews': reviews,
+        'items': items,
         'summary_messages': summary_message
     })
 
@@ -139,6 +160,6 @@ def single_page(request, id):
     template = loader.get_template('view/single.html')
     context = {
         'current_page': 'paper',
-        'review': review,
+        'item': review,
     }
     return HttpResponse(template.render(context, request))

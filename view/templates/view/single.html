@@ -1,10 +1,98 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if review %}
-<div class="paper-item">
-  {{ review }}
+{% if item %}
+
+<div class="card p-2 m-3 d-flex flex-row">
+  <div class="p-2 flex-fill text-start">
+    <div class="text-start">
+      {{ item.paper.journal }},
+      {{ item.paper.pub_year }}.
+      {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
+      {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
+    </div>
+    <div class="mt-2">
+      {% for t in item.labels.all %}
+      <span class="badge" style="background-color:{{t.color}}">{{ t.name }}</span>
+      {% endfor %}
+    </div>
+    <div class="fs-5 my-3 fw-bold">
+      <div>{{ item.paper.title }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译标题</a></div>
+      <div id="title_cn_{{ item.paper.pk }}">
+      {% if item.paper.translation and item.paper.translation.title_cn %}
+      {{ item.paper.translation.title_cn }}
+      {% endif %}
+      </div>
+    </div>
+    
+    <p>{{ item.author_list | join:", " }}</p>
+    {% if item.paper.abstract %}
+    <div class="my-3">
+      <div><b>Abstract:</b> {{ item.paper.abstract }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译摘要</a></div>
+      <div id="abstract_cn_{{ item.paper.pk }}">
+      {% if item.paper.translation and item.paper.translation.abstract_cn %}
+      {{ item.paper.translation.abstract_cn }}
+      {% endif %}
+      </div>
+    </div>
+    {% endif %}
+    {% if item.paper.keywords %}
+    <p><b>Keywords:</b> {{ item.paper.keywords }}</p>
+    {% endif %}
+
+    {% if item.comments %}
+    <hr>
+    <p>{{ item.comments }}</p>
+    {% endif %}
+  </div>
 </div>
+
+<script>
+
+function translate_title(paper_id) {
+  $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+
+  $.ajax({
+    url: "{% url 'api:translate_title' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { paper_id: paper_id },
+    success: function (data) {
+      console.log(data)
+      if (!data.success) {
+        alert('Translate title failed!\n' + data.error);
+      } else {
+        $('#title_cn_' + paper_id).html(data.answer);
+      }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
+}
+
+function translate_abstract(paper_id) {
+  $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+
+  $.ajax({
+    url: "{% url 'api:translate_abstract' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { paper_id: paper_id },
+    success: function (data) {
+      if (!data.success) {
+        alert('Translate title failed!\n' + data.error);
+      } else {
+        $('#abstract_cn_' + paper_id).html(data.answer);
+      }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
+}
+</script>
+  
 {% else %}
 <p>Invalid review ID.</p>
 {% endif %}
