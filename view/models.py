@@ -84,6 +84,8 @@ class Paper(models.Model):
     pmcid = models.CharField(max_length=128, default='', blank=True)
     cnki_id = models.CharField(max_length=128, default='', blank=True) # CNKI CJFD ID
 
+    language = models.CharField(max_length=20, default='eng') # eng, chi, etc.
+
     def __str__(self):
         return f'{self.pub_year}, {self.journal}, {self.title}'
 

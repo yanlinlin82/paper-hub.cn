@@ -96,8 +96,9 @@
 <script>
 
 function add_recommendation(id) {
-  $('#dlg_info').html($('#info_' + id).html())
-  $('#dlg_title').html($('#title_' + id).html())
+  $('#dlg_info').html($('#info_' + id).html());
+  $('#dlg_title').html($('#title_' + id).html());
+  $('#comments').val('');
   $('#commentsModal').modal('show');
 
   $('#submitComments').off('click').on('click', function() {
