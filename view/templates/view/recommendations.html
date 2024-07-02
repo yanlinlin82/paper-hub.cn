@@ -12,7 +12,7 @@
 <div id="card_{{item.pk}}" class="card p-2 m-3 d-flex flex-row">
   <div class="p-2 text-start">{{ item.display_index }}.</div>
   <div class="p-2 flex-fill text-start">
-    <div class="text-start">
+    <div id="info_{{item.pk}}" class="text-start">
       {{ item.paper.journal }},
       {{ item.paper.pub_year }}.
       {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
@@ -23,9 +23,9 @@
       <a class="badge" style="background-color:{{d.label.color}}" data-bs-toggle="tooltip" title="{{d.recommend_time | date:"Y-m-d H:i"}}" href="#">{{ d.label.name }}</a>
       {% endfor %}
     </div>
-    <div class="fs-5 my-3 fw-bold">
-      <div>{{ item.paper.title }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译标题</a></div>
-      <div id="title_cn_{{ item.paper.pk }}">
+    <div class="fs-5 my-3">
+      <div><div id="title_{{item.pk}}" class="d-inline text-start fw-bold">{{ item.paper.title }}</div><a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译标题</a></div>
+      <div id="title_cn_{{ item.paper.pk }}" class="fw-bold">
       {% if item.paper.translation and item.paper.translation.title_cn %}
       {{ item.paper.translation.title_cn }}
       {% endif %}
@@ -64,27 +64,69 @@
 
 {% include "group/paginator.html" %}
 
+<!-- Modal -->
+<div class="modal fade" id="commentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="commentsModalLabel">加入推荐文献到个人文献库</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="commentsForm">
+          <div class="mb-3">
+            <div id="dlg_info" class="text-start"></div>
+            <div id="dlg_title" class="text-start mt-3 fs-4 fw-bold"></div>
+          </div>
+          <div class="mb-3">
+            <label for="comments" class="form-label">评论</label>
+            <textarea class="form-control" id="comments" rows="8" required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="submitComments">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
 
 function add_recommendation(id) {
-  if (confirm('Are you sure to add the item?')) {
+  $('#dlg_info').html($('#info_' + id).html())
+  $('#dlg_title').html($('#title_' + id).html())
+  $('#commentsModal').modal('show');
+
+  $('#submitComments').off('click').on('click', function() {
+    const comments = $('#comments').val();
+    /*if (comments.trim() === '') {
+      alert('请填写评论');
+      return;
+    }*/
+    $('#commentsModal').modal('hide');
     $.ajax({
       url: "{% url 'api:add_recommendation' %}",
       type: 'POST',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
-      data: { recommendation_id: id },
-      success: function (data) {
+      data: {
+        recommendation_id: id,
+        comments: comments
+      },
+      success: function(data) {
         if (!data.success) {
-          alert('Delete recommendation failed!\n' + data.error);
+          alert('添加推荐失败！\n' + data.error);
         } else {
           $('#card_' + id).remove();
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function() {
+        alert('请求处理中发生错误。');
       }
     });
-  }
+  });
 }
 
 function delete_recommendation(id) {

@@ -385,6 +385,7 @@ def add_recommendation(request):
         })
     
     try:
+        comments = request.POST['comments']
         rmd_id = request.POST['recommendation_id']
         rmd = Recommendation.objects.get(pk=rmd_id)
 
@@ -400,7 +401,7 @@ def add_recommendation(request):
         if review_list.count() > 0:
             review = review_list[0]
         else:
-            review = Review(paper = rmd.paper, creator = user)
+            review = Review(paper = rmd.paper, creator = user, comments = comments)
             review.save()
 
         for i in rmd.details.all():
