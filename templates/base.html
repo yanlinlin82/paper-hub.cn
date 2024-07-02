@@ -78,6 +78,8 @@
           href="{% url 'all' %}">全部文献</a>
         <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}"
           href="{% url 'recent' %}">近期新增</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "labels" %}active{% endif %}"
+          href="{% url 'labels' %}">标签管理</a>
       {% if user.is_authenticated and user.is_superuser %}
         <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}"
           href="{% url 'trash' %}">回收站</a>

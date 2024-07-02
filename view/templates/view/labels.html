@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block page_title %}标签管理{% endblock page_title %}
+
+{% block content %}
+{% if label_list %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>名称</th>
+      <th>颜色</th>
+      <th>备注</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for label in label_list %}
+    <tr>
+      <td><span class="badge" style="background-color:{{ label.color }}">{{ label.name }}</span></td>
+      <td><span class="badge" style="background-color:{{ label.color }}">{{ label.color }}</span></td>
+      <td>{{ label.desc }}</td>
+      <td>
+        <a class="btn btn-primary btn-sm" href="javascript:edit_label({{ label.pk }})">编辑</a>
+        <a class="btn btn-danger btn-sm" href="javascript:delete_label({{ label.pk }})">删除</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function edit_label(pk) {
+  alert('not implemented yet');
+}
+function delete_label(pk) {
+  if (confirm('确定要删除这个标签吗？')) {
+    alert('not implemented yet');
+  }
+}
+</script>
+{% else %}
+暂没有任何标签
+{% endif %}
+{% endblock content %}

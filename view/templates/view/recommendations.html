@@ -102,10 +102,6 @@ function add_recommendation(id) {
 
   $('#submitComments').off('click').on('click', function() {
     const comments = $('#comments').val();
-    /*if (comments.trim() === '') {
-      alert('请填写评论');
-      return;
-    }*/
     $('#commentsModal').modal('hide');
     $.ajax({
       url: "{% url 'api:add_recommendation' %}",
@@ -120,6 +116,9 @@ function add_recommendation(id) {
           alert('添加推荐失败！\n' + data.error);
         } else {
           $('#card_' + id).remove();
+          if ($('.card').length === 0) {
+            location.reload();
+          }
         }
       },
       error: function() {
@@ -141,6 +140,9 @@ function delete_recommendation(id) {
           alert('Delete recommendation failed!\n' + data.error);
         } else {
           $('#card_' + id).remove();
+          if ($('.card').length === 0) {
+            location.reload();
+          }
         }
       },
       error: function () {
@@ -162,6 +164,9 @@ function restore_recommendation(id) {
           alert('Restore recommendation failed!\n' + data.error);
         } else {
           $('#card_' + id).remove();
+          if ($('.card').length === 0) {
+            location.reload();
+          }
         }
       },
       error: function () {
@@ -183,6 +188,9 @@ function delete_permanently_recommendation(id) {
           alert('Delete permanently recommendation failed!\n' + data.error);
         } else {
           $('#card_' + id).remove();
+          if ($('.card').length === 0) {
+            location.reload();
+          }
         }
       },
       error: function () {

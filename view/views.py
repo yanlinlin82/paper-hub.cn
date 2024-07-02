@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-from .models import Review, Recommendation, PaperTracking
+from .models import Review, Recommendation, PaperTracking, Label, UserProfile
 from paperhub import settings
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -163,3 +163,12 @@ def single_page(request, id):
         'item': review,
     }
     return HttpResponse(template.render(context, request))
+
+def labels_page(request):
+    u = UserProfile.objects.get(auth_user__username=request.user.username)
+    label_list = Label.objects.filter(user=u).order_by('name')
+
+    return render(request, 'view/labels.html', {
+        'current_page': 'labels',
+        'label_list': label_list,
+    })
