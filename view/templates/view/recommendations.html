@@ -166,51 +166,47 @@ function add_recommendation(id) {
 }
 
 function delete_recommendation(id) {
-  if (confirm('Are you sure to delete the item?')) {
-    $.ajax({
-      url: "{% url 'api:delete_recommendation' %}",
-      type: 'POST',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
-      data: { recommendation_id: id },
-      success: function (data) {
-        if (!data.success) {
-          alert('Delete recommendation failed!\n' + data.error);
-        } else {
-          $('#card_' + id).remove();
-          if ($('.card').length === 0) {
-            location.reload();
-          }
+  $.ajax({
+    url: "{% url 'api:delete_recommendation' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { recommendation_id: id },
+    success: function (data) {
+      if (!data.success) {
+        alert('Delete recommendation failed!\n' + data.error);
+      } else {
+        $('#card_' + id).remove();
+        if ($('.card').length === 0) {
+          location.reload();
         }
-      },
-      error: function () {
-        alert('An error occurred while processing your request.');
       }
-    });
-  }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
 }
 
 function restore_recommendation(id) {
-  if (confirm('Are you sure to restore the item?')) {
-    $.ajax({
-      url: "{% url 'api:restore_recommendation' %}",
-      type: 'POST',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
-      data: { recommendation_id: id },
-      success: function (data) {
-        if (!data.success) {
-          alert('Restore recommendation failed!\n' + data.error);
-        } else {
-          $('#card_' + id).remove();
-          if ($('.card').length === 0) {
-            location.reload();
-          }
+  $.ajax({
+    url: "{% url 'api:restore_recommendation' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { recommendation_id: id },
+    success: function (data) {
+      if (!data.success) {
+        alert('Restore recommendation failed!\n' + data.error);
+      } else {
+        $('#card_' + id).remove();
+        if ($('.card').length === 0) {
+          location.reload();
         }
-      },
-      error: function () {
-        alert('An error occurred while processing your request.');
       }
-    });
-  }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
 }
 
 function delete_permanently_recommendation(id) {
