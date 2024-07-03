@@ -64,11 +64,11 @@
         {% if item.paper.abstract|length > 30 %}
         <div id="abstract_{{ item.paper.pk }}_short" class="d-inline">
           {{ item.paper.abstract | truncatewords:30 }}
-          <a href="javascript:expand_abstract({{item.paper.pk}})">展开</a>
+          <a href="javascript:expand_abstract({{item.paper.pk}})">&gt;&gt;&gt;</a>
         </div>
         <div id="abstract_{{ item.paper.pk }}_long" class="d-none">
           {{ item.paper.abstract }}
-          <a href="javascript:collapse_abstract({{item.paper.pk}})">收起</a>
+          <a href="javascript:collapse_abstract({{item.paper.pk}})">&lt;&lt;&lt;</a>
         </div>
         {% else %}
         <div id="abstract_{{ item.paper.pk }}_long" class="d-inline">
@@ -84,8 +84,31 @@
       </div>
     </div>
     {% endif %}
-    {% if item.paper.keywords %}
-    <div><b>Keywords:</b> {{ item.paper.keywords }}</div>
+    {% if item.keyword_list %}
+    <div>
+      <b>Keywords:</b>
+      {% if item.keyword_list|length > 3 %}
+      <div id="keyword_{{ item.paper.pk }}_short" class="d-inline">
+        {% for keyword in item.keyword_list|slice:":3" %}
+        <a href="javascript:void(0)">{{ keyword }}</a>,
+        {% endfor %}
+        ...
+        <a href="javascript:expand_keywords({{ item.paper.pk }})">&gt;&gt;&gt;</a>
+      </div>
+      <div id="keyword_{{ item.paper.pk }}_long" class="d-none">
+        {% for keyword in item.keyword_list %}
+        <a href="javascript:void(0)">{{ keyword }}</a>,
+        {% endfor %}
+        <a href="javascript:collapse_keywords({{ item.paper.pk }})">&lt;&lt;&lt;</a>
+      </div>
+      {% else %}
+      <div>
+        {% for keyword in item.keyword_list %}
+        <a href="javascript:void(0)">{{ keyword }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
     {% endif %}
     <div class="d-flex my-2">
       <div class="text-start align-self-end me-3">推送源：{{ item.source }}</div>
@@ -140,6 +163,20 @@ function collapse_abstract(id) {
   $('#abstract_' + id + '_short').removeClass('d-none');
   $('#abstract_' + id + '_long').addClass('d-none');
   $('#abstract_' + id + '_long').removeClass('d-inline');
+}
+
+function expand_keywords(id) {
+  $('#keyword_' + id + '_short').addClass('d-none');
+  $('#keyword_' + id + '_short').removeClass('d-inline');
+  $('#keyword_' + id + '_long').addClass('d-inline');
+  $('#keyword_' + id + '_long').removeClass('d-none');
+}
+
+function collapse_keywords(id) {
+  $('#keyword_' + id + '_short').addClass('d-inline');
+  $('#keyword_' + id + '_short').removeClass('d-none');
+  $('#keyword_' + id + '_long').addClass('d-none');
+  $('#keyword_' + id + '_long').removeClass('d-inline');
 }
 
 function translate_title(paper_id) {

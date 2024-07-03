@@ -44,14 +44,14 @@ def search_page(request):
 
 def recommendations_page(request):
     item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=True).order_by('-create_time', '-pk')
-    for item in item_list:
-        item.author_list = item.paper.authors.split('\n')
 
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(item_list, page_number)
 
     for index, review in enumerate(reviews):
         review.display_index = index + reviews.start_index()
+        review.author_list = review.paper.authors.split('\n')
+        review.keyword_list = review.paper.keywords.split('\n')
 
     template = loader.get_template('view/recommendations.html')
     context = {
@@ -63,14 +63,14 @@ def recommendations_page(request):
 
 def recommendations_page_trash(request):
     item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=False).order_by('-delete_time', '-pk')
-    for item in item_list:
-        item.author_list = item.paper.authors.split('\n')
 
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(item_list, page_number)
 
     for index, review in enumerate(reviews):
         review.display_index = index + reviews.start_index()
+        review.author_list = review.paper.authors.split('\n')
+        review.keyword_list = review.paper.keywords.split('\n')
 
     template = loader.get_template('view/recommendations.html')
     context = {
