@@ -20,15 +20,21 @@
       {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
       {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
     </div>
-    <div class="mt-2">
-      {% for label in item.labels.all %}
-      <div class="badge" style="background-color:{{label.color}}">{{ label.name }}</div>
-      {% endfor %}
-    </div>
-    <div class="mt-2">
-      {% for d in item.details.all %}
-      <div class="badge" style="background-color:{{d.label.color}}">{{ d.label.name }}</div>
-      {% endfor %}
+    <div class="d-flex my-2">
+      <div class="mt-2">
+        {% for label in item.labels.all %}
+        <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+        {% endfor %}
+      </div>
+      <div class="flex-fill text-end align-self-end">
+        {% if current_page == "recommendations" %}
+        <a class="btn btn-primary btn-sm" href="javascript:add_recommendation({{item.pk}})">加入个人文献库</a>
+        <a class="btn btn-danger btn-sm" href="javascript:delete_recommendation({{item.pk}})">删除</a>
+        {% else %}
+        <a class="btn btn-primary btn-sm" href="javascript:restore_recommendation({{item.pk}})">恢复</a>
+        <a class="btn btn-danger btn-sm" href="javascript:delete_permanently_recommendation({{item.pk}})">彻底删除</a>
+        {% endif %}
+      </div>
     </div>
     <div class="fs-5 my-3">
       <div><div id="title_{{item.pk}}" class="d-inline text-start fw-bold">{{ item.paper.title }}</div><a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译标题</a></div>
@@ -42,11 +48,28 @@
     <div>{{ item.author_list | join:", " }}</div>
     {% if item.paper.abstract %}
     <div class="my-3">
-      <div><b>Abstract:</b> {{ item.paper.abstract }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译摘要</a></div>
-      <div id="abstract_cn_{{ item.paper.pk }}">
-      {% if item.paper.translation and item.paper.translation.abstract_cn %}
-      {{ item.paper.translation.abstract_cn }}
-      {% endif %}
+      <div>
+        <b>Abstract:</b>
+        {% if item.paper.abstract|length > 30 %}
+        <div id="abstract_{{ item.paper.pk }}_short" class="d-inline">
+          {{ item.paper.abstract | truncatewords:30 }}
+          <a href="javascript:expand_abstract({{item.paper.pk}})">展开</a>
+        </div>
+        <div id="abstract_{{ item.paper.pk }}_long" class="d-none">
+          {{ item.paper.abstract }}
+          <a href="javascript:collapse_abstract({{item.paper.pk}})">收起</a>
+        </div>
+        {% else %}
+        <div id="abstract_{{ item.paper.pk }}_long" class="d-inline">
+          {{ item.paper.abstract }}
+        </div>
+        {% endif %}
+        <a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译摘要</a>
+        <div id="abstract_cn_{{ item.paper.pk }}" class="d-none">
+          {% if item.paper.translation and item.paper.translation.abstract_cn %}
+          {{ item.paper.translation.abstract_cn }}
+          {% endif %}
+        </div>
       </div>
     </div>
     {% endif %}
@@ -56,15 +79,6 @@
     <div class="d-flex my-2">
       <div class="text-start align-self-end me-3">推送源：{{ item.source }}</div>
       <div class="text-start align-self-end">推送时间：{{ item.create_time | date:"Y-m-d H:i" }}</div>
-      <div class="flex-fill text-end align-self-end">
-        {% if current_page == "recommendations" %}
-        <a class="btn btn-primary" href="javascript:add_recommendation({{item.pk}})">加入个人文献库</a>
-        <a class="btn btn-danger" href="javascript:delete_recommendation({{item.pk}})">删除</a>
-        {% else %}
-        <a class="btn btn-primary" href="javascript:restore_recommendation({{item.pk}})">恢复</a>
-        <a class="btn btn-danger" href="javascript:delete_permanently_recommendation({{item.pk}})">彻底删除</a>
-        {% endif %}
-      </div>
     </div>
   </div>
 </div>
@@ -102,6 +116,20 @@
 
 
 <script>
+
+function expand_abstract(id) {
+  $('#abstract_' + id + '_short').addClass('d-none');
+  $('#abstract_' + id + '_short').removeClass('d-inline');
+  $('#abstract_' + id + '_long').addClass('d-inline');
+  $('#abstract_' + id + '_long').removeClass('d-none');
+}
+
+function collapse_abstract(id) {
+  $('#abstract_' + id + '_short').addClass('d-inline');
+  $('#abstract_' + id + '_short').removeClass('d-none');
+  $('#abstract_' + id + '_long').addClass('d-none');
+  $('#abstract_' + id + '_long').removeClass('d-inline');
+}
 
 function add_recommendation(id) {
   $('#dlg_info').html($('#info_' + id).html());
@@ -244,6 +272,8 @@ function translate_abstract(paper_id) {
         alert('Translate title failed!\n' + data.error);
       } else {
         $('#abstract_cn_' + paper_id).html(data.answer);
+        $('#abstract_cn_' + paper_id).addClass('d-block');
+        $('#abstract_cn_' + paper_id).removeClass('d-none');
       }
     },
     error: function () {
