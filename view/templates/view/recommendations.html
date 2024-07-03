@@ -13,32 +13,43 @@
 {% for item in reviews %}
 <div id="card_{{item.pk}}" class="card p-2 my-3 d-flex flex-row">
   <div class="p-2 text-start">{{ item.display_index }}.</div>
-  <div class="p-2 flex-fill text-start">
-    <div id="info_{{item.pk}}" class="text-start">
-      {{ item.paper.journal }},
-      {{ item.paper.pub_year }}.
-      {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
-      {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
-    </div>
-    <div class="d-flex my-2">
-      <div class="mt-2">
-        {% for label in item.labels.all %}
-        <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
-        {% endfor %}
+  <div class="p-2 text-start flex-fill">
+    <div class="d-flex">
+      <div class="flex-fill">
+        <div id="info_{{item.pk}}" class="text-start">
+          {{ item.paper.journal }},
+          {{ item.paper.pub_year }}.
+          {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
+          {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
+        </div>
       </div>
-      <div class="flex-fill text-end align-self-end">
-        {% if current_page == "recommendations" %}
-        <a class="btn btn-primary btn-sm" href="javascript:add_recommendation({{item.pk}})">加入个人文献库</a>
-        <a class="btn btn-danger btn-sm" href="javascript:delete_recommendation({{item.pk}})">删除</a>
-        {% else %}
-        <a class="btn btn-primary btn-sm" href="javascript:restore_recommendation({{item.pk}})">恢复</a>
-        <a class="btn btn-danger btn-sm" href="javascript:delete_permanently_recommendation({{item.pk}})">彻底删除</a>
-        {% endif %}
+      {% if current_page == "recommendations" %}
+      <div class="text-end align-self-start">
+        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_recommendation({{item.pk}})">加入个人文献库</a>
       </div>
+      <div class="text-end align-self-start">
+        <a class="btn btn-danger btn-sm text-nowrap ms-2" href="javascript:delete_recommendation({{item.pk}})">删除</a>
+      </div>
+      {% else %}
+      <div class="text-end align-self-start">
+        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:restore_recommendation({{item.pk}})">恢复</a>
+      </div>
+      <div class="text-end align-self-start">
+        <a class="btn btn-danger btn-sm text-nowrap ms-2" href="javascript:delete_permanently_recommendation({{item.pk}})">彻底删除</a>
+      </div>
+      {% endif %}
     </div>
-    <div class="fs-5 my-3">
-      <div><div id="title_{{item.pk}}" class="d-inline text-start fw-bold">{{ item.paper.title }}</div><a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译标题</a></div>
-      <div id="title_cn_{{ item.paper.pk }}" class="fw-bold">
+    <div class="mt-2">
+      {% for label in item.labels.all %}
+      <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+      {% endfor %}
+    </div>
+    <div class="my-3">
+      <div id="title_{{item.pk}}" class="d-inline text-start">
+        <div class="d-inline fs-5 fw-bold">{{ item.paper.title }}</div>
+        <a class="ms-2" href="javascript:translate_title({{ item.paper.pk }})">翻译</a>
+      </div>
+      <div id="title_cn_{{ item.paper.pk }}" class="mt-1 d-none">
       {% if item.paper.translation and item.paper.translation.title_cn %}
       {{ item.paper.translation.title_cn }}
       {% endif %}
@@ -64,8 +75,8 @@
           {{ item.paper.abstract }}
         </div>
         {% endif %}
-        <a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译摘要</a>
-        <div id="abstract_cn_{{ item.paper.pk }}" class="d-none">
+        <a class="ms-2" href="javascript:translate_abstract({{ item.paper.pk }})">翻译</a>
+        <div id="abstract_cn_{{ item.paper.pk }}" class="mt-1 d-none">
           {% if item.paper.translation and item.paper.translation.abstract_cn %}
           {{ item.paper.translation.abstract_cn }}
           {% endif %}
@@ -129,6 +140,73 @@ function collapse_abstract(id) {
   $('#abstract_' + id + '_short').removeClass('d-none');
   $('#abstract_' + id + '_long').addClass('d-none');
   $('#abstract_' + id + '_long').removeClass('d-inline');
+}
+
+function translate_title(paper_id) {
+  if ($('#title_cn_' + paper_id).html().trim() !== '') {
+    if ($('#title_cn_' + paper_id).hasClass('d-none')) {
+      $('#title_cn_' + paper_id).addClass('d-block');
+      $('#title_cn_' + paper_id).removeClass('d-none');
+    } else {
+      $('#title_cn_' + paper_id).addClass('d-none');
+      $('#title_cn_' + paper_id).removeClass('d-block');
+    }
+  } else {
+    $('#title_cn_' + paper_id).addClass('d-block');
+    $('#title_cn_' + paper_id).removeClass('d-none');
+    $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+
+    $.ajax({
+      url: "{% url 'api:translate_title' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { paper_id: paper_id },
+      success: function (data) {
+        console.log(data)
+        if (!data.success) {
+          alert('Translate title failed!\n' + data.error);
+        } else {
+          $('#title_cn_' + paper_id).html(data.answer);
+        }
+      },
+      error: function () {
+        alert('An error occurred while processing your request.');
+      }
+    });
+  }
+}
+
+function translate_abstract(paper_id) {
+  if ($('#abstract_cn_' + paper_id).html().trim() !== '') {
+    if ($('#abstract_cn_' + paper_id).hasClass('d-none')) {
+      $('#abstract_cn_' + paper_id).addClass('d-block');
+      $('#abstract_cn_' + paper_id).removeClass('d-none');
+    } else {
+      $('#abstract_cn_' + paper_id).addClass('d-none');
+      $('#abstract_cn_' + paper_id).removeClass('d-block');
+    }
+  } else {
+    $('#abstract_cn_' + paper_id).addClass('d-block');
+    $('#abstract_cn_' + paper_id).removeClass('d-none');
+    $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+
+    $.ajax({
+      url: "{% url 'api:translate_abstract' %}",
+      type: 'POST',
+      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      data: { paper_id: paper_id },
+      success: function (data) {
+        if (!data.success) {
+          alert('Translate title failed!\n' + data.error);
+        } else {
+          $('#abstract_cn_' + paper_id).html(data.answer);
+        }
+      },
+      error: function () {
+        alert('An error occurred while processing your request.');
+      }
+    });
+  }
 }
 
 function add_recommendation(id) {
@@ -231,51 +309,6 @@ function delete_permanently_recommendation(id) {
       }
     });
   }
-}
-
-function translate_title(paper_id) {
-  $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-  $.ajax({
-    url: "{% url 'api:translate_title' %}",
-    type: 'POST',
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
-    data: { paper_id: paper_id },
-    success: function (data) {
-      console.log(data)
-      if (!data.success) {
-        alert('Translate title failed!\n' + data.error);
-      } else {
-        $('#title_cn_' + paper_id).html(data.answer);
-      }
-    },
-    error: function () {
-      alert('An error occurred while processing your request.');
-    }
-  });
-}
-
-function translate_abstract(paper_id) {
-  $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-  $.ajax({
-    url: "{% url 'api:translate_abstract' %}",
-    type: 'POST',
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
-    data: { paper_id: paper_id },
-    success: function (data) {
-      if (!data.success) {
-        alert('Translate title failed!\n' + data.error);
-      } else {
-        $('#abstract_cn_' + paper_id).html(data.answer);
-        $('#abstract_cn_' + paper_id).addClass('d-block');
-        $('#abstract_cn_' + paper_id).removeClass('d-none');
-      }
-    },
-    error: function () {
-      alert('An error occurred while processing your request.');
-    }
-  });
 }
 
 </script>
