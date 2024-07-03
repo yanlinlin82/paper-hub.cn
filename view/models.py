@@ -108,18 +108,12 @@ class PaperTracking(models.Model): # every user has his own paper tracking rules
     memo = models.CharField(max_length=2000, default='', blank=True)
 
 class Recommendation(models.Model): # recommended by system (daily automatically)
-    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    source = models.CharField(max_length=100, default='') # eg. 'pubmed24n1453.20240628'
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
-
-class RecommendationDetails(models.Model):
-    recommendation = models.ForeignKey(Recommendation, on_delete=models.CASCADE, related_name='details')
-    recommend_time = models.DateTimeField(default=timezone.now)
-    type = models.CharField(max_length=20, default='read') # keyword, author, institute, journal, cite
-    value = models.CharField(max_length=100, default='', blank=True)
-    label = models.ForeignKey(Label, on_delete=models.CASCADE)
-    memo = models.CharField(max_length=2000, default='', blank=True)
+    labels = models.ManyToManyField(Label, blank=True, related_name='recommendations')
 
 class Review(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)

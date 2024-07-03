@@ -7,9 +7,9 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 
-from view.models import PaperTracking, UserProfile, Paper, Label, Recommendation, RecommendationDetails
+from view.models import PaperTracking, UserProfile, Paper, Label, Recommendation
 
-def import_excel(excel_file):
+def import_excel(source_id, excel_file):
 
     # 导入推荐数据，都按照我自己的用户来导入
     u = UserProfile.objects.get(pk=1)
@@ -20,16 +20,18 @@ def import_excel(excel_file):
     a = pd.read_excel(excel_file)
     a.fillna('', inplace = True)
 
-    print(f'Importing {len(a)} recommendations for user {u.nickname} ...')
-    cnt = 0
-    new = 0
-    new2 = 0
-    detail = 0
-    detail_succ = 0
+    print(f'Importing {len(a)} recommendations for source {source_id} and user {u.nickname} ...')
+    cnt = {
+        'total': 0,
+        'new_paper': 0,
+        'new_recommendation': 0,
+        'label_updated': 0,
+    }
+
     for _, i in a.iterrows():
-        cnt += 1
-        if cnt % 100 == 0:
-            print(f'Processed {cnt} recommendations ...')
+        cnt['total'] += 1
+        if cnt['total'] % 100 == 0:
+            print(f'Processed {cnt['total']} recommendations ...')
 
         paper_list = Paper.objects.filter(doi=i['doi'], pmid=i['pmid'])
         if len(paper_list) == 0:
@@ -38,40 +40,48 @@ def import_excel(excel_file):
                       abstract=i['abstract'], keywords=i['keywords'], \
                       doi=i['doi'], pmid=i['pmid'], language=i['language'])
             p.save()
-            new += 1
+            cnt['new_paper'] += 1
         else:
             p = paper_list[0]
+            p.journal = i['journal']
+            p.pub_date = i['pub_date']
+            p.pub_year = i['pub_year']
+            if p.title != i['title']:
+                p.title = i['title']
+                if hasattr(p, 'translation'):
+                    p.translation.title_cn = ''
+                    p.translation.save()
+            p.authors = i['author']
+            p.institutes = i['institutes']
+            if p.abstract != i['abstract']:
+                p.abstract = i['abstract']
+                if hasattr(p, 'translation'):
+                    p.translation.abstract_cn = ''
+                    p.translation.save()
+            p.keywords = i['keywords']
+            p.language = i['language']
+            p.save()
 
-        r_list = Recommendation.objects.filter(paper = p, user = u)
+        r_list = Recommendation.objects.filter(paper = p, user = u, source = source_id)
         if len(r_list) == 0:
-            r = Recommendation(paper = p, user = u)
+            r = Recommendation(paper = p, user = u, source = source_id)
             r.save()
-            new2 += 1
+            cnt['new_recommendation'] += 1
         else:
             r = r_list[0]
 
         for label_item in i['labels'].split('\n'):
-            detail += 1
-            label_list = Label.objects.filter(user = u, name = label_item)
-            if len(label_list) == 0:
-                print(f'Error: Cannot find label {label_item} for user {u.nickname}', file = sys.stderr)
-                continue
-            l = label_list[0]
+            label = Label.objects.filter(user = u, name = label_item)
+            if len(label) > 0:
+                if len(r.labels.filter(pk = label[0].pk)) == 0:
+                    r.labels.add(label[0])
+                    cnt['label_updated'] += 1
 
-            tracking_list = PaperTracking.objects.filter(user = u, label = l)
-            if len(tracking_list) > 0:
-                t = tracking_list[0]
-
-                d = RecommendationDetails(recommendation = r, recommend_time = r.create_time, \
-                                        type = t.type, value = t.value, label = t.label, memo = t.memo)
-                d.save()
-                detail_succ += 1
-
-    print(f'Imported {cnt} recommendations, {new} new papers, {new2} new recommendations, {detail} details, {detail_succ} details saved.')
+    print(f'Imported {cnt['total']} recommendations, {cnt['new_paper']} new papers, {cnt['new_recommendation']} new recommendations, {cnt['label_updated']} labels updated.')
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print(f'Usage: {sys.argv[0]} <excel_file>', file = sys.stderr)
+    if len(sys.argv) != 3:
+        print(f'Usage: {sys.argv[0]} <source_id> <excel_file>', file = sys.stderr)
         sys.exit(1)
 
-    import_excel(sys.argv[1])
+    import_excel(sys.argv[1], sys.argv[2])

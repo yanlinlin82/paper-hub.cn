@@ -19,8 +19,13 @@
       {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
     </div>
     <div class="mt-2">
+      {% for label in item.labels.all %}
+      <div class="badge" style="background-color:{{label.color}}">{{ label.name }}</div>
+      {% endfor %}
+    </div>
+    <div class="mt-2">
       {% for d in item.details.all %}
-      <a class="badge" style="background-color:{{d.label.color}}" data-bs-toggle="tooltip" title="{{d.recommend_time | date:"Y-m-d H:i"}}" href="#">{{ d.label.name }}</a>
+      <div class="badge" style="background-color:{{d.label.color}}">{{ d.label.name }}</div>
       {% endfor %}
     </div>
     <div class="fs-5 my-3">
@@ -47,6 +52,7 @@
     <div><b>Keywords:</b> {{ item.paper.keywords }}</div>
     {% endif %}
     <div class="d-flex my-2">
+      <div class="text-start align-self-end me-3">推送源：{{ item.source }}</div>
       <div class="text-start align-self-end">推送时间：{{ item.create_time | date:"Y-m-d H:i" }}</div>
       <div class="flex-fill text-end align-self-end">
         {% if current_page == "recommendations" %}
