@@ -12,7 +12,7 @@ def show_author_list(value):
 
 @register.filter(name='split')
 def split(value, sep):
-    return value.split(sep)
+    return [k for k in value.split(sep) if k]
 
 @register.filter(name='splitlines')
 def splitlines(value):

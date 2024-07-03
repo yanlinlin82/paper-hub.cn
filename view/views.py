@@ -50,8 +50,8 @@ def recommendations_page(request):
 
     for index, review in enumerate(reviews):
         review.display_index = index + reviews.start_index()
-        review.author_list = review.paper.authors.split('\n')
-        review.keyword_list = review.paper.keywords.split('\n')
+        review.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
 
     template = loader.get_template('view/recommendations.html')
     context = {
@@ -69,8 +69,8 @@ def recommendations_page_trash(request):
 
     for index, review in enumerate(reviews):
         review.display_index = index + reviews.start_index()
-        review.author_list = review.paper.authors.split('\n')
-        review.keyword_list = review.paper.keywords.split('\n')
+        review.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
 
     template = loader.get_template('view/recommendations.html')
     context = {
@@ -94,7 +94,7 @@ def all_page(request):
     if review_list:
         review_list = review_list.order_by('-create_time', '-pk')
         for item in review_list:
-            item.author_list = item.paper.authors.split('\n')
+            item.author_list = [k for k in item.paper.authors.split('\n') if k]
 
         page_number = request.GET.get('page')
         reviews, items = get_paginated_reviews(review_list, page_number)
@@ -116,7 +116,7 @@ def recent_page(request):
     if review_list is not None:
         review_list = review_list.filter(create_time__gte=last_week).order_by('-create_time', '-pk')
     for item in review_list:
-        item.author_list = item.paper.authors.split('\n')
+        item.author_list = [k for k in item.paper.authors.split('\n') if k]
 
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(review_list, page_number)
@@ -134,7 +134,7 @@ def trash_page(request):
     if review_list is not None:
         review_list = review_list.exclude(delete_time=None).order_by('-create_time', '-pk')
     for item in review_list:
-        item.author_list = item.paper.authors.split('\n')
+        item.author_list = [k for k in item.paper.authors.split('\n') if k]
 
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(review_list, page_number)

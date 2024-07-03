@@ -70,7 +70,7 @@ def import_excel(source_id, excel_file):
         else:
             r = r_list[0]
 
-        for label_item in i['labels'].split('\n'):
+        for label_item in [l for l in i['labels'].split('\n') if l]:
             label = Label.objects.filter(user = u, name = label_item)
             if len(label) > 0:
                 if len(r.labels.filter(pk = label[0].pk)) == 0:
