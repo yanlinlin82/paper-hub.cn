@@ -5,9 +5,7 @@ from paperhub import settings
 from . import views
 
 def redirect(request):
-    if settings.CONFIG_XIANGMA_GROUP_ONLY:
-        return HttpResponseRedirect('group/xiangma')
-    return HttpResponseRedirect('all')
+    return HttpResponseRedirect('search')
 
 urlpatterns = [
     path('', redirect, name='index'),

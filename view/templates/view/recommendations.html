@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block page_title %}文献推荐{% if current_page == "recommendations-trash" %}（回收站）{% endif %}{% endblock page_title %}
-{% block page_subtitle %}{% autoescape off %}{{ summary_messages }}{% endautoescape %}当前共推荐 {{ reviews.paginator.count }} 篇文献{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。{% endblock page_subtitle %}
+{% block page_subtitle %}
+当前共推荐 {{ reviews.paginator.count }} 篇文献{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。
+{% endblock page_subtitle %}
 
 {% block content %}
 {% if reviews %}
@@ -9,7 +11,7 @@
 {% include "group/paginator.html" %}
 
 {% for item in reviews %}
-<div id="card_{{item.pk}}" class="card p-2 m-3 d-flex flex-row">
+<div id="card_{{item.pk}}" class="card p-2 my-3 d-flex flex-row">
   <div class="p-2 text-start">{{ item.display_index }}.</div>
   <div class="p-2 flex-fill text-start">
     <div id="info_{{item.pk}}" class="text-start">

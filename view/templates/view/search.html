@@ -2,9 +2,9 @@
 
 {% block content %}
 <section>
-  <div class="row">
-    <form class="col-md-8 mb-5 mx-auto" method="GET">
-      <div>
+  <div class="p-3">
+    <form class="col-md-8 mx-auto" method="GET">
+      <div class="row">
         <label class="form-label mb-3" for="q">通过文献编号搜索文献进行分享：</label>
       </div>
       <div class="input-group w-auto mb-3">
@@ -19,7 +19,7 @@
           t = $('#q');
           t.focus()
           l = t.val().length;
-          t[0].setSelectionRange(l, l);
+          t[0].setSelectionRange(0, l);
         })
       </script>
     </form>
@@ -28,7 +28,7 @@
 
 {% if query %}
 <section>
-  <p>Found <em>{{ results|length }}</em> result for `<em>{{ query }}</em>':</p>
+  <div class="text-start">共找到 <em>{{ results|length }}</em> 条结果：</div>
   <ol>
     {% for item in results %}
     <li>

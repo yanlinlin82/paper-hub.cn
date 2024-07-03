@@ -20,7 +20,6 @@ def my_sharing_page(request, group_name):
         'current_page': 'group_my_sharing',
         'reviews': reviews,
         'items': items,
-        'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
 
@@ -33,7 +32,6 @@ def all_page(request, group_name):
         'current_page': 'group_all',
         'reviews': reviews,
         'items': items,
-        'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
 
@@ -41,14 +39,12 @@ def recent_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     start_time = get_this_week_start_time()
     reviews, items = filter_reviews(group.reviews, request.GET.get('page'), start_time=start_time)
-    summary_message = 'This page shows reviews in last week. '
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
         'current_page': 'group_recent',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
 
@@ -56,14 +52,12 @@ def this_month_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     start_time, end_time = get_check_in_interval(*get_this_month())
     reviews, items = filter_reviews(group.reviews, request.GET.get('page'), start_time=start_time)
-    summary_message = '本页面显示本月的文献分享。'
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
         'current_page': 'group_this_month',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
 
@@ -71,14 +65,12 @@ def last_month_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     start_time, end_time = get_check_in_interval(*get_last_month(*get_this_month()))
     reviews, items = filter_reviews(group.reviews, request.GET.get('page'), start_time=start_time, end_time=end_time)
-    summary_message = '本页面显示上月的文献分享。'
     template = loader.get_template('group/list.html')
     context = {
         'group': group,
         'current_page': 'group_last_month',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
 
@@ -153,13 +145,11 @@ def stat_journal_page(request, group_name):
 def trash_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews, items = filter_reviews(group.reviews, request.GET.get('page'), trash=True)
-    summary_message = '回收站中的内容将在30后自动删除！'
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_trash',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message
     })
 
 def single_page(request, id, group_name):
@@ -185,13 +175,11 @@ def journal_page(request, group_name, journal_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews, items = filter_reviews(group.reviews, request.GET.get('page'), journal_name=journal_name)
     template = loader.get_template('group/list.html')
-    summary_message = '本页面显示发表在 <b>' + journal_name + '</b> 杂志的文献。'
     context = {
         'group': group,
         'current_page': 'group_user',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))
 
@@ -200,12 +188,10 @@ def user_page(request, id, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews, items = filter_reviews(group.reviews, request.GET.get('page'), user=user)
     template = loader.get_template('group/list.html')
-    summary_message = '本页面显示由用户 <b>' + user.nickname + '</b> 推荐的文献。'
     context = {
         'group': group,
         'current_page': 'group_user',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message,
     }
     return HttpResponse(template.render(context, request))

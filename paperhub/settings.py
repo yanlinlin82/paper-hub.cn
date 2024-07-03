@@ -13,10 +13,6 @@ import os
 from pathlib import Path
 
 
-# My settings
-CONFIG_XIANGMA_GROUP_ONLY = False
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

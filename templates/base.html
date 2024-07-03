@@ -48,73 +48,55 @@
 <div class="bg-primary text-white">
   <div class="container px-3 py-3">
     {% block banner %}
-    <h2>{% block title %}文献宝盒{% endblock title %}</h2>
+    <h2>{% block title %}文献库{% endblock title %}</h2>
     <p>{% block subtitle %}一个便捷的用于文献收藏、分享、社群打卡的轻量级在线平台{% endblock subtitle %}</p>
     {% endblock banner %}
   </div>
 </div>
 
-<div class="container" style="margin-top:30px">
+<div class="container">
   {% block main %}
-  <div class="row d-flex">
+  <div class="d-flex">
     <nav class="bg-light col-md-3 col-lg-2 d-md-block">
-      {% if not CONFIG_XIANGMA_GROUP_ONLY %}
-      <div class="list-group text-center">
+      <div class="list-group text-center my-3 flex-md-column flex-row">
         <a class="list-group-item list-group-item-dark">探索发现</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "search" %}active{% endif %}"
-          href="{% url 'search' %}">文献搜索</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}"
-          href="{% url 'recommendations' %}">文献推荐</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "recommendations-trash" %}active{% endif %}"
-          href="{% url 'recommendations-trash' %}">回收站</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "trackings" %}active{% endif %}"
-          href="{% url 'trackings' %}">推荐规则</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "search" %}active{% endif %}" href="{% url 'search' %}">文献搜索</a>
+        {% if user.is_authenticated %}
+        <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}" href="{% url 'recommendations' %}">文献推荐</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "recommendations-trash" %}active{% endif %}" href="{% url 'recommendations-trash' %}">回收站</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "trackings" %}active{% endif %}" href="{% url 'trackings' %}">推荐规则</a>
+        {% endif %}
       </div>
       
-      <br>
-      <div class="list-group text-center">
+      {% if user.is_authenticated %}
+      <div class="list-group text-center my-3 flex-md-column flex-row">
         <a class="list-group-item list-group-item-dark">个人文献库</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}"
-          href="{% url 'all' %}">全部文献</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}"
-          href="{% url 'recent' %}">近期新增</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "labels" %}active{% endif %}"
-          href="{% url 'labels' %}">标签管理</a>
-      {% if user.is_authenticated and user.is_superuser %}
-        <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}"
-          href="{% url 'trash' %}">回收站</a>
-      {% endif %}
+        <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}" href="{% url 'all' %}">全部文献</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}" href="{% url 'recent' %}">近期新增</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "labels" %}active{% endif %}" href="{% url 'labels' %}">标签管理</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}" href="{% url 'trash' %}">回收站</a>
       </div>
       {% endif %}
-      
-      <br>
-      <div class="list-group text-center flex-md-column flex-row">
+
+      <div class="list-group text-center my-3 flex-md-column flex-row">
         <a class="list-group-item list-group-item-dark">社群</a>
         {% if user.is_authenticated and user.is_superuser %}
-        <a class="list-group-item list-group-item-action {% if current_page == "group_my_sharing" %}active{% endif %}"
-          href="{% url 'group:my_sharing' group_name=group_name %}">我的分享</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_my_sharing" %}active{% endif %}" href="{% url 'group:my_sharing' group_name=group_name %}">我的分享</a>
         {% endif %}
-        <a class="list-group-item list-group-item-action {% if current_page == "group_all" %}active{% endif %}"
-          href="{% url 'group:all' group_name=group_name %}">所有分享</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "group_this_month" %}active{% endif %}"
-          href="{% url 'group:this_month' group_name=group_name %}">本月分享</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "group_last_month" %}active{% endif %}"
-          href="{% url 'group:last_month' group_name=group_name %}">上月分享</a>
-        <a class="list-group-item list-group-item-action {% if current_page == "group_stat" %}active{% endif %}"
-          href="{% url 'group:stat' group_name=group_name %}">响马榜单</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_all" %}active{% endif %}" href="{% url 'group:all' group_name=group_name %}">所有分享</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_this_month" %}active{% endif %}" href="{% url 'group:this_month' group_name=group_name %}">本月分享</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_last_month" %}active{% endif %}" href="{% url 'group:last_month' group_name=group_name %}">上月分享</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_stat" %}active{% endif %}" href="{% url 'group:stat' group_name=group_name %}">响马榜单</a>
         {% if user.is_authenticated and user.is_superuser %}
-        <a class="list-group-item list-group-item-action {% if current_page == "group_trash" %}active{% endif %}"
-          href="{% url 'group:trash' group_name=group_name %}">回收站</a>
+        <a class="list-group-item list-group-item-action {% if current_page == "group_trash" %}active{% endif %}" href="{% url 'group:trash' group_name=group_name %}">回收站</a>
         {% endif %}
       </div>
     </nav>
-    <div class="flex-fill col-md-9 col-lg-10 ms-sm-auto">
-      <div class="container">
+    <div class="flex-fill col-md-9 col-lg-10 ms-sm-auto p-3">
+      <article class="container">
         <h1 class="mb-4">{% block page_title %}{% endblock page_title %}</h1>
         <p class="text-start">{% block page_subtitle %}{% endblock page_subtitle %}</p>
-      </div>
-      <div class="content">
-        <article>
+        <div class="content">
           {% if error_message %}
           <div class="alert alert-warning alert-dismissible fade show py-1 rounded-0 mb-0 fixed-top" role="alert">
             {{ error_message }}
@@ -123,8 +105,8 @@
           {% endif %}
           {% block content %}
           {% endblock content %}
-        </article>
-      </div>
+        </div>
+      </article>
     </div>
   </div>
   {% endblock main %}

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block page_title %}文献追踪规则{% endblock page_title %}
-{% block page_subtitle %}{% autoescape off %}{{ summary_messages }}{% endautoescape %}共有 {{ item_list | length }} 条文献追踪规则.{% endblock page_subtitle %}
+{% block page_subtitle %}
+共有 {{ item_list | length }} 条文献追踪规则.
+{% endblock page_subtitle %}
 
 {% block content %}
 {% if item_list %}

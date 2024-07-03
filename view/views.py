@@ -20,9 +20,6 @@ def get_review_list(request, include_trash=False):
         return Review.objects.filter(creator__auth_user__username=request.user.username, delete_time=None)
 
 def search_page(request):
-    if settings.CONFIG_XIANGMA_GROUP_ONLY:
-        return redirect("group:all", group_name='xiangma')
-
     context = {
         'current_page': 'search',
     }
@@ -72,6 +69,9 @@ def recommendations_page_trash(request):
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(item_list, page_number)
 
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+
     template = loader.get_template('view/recommendations.html')
     context = {
         'current_page': 'recommendations-trash',
@@ -91,20 +91,22 @@ def trackings_page(request):
 
 def all_page(request):
     review_list = get_review_list(request)
-    if review_list is not None:
+    if review_list:
         review_list = review_list.order_by('-create_time', '-pk')
-    for item in review_list:
-        item.author_list = item.paper.authors.split('\n')
+        for item in review_list:
+            item.author_list = item.paper.authors.split('\n')
 
-    page_number = request.GET.get('page')
-    reviews, items = get_paginated_reviews(review_list, page_number)
+        page_number = request.GET.get('page')
+        reviews, items = get_paginated_reviews(review_list, page_number)
+    else:
+        reviews = None
+        items = None
 
     template = loader.get_template('view/list.html')
     context = {
         'current_page': 'all',
         'reviews': reviews,
         'items': items,
-        'summary_messages': '',
     }
     return HttpResponse(template.render(context, request))
 
@@ -119,13 +121,11 @@ def recent_page(request):
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(review_list, page_number)
 
-    summary_message = 'This page shows papers in last week. '
     template = loader.get_template('view/list.html')
     context = {
         'current_page': 'recent',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message
     }
     return HttpResponse(template.render(context, request))
 
@@ -139,12 +139,10 @@ def trash_page(request):
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(review_list, page_number)
 
-    summary_message = 'Papers in this folder will be removed after 30 days automatically.'
     return render(request, 'view/list.html', {
         'current_page': 'trash',
         'reviews': reviews,
         'items': items,
-        'summary_messages': summary_message
     })
 
 def single_page(request, id):
