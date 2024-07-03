@@ -385,35 +385,31 @@ def add_recommendation(request):
         })
     
     try:
+        paper_id = request.POST['paper_id']
         comments = request.POST['comments']
-        rmd_id = request.POST['recommendation_id']
-        rmd = Recommendation.objects.get(pk=rmd_id)
 
         user = request.user.custom_user
-        if user != rmd.user:
-            return JsonResponse({
-                'success': False,
-                'error': 'User is not the creator of the recommendation!',
-            })
 
-        print(f'add_recommendation: {rmd_id} {rmd}')
-        review_list = Review.objects.filter(creator=user, paper__pk=rmd.paper.pk)
+        paper = Paper.objects.get(pk=paper_id)
+        print(f'add_recommendation: {paper_id} {paper}')
+
+        review_list = Review.objects.filter(creator=user, paper=paper)
         if review_list.count() > 0:
             review = review_list[0]
         else:
-            review = Review(paper = rmd.paper, creator = user, comments = comments)
+            review = Review(paper=paper, creator=user, comments=comments)
             review.save()
 
         any_change = False
-        for label in rmd.labels.all():
-            if label not in review.labels.all():
-                review.labels.add(label)
-                any_change = True
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
+            for label in recommendation.labels.all():
+                if label not in review.labels.all():
+                    review.labels.add(label)
+                    any_change = True
+            recommendation.delete_time = timezone.now()
+            recommendation.save()
         if any_change:
             review.save()
-
-        rmd.delete_time = timezone.now()
-        rmd.save()
 
     except Exception as e:
         return JsonResponse({
@@ -431,20 +427,16 @@ def delete_recommendation(request):
         })
     
     try:
-        rmd_id = request.POST['recommendation_id']
-        rmd = Recommendation.objects.get(pk=rmd_id)
+        paper_id = request.POST['paper_id']
 
         user = request.user.custom_user
-        if user != rmd.user:
-            return JsonResponse({
-                'success': False,
-                'error': 'User is not the creator of the recommendation!',
-            })
 
-        print(f'delete_recommendation: {rmd_id} {rmd}')
+        paper = Paper.objects.get(pk=paper_id)
+        print(f'delete_recommendation: {paper_id} {paper}')
 
-        rmd.delete_time = timezone.now()
-        rmd.save()
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
+            recommendation.delete_time = timezone.now()
+            recommendation.save()
 
     except Exception as e:
         return JsonResponse({
@@ -462,20 +454,16 @@ def restore_recommendation(request):
         })
     
     try:
-        rmd_id = request.POST['recommendation_id']
-        rmd = Recommendation.objects.get(pk=rmd_id)
+        paper_id = request.POST['paper_id']
 
         user = request.user.custom_user
-        if user != rmd.user:
-            return JsonResponse({
-                'success': False,
-                'error': 'User is not the creator of the recommendation!',
-            })
 
-        print(f'restore_recommendation: {rmd_id} {rmd}')
+        paper = Paper.objects.get(pk=paper_id)
+        print(f'restore_recommendation: {paper_id} {paper}')
 
-        rmd.delete_time = None
-        rmd.save()
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
+            recommendation.delete_time = None
+            recommendation.save()
 
     except Exception as e:
         return JsonResponse({
@@ -493,19 +481,15 @@ def delete_permanently_recommendation(request):
         })
     
     try:
-        rmd_id = request.POST['recommendation_id']
-        rmd = Recommendation.objects.get(pk=rmd_id)
+        paper_id = request.POST['paper_id']
 
         user = request.user.custom_user
-        if user != rmd.user:
-            return JsonResponse({
-                'success': False,
-                'error': 'User is not the creator of the recommendation!',
-            })
 
-        print(f'delete_permanently_recommendation: {rmd_id} {rmd}')
+        paper = Paper.objects.get(pk=paper_id)
+        print(f'delete_permanently_recommendation: {paper_id} {paper}')
 
-        rmd.delete()
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
+            recommendation.delete()
 
     except Exception as e:
         return JsonResponse({

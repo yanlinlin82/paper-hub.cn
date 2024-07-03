@@ -5,11 +5,13 @@ from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
 from django.utils import timezone
-from .models import Review, Recommendation, PaperTracking, Label, UserProfile
+from .models import Paper, Review, Recommendation, PaperTracking, Label, UserProfile
 from paperhub import settings
 from django.shortcuts import render, redirect
 from django.conf import settings
 from api.paper import get_paper_info, get_paginated_reviews
+from django.db.models import Max
+from django.db.models import Subquery, OuterRef
 
 def get_review_list(request, include_trash=False):
     if not request.user.is_authenticated:
@@ -43,42 +45,62 @@ def search_page(request):
     return render(request, 'view/search.html', context)
 
 def recommendations_page(request):
-    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=True).order_by('-create_time', '-pk')
+    u = UserProfile.objects.get(auth_user__username=request.user.username)
+
+    recommendations = Recommendation.objects.filter(
+        user=u,
+        delete_time__isnull=True
+        ).order_by('-create_time', '-pk')
+    
+    papers = Paper.objects.filter(pk__in=[r.paper_id for r in recommendations])
 
     page_number = request.GET.get('page')
-    reviews, items = get_paginated_reviews(item_list, page_number)
+    papers, items = get_paginated_reviews(papers, page_number)
 
-    for index, review in enumerate(reviews):
-        review.display_index = index + reviews.start_index()
-        review.author_list = [k for k in review.paper.authors.split('\n') if k]
-        review.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+    for index, paper in enumerate(papers):
+        paper.display_index = index + papers.start_index()
+        paper.author_list = [k for k in paper.authors.split('\n') if k]
+        paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
 
-    template = loader.get_template('view/recommendations.html')
-    context = {
+    return render(request, 'view/recommendations.html', {
         'current_page': 'recommendations',
-        'reviews': reviews,
+        'papers': papers,
         'items': items,
-    }
-    return HttpResponse(template.render(context, request))
+        })
 
 def recommendations_page_trash(request):
-    item_list = Recommendation.objects.filter(user__auth_user__username=request.user.username, delete_time__isnull=False).order_by('-delete_time', '-pk')
+    u = UserProfile.objects.get(auth_user__username=request.user.username)
+
+    recommendations = Recommendation.objects.filter(
+        user=u,
+        delete_time__isnull=False
+        ).order_by('-delete_time', '-pk')
+    
+    latest_delete_time_subquery = Recommendation.objects.filter(
+        paper=OuterRef('pk'),
+        user=u,
+        delete_time__isnull=False
+    ).order_by('-delete_time').values('delete_time')[:1]
+
+    papers = Paper.objects.filter(
+        pk__in=[r.paper_id for r in recommendations]
+    ).annotate(
+        latest_delete_time=Subquery(latest_delete_time_subquery)
+    ).order_by('-latest_delete_time')
 
     page_number = request.GET.get('page')
-    reviews, items = get_paginated_reviews(item_list, page_number)
+    papers, items = get_paginated_reviews(papers, page_number)
 
-    for index, review in enumerate(reviews):
-        review.display_index = index + reviews.start_index()
-        review.author_list = [k for k in review.paper.authors.split('\n') if k]
-        review.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+    for index, paper in enumerate(papers):
+        paper.display_index = index + papers.start_index()
+        paper.author_list = [k for k in paper.authors.split('\n') if k]
+        paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
 
-    template = loader.get_template('view/recommendations.html')
-    context = {
+    return render(request, 'view/recommendations.html', {
         'current_page': 'recommendations-trash',
-        'reviews': reviews,
+        'papers': papers,
         'items': items,
-    }
-    return HttpResponse(template.render(context, request))
+        })
 
 def trackings_page(request):
     item_list = PaperTracking.objects.filter(user__auth_user__username=request.user.username)
