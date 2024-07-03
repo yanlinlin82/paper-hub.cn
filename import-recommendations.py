@@ -31,7 +31,7 @@ def import_excel(source_id, excel_file):
     for _, i in a.iterrows():
         cnt['total'] += 1
         if cnt['total'] % 100 == 0:
-            print(f'Processed {cnt['total']} recommendations ...')
+            print(f"Processed {cnt['total']} recommendations ...")
 
         paper_list = Paper.objects.filter(doi=i['doi'], pmid=i['pmid'])
         if len(paper_list) == 0:
@@ -77,7 +77,7 @@ def import_excel(source_id, excel_file):
                     r.labels.add(label[0])
                     cnt['label_updated'] += 1
 
-    print(f'Imported {cnt['total']} recommendations, {cnt['new_paper']} new papers, {cnt['new_recommendation']} new recommendations, {cnt['label_updated']} labels updated.')
+    print(f"Imported {cnt['total']} recommendations, {cnt['new_paper']} new papers, {cnt['new_recommendation']} new recommendations, {cnt['label_updated']} labels updated.")
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
