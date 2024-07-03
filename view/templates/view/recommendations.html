@@ -46,7 +46,7 @@
     </div>
     <div class="my-3">
       <div id="title_{{item.pk}}" class="d-inline text-start">
-        <div class="d-inline fs-5 fw-bold">{{ item.paper.title }}</div>
+        <div id="title_{{item.pk}}_text" class="d-inline fs-5 fw-bold">{{ item.paper.title }}</div>
         <a class="ms-2" href="javascript:translate_title({{ item.paper.pk }})">翻译</a>
       </div>
       <div id="title_cn_{{ item.paper.pk }}" class="mt-1 d-none">
@@ -55,8 +55,33 @@
       {% endif %}
       </div>
     </div>
+
+    {% if item.author_list %}
+    <div>
+      {% if item.author_list|length > 10 %}
+      <div id="author_{{ item.paper.pk }}_short" class="d-inline">
+        {% for author in item.author_list|slice:":10" %}
+        <a href="javascript:void(0)">{{ author }}</a>,
+        {% endfor %}
+        ...
+        <a href="javascript:expand_authors({{ item.paper.pk }})">&gt;&gt;&gt;</a>
+      </div>
+      <div id="author_{{ item.paper.pk }}_long" class="d-none">
+        {% for author in item.author_list %}
+        <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+        {% endfor %}
+        <a href="javascript:collapse_authors({{ item.paper.pk }})">&lt;&lt;&lt;</a>
+      </div>
+      {% else %}
+      <div class="d-inline">
+        {% for author in item.author_list %}
+        <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
     
-    <div>{{ item.author_list | join:", " }}</div>
     {% if item.paper.abstract %}
     <div class="my-3">
       <div>
@@ -84,6 +109,7 @@
       </div>
     </div>
     {% endif %}
+
     {% if item.keyword_list %}
     <div>
       <b>Keywords:</b>
@@ -97,14 +123,14 @@
       </div>
       <div id="keyword_{{ item.paper.pk }}_long" class="d-none">
         {% for keyword in item.keyword_list %}
-        <a href="javascript:void(0)">{{ keyword }}</a>,
+        <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
         {% endfor %}
         <a href="javascript:collapse_keywords({{ item.paper.pk }})">&lt;&lt;&lt;</a>
       </div>
       {% else %}
-      <div>
+      <div class="d-inline">
         {% for keyword in item.keyword_list %}
-        <a href="javascript:void(0)">{{ keyword }}</a>
+        <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
         {% endfor %}
       </div>
       {% endif %}
@@ -151,6 +177,20 @@
 
 <script>
 
+function expand_authors(id) {
+  $('#author_' + id + '_short').addClass('d-none');
+  $('#author_' + id + '_short').removeClass('d-inline');
+  $('#author_' + id + '_long').addClass('d-inline');
+  $('#author_' + id + '_long').removeClass('d-none');
+}
+
+function collapse_authors(id) {
+  $('#author_' + id + '_short').addClass('d-inline');
+  $('#author_' + id + '_short').removeClass('d-none');
+  $('#author_' + id + '_long').addClass('d-none');
+  $('#author_' + id + '_long').removeClass('d-inline');
+}
+  
 function expand_abstract(id) {
   $('#abstract_' + id + '_short').addClass('d-none');
   $('#abstract_' + id + '_short').removeClass('d-inline');
@@ -248,7 +288,7 @@ function translate_abstract(paper_id) {
 
 function add_recommendation(id) {
   $('#dlg_info').html($('#info_' + id).html());
-  $('#dlg_title').html($('#title_' + id).html());
+  $('#dlg_title').html($('#title_' + id + '_text').html());
   $('#comments').val('');
   $('#commentsModal').modal('show');
 
