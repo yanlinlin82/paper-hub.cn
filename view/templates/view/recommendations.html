@@ -158,8 +158,8 @@
     </div>
     {% endif %}
     <div class="mt-4">
-    {% for recommendation in paper.recommendation_set.all %}
-      {% if recommendation.delete_time is None %}
+    {% if current_page == "recommendations" %}
+      {% for recommendation in paper.recommendations %}
       <div class="d-flex my-2">
         <div class="text-start align-self-end me-3">推送标签：
           {% for label in recommendation.labels.all %}
@@ -169,8 +169,39 @@
         <div class="text-start align-self-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
         <div class="text-start align-self-end me-3">推送源：{{ recommendation.source }}</div>
       </div>
+      {% endfor %}
+      {% if paper.historical_recommendations %}
+        {% for recommendation in paper.historical_recommendations %}
+        <div id="historical_recommendations_{{paper.pk}}" class="d-flex my-2 d-none">
+          <div class="text-start align-self-end me-3">推送标签：
+            {% for label in recommendation.labels.all %}
+            <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+            {% endfor %}
+          </div>
+          <div class="text-start align-self-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
+          <div class="text-start align-self-end me-3">推送源：{{ recommendation.source }}</div>
+        </div>
+        {% endfor %}
+        <div id="button_expand_historical_recommendations_{{paper.pk}}" class="d-block">
+          <a href="javascript:expand_recommendations({{ paper.pk }})">&gt;&gt;&gt;</a>
+        </div>
+        <div id="button_collapse_historical_recommendations_{{paper.pk}}" class="d-none">
+          <a href="javascript:collapse_recommendations({{ paper.pk }})">&lt;&lt;&lt;</a>
+        </div>
       {% endif %}
-    {% endfor %}
+    {% else %}
+      {% for recommendation in paper.historical_recommendations %}
+      <div class="d-flex my-2">
+        <div class="text-start align-self-end me-3">推送标签：
+          {% for label in recommendation.labels.all %}
+          <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+          {% endfor %}
+        </div>
+        <div class="text-start align-self-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
+        <div class="text-start align-self-end me-3">推送源：{{ recommendation.source }}</div>
+      </div>
+      {% endfor %}
+    {% endif %}
     </div>
   </div>
 </div>
@@ -213,6 +244,24 @@ $(document).ready(function(){
       $('#comments').focus();
   });
 });
+
+function expand_recommendations(paper_id) {
+  $('#historical_recommendations_' + paper_id).addClass('d-block');
+  $('#historical_recommendations_' + paper_id).removeClass('d-none');
+  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-none');
+  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-block');
+  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-block');
+  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-none');
+}
+
+function collapse_recommendations(paper_id) {
+  $('#historical_recommendations_' + paper_id).addClass('d-none');
+  $('#historical_recommendations_' + paper_id).removeClass('d-block');
+  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-block');
+  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-none');
+  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-none');
+  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-block');
+}
 
 function add_recommendation(id) {
   $('#dlg_info').html($('#info_' + id).html());

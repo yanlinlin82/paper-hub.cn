@@ -136,6 +136,8 @@ def _recommendation_list(request, is_trash=False):
         paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
         if paper.review_set.filter(creator=u, delete_time__isnull=True).count() > 0:
             paper.has_any_review = True
+        paper.recommendations = paper.recommendation_set.filter(user=u, delete_time__isnull=True).order_by('-create_time')
+        paper.historical_recommendations = paper.recommendation_set.filter(user=u, delete_time__isnull=False).order_by('-create_time')
 
     return papers, items
 
