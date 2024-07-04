@@ -96,16 +96,7 @@
       <article class="container">
         <h1 class="mb-4">{% block page_title %}{% endblock page_title %}</h1>
         <p class="text-start">{% block page_subtitle %}{% endblock page_subtitle %}</p>
-        <div class="content">
-          {% if error_message %}
-          <div class="alert alert-warning alert-dismissible fade show py-1 rounded-0 mb-0 fixed-top" role="alert">
-            {{ error_message }}
-            <button type="button" class="btn-close btn-sm align-middle py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-          {% endif %}
-          {% block content %}
-          {% endblock content %}
-        </div>
+        <div class="content">{% block content %}{% endblock content %}</div>
       </article>
     </div>
   </div>

@@ -377,6 +377,36 @@ def delete_review_forever(request):
 
     return JsonResponse({'success': True})
 
+def add_search_result(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    try:
+        paper_id = request.POST['paper_id']
+        comments = request.POST['comments']
+
+        user = request.user.custom_user
+
+        paper = Paper.objects.get(pk=paper_id)
+        if paper is None:
+            return JsonResponse({
+                'success': False,
+                'error': f"Paper not found: {paper_id}"
+            })
+        print(f'add_search_result: {paper_id} {paper}')
+
+        review = Review(paper=paper, creator=user, comments=comments)
+        review.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
 def add_recommendation(request):
     if not request.user.is_authenticated:
         return JsonResponse({

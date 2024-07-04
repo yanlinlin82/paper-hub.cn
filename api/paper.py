@@ -39,13 +39,13 @@ def convert_string_to_datetime(s):
             pass  # continue to the next format string
     return None
 
-def extract_year_from_dict(data, key):
+def extract_date_and_year_from_dict(data, key):
     if key not in data:
-        return None
+        return None, None
     dt = convert_string_to_datetime(data[key])
     if dt is None:
-        return None
-    return dt.year
+        return None, None
+    return dt, dt.year
 
 def fetch_and_cache(url, cache_filename):
     if os.path.exists(cache_filename):
@@ -88,6 +88,7 @@ def get_paper_info_by_arxiv_id(arxiv_id):
     data = fetch_json(api_url, cache_filename, is_xml=True)
     if 'feed' in data and 'entry' in data['feed']:
         obj = data['feed']['entry']
+        pub_date, pub_year = extract_date_and_year_from_dict(obj, 'published')
         paper_info = {
             'id': {
                 'doi': f"10.48550/arXiv.{arxiv_id}",
@@ -96,7 +97,8 @@ def get_paper_info_by_arxiv_id(arxiv_id):
             'title': obj.get('title', ''),
             'journal': 'arXiv',
             'abstract': obj.get('summary', ''),
-            'pub_year': extract_year_from_dict(obj, 'published'),
+            'pub_date': pub_date,
+            'pub_year': pub_year,
             'authors': [node.get('name') for node in obj.get('author', [])],
             'urls': [obj.get('id')],
         }
@@ -115,12 +117,13 @@ def get_paper_info_by_pmid(pmid):
     data = fetch_json(api_url, cache_filename)
     if 'result' in data and pmid in data['result']:
         obj = data['result'][pmid]
-
+        pub_date, pub_year = extract_date_and_year_from_dict(obj, 'pubdate')
         paper_info = {
             'id': {'pmid': pmid},
             'title': obj.get('title', ''),
             'journal': obj.get('fulljournalname', ''),
-            'pub_year': extract_year_from_dict(obj, 'pubdate'),
+            'pub_date': pub_date,
+            'pub_year': pub_year,
             'issue': obj.get('issue'),
             'volume': obj.get('volume'),
             'page': obj.get('pages'),
@@ -178,7 +181,7 @@ def get_paper_info_by_doi(doi):
         title = " ".join(obj.get('title', []))
         journal = " ".join(obj.get('container-title', []))
         if 'created' in obj:
-            pub_year = extract_year_from_dict(obj['created'], 'date-time')
+            pub_date, pub_year = extract_date_and_year_from_dict(obj['created'], 'date-time')
         issue = obj.get('issue', '')
         volume = obj.get('volume', '')
         page = obj.get('page', '')
@@ -189,6 +192,7 @@ def get_paper_info_by_doi(doi):
             'type': type,
             'title': title,
             'journal': journal,
+            'pub_date': pub_date,
             'pub_year': pub_year,
             'issue': issue,
             'volume': volume,
@@ -200,32 +204,35 @@ def get_paper_info_by_doi(doi):
         return paper_info, data
     return None, f"Query DOI '{doi}' failed!"
 
+def guess_identifier_type(identifier):
+    if identifier.startswith("10."):
+        pattern_arxiv = re.compile('^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
+        m = pattern_arxiv.match(identifier)
+        if m:
+            return "arxiv_id", m.group(1)
+        else:
+            return "doi", identifier
+    elif re.match(r'^(arXiv:)?\d{4}\.\d{5}$', identifier):
+        return "arxiv_id", identifier.replace("arXiv:", "")
+    elif identifier.isdigit():
+        return "pmid", identifier
+    elif identifier.startswith("PMC"):
+        return "pmcid", identifier
+    else:
+        return "unknown", identifier
+
 def get_paper_info(identifier):
     print('get_paper_info:', identifier)
-    if identifier.startswith("10."):
-        # DOI
-        doi = identifier
-        pattern_arxiv = re.compile('^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
-        m = pattern_arxiv.match(doi)
-        if m:
-            # arXiv ID
-            arxiv_id = m.group(1)
-            return get_paper_info_by_arxiv_id(arxiv_id)
-        return get_paper_info_by_doi(doi)
-    elif re.match(r'^(arXiv:)?\d{4}\.\d{5}$', identifier):
-        # arXiv ID
-        arxiv_id = identifier.replace("arXiv:", "")
-        return get_paper_info_by_arxiv_id(arxiv_id)
+    identifier_type, id = guess_identifier_type(identifier)
+    if identifier_type == "doi":
+        return get_paper_info_by_doi(id)
+    elif identifier_type == "arxiv_id":
+        return get_paper_info_by_arxiv_id(id)
     elif identifier.isdigit():
-        # Check if it's a number (PMID)
-        pmid = identifier
-        return get_paper_info_by_pmid(pmid)
+        return get_paper_info_by_pmid(id)
     elif identifier.startswith("PMC"):
-        # PMC ID
-        pmcid = identifier
-        return get_paper_info_by_pmcid(pmcid)
+        return get_paper_info_by_pmcid(id)
     else:
-        # invalid ID
         return None, f"Invalid paper ID '{identifier}'"
 
 def main() -> int:

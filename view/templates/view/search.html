@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load static %}
+{% load language_filters %}
 
 {% block content %}
 <section>
@@ -28,171 +30,229 @@
 
 {% if query %}
 <section>
-  <div class="text-start">共找到 <em>{{ results|length }}</em> 条结果：</div>
-  <ol>
-    {% for item in results %}
-    <li>
-      <div class="mb-3 px-3">
-        <div class="fs-5" id="paper-title-{{forloop.counter}}">{{ item.title }}</div>
-        <div class="text-secondary fst-italic" id="paper-authors-{{forloop.counter}}">
-          {% for author in item.authors %}
-          {{ author }}{% if not forloop.last %}, {% endif %}
-          {% endfor %}
+  <div class="my-3 text-start">当前共找到 <em>{{ papers|length }}</em> 篇文献：</div>
+
+  {% include "view/paginator.html" %}
+
+  {% for paper in papers %}
+  <div id="card_{{paper.pk}}" class="card p-2 my-3 d-flex flex-row">
+    <div class="p-2 text-start">{{ paper.display_index }}.</div>
+    <div class="p-2 text-start flex-fill">
+      <div class="d-flex">
+        <div class="flex-fill">
+          <div id="info_{{paper.pk}}" class="text-start">
+            {{ paper.journal }},
+            {{ paper.pub_date }}.
+            {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
+            {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
+          </div>
         </div>
-        <div class="text-secondary">
-          <span id="paper-pub-year-{{forloop.counter}}">{{ item.pub_year }}</span>,
-          <span id="paper-journal-{{forloop.counter}}">{{ item.journal }}</span>
-        </div>
-        <div class="text-secondary">
-          {% if item.id.doi %}
-          <span class="me-2">DOI: <a class="link-secondary" href="https://doi.org/{{ item.id.doi }}" target="_blank">{{ item.id.doi }}</a></span>
+        <div class="text-end align-self-start">
+          {% if paper.has_any_review %}
+          <div class="badge bg-secondary">已加入个人文献库</div>
+          {% else %}
+          <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_search_result({{paper.pk}})">加入个人文献库</a>
           {% endif %}
-          {% if item.id.pmid %}
-          <span class="me-2">PMID: <a class="link-secondary" href="https://pubmed.ncbi.nlm.nih.gov/{{ item.id.pmid }}/" target="_blank">{{ item.id.pmid }}</a></span>
-          {% endif %}
-          {% if item.id.pmcid %}
-          <span class="me-2">PMCID: <a class="link-secondary" href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ item.id.pmcid }}/" target="_blank">{{ item.id.pmcid }}</a></span>
-          {% endif %}
-          {% if item.id.arxiv_id %}
-          <span class="me-2">arXivID: <a class="link-secondary" href="https://arxiv.org/abs/{{ item.id.arxiv_id }}" target="_blank">{{ item.id.arxiv_id }}</a></span>
-          {% endif %}
-          {% if item.id.pii %}
-          <span class="me-2">PII: {{ item.id.pii }}</span>
-          {% endif %}
-        </div>
-        <div class="mt-2">
-          <a class="link-success link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="javascript:share_review({{forloop.counter}});">Share</a>
         </div>
       </div>
-    </li>
-    {% endfor %}
-  </ol>
+      <div class="mt-2">
+        {% for review in paper.review_set.all %}
+          {% for label in review.labels.all %}
+        <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+          {% endfor %}
+        {% endfor %}
+      </div>
+      <div class="my-3">
+        <div id="title_{{paper.pk}}" class="d-inline text-start">
+          <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+          <a class="ms-2" href="javascript:translate_title({{ paper.pk }}, '{% url 'api:translate_title' %}', '{{csrf_token}}')">翻译</a>
+        </div>
+        <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
+        {% if paper.translation and paper.translation.title_cn %}
+        {{ paper.translation.title_cn }}
+        {% endif %}
+        </div>
+        {% if paper.language != "eng" %}
+        <div class="mt-1">
+          <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
+        </div>
+        {% endif %}
+      </div>
+  
+      {% if paper.author_list %}
+      <div>
+        {% if paper.author_list|length > 10 %}
+        <div id="author_{{ paper.pk }}_short" class="d-inline">
+          {% for author in paper.author_list|slice:":10" %}
+          <a href="javascript:void(0)">{{ author }}</a>,
+          {% endfor %}
+          ...
+          <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
+        </div>
+        <div id="author_{{ paper.pk }}_long" class="d-none">
+          {% for author in paper.author_list %}
+          <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
+        </div>
+        {% else %}
+        <div class="d-inline">
+          {% for author in paper.author_list %}
+          <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      
+      {% if paper.abstract %}
+      <div class="my-3">
+        <div>
+          <b>Abstract:</b>
+          {% if paper.abstract|length > 30 %}
+          <div id="abstract_{{ paper.pk }}_short" class="d-inline">
+            {{ paper.abstract | truncatewords:30 }}
+            <a href="javascript:expand_abstract({{paper.pk}})">&gt;&gt;&gt;</a>
+          </div>
+          <div id="abstract_{{ paper.pk }}_long" class="d-none">
+            {{ paper.abstract }}
+            <a href="javascript:collapse_abstract({{paper.pk}})">&lt;&lt;&lt;</a>
+          </div>
+          {% else %}
+          <div id="abstract_{{ paper.pk }}_long" class="d-inline">
+            {{ paper.abstract }}
+          </div>
+          {% endif %}
+          <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }}, '{% url 'api:translate_abstract' %}', '{{csrf_token}}')">翻译</a>
+          <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
+            {% if paper.translation and paper.translation.abstract_cn %}
+            {{ paper.translation.abstract_cn }}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+  
+      {% if paper.keyword_list %}
+      <div>
+        <b>Keywords:</b>
+        {% if paper.keyword_list|length > 3 %}
+        <div id="keyword_{{ paper.pk }}_short" class="d-inline">
+          {% for keyword in paper.keyword_list|slice:":3" %}
+          <a href="javascript:void(0)">{{ keyword }}</a>,
+          {% endfor %}
+          ...
+          <a href="javascript:expand_keywords({{ paper.pk }})">&gt;&gt;&gt;</a>
+        </div>
+        <div id="keyword_{{ paper.pk }}_long" class="d-none">
+          {% for keyword in paper.keyword_list %}
+          <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          <a href="javascript:collapse_keywords({{ paper.pk }})">&lt;&lt;&lt;</a>
+        </div>
+        {% else %}
+        <div class="d-inline">
+          {% for keyword in paper.keyword_list %}
+          <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      <div class="mt-4">
+      {% for recommendation in paper.recommendation_set.all %}
+        {% if recommendation.delete_time is None %}
+        <div class="d-flex my-2">
+          <div class="text-start align-self-end me-3">推送标签：
+            {% for label in recommendation.labels.all %}
+            <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+            {% endfor %}
+          </div>
+          <div class="text-start align-self-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
+          <div class="text-start align-self-end me-3">推送源：{{ recommendation.source }}</div>
+        </div>
+        {% endif %}
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% include "view/paginator.html" %}
 </section>
 
-<div class="modal fade" id="shareModal" role="dialog">
-  <div class="modal-dialog modal-lg" role="document">
+<!-- Modal -->
+<div class="modal fade" id="commentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="shareModalLabel">Share Paper</h5>
+        <h5 class="modal-title" id="commentsModalLabel">加入推荐文献到个人文献库</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="shareForm" method="post">
-          {% csrf_token %}
-          <div class="row">
-            <div class="form-group">
-              <label class="mt-3">
-                <div class="fs-5" id="shareModelTitle"></div>
-                <div class="text-secondary fst-italic" id="shareModelAuthors"></div>
-                <div class="text-secondary">
-                  <span id="shareModelPubYear"></span>,
-                  <span id="shareModelJournal"></span>
-                </div>
-              </label>
-            </div>
+        <form id="commentsForm">
+          <div class="mb-3">
+            <div id="dlg_info" class="text-start"></div>
+            <div id="dlg_title" class="text-start mt-3 fs-4 fw-bold"></div>
           </div>
-          {% if user.is_authenticated and user.is_superuser %}
-          <input type="hidden" id="paperEditModalUsername" value="{{user}}">
-          {% else %}
-          <div class="mb-3 form-group">
-            <label class="mt-3" for="paperEditModalUsername">Username</label>
-            <input type="text" class="form-control" id="paperEditModalUsername" name="paperEditModalUsername" required>
-          </div>
-          {% endif %}
-          <div class="form-group">
-            <label class="mt-3" for="shareModalComment">Comment</label>
-            <textarea class="form-control" id="shareModalComment" name="shareModalComment" rows="10" required></textarea>
+          <div class="mb-3">
+            <label for="comments" class="form-label">笔记</label>
+            <textarea class="form-control" id="comments" rows="8" required></textarea>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="shareModalShare">Share</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="submitComments">确定</button>
       </div>
     </div>
   </div>
 </div>
+
+<script src="{% static 'js/paper.js' %}"></script>
 <script>
-function get_review_id(id) {
-  var paper_id = '';
-  if ($('#paper-doi-' + id)) {
-    paper_id = $('#paper-doi-' + id).text();
-  } else if ($('#paper-pmid-' + id)) {
-    paper_id = $('#paper-pmid-' + id).text();
-  } else if ($('#paper-pmcid-' + id)) {
-    paper_id = $('#paper-pmcid-' + id).text();
-  } else if ($('#paper-arxiv-id-' + id)) {
-    paper_id = $('#paper-arxiv-id-' + id).text();
-  } else if ($('#paper-cnki-id-' + id)) {
-    paper_id = $('#paper-cnki-id-' + id).text();
-  }
-  return paper_id;
-}
-
-function share_review(id) {
-  console.log('share_review(' + id + ')');
-  $('#shareModelTitle').text($('#paper-title-' + id).text());
-  $('#shareModelAuthors').text($('#paper-authors-' + id).text());
-  $('#shareModelPubYear').text($('#paper-pub-year-' + id).text());
-  $('#shareModelJournal').text($('#paper-journal-' + id).text());
-  $('#shareModal').modal('show');
-}
-
 $(document).ready(function() {
   $('#shareModal').on('shown.bs.modal', () => {
     $('#shareModalPaperID').focus();
   })
-
-  $('#shareModalQuery').click(function () {
-    paper_id = $('#shareModalPaperID').val();
-    url = "{% url 'api:query_review' 'xxxxxx' %}".replace('xxxxxx', paper_id);
-    $.ajax({
-      url: url,
-      success: function (data) {
-        console.log('ajax return:', data)
-        if (!data.success) {
-          alert('Edit paper failed.')
-        } else {
-          $('#shareModalTitle').val(data.results.title);
-          $('#shareModalPubYear').val(data.results.pub_year);
-          $('#shareModalJournal').val(data.results.journal);
-        }
-      },
-      error: function () {
-        // Handle AJAX error
-        alert('An error occurred while processing your request.')
-      }
-    })
+  $('#commentsModal').on('shown.bs.modal', () => {
+    $('#comments').focus();
   })
+})
 
-  $('#shareModalShare').click(function () {
+function add_search_result(id) {
+  $('#dlg_info').html($('#info_' + id).html());
+  $('#dlg_title').html($('#title_' + id + '_text').html());
+  $('#comments').val('');
+  $('#commentsModal').modal('show');
+
+  $('#submitComments').off('click').on('click', function() {
+    const comments = $('#comments').val();
+    $('#commentsModal').modal('hide');
     $.ajax({
-      url: "{% url 'api:edit_review' %}",
+      url: "{% url 'api:add_search_result' %}",
       type: 'POST',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
       data: {
-        id: $('#shareModalPk').val(),
-        paper_id: $('#shareModalPaperID').val(),
-        title: $('#shareModalTitle').val(),
-        pub_year: $('#shareModalPubYear').val(),
-        journal: $('#shareModalJournal').val(),
-        comment: $('#shareModalComment').val()
+        paper_id: id,
+        comments: comments
       },
-      success: function (data) {
-        console.log('ajax return:', data)
+      success: function(data) {
         if (!data.success) {
-          alert('Edit paper failed.')
+          alert('添加推荐失败！\n' + data.error);
         } else {
-          location.reload(false);
+          $('#card_' + id).remove();
+          if ($('.card').length === 0) {
+            location.reload();
+          }
         }
       },
-      error: function () {
-        // Handle AJAX error
-        alert('An error occurred while processing your request.')
+      error: function() {
+        alert('请求处理中发生错误。');
       }
-    })
-  })
-})
+    });
+  });
+}
 </script>
 
 {% endif %}

@@ -13,6 +13,7 @@ urlpatterns = [
     path('delete_review', views.delete_review, name='delete_review'),
     path('restore_review', views.restore_review, name='restore_review'),
     path('delete_review_forever', views.delete_review_forever, name='delete_review_forever'),
+    path('add_search_result', views.add_search_result, name='add_search_result'),
     path('add_recommendation', views.add_recommendation, name='add_recommendation'),
     path('delete_recommendation', views.delete_recommendation, name='delete_recommendation'),
     path('restore_recommendation', views.restore_recommendation, name='restore_recommendation'),

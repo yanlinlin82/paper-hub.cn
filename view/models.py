@@ -68,6 +68,11 @@ class UserSession(models.Model):
         return f"{self.user.nickname}: {self.token} - {self.get_client_type_display()}"
 
 class Paper(models.Model):
+    #create_time = models.DateTimeField(default=timezone.now)
+    #update_time = models.DateTimeField(default=timezone.now)
+    #create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    #update_time = models.DateTimeField(auto_now=True, db_index=True)
+
     journal = models.CharField(max_length=256, default='', blank=True)
     pub_date = models.CharField(max_length=64, default='', blank=True)
     pub_year = models.IntegerField(blank=True, null=True, default=None)
@@ -85,6 +90,9 @@ class Paper(models.Model):
     cnki_id = models.CharField(max_length=128, default='', blank=True) # CNKI CJFD ID
 
     language = models.CharField(max_length=20, default='eng') # eng, chi, etc.
+
+    #class Meta:
+    #    ordering = ['-create_time']
 
     def __str__(self):
         return f'{self.pub_year}, {self.journal}, {self.title}'
