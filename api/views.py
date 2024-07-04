@@ -461,7 +461,7 @@ def restore_recommendation(request):
         paper = Paper.objects.get(pk=paper_id)
         print(f'restore_recommendation: {paper_id} {paper}')
 
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time__isnull=False):
             recommendation.delete_time = None
             recommendation.save()
 
