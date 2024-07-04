@@ -70,12 +70,17 @@ def import_excel(source_id, excel_file):
         else:
             r = r_list[0]
 
+        any_change = False
         for label_item in [l for l in i['labels'].split('\n') if l]:
             label = Label.objects.filter(user = u, name = label_item)
             if len(label) > 0:
                 if len(r.labels.filter(pk = label[0].pk)) == 0:
                     r.labels.add(label[0])
                     cnt['label_updated'] += 1
+                    any_change = True
+        if any_change:
+            r.delete_time = None
+            r.save()
 
     print(f"Imported {cnt['total']} recommendations, {cnt['new_paper']} new papers, {cnt['new_recommendation']} new recommendations, {cnt['label_updated']} labels updated.")
 
