@@ -63,7 +63,7 @@ def query_papers(query):
             )
             paper.save()
             print(f'Save paper into database: {paper.pk} {paper.title}')
-            papers = Paper.objects.filter(pmcid=paper.pk).order_by('-pk')
+            papers = Paper.objects.filter(pk=paper.pk).order_by('-pk')
 
     return papers
 
