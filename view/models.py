@@ -68,8 +68,8 @@ class UserSession(models.Model):
         return f"{self.user.nickname}: {self.token} - {self.get_client_type_display()}"
 
 class Paper(models.Model):
-    #create_time = models.DateTimeField(default=timezone.now)
-    #update_time = models.DateTimeField(default=timezone.now)
+    create_time = models.DateTimeField(default=timezone.now)
+    update_time = models.DateTimeField(default=timezone.now)
     #create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     #update_time = models.DateTimeField(auto_now=True, db_index=True)
 
