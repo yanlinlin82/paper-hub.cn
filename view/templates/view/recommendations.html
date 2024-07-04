@@ -26,7 +26,7 @@
       <div class="flex-fill">
         <div id="info_{{paper.pk}}" class="text-start">
           {{ paper.journal }},
-          {{ paper.pub_year }}.
+          {{ paper.pub_date }}.
           {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
           {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
         </div>
