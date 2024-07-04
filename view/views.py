@@ -48,11 +48,21 @@ def recommendations_page(request):
     u = UserProfile.objects.get(auth_user__username=request.user.username)
 
     recommendations = Recommendation.objects.filter(
-        user=u,
-        delete_time__isnull=True
-        ).order_by('-create_time', '-pk')
-    
-    papers = Paper.objects.filter(pk__in=[r.paper_id for r in recommendations])
+            user=u,
+            delete_time__isnull=True
+        )
+
+    latest_create_time_subquery = Recommendation.objects.filter(
+            paper=OuterRef('pk'),
+            user=u,
+            delete_time__isnull=False
+        ).order_by('-create_time').values('create_time')[:1]
+
+    papers = Paper.objects.filter(
+            pk__in=[r.paper_id for r in recommendations]
+        ).annotate(
+            latest_create_time=Subquery(latest_create_time_subquery)
+        ).order_by('-latest_create_time', '-pk')
 
     page_number = request.GET.get('page')
     papers, items = get_paginated_reviews(papers, page_number)
@@ -112,25 +122,40 @@ def trackings_page(request):
     return HttpResponse(template.render(context, request))
 
 def all_page(request):
-    review_list = get_review_list(request)
-    if review_list:
-        review_list = review_list.order_by('-create_time', '-pk')
-        for item in review_list:
-            item.author_list = [k for k in item.paper.authors.split('\n') if k]
+    u = UserProfile.objects.get(auth_user__username=request.user.username)
 
-        page_number = request.GET.get('page')
-        reviews, items = get_paginated_reviews(review_list, page_number)
-    else:
-        reviews = None
-        items = None
+    reviews = Review.objects.filter(
+            creator=u,
+            delete_time=None
+        )
 
-    template = loader.get_template('view/list.html')
-    context = {
+    latest_update_time_subquery = Review.objects.filter(
+            paper=OuterRef('pk'),
+            creator=u,
+            delete_time__isnull=False
+        ).order_by('-update_time').values('update_time')[:1]
+
+    papers = Paper.objects.filter(
+            pk__in=[r.paper_id for r in reviews]
+        ).annotate(
+            latest_update_time=Subquery(latest_update_time_subquery)
+        ).order_by('-latest_update_time', '-pk')
+
+    page_number = request.GET.get('page')
+    papers, items = get_paginated_reviews(papers, page_number)
+
+    for index, paper in enumerate(papers):
+        paper.display_index = index + papers.start_index()
+        paper.author_list = [k for k in paper.authors.split('\n') if k]
+        paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
+        paper.reviews = paper.review_set.filter(
+            delete_time__isnull=True, creator=u)
+
+    return render(request, 'view/list.html', {
         'current_page': 'all',
-        'reviews': reviews,
+        'papers': papers,
         'items': items,
-    }
-    return HttpResponse(template.render(context, request))
+        })
 
 def recent_page(request):
     last_week = datetime.now().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE)) - timedelta(days=7)
