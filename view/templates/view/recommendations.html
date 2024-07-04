@@ -201,8 +201,13 @@
   </div>
 </div>
 
-
 <script>
+
+$(document).ready(function(){
+  $('#commentsModal').on('shown.bs.modal', function () {
+      $('#comments').trigger('focus');
+  });
+});
 
 function expand_authors(id) {
   $('#author_' + id + '_short').addClass('d-none');
