@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load language_filters %}
 
 {% block page_title %}
   {% if current_page == "recommendations" %}文献推荐{% endif %}
@@ -64,6 +65,11 @@
       {{ paper.translation.title_cn }}
       {% endif %}
       </div>
+      {% if paper.language != "eng" %}
+      <div class="mt-1">
+        <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
+      </div>
+      {% endif %}
     </div>
 
     {% if paper.author_list %}
