@@ -33,6 +33,13 @@ def my_sharing_page(request, group_name):
     reviews = group.reviews.filter(creator=user).order_by('-create_time', '-pk')
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_my_sharing',
@@ -45,6 +52,13 @@ def all_page(request, group_name):
     reviews = group.reviews.filter(delete_time__isnull=True).order_by('-create_time', '-pk')
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_all',
@@ -58,6 +72,13 @@ def recent_page(request, group_name):
     reviews = group.reviews.filter(create_time__gte=start_time).order_by('-create_time', '-pk')
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_recent',
@@ -71,6 +92,13 @@ def this_month_page(request, group_name):
     reviews = group.reviews.filter(create_time__gte=start_time).order_by('-create_time', '-pk')
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_this_month',
@@ -84,6 +112,13 @@ def last_month_page(request, group_name):
     reviews = group.reviews.filter(create_time__gte=start_time, create_time__lt=end_time).order_by('-create_time', '-pk')
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_last_month',
@@ -153,6 +188,13 @@ def trash_page(request, group_name):
     reviews = group.reviews.filter(delete_time__isnull=False).order_by('-delete_time', '-pk')
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_trash',
@@ -163,6 +205,11 @@ def trash_page(request, group_name):
 def single_page(request, id, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     review = get_object_or_404(group.reviews, pk=id)
+
+    review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+    review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+    review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/single.html', {
         'group': group,
         'current_page': 'group_single',
@@ -171,12 +218,20 @@ def single_page(request, id, group_name):
 
 def journal_page(request, group_name, journal_name):
     group = get_object_or_404(GroupProfile, name=group_name)
-    reviews = group.reviews.filter(journal=journal_name)
+    reviews = group.reviews.filter(paper__journal=journal_name)
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_journal',
+        'journal_name': journal_name,
         'reviews': reviews,
         'items': items,
     })
@@ -187,9 +242,17 @@ def user_page(request, id, group_name):
     reviews = group.reviews.filter(creator=user).order_by('-create_time', '-pk')
     page_number = request.GET.get('page')
     reviews, items = get_paginated_reviews(reviews, page_number)
+
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
+        review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_user',
+        'user': user,
         'reviews': reviews,
         'items': items,
     })
