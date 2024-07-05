@@ -11,7 +11,7 @@
       <a class="nav-link{% if rank_type == 'this_month' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='this_month' group_name=group.name %}">本月榜单</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link{% if rank_type == 'last_month' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='last_month' group_name=group.name %}">月度榜单</a>
+      <a class="nav-link{% if rank_type == 'last_month' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='last_month' group_name=group.name %}">上月榜单</a>
     </li>
     <li class="nav-item">
       <a class="nav-link{% if rank_type == 'monthly' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='monthly' group_name=group.name %}">月度榜单</a>
