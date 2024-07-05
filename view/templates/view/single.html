@@ -1,99 +1,89 @@
 {% extends "base.html" %}
+{% load static %}
+{% load language_filters %}
 
 {% block content %}
-{% if item %}
-
-<div class="card p-2 m-3 d-flex flex-row">
-  <div class="p-2 flex-fill text-start">
-    <div class="text-start">
-      {{ item.paper.journal }},
-      {{ item.paper.pub_year }}.
-      {% if item.paper.doi %}doi: <a href="https://doi.org/{{ item.paper.doi }}" target="_blank">{{ item.paper.doi }}</a>{% endif %}
-      {% if item.paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ item.paper.pmid }}" target="_blank">{{ item.paper.pmid }}</a>{% endif %}
+<section>
+  <div class="p-2 text-start flex-fill">
+    <div class="d-flex">
+      <div class="flex-fill">
+        <div id="info_{{paper.pk}}" class="text-start">
+          {{ paper.journal }},
+          {{ paper.pub_date }}.
+          {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
+          {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
+        </div>
+      </div>
+      {% if user.is_authenticated %}
+      <div class="text-end align-self-start">
+        {% if paper.has_any_review %}
+        <div class="badge bg-secondary">已加入个人文献库</div>
+        {% else %}
+        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_search_result({{paper.pk}})">加入个人文献库</a>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
     <div class="mt-2">
-      {% for t in item.labels.all %}
-      <span class="badge" style="background-color:{{t.color}}">{{ t.name }}</span>
+      {% for review in paper.review_set.all %}
+        {% for label in review.labels.all %}
+      <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+        {% endfor %}
       {% endfor %}
     </div>
-    <div class="fs-5 my-3 fw-bold">
-      <div>{{ item.paper.title }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_title({{ item.paper.pk }})">翻译标题</a></div>
-      <div id="title_cn_{{ item.paper.pk }}">
-      {% if item.paper.translation and item.paper.translation.title_cn %}
-      {{ item.paper.translation.title_cn }}
-      {% endif %}
-      </div>
-    </div>
-    
-    <p>{{ item.author_list | join:", " }}</p>
-    {% if item.paper.abstract %}
     <div class="my-3">
-      <div><b>Abstract:</b> {{ item.paper.abstract }}<a class="btn btn-secondary mx-3 btn-sm" href="javascript:translate_abstract({{ item.paper.pk }})">翻译摘要</a></div>
-      <div id="abstract_cn_{{ item.paper.pk }}">
-      {% if item.paper.translation and item.paper.translation.abstract_cn %}
-      {{ item.paper.translation.abstract_cn }}
+      <div id="title_{{paper.pk}}" class="d-inline text-start">
+        <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+        <a class="ms-2" href="javascript:translate_title({{ paper.pk }}, '{% url 'api:translate_title' %}', '{{csrf_token}}')">翻译</a>
+      </div>
+      <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
+      {% if paper.translation and paper.translation.title_cn %}
+      {{ paper.translation.title_cn }}
       {% endif %}
       </div>
+      {% if paper.language != "eng" %}
+      <div class="mt-1">
+        <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if paper.author_list %}
+    <div>
+      {% for author in paper.author_list %}
+      <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+      {% endfor %}
     </div>
     {% endif %}
-    {% if item.paper.keywords %}
-    <p><b>Keywords:</b> {{ item.paper.keywords }}</p>
+    
+    {% if paper.abstract %}
+    <div class="my-3">
+      <div>
+        <b>Abstract:</b>
+        <div id="abstract_{{ paper.pk }}_long" class="d-inline">
+          {{ paper.abstract }}
+        </div>
+        <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }}, '{% url 'api:translate_abstract' %}', '{{csrf_token}}')">翻译</a>
+        <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
+          {% if paper.translation and paper.translation.abstract_cn %}
+          {{ paper.translation.abstract_cn }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
     {% endif %}
 
-    {% if item.comments %}
-    <hr>
-    <p>{{ item.comments }}</p>
+    {% if paper.keyword_list %}
+    <div>
+      <b>Keywords:</b>
+      <div class="d-inline">
+        {% for keyword in paper.keyword_list %}
+        <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      </div>
+    </div>
     {% endif %}
   </div>
-</div>
-
-<script>
-
-function translate_title(paper_id) {
-  $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-  $.ajax({
-    url: "{% url 'api:translate_title' %}",
-    type: 'POST',
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
-    data: { paper_id: paper_id },
-    success: function (data) {
-      console.log(data)
-      if (!data.success) {
-        alert('Translate title failed!\n' + data.error);
-      } else {
-        $('#title_cn_' + paper_id).html(data.answer);
-      }
-    },
-    error: function () {
-      alert('An error occurred while processing your request.');
-    }
-  });
-}
-
-function translate_abstract(paper_id) {
-  $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-  $.ajax({
-    url: "{% url 'api:translate_abstract' %}",
-    type: 'POST',
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
-    data: { paper_id: paper_id },
-    success: function (data) {
-      if (!data.success) {
-        alert('Translate title failed!\n' + data.error);
-      } else {
-        $('#abstract_cn_' + paper_id).html(data.answer);
-      }
-    },
-    error: function () {
-      alert('An error occurred while processing your request.');
-    }
-  });
-}
-</script>
-  
-{% else %}
-<p>Invalid review ID.</p>
-{% endif %}
+</section>
+<script src="{% static 'js/paper.js' %}"></script>
 {% endblock content %}

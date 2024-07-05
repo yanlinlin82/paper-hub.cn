@@ -7,265 +7,151 @@
 {% endblock page_title %}
 
 {% block content %}
+<section>
 {% if papers %}
+  <div class="my-3">
+    当前共 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
+  </div>
 
-<div class="my-3">
-  当前共 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
-</div>
+  {% include "view/paginator.html" %}
 
-{% include "view/paginator.html" %}
-
-{% for paper in papers %}
-<div id="card_{{paper.pk}}" class="card p-2 my-3 d-flex flex-row">
-  <div class="p-2 text-start">{{ paper.display_index }}.</div>
-  <div class="p-2 text-start flex-fill">
-    <div class="d-flex">
-      <div class="flex-fill">
-        <div id="info_{{paper.pk}}" class="text-start">
-          {{ paper.journal }},
-          {{ paper.pub_date }}.
-          {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
-          {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
+  {% for paper in papers %}
+  <div id="card_{{paper.pk}}" class="card p-2 my-3 d-flex flex-row">
+    <div class="p-2 text-start">{{ paper.display_index }}.</div>
+    <div class="p-2 text-start flex-fill">
+      <div class="d-flex">
+        <div class="flex-fill">
+          <div id="info_{{paper.pk}}" class="text-start">
+            {{ paper.journal }},
+            {{ paper.pub_date }}.
+            {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
+            {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
+          </div>
+        </div>
+        <div class="text-end align-self-start">
+          <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:alert('not implemented yet');void({{paper.pk}})">星标</a>
+        </div>
+        <div class="text-end align-self-start">
+          <a class="btn btn-danger btn-sm text-nowrap ms-2" href="javascript:alert('not implemented yet');void({{paper.pk}})">删除</a>
         </div>
       </div>
-      <div class="text-end align-self-start">
-        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:alert('not implemented yet');void({{paper.pk}})">星标</a>
-      </div>
-      <div class="text-end align-self-start">
-        <a class="btn btn-danger btn-sm text-nowrap ms-2" href="javascript:alert('not implemented yet');void({{paper.pk}})">删除</a>
-      </div>
-    </div>
-    <div class="mt-2">
-      {% for review in paper.review_set.all %}
-        {% for label in review.labels.all %}
-      <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+      <div class="mt-2">
+        {% for review in paper.review_set.all %}
+          {% for label in review.labels.all %}
+        <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+          {% endfor %}
         {% endfor %}
-      {% endfor %}
-    </div>
-    <div class="my-3">
-      <div id="title_{{paper.pk}}" class="d-inline text-start">
-        <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
-        <a class="ms-2" href="javascript:translate_title({{ paper.pk }})">翻译</a>
       </div>
-      <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
-      {% if paper.translation and paper.translation.title_cn %}
-      {{ paper.translation.title_cn }}
-      {% endif %}
+      <div class="my-3">
+        <div id="title_{{paper.pk}}" class="d-inline text-start">
+          <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+          <a class="ms-2" href="javascript:translate_title({{ paper.pk }}, '{% url 'api:translate_title' %}', '{{csrf_token}}')">翻译</a>
+        </div>
+        <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
+        {% if paper.translation and paper.translation.title_cn %}
+        {{ paper.translation.title_cn }}
+        {% endif %}
+        </div>
       </div>
-    </div>
 
-    {% if paper.author_list %}
-    <div>
-      {% if paper.author_list|length > 10 %}
-      <div id="author_{{ paper.pk }}_short" class="d-inline">
-        {% for author in paper.author_list|slice:":10" %}
-        <a href="javascript:void(0)">{{ author }}</a>,
-        {% endfor %}
-        ...
-        <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
-      </div>
-      <div id="author_{{ paper.pk }}_long" class="d-none">
-        {% for author in paper.author_list %}
-        <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
-        {% endfor %}
-        <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
-      </div>
-      {% else %}
-      <div class="d-inline">
-        {% for author in paper.author_list %}
-        <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
-        {% endfor %}
-      </div>
-      {% endif %}
-    </div>
-    {% endif %}
-    
-    {% if paper.abstract %}
-    <div class="my-3">
+      {% if paper.author_list %}
       <div>
-        <b>Abstract:</b>
-        {% if paper.abstract|length > 30 %}
-        <div id="abstract_{{ paper.pk }}_short" class="d-inline">
-          {{ paper.abstract | truncatewords:30 }}
-          <a href="javascript:expand_abstract({{paper.pk}})">&gt;&gt;&gt;</a>
+        {% if paper.author_list|length > 10 %}
+        <div id="author_{{ paper.pk }}_short" class="d-inline">
+          {% for author in paper.author_list|slice:":10" %}
+          <a href="javascript:void(0)">{{ author }}</a>,
+          {% endfor %}
+          ...
+          <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
         </div>
-        <div id="abstract_{{ paper.pk }}_long" class="d-none">
-          {{ paper.abstract }}
-          <a href="javascript:collapse_abstract({{paper.pk}})">&lt;&lt;&lt;</a>
+        <div id="author_{{ paper.pk }}_long" class="d-none">
+          {% for author in paper.author_list %}
+          <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
         </div>
         {% else %}
-        <div id="abstract_{{ paper.pk }}_long" class="d-inline">
-          {{ paper.abstract }}
+        <div class="d-inline">
+          {% for author in paper.author_list %}
+          <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
         </div>
         {% endif %}
-        <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
-        <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
-          {% if paper.translation and paper.translation.abstract_cn %}
-          {{ paper.translation.abstract_cn }}
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    {% endif %}
-
-    {% if paper.keyword_list %}
-    <div>
-      <b>Keywords:</b>
-      {% if paper.keyword_list|length > 3 %}
-      <div id="keyword_{{ paper.pk }}_short" class="d-inline">
-        {% for keyword in paper.keyword_list|slice:":3" %}
-        <a href="javascript:void(0)">{{ keyword }}</a>,
-        {% endfor %}
-        ...
-        <a href="javascript:expand_keywords({{ paper.pk }})">&gt;&gt;&gt;</a>
-      </div>
-      <div id="keyword_{{ paper.pk }}_long" class="d-none">
-        {% for keyword in paper.keyword_list %}
-        <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
-        {% endfor %}
-        <a href="javascript:collapse_keywords({{ paper.pk }})">&lt;&lt;&lt;</a>
-      </div>
-      {% else %}
-      <div class="d-inline">
-        {% for keyword in paper.keyword_list %}
-        <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
-        {% endfor %}
       </div>
       {% endif %}
-    </div>
-    {% endif %}
-    <hr>
-    <div class="mt-2">
-      <div>共 {{ paper.reviews | length }} 条笔记：</div>
-      <ul>
-      {% for review in paper.reviews %}
-        <li class="my-2">
-          <div class="d-inline text-start my-2">{{ review.create_time | date:"Y-m-d H:i" }}：</div>
-          <div class="d-inline text-start my-2">{{ review.comments }}</div>
-        </li>
-      {% endfor %}
-      </ul>
+      
+      {% if paper.abstract %}
+      <div class="my-3">
+        <div>
+          <b>Abstract:</b>
+          {% if paper.abstract|length > 30 %}
+          <div id="abstract_{{ paper.pk }}_short" class="d-inline">
+            {{ paper.abstract | truncatewords:30 }}
+            <a href="javascript:expand_abstract({{paper.pk}})">&gt;&gt;&gt;</a>
+          </div>
+          <div id="abstract_{{ paper.pk }}_long" class="d-none">
+            {{ paper.abstract }}
+            <a href="javascript:collapse_abstract({{paper.pk}})">&lt;&lt;&lt;</a>
+          </div>
+          {% else %}
+          <div id="abstract_{{ paper.pk }}_long" class="d-inline">
+            {{ paper.abstract }}
+          </div>
+          {% endif %}
+          <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }}, '{% url 'api:translate_abstract' %}', '{{csrf_token}}')">翻译</a>
+          <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
+            {% if paper.translation and paper.translation.abstract_cn %}
+            {{ paper.translation.abstract_cn }}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if paper.keyword_list %}
+      <div>
+        <b>Keywords:</b>
+        {% if paper.keyword_list|length > 3 %}
+        <div id="keyword_{{ paper.pk }}_short" class="d-inline">
+          {% for keyword in paper.keyword_list|slice:":3" %}
+          <a href="javascript:void(0)">{{ keyword }}</a>,
+          {% endfor %}
+          ...
+          <a href="javascript:expand_keywords({{ paper.pk }})">&gt;&gt;&gt;</a>
+        </div>
+        <div id="keyword_{{ paper.pk }}_long" class="d-none">
+          {% for keyword in paper.keyword_list %}
+          <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          <a href="javascript:collapse_keywords({{ paper.pk }})">&lt;&lt;&lt;</a>
+        </div>
+        {% else %}
+        <div class="d-inline">
+          {% for keyword in paper.keyword_list %}
+          <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      <hr>
+      <div class="mt-2">
+        <div>共 {{ paper.reviews | length }} 条笔记：</div>
+        <ul>
+        {% for review in paper.reviews %}
+          <li class="my-2">
+            <div class="d-inline text-start my-2">{{ review.create_time | date:"Y-m-d H:i" }}：</div>
+            <div class="d-inline text-start my-2">{{ review.comments }}</div>
+          </li>
+        {% endfor %}
+        </ul>
+      </div>
     </div>
   </div>
-</div>
-{% endfor %}
-
+  {% endfor %}
 {% include "view/paginator.html" %}
-
-<script>
-
-function expand_authors(id) {
-  $('#author_' + id + '_short').addClass('d-none');
-  $('#author_' + id + '_short').removeClass('d-inline');
-  $('#author_' + id + '_long').addClass('d-inline');
-  $('#author_' + id + '_long').removeClass('d-none');
-}
-
-function collapse_authors(id) {
-  $('#author_' + id + '_short').addClass('d-inline');
-  $('#author_' + id + '_short').removeClass('d-none');
-  $('#author_' + id + '_long').addClass('d-none');
-  $('#author_' + id + '_long').removeClass('d-inline');
-}
-  
-function expand_abstract(id) {
-  $('#abstract_' + id + '_short').addClass('d-none');
-  $('#abstract_' + id + '_short').removeClass('d-inline');
-  $('#abstract_' + id + '_long').addClass('d-inline');
-  $('#abstract_' + id + '_long').removeClass('d-none');
-}
-
-function collapse_abstract(id) {
-  $('#abstract_' + id + '_short').addClass('d-inline');
-  $('#abstract_' + id + '_short').removeClass('d-none');
-  $('#abstract_' + id + '_long').addClass('d-none');
-  $('#abstract_' + id + '_long').removeClass('d-inline');
-}
-
-function expand_keywords(id) {
-  $('#keyword_' + id + '_short').addClass('d-none');
-  $('#keyword_' + id + '_short').removeClass('d-inline');
-  $('#keyword_' + id + '_long').addClass('d-inline');
-  $('#keyword_' + id + '_long').removeClass('d-none');
-}
-
-function collapse_keywords(id) {
-  $('#keyword_' + id + '_short').addClass('d-inline');
-  $('#keyword_' + id + '_short').removeClass('d-none');
-  $('#keyword_' + id + '_long').addClass('d-none');
-  $('#keyword_' + id + '_long').removeClass('d-inline');
-}
-
-function translate_title(paper_id) {
-  if ($('#title_cn_' + paper_id).html().trim() !== '') {
-    if ($('#title_cn_' + paper_id).hasClass('d-none')) {
-      $('#title_cn_' + paper_id).addClass('d-block');
-      $('#title_cn_' + paper_id).removeClass('d-none');
-    } else {
-      $('#title_cn_' + paper_id).addClass('d-none');
-      $('#title_cn_' + paper_id).removeClass('d-block');
-    }
-  } else {
-    $('#title_cn_' + paper_id).addClass('d-block');
-    $('#title_cn_' + paper_id).removeClass('d-none');
-    $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-    $.ajax({
-      url: "{% url 'api:translate_title' %}",
-      type: 'POST',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
-      data: { paper_id: paper_id },
-      success: function (data) {
-        console.log(data)
-        if (!data.success) {
-          alert('Translate title failed!\n' + data.error);
-        } else {
-          $('#title_cn_' + paper_id).html(data.answer);
-        }
-      },
-      error: function () {
-        alert('An error occurred while processing your request.');
-      }
-    });
-  }
-}
-
-function translate_abstract(paper_id) {
-  if ($('#abstract_cn_' + paper_id).html().trim() !== '') {
-    if ($('#abstract_cn_' + paper_id).hasClass('d-none')) {
-      $('#abstract_cn_' + paper_id).addClass('d-block');
-      $('#abstract_cn_' + paper_id).removeClass('d-none');
-    } else {
-      $('#abstract_cn_' + paper_id).addClass('d-none');
-      $('#abstract_cn_' + paper_id).removeClass('d-block');
-    }
-  } else {
-    $('#abstract_cn_' + paper_id).addClass('d-block');
-    $('#abstract_cn_' + paper_id).removeClass('d-none');
-    $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-    $.ajax({
-      url: "{% url 'api:translate_abstract' %}",
-      type: 'POST',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
-      data: { paper_id: paper_id },
-      success: function (data) {
-        if (!data.success) {
-          alert('Translate title failed!\n' + data.error);
-        } else {
-          $('#abstract_cn_' + paper_id).html(data.answer);
-        }
-      },
-      error: function () {
-        alert('An error occurred while processing your request.');
-      }
-    });
-  }
-}
-
-</script>
-
 {% else %}
-<p style="padding:20px; height:200px;">No paper is available.</p>
+  <p style="padding:20px; height:200px;">No paper is available.</p>
 {% endif %}
+</section>
 {% endblock content %}

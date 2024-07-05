@@ -13,14 +13,7 @@ from api.paper import get_paper_info, get_paginated_reviews, guess_identifier_ty
 from django.db.models import Max
 from django.db.models import Subquery, OuterRef
 from django.db.models import Q
-
-def get_review_list(request, include_trash=False):
-    if not request.user.is_authenticated:
-        return None
-    if include_trash:
-        return Review.objects.filter(creator__auth_user__username=request.user.username)
-    else:
-        return Review.objects.filter(creator__auth_user__username=request.user.username, delete_time=None)
+from django.shortcuts import get_object_or_404
 
 def query_papers(query):
     identifier_type, id = guess_identifier_type(query)
@@ -68,8 +61,6 @@ def query_papers(query):
     return papers
 
 def search_page(request):
-    u = UserProfile.objects.get(auth_user__username=request.user.username)
-
     context = {'current_page': 'search'}
     query = request.GET.get('q')
     if query is not None:
@@ -79,12 +70,18 @@ def search_page(request):
         page_number = request.GET.get('page')
         papers, items = get_paginated_reviews(papers, page_number)
 
+        user = None
+        if request.user.is_authenticated:
+            user = UserProfile.objects.get(auth_user__username=request.user.username)
+
         for index, paper in enumerate(papers):
             paper.display_index = index + papers.start_index()
             paper.author_list = [k for k in paper.authors.split('\n') if k]
             paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
-            if paper.review_set.filter(creator=u, delete_time__isnull=True).count() > 0:
-                paper.has_any_review = True
+            paper.has_any_review = False
+            if user is not None:
+                if paper.review_set.filter(creator=user, delete_time__isnull=True).count() > 0:
+                    paper.has_any_review = True
 
         context['papers'] = papers
         context['items'] = items
@@ -97,18 +94,18 @@ def search_page(request):
     return render(request, 'view/search.html', context)
 
 def _recommendation_list(request, is_trash=False):
-    u = UserProfile.objects.get(
+    user = UserProfile.objects.get(
             auth_user__username=request.user.username
         )
 
     if not is_trash:
         recommendations = Recommendation.objects.filter(
-                user=u,
+                user=user,
                 delete_time__isnull=True
             )
         latest_create_time_subquery = Recommendation.objects.filter(
                 paper=OuterRef('pk'),
-                user=u,
+                user=user,
                 delete_time__isnull=True
             ).order_by('-create_time').values('create_time')[:1]
         papers = Paper.objects.filter(
@@ -118,12 +115,12 @@ def _recommendation_list(request, is_trash=False):
             ).order_by('-latest_create_time', '-pk')
     else:
         recommendations = Recommendation.objects.filter(
-            user=u,
+            user=user,
             delete_time__isnull=False
             )
         latest_delete_time_subquery = Recommendation.objects.filter(
                 paper=OuterRef('pk'),
-                user=u,
+                user=user,
                 delete_time__isnull=False
             ).order_by('-delete_time').values('delete_time')[:1]
         papers = Paper.objects.filter(
@@ -139,14 +136,17 @@ def _recommendation_list(request, is_trash=False):
         paper.display_index = index + papers.start_index()
         paper.author_list = [k for k in paper.authors.split('\n') if k]
         paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
-        if paper.review_set.filter(creator=u, delete_time__isnull=True).count() > 0:
+        if paper.review_set.filter(creator=user, delete_time__isnull=True).count() > 0:
             paper.has_any_review = True
-        paper.recommendations = paper.recommendation_set.filter(user=u, delete_time__isnull=True).order_by('-create_time')
-        paper.historical_recommendations = paper.recommendation_set.filter(user=u, delete_time__isnull=False).order_by('-create_time')
+        paper.recommendations = paper.recommendation_set.filter(user=user, delete_time__isnull=True).order_by('-create_time')
+        paper.historical_recommendations = paper.recommendation_set.filter(user=user, delete_time__isnull=False).order_by('-create_time')
 
     return papers, items
 
 def recommendations_page(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
     papers, items = _recommendation_list(request, is_trash=False)
     return render(request, 'view/recommendations.html', {
         'current_page': 'recommendations',
@@ -155,6 +155,9 @@ def recommendations_page(request):
         })
 
 def recommendations_trash_page(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
     papers, items = _recommendation_list(request, is_trash=True)
     return render(request, 'view/recommendations.html', {
         'current_page': 'recommendations-trash',
@@ -163,6 +166,9 @@ def recommendations_trash_page(request):
         })
 
 def trackings_page(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
     item_list = PaperTracking.objects.filter(user__auth_user__username=request.user.username)
     template = loader.get_template('view/trackings.html')
     context = {
@@ -172,11 +178,11 @@ def trackings_page(request):
     return HttpResponse(template.render(context, request))
 
 def _all_page(request, is_trash=False, last_week=False):
-    u = UserProfile.objects.get(auth_user__username=request.user.username)
+    user = UserProfile.objects.get(auth_user__username=request.user.username)
 
     if not is_trash:
         reviews = Review.objects.filter(
-                creator=u,
+                creator=user,
                 delete_time__isnull=True
             )
         if last_week:
@@ -184,7 +190,7 @@ def _all_page(request, is_trash=False, last_week=False):
             reviews = reviews.filter(create_time__gte=last_week)
         latest_update_time_subquery = Review.objects.filter(
                 paper=OuterRef('pk'),
-                creator=u,
+                creator=user,
                 delete_time__isnull=False
             ).order_by('-update_time').values('update_time')[:1]
         papers = Paper.objects.filter(
@@ -194,7 +200,7 @@ def _all_page(request, is_trash=False, last_week=False):
             ).order_by('-latest_update_time', '-pk')
     else:
         reviews = Review.objects.filter(
-                creator=u,
+                creator=user,
                 delete_time__isnull=False
             )
         if last_week:
@@ -202,7 +208,7 @@ def _all_page(request, is_trash=False, last_week=False):
             reviews = reviews.filter(create_time__gte=last_week)
         latest_delete_time_subquery = Review.objects.filter(
                 paper=OuterRef('pk'),
-                creator=u,
+                creator=user,
                 delete_time__isnull=False
             ).order_by('-delete_time').values('delete_time')[:1]
         papers = Paper.objects.filter(
@@ -218,11 +224,14 @@ def _all_page(request, is_trash=False, last_week=False):
         paper.display_index = index + papers.start_index()
         paper.author_list = [k for k in paper.authors.split('\n') if k]
         paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
-        paper.reviews = paper.review_set.filter(creator=u, delete_time__isnull=True)
+        paper.reviews = paper.review_set.filter(creator=user, delete_time__isnull=True)
 
     return papers, items
 
 def all_page(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
     papers, items = _all_page(request, is_trash=False)
     return render(request, 'view/list.html', {
         'current_page': 'all',
@@ -231,6 +240,9 @@ def all_page(request):
         })
 
 def recent_page(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
     papers, items = _all_page(request, is_trash=False, last_week=True)
     return render(request, 'view/list.html', {
         'current_page': 'recent',
@@ -239,6 +251,9 @@ def recent_page(request):
         })
 
 def trash_page(request):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
     papers, items = _all_page(request, is_trash=True)
     return render(request, 'view/list.html', {
         'current_page': 'trash',
@@ -247,25 +262,23 @@ def trash_page(request):
     })
 
 def single_page(request, id):
-    review_list = get_review_list(request)
-    if review_list is not None:
-        review_list = review_list.filter(pk=id)
-    if review_list.count() <= 0:
-        return render(request, 'view/single.html', {
-            'current_page': 'paper',
-            'error_message': 'Invalid paper ID: ' + str(id),
-        })
-    review = review_list[0]
-    template = loader.get_template('view/single.html')
-    context = {
+    paper = get_object_or_404(Paper, pk=id)
+    paper.author_list = [k for k in paper.authors.split('\n') if k]
+    paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
+    if request.user.is_authenticated:
+        user = UserProfile.objects.get(auth_user__username=request.user.username)
+        paper.reviews = paper.review_set.filter(creator=user, delete_time__isnull=True)
+    return render(request, 'view/single.html', {
         'current_page': 'paper',
-        'item': review,
-    }
-    return HttpResponse(template.render(context, request))
+        'paper': paper,
+    })
 
 def labels_page(request):
-    u = UserProfile.objects.get(auth_user__username=request.user.username)
-    label_list = Label.objects.filter(user=u).order_by('name')
+    if not request.user.is_authenticated:
+        return redirect('/')
+
+    user = UserProfile.objects.get(auth_user__username=request.user.username)
+    label_list = Label.objects.filter(user=user).order_by('name')
 
     return render(request, 'view/labels.html', {
         'current_page': 'labels',
