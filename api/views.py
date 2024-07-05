@@ -7,7 +7,6 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
-from django.utils import timezone
 from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
 from api.paper import get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
@@ -257,34 +256,36 @@ def add_review(request):
         else:
             create_time = timezone.now()
 
-        p = Review(
+        paper = Paper(
+            journal = request.POST['journal'],
+            pub_year = request.POST['pub_year'],
+            title = request.POST['title']
+        )
+        review_id = request.POST['review_id']
+        paper_info, raw_dict = get_paper_info(review_id)
+        if paper_info is not None:
+            paper.doi = paper_info.get('doi', '')
+            paper.pmid = paper_info.get('pmid', '')
+            paper.arxiv_id = paper_info.get('arxiv_id', '')
+            paper.pmcid = paper_info.get('pmcid', '')
+            paper.authors = "\n".join(paper_info.get('authors', []))
+            paper.abstract = paper_info.get('abstract', '')
+            paper.urls = "\n".join(paper_info.get('urls', []))
+        paper.save()
+
+        review = Review(
+            paper = paper,
             creator = user,
             create_time = create_time,
-            update_time = create_time)
-
-        p.title = request.POST['title']
-        p.pub_year = request.POST['pub_year']
-        p.journal = request.POST['journal']
-        p.comments = request.POST['comment']
-
-        review_id = request.POST['review_id']
-        review_info, raw_dict = get_paper_info(review_id)
-        if review_info is not None:
-            p.doi = review_info['id'].get('doi', '')
-            p.pmid = review_info['id'].get('pmid', '')
-            p.arxiv_id = review_info['id'].get('arxiv_id', '')
-            p.pmcid = review_info['id'].get('pmcid', '')
-            p.cnki_id = review_info['id'].get('cnki_id', '')
-            p.authors = "\n".join(review_info.get('authors', []))
-            p.abstract = review_info.get('abstract', '')
-            p.urls = "\n".join(review_info.get('urls', []))
-        p.save()
+            update_time = create_time,
+            comments = request.POST['comment'])
+        review.save()
 
         group_name = request.POST['group_name']
         if group_name:
             group = GroupProfile.objects.get(name=group_name)
-        group.reviews.add(p)
-        group.save()
+            group.reviews.add(review)
+            group.save()
 
     except Exception as e:
         return JsonResponse({
