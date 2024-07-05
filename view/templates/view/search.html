@@ -64,6 +64,7 @@
         </div>
         {% endif %}
       </div>
+      {% if user.is_authenticated %}
       <div class="mt-2">
         {% for review in paper.review_set.all %}
           {% for label in review.labels.all %}
@@ -71,6 +72,7 @@
           {% endfor %}
         {% endfor %}
       </div>
+      {% endif %}
       <div class="my-3">
         <div id="title_{{paper.pk}}" class="d-inline text-start">
           <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold"><a href="{% url "paper" id=paper.pk %}">{{ paper.title }}</a></div>
@@ -93,21 +95,21 @@
         {% if paper.author_list|length > 10 %}
         <div id="author_{{ paper.pk }}_short" class="d-inline">
           {% for author in paper.author_list|slice:":10" %}
-          <a href="javascript:void(0)">{{ author }}</a>,
+          <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>,
           {% endfor %}
           ...
           <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
         </div>
         <div id="author_{{ paper.pk }}_long" class="d-none">
           {% for author in paper.author_list %}
-          <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+          <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
           {% endfor %}
           <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
         </div>
         {% else %}
         <div class="d-inline">
           {% for author in paper.author_list %}
-          <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+          <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
           {% endfor %}
         </div>
         {% endif %}
@@ -148,21 +150,21 @@
         {% if paper.keyword_list|length > 3 %}
         <div id="keyword_{{ paper.pk }}_short" class="d-inline">
           {% for keyword in paper.keyword_list|slice:":3" %}
-          <a href="javascript:void(0)">{{ keyword }}</a>,
+          <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>,
           {% endfor %}
           ...
           <a href="javascript:expand_keywords({{ paper.pk }})">&gt;&gt;&gt;</a>
         </div>
         <div id="keyword_{{ paper.pk }}_long" class="d-none">
           {% for keyword in paper.keyword_list %}
-          <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+          <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
           {% endfor %}
           <a href="javascript:collapse_keywords({{ paper.pk }})">&lt;&lt;&lt;</a>
         </div>
         {% else %}
         <div class="d-inline">
           {% for keyword in paper.keyword_list %}
-          <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+          <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
           {% endfor %}
         </div>
         {% endif %}

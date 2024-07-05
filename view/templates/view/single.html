@@ -51,7 +51,7 @@
     {% if paper.author_list %}
     <div>
       {% for author in paper.author_list %}
-      <a href="javascript:void(0)">{{ author }}</a>{% if not forloop.last %},{% endif %}
+      <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
       {% endfor %}
     </div>
     {% endif %}
@@ -78,7 +78,7 @@
       <b>Keywords:</b>
       <div class="d-inline">
         {% for keyword in paper.keyword_list %}
-        <a href="javascript:void(0)">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+        <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
         {% endfor %}
       </div>
     </div>
