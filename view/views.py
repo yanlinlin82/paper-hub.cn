@@ -89,6 +89,11 @@ def search_page(request):
         context['papers'] = papers
         context['items'] = items
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+    context['get_params'] = get_params
+
     return render(request, 'view/search.html', context)
 
 def _recommendation_list(request, is_trash=False):
