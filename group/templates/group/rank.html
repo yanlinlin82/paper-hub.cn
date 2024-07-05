@@ -1,0 +1,95 @@
+{% extends "group/base.html" %}
+{% load view_extras %}
+{% load static %}
+
+{% block page_title %}社群榜单{% endblock page_title %}
+
+{% block content %}
+<div class="container">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link{% if rank_type == 'this_month' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='this_month' group_name=group.name %}">本月榜单</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link{% if rank_type == 'last_month' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='last_month' group_name=group.name %}">月度榜单</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link{% if rank_type == 'monthly' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='monthly' group_name=group.name %}">月度榜单</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link{% if rank_type == 'all' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='all' group_name=group.name %}">总榜单</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link{% if rank_type == 'journal' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='journal' group_name=group.name %}">杂志榜单</a>
+    </li>
+  </ul>
+
+  <div class="card">
+    {% if rank_type == "monthly" %}
+    <form class="mt-3 mx-auto col-4">
+      <div class="input-group w-auto mb-3">
+        <select id="yearSelect" name="year" class="form-select form-select-sm">
+          {% for y in year_list %}
+          <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+        &nbsp;
+        <select id="monthSelect" name="month" class="form-select form-select-sm">
+          {% for m in month_list %}
+          <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+    {% endif %}
+    {% if rank_type == "this_month" or rank_type == "last_month" or rank_type == "monthly" %}
+    <div class="text-center fw-bold my-3">{{year}}年{{month}}月榜单</div>
+    {% endif %}
+    {% if ranks %}
+    <table class="table text-center">
+      <tr>
+        <th class="col-1">排名</th>
+        <th class="col-6">
+          {% if rank_type == "journal" %}
+          杂志
+          {% else %}
+          分享者
+          {% endif %}
+        </th>
+        <th class="col-2">分享数</th>
+        <th class="col-3">{% if rank_type == "this_month" or rank_type == "last_month" or rank_type == "monthly" %}本期内{% endif %}最早分享时间</th>
+      </tr>
+    {% for row in ranks %}
+      <tr>
+        <td>{{ row.display_index }}</td>
+        <td>
+          {% if rank_type == "journal" %}
+          <a href="{% url 'group:journal' journal_name=row.name|urlencode_full group_name=group.name %}">{{ row.name }}</a>
+          {% else %}
+          <a href="{% url "group:user" id=row.id group_name=group.name %}">{{ row.name }}</a>
+          {% endif %}
+        </td>
+        <td>{{ row.count }}</td>
+        <td>{{ row.create_time|date:'Y-m-d H:i' }}</td>
+      </tr>
+    {% endfor %}
+    </table>
+    {% else %}
+    <div class="card-body text-center my-5">暂无数据</div>
+    {% endif %}
+  </div>
+</div>
+{% if rank_type == "monthly" %}
+<script>
+$(document).ready(function() {
+  $('#yearSelect, #monthSelect').change(function() {
+      var year = $('#yearSelect').val();
+      var month = $('#monthSelect').val();
+      if (year && month) {
+          window.location.href = `?year=${year}&month=${month}`;
+      }
+  });
+});
+</script>
+{% endif %}
+{% endblock content %}

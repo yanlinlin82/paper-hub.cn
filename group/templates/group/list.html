@@ -14,7 +14,7 @@
 {% endblock page_title %}
 
 {% block page_subtitle %}
-{% if current_page == "group_journal" %}来自杂志 <a href="{% url 'group:journal' journal_name=journal_name group_name=group.name %}"><i>{{ journal_name }}</i></a> 的文献。{% endif %}
+{% if current_page == "group_journal" %}来自杂志 <a href="{% url 'group:journal' journal_name=journal_name|urlencode_full group_name=group.name %}"><i>{{ journal_name }}</i></a> 的文献。{% endif %}
 {% if current_page == "group_user" %}来自用户 <a href="{% url "group:user" id=user.pk group_name=group.name %}">{{ user }}</a> 的文献。{% endif %}
 {% endblock page_subtitle %}
 
@@ -44,13 +44,15 @@
     <div class="p-2 text-start flex-fill">
       <div class="d-flex flex-row">
         <div class="flex-fill"><a href="{% url "group:user" id=review.creator.pk group_name=group.name %}">{{ review.creator }}</a>:</div>
-        <div>{{ review.create_time|date:'Y-m-d H:i:s' }}</div>
+        <div>{{ review.create_time|date:'Y-m-d H:i' }}</div>
       </div>
       <div class="my-3">{{ review.comments }}</div>
       {% with review.paper as paper %}
       <div id="card_{{paper.pk}}" class="card p-2">
         <div id="info_{{paper.pk}}" class="text-start">
-          <a href="{% url 'group:journal' journal_name=paper.journal group_name=group.name %}">{{ paper.journal }}</a>,
+          {% if paper.journal %}
+          <a href="{% url 'group:journal' journal_name=paper.journal|urlencode_full group_name=group.name %}">{{ paper.journal }}</a>,
+          {% endif %}
           {{ paper.pub_date }}.
           {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
           {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}

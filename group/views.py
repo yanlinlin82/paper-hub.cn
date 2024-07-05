@@ -1,9 +1,11 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
 from view.models import UserProfile, GroupProfile, Review, Paper
 from api.paper import get_this_week_start_time, get_check_in_interval, get_this_month, get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal, get_last_month
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Count, F, Min
+from urllib.parse import unquote
 
 def index_page(request):
     return HttpResponseRedirect('xiangma')
@@ -126,63 +128,6 @@ def last_month_page(request, group_name):
         'items': items,
     })
 
-def stat_page(request, group_name):
-    group = get_object_or_404(GroupProfile, name=group_name)
-    reviews = group.reviews.filter(delete_time=None)
-
-    stat_3 = get_stat_all(reviews, group_name, top_n=10)
-    stat_1 = get_stat_this_month(reviews, group_name, top_n=10)
-    stat_2 = get_stat_last_month(reviews, group_name, top_n=10)
-    stat_4 = get_stat_journal(reviews, group_name, top_n=10)
-    return render(request, 'group/stat.html', {
-        'group': group,
-        'current_page': 'group_stat',
-        'stat_1': stat_1,
-        'stat_2': stat_2,
-        'stat_3': stat_3,
-        'stat_4': stat_4,
-    })
-
-def stat_this_month_page(request, group_name):
-    group = get_object_or_404(GroupProfile, name=group_name)
-    reviews = group.reviews.filter(delete_time=None)
-    stat = get_stat_this_month(reviews, group_name)
-    return render(request, 'group/stat-single.html', {
-        'group': group,
-        'current_page': 'group_stat',
-        'stat': stat,
-    })
-
-def stat_last_month_page(request, group_name):
-    group = get_object_or_404(GroupProfile, name=group_name)
-    reviews = group.reviews.filter(delete_time=None)
-    stat = get_stat_last_month(reviews, group_name)
-    return render(request, 'group/stat-single.html', {
-        'group': group,
-        'current_page': 'group_stat',
-        'stat': stat,
-    })
-
-def stat_all_page(request, group_name):
-    group = get_object_or_404(GroupProfile, name=group_name)
-    reviews = group.reviews.filter(delete_time=None)
-    stat = get_stat_all(reviews, group_name)
-    return render(request, 'group/stat-single.html', {
-        'group': group,
-        'current_page': 'group_stat',
-        'stat': stat,
-    })
-
-def stat_journal_page(request, group_name):
-    group = get_object_or_404(GroupProfile, name=group_name)
-    reviews = group.reviews.filter(delete_time=None)
-    stat = get_stat_journal(reviews, group_name)
-    return render(request, 'group/stat-single.html', {
-        'group': group,
-        'current_page': 'group_stat',
-        'stat': stat,
-    })
-
 def trash_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews = group.reviews.filter(delete_time__isnull=False).order_by('-delete_time', '-pk')
@@ -217,6 +162,7 @@ def single_page(request, id, group_name):
     })
 
 def journal_page(request, group_name, journal_name):
+    journal_name = unquote(journal_name)
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews = group.reviews.filter(paper__journal=journal_name)
     page_number = request.GET.get('page')
@@ -256,3 +202,65 @@ def user_page(request, id, group_name):
         'reviews': reviews,
         'items': items,
     })
+
+def _rank_page(request, group_name, rank_type):
+    group = get_object_or_404(GroupProfile, name=group_name)
+    reviews = group.reviews.filter(delete_time=None)
+    year, month, page_obj = None, None, None
+
+    if rank_type == 'journal':
+        ranks = reviews.exclude(paper__journal='').values('paper__journal').annotate(
+                count=Count('paper__journal'),
+                name=F('paper__journal'),
+                create_time=Min('create_time')
+            ).order_by('-count', 'create_time')
+    else:
+        if rank_type == 'this_month':
+            year, month = get_this_month()
+            start_time, end_time = get_check_in_interval(year, month)
+            print(f'start_time: {start_time}, end_time: {end_time}')
+            reviews = reviews.filter(create_time__gte=start_time)
+        elif rank_type == 'last_month':
+            year, month = get_this_month()
+            year, month = get_last_month(year, month)
+            start_time, end_time = get_check_in_interval(year, month)
+            print(f'start_time: {start_time}, end_time: {end_time}')
+            reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
+        elif rank_type == 'monthly':
+            year, month = get_this_month()
+            year = int(request.GET.get('year', year))
+            month = int(request.GET.get('month', month))
+            start_time, end_time = get_check_in_interval(year, month)
+            print(f'start_time: {start_time}, end_time: {end_time}')
+            reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
+        elif rank_type == 'all':
+            pass
+        else:
+            return HttpResponse('Invalid rank type')
+
+        ranks = reviews.values('creator').annotate(
+                count=Count('creator'),
+                id=F('creator__pk'),
+                name=F('creator__nickname'),
+                create_time=Min('create_time')
+            ).order_by('-count', 'create_time')
+
+    for index, rank in enumerate(ranks):
+        rank['display_index'] = index + 1
+
+    return render(request, 'group/rank.html', {
+        'group': group,
+        'current_page': 'group_rank',
+        'rank_type': rank_type,
+        'ranks': ranks,
+        'year': year,
+        'month': month,
+        'year_list': [i for i in range(2022, get_this_month()[0] + 1)],
+        'month_list': [i for i in range(1, 13)],
+    })
+
+def rank_page(request, group_name):
+    return _rank_page(request, group_name, 'this_month')
+
+def rank_type_page(request, group_name, rank_type):
+    return _rank_page(request, group_name, rank_type)

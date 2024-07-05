@@ -1,4 +1,5 @@
 from django import template
+from urllib.parse import quote
 
 register = template.Library()
 
@@ -17,3 +18,7 @@ def split(value, sep):
 @register.filter(name='splitlines')
 def splitlines(value):
     return value.splitlines()
+
+@register.filter
+def urlencode_full(value):
+    return quote(value, safe='') # 'abc/def' => 'abc%2Fdef'

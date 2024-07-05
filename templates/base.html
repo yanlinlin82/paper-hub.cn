@@ -91,7 +91,7 @@
           <a class="list-group-item list-group-item-action {% if current_page == "group_all" %}active{% endif %}" href="{% url 'group:all' group_name=group_name %}">所有分享</a>
           <a class="list-group-item list-group-item-action {% if current_page == "group_this_month" %}active{% endif %}" href="{% url 'group:this_month' group_name=group_name %}">本月分享</a>
           <a class="list-group-item list-group-item-action {% if current_page == "group_last_month" %}active{% endif %}" href="{% url 'group:last_month' group_name=group_name %}">上月分享</a>
-          <a class="list-group-item list-group-item-action {% if current_page == "group_stat" %}active{% endif %}" href="{% url 'group:stat' group_name=group_name %}">社群榜单</a>
+          <a class="list-group-item list-group-item-action {% if current_page == "group_rank" %}active{% endif %}" href="{% url 'group:rank' group_name=group_name %}">社群榜单</a>
           {% if user.is_authenticated and user.is_superuser %}
           <a class="list-group-item list-group-item-action {% if current_page == "group_trash" %}active{% endif %}" href="{% url 'group:trash' group_name=group_name %}">回收站</a>
           {% endif %}
