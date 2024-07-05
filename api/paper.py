@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from django.urls import reverse
 from django.db.models import Count
 from django.db.models.aggregates import Min
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from view.models import CustomCheckInInterval
 from paperhub import settings
 import requests
@@ -261,48 +260,6 @@ def get_this_week_start_time():
     today = datetime.today().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE))
     start_time = today - timedelta(days=7)
     return start_time
-
-def get_paginated_reviews(reviews, page_number):
-    if page_number is None:
-        page_number = 1
-
-    p = Paginator(reviews, 20)
-    try:
-        reviews = p.get_page(page_number)
-    except PageNotAnInteger:
-        page_number = 1
-        reviews = p.page(1)
-    except EmptyPage:
-        page_number = p.num_pages
-        reviews = p.page(p.num_pages)
-
-    items = list(reviews)
-    indices = list(range((reviews.number - 1) * p.per_page + 1, reviews.number * p.per_page + 1))
-
-    return reviews, zip(items, indices)
-
-def filter_reviews(reviews, page_number, id=None, user=None, trash=False, journal_name=None, start_time=None, end_time=None):
-    if id is not None:
-        reviews = reviews.filter(pk=id)
-
-    if user is not None:
-        reviews = reviews.filter(creator=user)
-
-    if trash:
-        reviews = reviews.exclude(delete_time=None)
-    else:
-        reviews = reviews.filter(delete_time=None)
-
-    if journal_name is not None:
-        reviews = reviews.filter(journal=journal_name)
-
-    if start_time is not None:
-        reviews = reviews.filter(create_time__gte=start_time)
-    if end_time is not None:
-        reviews = reviews.filter(create_time__lt=end_time)
-
-    reviews = reviews.order_by('-create_time', '-pk')
-    return get_paginated_reviews(reviews, page_number)
 
 def get_stat_all(reviews, group_name, top_n = None):
     stat_all = reviews\

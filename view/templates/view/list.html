@@ -150,6 +150,9 @@
   </div>
   {% endfor %}
 {% include "view/paginator.html" %}
+
+<script src="{% static 'js/paper.js' %}"></script>
+
 {% else %}
   <p style="padding:20px; height:200px;">No paper is available.</p>
 {% endif %}

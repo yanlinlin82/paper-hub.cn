@@ -1,19 +1,33 @@
 import zoneinfo
 from datetime import datetime, timedelta
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponse
 from django.template import loader
-from django.urls import reverse
-from django.utils import timezone
-from .models import Paper, Review, Recommendation, PaperTracking, Label, UserProfile
-from paperhub import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
-from api.paper import get_paper_info, get_paginated_reviews, guess_identifier_type
-from django.db.models import Max
-from django.db.models import Subquery, OuterRef
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
+from django.db.models import Subquery, OuterRef, Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from paperhub import settings
+from api.paper import get_paper_info, guess_identifier_type
+from .models import Paper, Review, Recommendation, PaperTracking, Label, UserProfile
+
+def get_paginated_reviews(reviews, page_number):
+    if page_number is None:
+        page_number = 1
+
+    p = Paginator(reviews, 20)
+    try:
+        reviews = p.get_page(page_number)
+    except PageNotAnInteger:
+        page_number = 1
+        reviews = p.page(1)
+    except EmptyPage:
+        page_number = p.num_pages
+        reviews = p.page(p.num_pages)
+
+    items = list(reviews)
+    indices = list(range((reviews.number - 1) * p.per_page + 1, reviews.number * p.per_page + 1))
+
+    return reviews, zip(items, indices)
 
 def query_papers(query):
     identifier_type, id = guess_identifier_type(query)

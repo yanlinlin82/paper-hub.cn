@@ -2,68 +2,152 @@
 {% load view_extras %}
 {% load static %}
 
-{% block page_title %}分享列表{% endblock page_title %}
+{% block page_title %}文献分享列表{% endblock page_title %}
 
 {% block content %}
-
-{% if current_page == "group_my_sharing" %}
-<div class="container my-4">
-  <div class="text-center">
-    <a class="btn btn-warning btn-lg" href="javascript:add_review();">分享打卡</a>
-  </div>
-</div>
-{% endif %}
-
-<div class="page-summary">
-  当前共有 {{ reviews.paginator.count }} 篇文献{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。
-</div>
-
-{% if reviews %}
-
-{% if collection %}
-<h2>{{ collection.name }}</h2>
-<p>创建时间：{{ collection.create_time|date:'Y-m-d H:i:s' }}</p>
-<p>更新时间：{{ collection.update_time|date:'Y-m-d H:i:s' }}</p>
-<p>{{ collection.desc }}</p>
-{% endif %}
-
-{% include "group/paginator.html" %}
-
-{% for review, index in items %}
-{% load view_extras %}
-{% load static %}
-<div class="border border-1 rounded px-3 pt-3 mb-3 bg-light-hover">
-  <div class="d-flex">
-    <div class="text-start px-2">{{ index }}.</div>
-    <div class="flex-fill px-2">
-      <div class="pb-2"><a class="fs-6 text-primary" href="{% url "group:review" id=review.pk group_name=group.name %}" id="review-title-{{review.pk}}">{{review.paper.title}}</a></div>
-      <div>
-        <span id="review-pub-year-{{review.pk}}">{{review.paper.pub_year}}</span>,
-        <span id="review-journal-{{review.pk}}" class="fst-italic">{{ review.paper.journal }}</span>.
-        {% include "group/review-info-id-list.html" %}
-      </div>
-      <div class="py-2">{% include "group/review-info-badge.html" %}</div>
-
-      <div class="border border-1 mt-3 p-1">
-        <div class="float-end fst-italic" id="review-create-time-{{review.pk}}">{{ review.create_time|date:'Y-m-d H:i:s' }}</div>
-        <div class="mb-3">
-          <a class="link-dark fw-bold" href="{% url "group:user" id=review.creator.pk group_name=group.name %}" id="review-user-{{review.pk}}">{{ review.creator }}</a>:
-        </div>
-        <div id="review-comment-{{review.pk}}" style="overflow-wrap:anywhere">{{ review.comments }}</div>
-      </div>
+{% if user.is_authenticated %}
+<section>
+  <div class="container my-4">
+    <div class="text-center">
+      <a class="btn btn-warning btn-lg" href="javascript:add_review();">分享打卡</a>
     </div>
   </div>
-  <div class="text-end my-3">
-    {% include "group/review-info-operators.html" %}
-  </div>
-</div>
-{% endfor %}
-
-{% include "group/paginator.html" %}
-
-{% else %}
-<p style="padding:20px; height:200px;">暂无任何内容。</p>
+</section>
 {% endif %}
 
-{% include "group/review-op-script.html" %}
+<section>
+{% if reviews %}
+  <div class="my-3">
+    当前共有 {{ reviews.paginator.count }} 篇文献分享{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。
+  </div>
+
+  {% include "group/paginator.html" %}
+
+  {% for review, index in items %}
+  <div id="card_{{review.pk}}" class="card p-2 my-3 d-flex flex-row">
+    <div class="p-2 text-start">{{ index }}.</div>
+    <div class="p-2 text-start flex-fill">
+      <div class="d-flex flex-row">
+        <div class="flex-fill"><a href="{% url "group:user" id=review.creator.pk group_name=group.name %}">{{ review.creator }}</a>:</div>
+        <div>{{ review.create_time|date:'Y-m-d H:i:s' }}</div>
+      </div>
+      <div class="my-3">{{ review.comments }}</div>
+      {% with review.paper as paper %}
+      <div id="card_{{paper.pk}}" class="card p-2">
+        <div id="info_{{paper.pk}}" class="text-start">
+          {{ paper.journal }},
+          {{ paper.pub_date }}.
+          {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
+          {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
+        </div>
+        <div class="my-2">
+          <div id="title_{{paper.pk}}" class="d-inline text-start">
+            <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+            <a class="ms-2" href="javascript:translate_title({{ paper.pk }}, '{% url 'api:translate_title' %}', '{{csrf_token}}')">翻译</a>
+          </div>
+          <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
+          {% if paper.translation and paper.translation.title_cn %}
+          {{ paper.translation.title_cn }}
+          {% endif %}
+          </div>
+        </div>
+  
+        {% if paper.author_list %}
+        <div>
+          {% if paper.author_list|length > 10 %}
+          <div id="author_{{ paper.pk }}_short" class="d-inline">
+            {% for author in paper.author_list|slice:":10" %}
+            <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>,
+            {% endfor %}
+            ...
+            <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
+          </div>
+          <div id="author_{{ paper.pk }}_long" class="d-none">
+            {% for author in paper.author_list %}
+            <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+            <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
+          </div>
+          {% else %}
+          <div class="d-inline">
+            {% for author in paper.author_list %}
+            <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if paper.abstract %}
+        <div class="my-3">
+          <div>
+            <b>Abstract:</b>
+            {% if paper.abstract|length > 30 %}
+            <div id="abstract_{{ paper.pk }}_short" class="d-inline">
+              {{ paper.abstract | truncatewords:30 }}
+              <a href="javascript:expand_abstract({{paper.pk}})">&gt;&gt;&gt;</a>
+            </div>
+            <div id="abstract_{{ paper.pk }}_long" class="d-none">
+              {{ paper.abstract }}
+              <a href="javascript:collapse_abstract({{paper.pk}})">&lt;&lt;&lt;</a>
+            </div>
+            {% else %}
+            <div id="abstract_{{ paper.pk }}_long" class="d-inline">
+              {{ paper.abstract }}
+            </div>
+            {% endif %}
+            <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }}, '{% url 'api:translate_abstract' %}', '{{csrf_token}}')">翻译</a>
+            <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
+              {% if paper.translation and paper.translation.abstract_cn %}
+              {{ paper.translation.abstract_cn }}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+  
+        {% if paper.keyword_list %}
+        <div>
+          <b>Keywords:</b>
+          {% if paper.keyword_list|length > 3 %}
+          <div id="keyword_{{ paper.pk }}_short" class="d-inline">
+            {% for keyword in paper.keyword_list|slice:":3" %}
+            <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>,
+            {% endfor %}
+            ...
+            <a href="javascript:expand_keywords({{ paper.pk }})">&gt;&gt;&gt;</a>
+          </div>
+          <div id="keyword_{{ paper.pk }}_long" class="d-none">
+            {% for keyword in paper.keyword_list %}
+            <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+            <a href="javascript:collapse_keywords({{ paper.pk }})">&lt;&lt;&lt;</a>
+          </div>
+          {% else %}
+          <div class="d-inline">
+            {% for keyword in paper.keyword_list %}
+            <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endwith %}
+    </div>
+    <div class="text-end my-3">
+      {% include "group/review-info-operators.html" %}
+    </div>
+  </div>
+  {% endfor %}
+
+  {% include "group/paginator.html" %}
+
+  <script src="{% static 'js/paper.js' %}"></script>
+
+  {% include "group/review-op-script.html" %}
+{% else %}
+  <p style="padding:20px; height:200px;">暂无任何内容。</p>
+{% endif %}
+</section>
 {% endblock content %}
