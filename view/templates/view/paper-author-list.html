@@ -1,0 +1,25 @@
+{% if paper.author_list %}
+<div>
+  {% if paper.author_list|length > 10 %}
+  <div id="author_{{ paper.pk }}_short" class="d-inline">
+    {% for author in paper.author_list|slice:":10" %}
+    <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>,
+    {% endfor %}
+    ...
+    <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
+  </div>
+  <div id="author_{{ paper.pk }}_long" class="d-none">
+    {% for author in paper.author_list %}
+    <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+    {% endfor %}
+    <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
+  </div>
+  {% else %}
+  <div class="d-inline">
+    {% for author in paper.author_list %}
+    <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
