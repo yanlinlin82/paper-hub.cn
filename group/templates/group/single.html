@@ -11,10 +11,7 @@
 
 {% block content %}
 <div class="p-2 text-start flex-fill">
-  <div class="d-flex flex-row">
-    <div class="flex-fill"><a href="{% url "group:user" id=review.creator.pk group_name=group.name %}">{{ review.creator }}</a>:</div>
-    <div>{{ review.create_time|date:'Y-m-d H:i' }}</div>
-  </div>
+  {% include "group/review-info.html" %}
   <div class="my-3">{{ review.comments }}</div>
   {% with review.paper as paper %}
   <div id="card_{{paper.pk}}" class="card p-2">
@@ -128,7 +125,7 @@
 </div>
 
 <script src="{% static 'js/paper.js' %}"></script>
-{% include "group/review-op-script.html" %}
+{% include "group/review-info-js.html" %}
 
 {% if user.is_authenticated %}
 <!-- Bootstrap Modal for Loading Spinner -->

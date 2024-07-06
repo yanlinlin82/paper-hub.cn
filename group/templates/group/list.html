@@ -48,10 +48,7 @@
   <div id="card_{{review.pk}}" class="card p-2 my-3 d-flex flex-row">
     <div class="p-2 text-start"><a href="{% url "group:review" id=review.pk group_name=group.name %}">{{ index }}</a>.</div>
     <div class="p-2 text-start flex-fill">
-      <div class="d-flex flex-row">
-        <div class="flex-fill"><a href="{% url "group:user" id=review.creator.pk group_name=group.name %}">{{ review.creator }}</a>:</div>
-        <div>{{ review.create_time|date:'Y-m-d H:i' }}</div>
-      </div>
+      {% include "group/review-info.html" %}
       <div class="my-3">{{ review.comments }}</div>
       {% with review.paper as paper %}
       <div id="card_{{paper.pk}}" class="card p-2">
@@ -76,7 +73,7 @@
       {% endwith %}
     </div>
     <div class="text-end my-3">
-      {% include "group/review-info-operators.html" %}
+      {% include "group/review-info-js.html" %}
     </div>
   </div>
   {% endfor %}
@@ -84,8 +81,7 @@
   {% include "group/paginator.html" %}
 
   <script src="{% static 'js/paper.js' %}"></script>
-
-  {% include "group/review-op-script.html" %}
+  {% include "group/review-info-js.html" %}
 {% else %}
   <p style="padding:20px; height:200px;">暂无任何内容。</p>
 {% endif %}
