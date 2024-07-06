@@ -61,9 +61,9 @@
 <div class="container">
   {% block main %}
   <div class="d-flex">
-    <nav class="bg-light col-md-3 col-lg-2 d-md-block">
+    <nav class="bg-light d-md-block col-4 col-sm-3 col-md-2">
       <div class="sticky-top">
-        <div class="list-group text-center my-3 flex-md-column flex-row">
+        <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark">探索发现</div>
           <a class="list-group-item list-group-item-action {% if current_page == "search" %}active{% endif %}" href="{% url 'search' %}">文献搜索</a>
           {% if user.is_authenticated %}
@@ -74,7 +74,7 @@
         </div>
         
         {% if user.is_authenticated %}
-        <div class="list-group text-center my-3 flex-md-column flex-row">
+        <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark">个人文献库</div>
           <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}" href="{% url 'all' %}">全部文献</a>
           <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}" href="{% url 'recent' %}">近期新增</a>
@@ -83,7 +83,7 @@
         </div>
         {% endif %}
 
-        <div class="list-group text-center my-3 flex-md-column flex-row">
+        <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark">社群</div>
           {% if user.is_authenticated and user.is_superuser %}
           <a class="list-group-item list-group-item-action {% if current_page == "group_my_sharing" %}active{% endif %}" href="{% url 'group:my_sharing' group_name=group_name %}">我的分享</a>
@@ -98,7 +98,7 @@
         </div>
       </div>
     </nav>
-    <div class="flex-fill col-md-9 col-lg-10 ms-sm-auto p-3">
+    <div class="flex-fill ms-sm-auto p-3 col-8 col-sm-9 col-md-10">
       <article class="container">
         <h1 class="mb-4">{% block page_title %}{% endblock page_title %}</h1>
         <p class="text-start">{% block page_subtitle %}{% endblock page_subtitle %}</p>
