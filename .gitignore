@@ -1,6 +1,5 @@
-*.sqlite3
 __pycache__
-db.sqlite3.bak*
+db.sqlite3*
 cache/
 static_root/
 .env

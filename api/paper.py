@@ -234,28 +234,6 @@ def get_paper_info(identifier):
     else:
         return None, f"Invalid paper ID '{identifier}'"
 
-def main() -> int:
-    if len(sys.argv) < 2:
-        print(f"""
-Usage: python {sys.argv[0]} <doi/pmid/pmcid/arxivid>
-
-For example:
-  1. DOI: 10.1101/2023.09.06.556610
-  2. PMID: 37683932, 37678251
-  3. PMCID: PMC9478175
-  4. arXiv ID: 2306.03301
-""")
-        return 2
-    id = sys.argv[1]
-
-    paper_info, raw = get_paper_info(id)
-    if paper_info is None:
-        print(f"ERROR: Failed to get paper info by {id}", file=sys.stderr)
-        return 1
-
-    print(json.dumps(paper_info))
-    return 0
-
 def get_this_week_start_time():
     today = datetime.today().astimezone(zoneinfo.ZoneInfo(settings.TIME_ZONE))
     start_time = today - timedelta(days=7)
@@ -469,6 +447,3 @@ def get_abstract_by_doi(doi):
             return get_abstract_by_pmid(pubmed_ids[0])
 
     return None
-
-if __name__ == '__main__':
-    sys.exit(main())
