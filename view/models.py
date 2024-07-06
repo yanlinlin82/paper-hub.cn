@@ -149,3 +149,15 @@ class CustomCheckInInterval(models.Model):
     year = models.IntegerField()
     month = models.IntegerField()
     deadline = models.DateTimeField()
+
+class PubMedIndex(models.Model):
+    source = models.IntegerField()
+    index = models.IntegerField()
+    doi = models.CharField(max_length=128, unique=True, blank=True, db_index=True)
+    pmid = models.BigIntegerField(unique=True, null=True, blank=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['doi'], name='doi_idx'),
+            models.Index(fields=['pmid'], name='pmid_idx'),
+        ]
