@@ -5,7 +5,7 @@ from paperhub import settings
 from . import views
 
 def redirect(request):
-    return HttpResponseRedirect('search')
+    return HttpResponseRedirect('group/xiangma')
 
 urlpatterns = [
     path('', redirect, name='index'),

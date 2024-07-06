@@ -29,6 +29,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="collapsibleNavbar">
+      {% if False %}
       <ul class="navbar-nav">
         {% if user.is_authenticated %}
         <li class="nav-item dropdown">
@@ -45,6 +46,7 @@
         </li>
         {% endif %}
       </ul>
+      {% endif %}
     </div>
   </div>
 </nav>
@@ -63,17 +65,15 @@
   <div class="d-flex">
     <nav class="bg-light d-md-block col-4 col-sm-3 col-md-2">
       <div class="sticky-top">
+        {% if user.is_authenticated %}
         <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark">探索发现</div>
           <a class="list-group-item list-group-item-action {% if current_page == "search" %}active{% endif %}" href="{% url 'search' %}">文献搜索</a>
-          {% if user.is_authenticated %}
           <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}" href="{% url 'recommendations' %}">文献推荐</a>
           <a class="list-group-item list-group-item-action {% if current_page == "recommendations-trash" %}active{% endif %}" href="{% url 'recommendations-trash' %}">回收站</a>
           <a class="list-group-item list-group-item-action {% if current_page == "trackings" %}active{% endif %}" href="{% url 'trackings' %}">推荐规则</a>
-          {% endif %}
         </div>
-        
-        {% if user.is_authenticated %}
+
         <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark">个人文献库</div>
           <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}" href="{% url 'all' %}">全部文献</a>
