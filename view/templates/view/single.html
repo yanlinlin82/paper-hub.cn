@@ -6,14 +6,7 @@
 <section>
   <div class="p-2 text-start flex-fill">
     <div class="d-flex">
-      <div class="flex-fill">
-        <div id="info_{{paper.pk}}" class="text-start">
-          {{ paper.journal }},
-          {{ paper.pub_date }}.
-          {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
-          {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
-        </div>
-      </div>
+      <div class="flex-fill">{% include "view/paper-info.html" %}</div>
       {% if user.is_authenticated %}
       <div class="text-end align-self-start">
         {% if paper.has_any_review %}

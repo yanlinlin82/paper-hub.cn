@@ -1,0 +1,10 @@
+<div id="info_{{paper.pk}}" class="text-start">
+  {% if paper.journal %}<a href="{% url 'search' %}?q={{paper.journal|urlencode}}">{{ paper.journal }}</a>,{% endif %}
+  {{ paper.journal }},
+  {{ paper.pub_date }}.
+  {% if paper.doi %}DOI: <a href="https://doi.org/{{paper.doi}}" target="_blank">{{paper.doi}}</a>{% endif %}
+  {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{paper.pmid}}" target="_blank">{{paper.pmid}}</a>{% endif %}
+  {% if paper.pmcid %}PMCID:<a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{paper.pmcid}} " target="_blank">{{paper.pmcid}}</a>{% endif %}
+  {% if review.arxiv_id %}arXiv:<a href="https://arxiv.org/abs/{{paper.arxiv_id}}" target="_blank">{{review.arxiv_id}}</a>{% endif %}
+  {% if review.cnki_id %}CNKI:<a href="https://kns.cnki.net/kcms/detail/detail.aspx?dbcode=CJFD&filename={{review.cnki_id}}" target="_blank">{{ review.cnki_id|escape }}</a>{% endif %}
+</div>

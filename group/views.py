@@ -198,7 +198,7 @@ def user_page(request, id, group_name):
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_user',
-        'user': user,
+        'user_info': user,
         'reviews': reviews,
         'items': items,
     })

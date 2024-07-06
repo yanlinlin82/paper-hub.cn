@@ -1,6 +1,13 @@
-{% extends "group/base.html" %}
+{% extends "base.html" %}
 {% load view_extras %}
 {% load static %}
+
+{% block banner %}
+<div class="text-start">
+  <a class="navbar-brand fs-2" href="/group/{{ group.name }}">{{ group.display_name }}</a>
+  <p>{{ group.desc }}</p>
+</div>
+{% endblock banner %}
 
 {% block page_title %}社群榜单{% endblock page_title %}
 

@@ -154,7 +154,7 @@ def _recommendation_list(request, is_trash=False):
             paper.has_any_review = True
         paper.recommendations = paper.recommendation_set.filter(user=user, delete_time__isnull=True).order_by('-create_time')
         paper.historical_recommendations = paper.recommendation_set.filter(user=user, delete_time__isnull=False).order_by('-create_time')
-
+        paper.multi_recommendations = paper.recommendation_set.filter(user=user).count() > 1
     return papers, items
 
 def recommendations_page(request):

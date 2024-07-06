@@ -1,6 +1,13 @@
-{% extends "group/base.html" %}
+{% extends "base.html" %}
 {% load view_extras %}
 {% load static %}
+
+{% block banner %}
+<div class="text-start">
+  <a class="navbar-brand fs-2" href="/group/{{ group.name }}">{{ group.display_name }}</a>
+  <p>{{ group.desc }}</p>
+</div>
+{% endblock banner %}
 
 {% block page_title %}
 {% if current_page == "group_my_sharing" %}我的文献分享列表{% endif %}
@@ -15,9 +22,8 @@
 
 {% block page_subtitle %}
 {% if current_page == "group_journal" %}来自杂志 <a href="{% url 'group:journal' journal_name=journal_name|urlencode_full group_name=group.name %}"><i>{{ journal_name }}</i></a> 的文献。{% endif %}
-{% if current_page == "group_user" %}来自用户 <a href="{% url "group:user" id=user.pk group_name=group.name %}">{{ user }}</a> 的文献。{% endif %}
+{% if current_page == "group_user" %}来自用户 <a href="{% url "group:user" id=user_info.pk group_name=group.name %}">{{ user_info }}</a> 的文献。{% endif %}
 {% endblock page_subtitle %}
-
 
 {% block content %}
 {% if user.is_authenticated %}
@@ -50,12 +56,7 @@
       {% with review.paper as paper %}
       <div id="card_{{paper.pk}}" class="card p-2">
         <div id="info_{{paper.pk}}" class="text-start">
-          {% if paper.journal %}
-          <a href="{% url 'group:journal' journal_name=paper.journal|urlencode_full group_name=group.name %}">{{ paper.journal }}</a>,
-          {% endif %}
-          {{ paper.pub_date }}.
-          {% if paper.doi %}doi: <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>{% endif %}
-          {% if paper.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ paper.pmid }}" target="_blank">{{ paper.pmid }}</a>{% endif %}
+          <div class="flex-fill">{% include "view/paper-info.html" %}</div>
         </div>
         <div class="my-2">
           <div id="title_{{paper.pk}}" class="d-inline text-start">
