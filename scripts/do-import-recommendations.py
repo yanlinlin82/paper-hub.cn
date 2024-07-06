@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import django
 
-# 设置 Django 项目配置模块的路径
+sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 

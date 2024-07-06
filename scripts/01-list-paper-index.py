@@ -3,6 +3,7 @@ import sys
 import django
 import pandas as pd
 
+sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 

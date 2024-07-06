@@ -2,7 +2,6 @@ import os
 import sys
 import gzip
 import django
-from django.db import transaction
 
 sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')

@@ -4,6 +4,7 @@ import pandas as pd
 import django
 from lxml import etree
 
+sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 
