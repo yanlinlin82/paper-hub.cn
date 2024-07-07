@@ -71,21 +71,21 @@ class Paper(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     update_time = models.DateTimeField(auto_now=True, db_index=True)
 
-    journal = models.CharField(max_length=256, default='', blank=True)
+    journal = models.CharField(max_length=256, default='', blank=True, db_index=True)
     pub_date = models.CharField(max_length=64, default='', blank=True)
-    pub_year = models.IntegerField(blank=True, null=True, default=None)
-    title = models.CharField(max_length=4096, default='')
+    pub_year = models.IntegerField(blank=True, null=True, default=None, db_index=True)
+    title = models.CharField(max_length=4096, default='', db_index=True)
     authors = models.CharField(max_length=65536, default='', blank=True)
     institutes = models.CharField(max_length=65536, default='', blank=True)
     abstract = models.CharField(max_length=65536, default='', blank=True)
     keywords = models.CharField(max_length=65536, default='', blank=True)
     urls = models.CharField(max_length=65536, default='', blank=True)
 
-    doi = models.CharField(max_length=128, default='', blank=True)
-    pmid = models.CharField(max_length=128, default='', blank=True)
-    arxiv_id = models.CharField(max_length=128, default='', blank=True)
-    pmcid = models.CharField(max_length=128, default='', blank=True)
-    cnki_id = models.CharField(max_length=128, default='', blank=True) # CNKI CJFD ID
+    doi = models.CharField(max_length=128, default='', blank=True, db_index=True)
+    pmid = models.CharField(max_length=128, default='', blank=True, db_index=True)
+    arxiv_id = models.CharField(max_length=128, default='', blank=True, db_index=True)
+    pmcid = models.CharField(max_length=128, default='', blank=True, db_index=True)
+    cnki_id = models.CharField(max_length=128, default='', blank=True, db_index=True) # CNKI CJFD ID
 
     language = models.CharField(max_length=20, default='eng') # eng, chi, etc.
 
@@ -115,10 +115,10 @@ class PaperTracking(models.Model): # every user has his own paper tracking rules
 
 class Recommendation(models.Model): # recommended by system (daily automatically)
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    read_time = models.DateTimeField(null=True, default=None) # None means unread
+    read_time = models.DateTimeField(null=True, default=None, db_index=True) # None means unread
     source = models.CharField(max_length=100, default='') # eg. 'pubmed24n1453.20240628'
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_index=True)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE, db_index=True)
     labels = models.ManyToManyField(Label, blank=True, related_name='recommendations')
 
 class Review(models.Model):
