@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
-from django.db.models import Subquery, OuterRef, Q
+from django.db.models import Subquery, OuterRef, Q, Max, Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from paperhub import settings
 from api.paper import get_paper_info, guess_identifier_type
@@ -107,27 +107,45 @@ def search_page(request):
 
     return render(request, 'view/search.html', context)
 
-def _recommendation_list(request, status):
+def _recommendation_list(request, status, recommended):
     user = UserProfile.objects.get(
             auth_user__username=request.user.username
         )
 
-    papers = Paper.objects.annotate(
-            any_unread_recommendation=Subquery(Recommendation.objects.filter(
+    if status == 'isunread':
+        recommendations = Recommendation.objects.filter(
                 paper=OuterRef('pk'),
                 user=user,
                 read_time__isnull=True
-            ).values('pk')[:1]),
-            latest_create_time=Subquery(Recommendation.objects.filter(
+            ).values('paper').annotate(
+                latest_create_time=Max('create_time')
+            )
+        papers = Paper.objects.annotate(
+                recommendation_time=Subquery(recommendations.values('latest_create_time')),
+                recommended_count=Count('recommendation__pk'),
+            ).filter(
+                recommendation_time__isnull=False
+            ).order_by('-recommendation_time', '-pk')
+    else:
+        recommendations = Recommendation.objects.filter(
                 paper=OuterRef('pk'),
-                user=user
-            ).values('create_time').order_by('-create_time')[:1])
-        ).order_by('-latest_create_time', '-pk')
+                user=user,
+                read_time__isnull=False
+            ).values('paper').annotate(
+                latest_read_time=Max('read_time'),
+                recommended_count=Count('pk')
+            )
+        papers = Paper.objects.annotate(
+                read_time=Subquery(recommendations.values('latest_read_time')),
+                recommended_count=Subquery(recommendations.values('recommended_count')),
+            ).filter(
+                read_time__isnull=False
+            ).order_by('-read_time', '-pk')
 
-    if status == 'isunread':
-        papers = papers.filter(any_unread_recommendation__isnull=False)
-    elif status == 'isread':
-        papers = papers.filter(any_unread_recommendation__isnull=True)
+    if recommended == 'first':
+        papers = papers.filter(recommended_count=1)
+    elif recommended == 'multi':
+        papers = papers.filter(recommended_count__gt=1)
     else:
         pass
 
@@ -142,7 +160,6 @@ def _recommendation_list(request, status):
             paper.has_any_review = True
         paper.recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=True).order_by('-create_time')
         paper.historical_recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=False).order_by('-create_time')
-        paper.multi_recommendations = paper.recommendation_set.filter(user=user).count() > 1
     return papers, items
 
 def recommendations_page(request):
@@ -150,12 +167,20 @@ def recommendations_page(request):
         return redirect('/')
 
     status = request.GET.get('status', 'isunread')
-    papers, items = _recommendation_list(request, status)
+    recommended = request.GET.get('recommended', 'all')
+    papers, items = _recommendation_list(request, status, recommended)
+
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'view/recommendations.html', {
         'current_page': 'recommendations',
         'papers': papers,
         'items': items,
         'status': status,
+        'recommended': recommended,
+        'get_params': get_params,
         })
 
 def trackings_page(request):

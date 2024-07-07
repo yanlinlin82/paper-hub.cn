@@ -8,18 +8,30 @@
 
 <div class="container my-3">
   <div class="d-flex">
-    <div class="text-start align-self-start me-2">筛选条件：</div>
-    <div class="text-start align-self-start">
+    <div class="text-start align-self-start">筛选条件：</div>
+    <div class="text-start align-self-start ms-2">
       <div class="dropdown">
         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
           {% if status == 'isunread' %}状态：仅未读{% endif %}
           {% if status == 'isread' %}状态：仅已读{% endif %}
-          {% if status == 'all' %}状态：显示全部{% endif %}
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
           <li><a class="btn btn-sm dropdown-item" href="?status=isunread">仅未读</a></li>
           <li><a class="btn btn-sm dropdown-item" href="?status=isread">仅已读</a></li>
-          <li><a class="btn btn-sm dropdown-item" href="?status=all">显示全部</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="text-start align-self-start ms-2">
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+          {% if recommended == 'first' %}仅首次推送{% endif %}
+          {% if recommended == 'multi' %}仅多次推送{% endif %}
+          {% if recommended == 'all' %}全部显示{% endif %}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+          <li><a class="btn btn-sm dropdown-item" href="?recommended=first">首次推送</a></li>
+          <li><a class="btn btn-sm dropdown-item" href="?recommended=multi">多次推送</a></li>
+          <li><a class="btn btn-sm dropdown-item" href="?recommended=all">全部显示</a></li>
         </ul>
       </div>
     </div>
@@ -40,19 +52,19 @@
   <div class="p-2 text-start flex-fill">
     <div class="d-flex">
       <div class="flex-fill">{% include "view/paper-info.html" %}</div>
-      {% if paper.multi_recommendations %}
+      {% if paper.recommended_count > 1 %}
       <div class="text-end align-self-start">
-        <div class="badge bg-secondary">多次推送</div>
+        <div class="badge bg-secondary ms-2">多次推送</div>
       </div>
       {% endif %}
       <div class="text-end align-self-start">
         {% if paper.has_any_review %}
-        <div class="badge bg-secondary">已加入个人文献库</div>
+        <div class="badge bg-secondary ms-2">已加入个人文献库</div>
         {% else %}
         <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_recommendation({{paper.pk}})">加入个人文献库</a>
         {% endif %}
       </div>
-      {% if paper.any_unread_recommendation %}
+      {% if paper.recommendation_time %}
       <div class="text-end align-self-start">
         <a class="btn btn-outline-primary btn-sm text-nowrap ms-2" href="javascript:delete_recommendation({{paper.pk}})">标记为已读</a>
       </div>
@@ -282,4 +294,5 @@ function restore_recommendation(id) {
   </div>
 </div>
 {% endif %}
+
 {% endblock content %}
