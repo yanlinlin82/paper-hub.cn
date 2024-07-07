@@ -233,6 +233,13 @@ def _rank_page(request, group_name, rank_type):
             start_time, end_time = get_check_in_interval(year, month)
             print(f'start_time: {start_time}, end_time: {end_time}')
             reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
+        elif rank_type == 'yearly':
+            year, _ = get_this_month()
+            year = int(request.GET.get('year', year))
+            start_time, _ = get_check_in_interval(year, 1)
+            _, end_time = get_check_in_interval(year, 12)
+            print(f'start_time: {start_time}, end_time: {end_time}')
+            reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
         elif rank_type == 'all':
             pass
         else:
