@@ -278,7 +278,7 @@ def add_review(request):
             creator = user,
             create_time = create_time,
             update_time = create_time,
-            comments = request.POST['comment'])
+            comment = request.POST['comment'])
         review.save()
 
         group_name = request.POST['group_name']
@@ -309,7 +309,7 @@ def edit_review(request):
         p.title = request.POST['title']
         p.pub_year = request.POST['pub_year']
         p.journal = request.POST['journal']
-        p.comments = request.POST['comment']
+        p.comment = request.POST['comment']
         p.save()
     except Exception as e:
         return JsonResponse({
@@ -387,7 +387,7 @@ def add_search_result(request):
 
     try:
         paper_id = request.POST['paper_id']
-        comments = request.POST['comments']
+        comment = request.POST['comment']
 
         user = request.user.custom_user
 
@@ -399,7 +399,7 @@ def add_search_result(request):
             })
         print(f'add_search_result: {paper_id} {paper}')
 
-        review = Review(paper=paper, creator=user, comments=comments)
+        review = Review(paper=paper, creator=user, comment=comment)
         review.save()
         return JsonResponse({'success': True})
     except Exception as e:
@@ -417,7 +417,7 @@ def add_recommendation(request):
     
     try:
         paper_id = request.POST['paper_id']
-        comments = request.POST['comments']
+        comment = request.POST['comment']
 
         user = request.user.custom_user
 
@@ -428,7 +428,7 @@ def add_recommendation(request):
         if review_list.count() > 0:
             review = review_list[0]
         else:
-            review = Review(paper=paper, creator=user, comments=comments)
+            review = Review(paper=paper, creator=user, comment=comment)
             review.save()
 
         any_change = False
@@ -651,7 +651,7 @@ def fetch_review_list(request):
                 'pub_year': p.pub_year,
                 'title': p.title,
                 'journal': p.journal,
-                'comments': p.comments,
+                'comment': p.comment,
                 'doi': p.doi,
                 'pmid': p.pmid,
                 'arxiv_id': p.arxiv_id,
@@ -712,7 +712,7 @@ def submit_comment(request):
         pub_year = json_data.get('pub_year')
         journal = json_data.get('journal')
         nickname = json_data.get('nickname')
-        comments = json_data.get('comment')
+        comment = json_data.get('comment')
 
         review_info, raw_dict = get_paper_info(review_id)
 
@@ -728,7 +728,7 @@ def submit_comment(request):
                       title=title or review_info['title'],
                       pub_year=pub_year or review_info['pub_year'],
                       journal=journal or review_info['journal'],
-                      comments=comments)
+                      comment=comment)
         if review_info is not None:
             review.doi = review_info['id'].get('doi', '')
             review.pmid = review_info['id'].get('pmid', '')

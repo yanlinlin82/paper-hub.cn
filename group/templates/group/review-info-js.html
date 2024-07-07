@@ -1,3 +1,191 @@
+<div class="modal fade" id="editReviewModal" data-bs-backdrop="static" role="dialog">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="editReviewModalDialogTitle">修改文献分享评论</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editReviewForm" method="post">
+          {% csrf_token %}
+          <input type="hidden" id="editReviewModalPk">
+          <div class="from-group text-start flex-fill my-3">
+            <label class="mb-3" id="editReviewModalLabel" for="editReviewModalComment"></label>
+            <textarea class="form-control" id="editReviewModalComment" name="comment" rows="6" placeholder="请输入评论" required></textarea>
+          </div>
+          <div id="editReviewModalCard" class="card p-2">
+            <div class="d-flex">
+              <div class="flex-fill">
+                <div class="text-start mb-3">文献信息</div>
+              </div>
+              <div class="text-end">
+                <button type="button" class="btn btn-outline-primary" onclick="javascript:enable_edit_paper()">同时修改文献信息</button>
+              </div>
+            </div>
+          </div>
+          <div id="editReviewModalPaperInfo" class="card p-2 d-none">
+            <!-- 文献ID -->
+            <div class="row align-items-center">
+              <div class="col-2 text-end"><label class="mt-3" for="editReviewModalID">文献ID</label></div>
+              <div class="col-10 d-flex">
+                <div class="flex-fill form-group">
+                  <div class="input-group w-auto">
+                    <input type="text" class="form-control" id="editReviewModalID" name="editReviewModalID" required placeholder="DOI/PMID/PMCID/arXivID">
+                    <button type="button" class="btn btn-primary" id="reviewModalQuery">Query</button>
+                  </div>
+                </div>
+                <div class="text-end ms-2">
+                  <button type="button" class="btn btn-outline-primary" onclick="javascript:disable_edit_paper()">取消修改文献信息</button>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <!-- 标题 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">标题</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalTitle" name="editReviewModalTitle" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalTitle2" name="editReviewModalTitle2" readonly></div>
+            </div>
+            <!-- 杂志 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">杂志</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalJournal" name="editReviewModalJournal" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalJournal2" name="editReviewModalJournal2" readonly></div>
+            </div>
+            <!-- 发表日期 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">发表日期</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalPubDate" name="editReviewModalPubDate" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalPubDate2" name="editReviewModalPubDate2" readonly></div>
+            </div>
+            <!-- 作者列表 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">作者列表</div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+            </div>
+            <!-- 机构列表 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">机构列表</div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+            </div>
+            <!-- 摘要 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">摘要</div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+            </div>
+            <!-- 关键词 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">关键词</div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+            </div>
+            <!-- URLs -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">URLs</div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+            </div>
+            <!-- DOI -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">DOI</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalDOI" name="doi" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalDOI2" readonly></div>
+            </div>
+            <!-- PMID -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">PMID</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalPMID" name="pmid" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalPMID2" readonly></div>
+            </div>
+            <!-- arXiv ID -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">arXiv ID</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalArXivID" name="arxiv_id" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalArXivID2" readonly></div>
+            </div>
+            <!-- PMCID -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">PMCID</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalPMCID" name="pmcid" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalPMCID2" readonly></div>
+            </div>
+            <!-- CNKI ID -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">CNKI ID</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalCNKIID" name="cnki_id" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalCNKIID2" readonly></div>
+            </div>
+            <!-- 论文语种 -->
+            <div class="row align-items-center p-2">
+              <div class="col-2 text-end">论文语种</div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalLang" name="lang" required></div>
+              <div class="col-1 text-center">
+                <a class="btn btn-outline-primary btn-sm">&lt;</a>
+              </div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalLang2" readonly></div>
+            </div>
+          </div>
+          <div class="text-end">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="submit" class="btn btn-primary">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function edit_review_new(review_id, paper_id) {
+  $('#editReviewModalPk').val(review_id);
+  $('#editReviewModalLabel').text($('#review_creator_' + review_id).text());
+  $('#editReviewModalComment').text($('#review_comment_' + review_id).text());
+  //$('#editReviewModalCard').html($('#card_paper_' + paper_id).html());
+  $('#editReviewModal').modal('show');
+}
+</script>
+
 <div class="modal fade" id="reviewModal" data-bs-backdrop="static" role="dialog">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -12,11 +200,11 @@
           <div class="row mb-3">
             <div class="col-6 form-group">
               <label class="mt-3" for="reviewModalUsername">Username</label>
-              <input type="text" class="form-control" id="reviewModalUsername" name="reviewModalUsername" required disabled>
+              <input type="text" class="form-control" id="reviewModalUsername" name="reviewModalUsername" required readonly>
             </div>
             <div class="col-6 form-group">
               <label class="mt-3" for="reviewModalCreateTime">Create Time</label>
-              <input type="text" class="form-control" id="reviewModalCreateTime" name="reviewModalCreateTime" required disabled>
+              <input type="text" class="form-control" id="reviewModalCreateTime" name="reviewModalCreateTime" required readonly>
             </div>
           </div>
           <div class="row">
@@ -54,6 +242,20 @@
   </div>
 </div>
 <script>
+function enable_edit_paper() {
+  $('#editReviewModalPaperInfo').addClass('d-block');
+  $('#editReviewModalPaperInfo').removeClass('d-none');
+  $('#editReviewModalCard').addClass('d-none');
+  $('#editReviewModalCard').removeClass('d-block');
+}
+
+function disable_edit_paper() {
+  $('#editReviewModalPaperInfo').addClass('d-none');
+  $('#editReviewModalPaperInfo').removeClass('d-block');
+  $('#editReviewModalCard').addClass('d-block');
+  $('#editReviewModalCard').removeClass('d-none');
+}
+
 function get_review_id(id) {
   var review_id = '';
   if ($('#review-doi-' + id)) {
@@ -72,8 +274,8 @@ function get_review_id(id) {
 
 function edit_review(id) {
   $('#reviewModalLabel').text('Edit review');
-  $('#reviewModalUsername').prop("disabled", true);
-  $('#reviewModalCreateTime').prop("disabled", true);
+  $('#reviewModalUsername').prop("readonly", true);
+  $('#reviewModalCreateTime').prop("readonly", true);
   $('#reviewModalPk').val(id);
   $('#reviewModalUsername').val($('#review-user-' + id).text());
   $('#reviewModalCreateTime').val($('#review-create-time-' + id).text());
@@ -87,8 +289,8 @@ function edit_review(id) {
 
 function add_review() {
   $('#reviewModalLabel').text('Add review');
-  $('#reviewModalUsername').prop("disabled", false);
-  $('#reviewModalCreateTime').prop("disabled", false);
+  $('#reviewModalUsername').prop("readonly", false);
+  $('#reviewModalCreateTime').prop("readonly", false);
   $('#reviewModalPk').val('');
   $('#reviewModalUsername').val('');
   $('#reviewModalCreateTime').val('');

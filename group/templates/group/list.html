@@ -45,13 +45,13 @@
   {% include "group/paginator.html" %}
 
   {% for review, index in items %}
-  <div id="card_{{review.pk}}" class="card p-2 my-3 d-flex flex-row">
+  <div id="card_review_{{review.pk}}" class="card p-2 my-3 d-flex flex-row">
     <div class="p-2 text-start"><a href="{% url "group:review" id=review.pk group_name=group.name %}">{{ index }}</a>.</div>
     <div class="p-2 text-start flex-fill">
       {% include "group/review-info.html" %}
-      <div class="my-3">{{ review.comments }}</div>
+      <div id="review_comment_{{review.pk}}" class="my-3">{{ review.comment }}</div>
       {% with review.paper as paper %}
-      <div id="card_{{paper.pk}}" class="card p-2">
+      <div id="card_paper_{{paper.pk}}" class="card p-2">
         <div id="info_{{paper.pk}}" class="text-start">
           <div class="flex-fill">{% include "view/paper-info.html" %}</div>
         </div>

@@ -93,28 +93,28 @@
 </section>
 
 <!-- Modal -->
-<div class="modal fade" id="commentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="commentsModalLabel">加入推荐文献到个人文献库</h5>
+        <h5 class="modal-title" id="commentModalLabel">加入推荐文献到个人文献库</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="commentsForm">
+        <form id="commentForm">
           <div class="mb-3">
             <div id="dlg_info" class="text-start"></div>
             <div id="dlg_title" class="text-start mt-3 fs-4 fw-bold"></div>
           </div>
           <div class="mb-3">
-            <label for="comments" class="form-label">笔记</label>
-            <textarea class="form-control" id="comments" rows="8" required></textarea>
+            <label for="comment" class="form-label">笔记</label>
+            <textarea class="form-control" id="comment" rows="8" required></textarea>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" id="submitComments">确定</button>
+        <button type="button" class="btn btn-primary" id="submitComment">确定</button>
       </div>
     </div>
   </div>
@@ -126,27 +126,27 @@ $(document).ready(function() {
   $('#shareModal').on('shown.bs.modal', () => {
     $('#shareModalPaperID').focus();
   })
-  $('#commentsModal').on('shown.bs.modal', () => {
-    $('#comments').focus();
+  $('#commentModal').on('shown.bs.modal', () => {
+    $('#comment').focus();
   })
 })
 
 function add_search_result(id) {
   $('#dlg_info').html($('#info_' + id).html());
   $('#dlg_title').html($('#title_' + id + '_text').html());
-  $('#comments').val('');
-  $('#commentsModal').modal('show');
+  $('#comment').val('');
+  $('#commentModal').modal('show');
 
-  $('#submitComments').off('click').on('click', function() {
-    const comments = $('#comments').val();
-    $('#commentsModal').modal('hide');
+  $('#submitComment').off('click').on('click', function() {
+    const comment = $('#comment').val();
+    $('#commentModal').modal('hide');
     $.ajax({
       url: "{% url 'api:add_search_result' %}",
       type: 'POST',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
       data: {
         paper_id: id,
-        comments: comments
+        comment: comment
       },
       success: function(data) {
         if (!data.success) {

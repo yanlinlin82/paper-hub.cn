@@ -57,7 +57,7 @@
         {% for review in paper.reviews %}
           <li class="my-2">
             <div class="d-inline text-start my-2">{{ review.create_time | date:"Y-m-d H:i" }}：</div>
-            <div class="d-inline text-start my-2">{{ review.comments }}</div>
+            <div class="d-inline text-start my-2">{{ review.comment }}</div>
           </li>
         {% endfor %}
         </ul>

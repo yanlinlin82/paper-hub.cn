@@ -71,10 +71,10 @@ class Paper(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     update_time = models.DateTimeField(auto_now=True, db_index=True)
 
+    title = models.CharField(max_length=4096, default='', db_index=True)
     journal = models.CharField(max_length=256, default='', blank=True, db_index=True)
     pub_date = models.CharField(max_length=64, default='', blank=True)
     pub_year = models.IntegerField(blank=True, null=True, default=None, db_index=True)
-    title = models.CharField(max_length=4096, default='', db_index=True)
     authors = models.CharField(max_length=65536, default='', blank=True)
     institutes = models.CharField(max_length=65536, default='', blank=True)
     abstract = models.CharField(max_length=65536, default='', blank=True)
@@ -129,7 +129,7 @@ class Review(models.Model):
     update_time = models.DateTimeField(default=timezone.now)
     delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
 
-    comments = models.CharField(max_length=65536, default='', blank=True)
+    comment = models.CharField(max_length=1024*1024, default='', blank=True)
     labels = models.ManyToManyField(Label, blank=True, related_name='reviews')
 
     def __str__(self):

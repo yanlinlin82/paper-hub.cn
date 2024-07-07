@@ -12,7 +12,7 @@
 {% block content %}
 <div class="p-2 text-start flex-fill">
   {% include "group/review-info.html" %}
-  <div class="my-3">{{ review.comments }}</div>
+  <div class="my-3">{{ review.comment }}</div>
   {% with review.paper as paper %}
   <div id="card_{{paper.pk}}" class="card p-2">
     <div id="info_{{paper.pk}}" class="text-start">
@@ -118,10 +118,6 @@
     {% endif %}
   </div>
   {% endwith %}
-
-  <div class="text-end my-3">
-    {% include "group/review-info-operators.html" %}
-  </div>
 </div>
 
 <script src="{% static 'js/paper.js' %}"></script>

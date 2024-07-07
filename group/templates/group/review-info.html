@@ -1,7 +1,7 @@
 <div class="d-flex flex-row">
-  <div class="text-start flex-fill">
-    <a href="{% url "group:user" id=review.creator.pk group_name=group.name %}">{{ review.creator }}</a>
-    ({{ review.create_time|date:'Y-m-d H:i' }}):
+  <div id="review_creator_{{review.pk}}" class="text-start flex-fill">
+    <a href="{% url "group:user" id=review.creator.pk group_name=group.name %}">{{review.creator}}</a>
+    ({{review.create_time|date:'Y-m-d H:i'}}):
   </div>
   {% if user.is_authenticated and user.is_superuser %}
   {% if current_page == 'group_trash' %}
@@ -13,7 +13,7 @@
   </div>
 {% else %}
   <div class="text-end align-self-start">
-    <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:edit_review({{review.pk}})">修改</a>
+    <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:edit_review_new({{review.pk}}, {{review.paper.pk}})">修改</a>
   </div>
   <div class="text-end align-self-start">
     <a class="btn btn-danger btn-sm text-nowrap ms-2" href="javascript:delete_review({{review.pk}});">删除</a>
