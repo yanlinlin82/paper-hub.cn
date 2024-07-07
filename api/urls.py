@@ -17,7 +17,6 @@ urlpatterns = [
     path('add_recommendation', views.add_recommendation, name='add_recommendation'),
     path('delete_recommendation', views.delete_recommendation, name='delete_recommendation'),
     path('restore_recommendation', views.restore_recommendation, name='restore_recommendation'),
-    path('delete_permanently_recommendation', views.delete_permanently_recommendation, name='delete_permanently_recommendation'),
     path('wx_login', views.wx_login, name='wx_login'),
     path('update_nickname', views.update_nickname, name='update_nickname'),
     path('fetch_rank_list', views.fetch_rank_list, name='fetch_rank_list'),

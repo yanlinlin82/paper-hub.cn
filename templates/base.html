@@ -71,7 +71,6 @@
           <div class="collapse{% if current_page == "search" or current_page == "recommendations" or current_page == "recommendations-trash" or current_page == "trackings" %} show{% endif %}" id="collapse-group-1" data-bs-parent="#collapse-group">
             <a class="list-group-item list-group-item-action {% if current_page == "search" %}active{% endif %}" href="{% url 'search' %}">文献搜索</a>
             <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}" href="{% url 'recommendations' %}">文献推荐</a>
-            <a class="list-group-item list-group-item-action {% if current_page == "recommendations-trash" %}active{% endif %}" href="{% url 'recommendations-trash' %}">回收站</a>
             <a class="list-group-item list-group-item-action {% if current_page == "trackings" %}active{% endif %}" href="{% url 'trackings' %}">推荐规则</a>
           </div>
         </div>

@@ -79,7 +79,7 @@ def import_excel(source_id, excel_file):
                     cnt['label_updated'] += 1
                     any_change = True
         if any_change:
-            r.delete_time = None
+            r.read_time = None
             r.save()
 
     print(f"Imported {cnt['total']} recommendations, {cnt['new_paper']} new papers, {cnt['new_recommendation']} new recommendations, {cnt['label_updated']} labels updated.")

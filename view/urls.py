@@ -11,7 +11,6 @@ urlpatterns = [
     path('', redirect, name='index'),
     path('search', views.search_page, name='search'),
     path('recommendations', views.recommendations_page, name='recommendations'),
-    path('recommendations-trash', views.recommendations_trash_page, name='recommendations-trash'),
     path('trackings', views.trackings_page, name='trackings'),
     path('all', views.all_page, name='all'),
     path('recent', views.recent_page, name='recent'),

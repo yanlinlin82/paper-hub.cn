@@ -432,12 +432,12 @@ def add_recommendation(request):
             review.save()
 
         any_change = False
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time=None):
             for label in recommendation.labels.all():
                 if label not in review.labels.all():
                     review.labels.add(label)
                     any_change = True
-            recommendation.delete_time = timezone.now()
+            recommendation.read_time = timezone.now()
             recommendation.save()
         if any_change:
             review.save()
@@ -465,8 +465,8 @@ def delete_recommendation(request):
         paper = Paper.objects.get(pk=paper_id)
         print(f'delete_recommendation: {paper_id} {paper}')
 
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
-            recommendation.delete_time = timezone.now()
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time=None):
+            recommendation.read_time = timezone.now()
             recommendation.save()
 
     except Exception as e:
@@ -492,35 +492,9 @@ def restore_recommendation(request):
         paper = Paper.objects.get(pk=paper_id)
         print(f'restore_recommendation: {paper_id} {paper}')
 
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time__isnull=False):
-            recommendation.delete_time = None
+        for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=False):
+            recommendation.read_time = None
             recommendation.save()
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
-
-    return JsonResponse({'success': True})
-
-def delete_permanently_recommendation(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
-    
-    try:
-        paper_id = request.POST['paper_id']
-
-        user = request.user.custom_user
-
-        paper = Paper.objects.get(pk=paper_id)
-        print(f'delete_permanently_recommendation: {paper_id} {paper}')
-
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, delete_time=None):
-            recommendation.delete()
 
     except Exception as e:
         return JsonResponse({

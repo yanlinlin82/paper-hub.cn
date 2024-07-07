@@ -107,41 +107,29 @@ def search_page(request):
 
     return render(request, 'view/search.html', context)
 
-def _recommendation_list(request, is_trash=False):
+def _recommendation_list(request, status):
     user = UserProfile.objects.get(
             auth_user__username=request.user.username
         )
 
-    if not is_trash:
-        recommendations = Recommendation.objects.filter(
-                user=user,
-                delete_time__isnull=True
-            )
-        latest_create_time_subquery = Recommendation.objects.filter(
+    papers = Paper.objects.annotate(
+            any_unread_recommendation=Subquery(Recommendation.objects.filter(
                 paper=OuterRef('pk'),
                 user=user,
-                delete_time__isnull=True
-            ).order_by('-create_time').values('create_time')[:1]
-        papers = Paper.objects.filter(
-                pk__in=[r.paper_id for r in recommendations]
-            ).annotate(
-                latest_create_time=Subquery(latest_create_time_subquery)
-            ).order_by('-latest_create_time', '-pk')
+                read_time__isnull=True
+            ).values('pk')[:1]),
+            latest_create_time=Subquery(Recommendation.objects.filter(
+                paper=OuterRef('pk'),
+                user=user
+            ).values('create_time').order_by('-create_time')[:1])
+        ).order_by('-latest_create_time', '-pk')
+
+    if status == 'isunread':
+        papers = papers.filter(any_unread_recommendation__isnull=False)
+    elif status == 'isread':
+        papers = papers.filter(any_unread_recommendation__isnull=True)
     else:
-        recommendations = Recommendation.objects.filter(
-            user=user,
-            delete_time__isnull=False
-            )
-        latest_delete_time_subquery = Recommendation.objects.filter(
-                paper=OuterRef('pk'),
-                user=user,
-                delete_time__isnull=False
-            ).order_by('-delete_time').values('delete_time')[:1]
-        papers = Paper.objects.filter(
-                pk__in=[r.paper_id for r in recommendations]
-            ).annotate(
-                latest_delete_time=Subquery(latest_delete_time_subquery)
-            ).order_by('-latest_delete_time', '-pk')
+        pass
 
     page_number = request.GET.get('page')
     papers, items = get_paginated_reviews(papers, page_number)
@@ -152,8 +140,8 @@ def _recommendation_list(request, is_trash=False):
         paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
         if paper.review_set.filter(creator=user, delete_time__isnull=True).count() > 0:
             paper.has_any_review = True
-        paper.recommendations = paper.recommendation_set.filter(user=user, delete_time__isnull=True).order_by('-create_time')
-        paper.historical_recommendations = paper.recommendation_set.filter(user=user, delete_time__isnull=False).order_by('-create_time')
+        paper.recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=True).order_by('-create_time')
+        paper.historical_recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=False).order_by('-create_time')
         paper.multi_recommendations = paper.recommendation_set.filter(user=user).count() > 1
     return papers, items
 
@@ -161,22 +149,13 @@ def recommendations_page(request):
     if not request.user.is_authenticated:
         return redirect('/')
 
-    papers, items = _recommendation_list(request, is_trash=False)
+    status = request.GET.get('status', 'isunread')
+    papers, items = _recommendation_list(request, status)
     return render(request, 'view/recommendations.html', {
         'current_page': 'recommendations',
         'papers': papers,
         'items': items,
-        })
-
-def recommendations_trash_page(request):
-    if not request.user.is_authenticated:
-        return redirect('/')
-
-    papers, items = _recommendation_list(request, is_trash=True)
-    return render(request, 'view/recommendations.html', {
-        'current_page': 'recommendations-trash',
-        'papers': papers,
-        'items': items,
+        'status': status,
         })
 
 def trackings_page(request):
