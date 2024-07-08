@@ -33,7 +33,7 @@
                 <div class="flex-fill form-group">
                   <div class="input-group w-auto">
                     <input type="text" class="form-control" id="editReviewModalID" name="editReviewModalID" placeholder="DOI/PMID/PMCID/arXivID">
-                    <button type="button" class="btn btn-primary" onclick="javascript:query_paper_info()">Query</button>
+                    <button type="button" class="btn btn-primary" onclick="javascript:query_paper_info()">提取供参考的文献信息</button>
                   </div>
                 </div>
                 <div class="text-end ms-2">
@@ -44,11 +44,11 @@
             <hr>
             <div class="row align-items-center p-2">
               <div class="col-2"></div>
-              <div class="col-5 text-center">待提交信息</div>
+              <div class="col-5 text-center">待提交的文献信息</div>
               <div class="col-1 text-center">
                 <button type="button" id="editReviewModalAllConfirm" class="btn btn-outline-primary btn-sm" onclick="fill_input_all()">&lt;&lt;</button>
               </div>
-              <div class="col-4 text-center">参考信息</div>
+              <div class="col-4 text-center">供参考的文献信息</div>
             </div>
             <!-- 标题 -->
             <div class="row align-items-center p-2">
@@ -262,10 +262,8 @@ function fill_input_all() {
 
 function query_paper_info() {
   var identifier = $('#editReviewModalID').val();
-  $.ajax({
+  ajaxPostJson({
     url: "{% url 'api:query_paper_info' %}",
-    type: 'POST',
-    contentType: 'application/json',
     headers: { "X-CSRFToken": '{{csrf_token}}' },
     data: { identifier: identifier },
     success: function (data) {
@@ -321,17 +319,15 @@ function submit_review(event) {
     data.paper.lang = $('#editReviewModalLang').val();
   }
   console.log(data);
-  $.ajax({
+  ajaxPostJson({
     url: "{% url 'api:submit_review' %}",
-    type: 'POST',
-    contentType: 'application/json',
     headers: { "X-CSRFToken": '{{csrf_token}}' },
     data: data,
     success: function (data) {
       if (!data.success) {
-        alert('Edit review failed!\n' + data.error);
+        alert('submit_review failed!\n' + data.error);
       } else {
-        //location.reload(false);
+        location.reload(false);
       }
     },
     error: function () {

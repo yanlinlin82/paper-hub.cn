@@ -12,7 +12,6 @@ from django.db.models.aggregates import Min
 from view.models import CustomCheckInInterval, PubMedIndex, Paper
 from paperhub import settings
 import requests
-import urllib.request
 from lxml import etree
 
 class PaperInfo:
@@ -24,6 +23,9 @@ class PaperInfo:
         self._pub_year = None
         self._doi = None
         self._pmid = None
+        self._arxiv_id = None
+        self._pmcid = None
+        self._cnki_id = None
         self._authors = None
         self._affiliations = None
         self._abstract = None
@@ -34,22 +36,24 @@ class PaperInfo:
     @property
     def title(self):
         if self._title is None:
-            node_list = self.xml_node.xpath('MedlineCitation/Article/ArticleTitle')
-            text = []
-            for node in node_list:
-                for child in node.itertext(with_tail=True):
-                    if isinstance(child, etree._Element):
-                        text.append(etree.tostring(child, encoding='unicode', method='html'))
-                    else:
-                        text.append(child)
-            self._title = ''.join(text)
-            self._title = self._title.rstrip('.')
+            if self.xml_node:
+                node_list = self.xml_node.xpath('MedlineCitation/Article/ArticleTitle')
+                text = []
+                for node in node_list:
+                    for child in node.itertext(with_tail=True):
+                        if isinstance(child, etree._Element):
+                            text.append(etree.tostring(child, encoding='unicode', method='html'))
+                        else:
+                            text.append(child)
+                self._title = ''.join(text)
+                self._title = self._title.rstrip('.')
         return self._title
 
     @property
     def journal(self):
         if self._journal is None:
-            self._journal = (self.xml_node.xpath('MedlineCitation/Article/Journal/Title/text()') or [''])[0]
+            if self.xml_node:
+                self._journal = (self.xml_node.xpath('MedlineCitation/Article/Journal/Title/text()') or [''])[0]
         return self._journal
 
     @property
@@ -65,14 +69,16 @@ class PaperInfo:
     @property
     def doi(self):
         if self._doi is None:
-            self._doi = (self.xml_node.xpath('MedlineCitation/Article/ELocationID[@EIdType="doi"]/text()') or [''])[0]
-            self._doi = self._doi.rstrip('.')
+            if self.xml_node:
+                self._doi = (self.xml_node.xpath('MedlineCitation/Article/ELocationID[@EIdType="doi"]/text()') or [''])[0]
+                self._doi = self._doi.rstrip('.')
         return self._doi
 
     @property
     def pmid(self):
         if self._pmid is None:
-            self._pmid = (self.xml_node.xpath('MedlineCitation/PMID/text()') or [''])[0]
+            if self.xml_node:
+                self._pmid = (self.xml_node.xpath('MedlineCitation/PMID/text()') or [''])[0]
         return self._pmid
 
     @property
@@ -162,48 +168,50 @@ class PaperInfo:
 
     @property
     def arxiv_id(self):
-        return None
+        return self._arxiv_id
     
     @property
     def pmcid(self):
-        return None
+        return self._pmcid
     
     @property
     def cnki_id(self):
-        return None
+        return self._cnki_id
 
     def _parse_date(self):
-        if self._pub_date is not None:
-            return
+        if self._pub_date is None:
+            if self.xml_node:
+                node = self.xml_node.xpath('MedlineCitation/Article/Journal/JournalIssue/PubDate')
+                if len(node) == 0:
+                    node = self.xml_node.xpath('MedlineCitation/Article/ArticleDate')
 
-        node = self.xml_node.xpath('MedlineCitation/Article/Journal/JournalIssue/PubDate')
-        if len(node) == 0:
-            node = self.xml_node.xpath('MedlineCitation/Article/ArticleDate')
-
-        if len(node) == 0:
-            self._pub_date = ''
-        else:
-            node = node[0]
-            # eg. <PubDate><Year>2012</Year><Month>Jan</Month><Day>01</Day></PubDate>
-            #     <PubDate><Year>2012</Year><Month>Jan-Feb</Month></PubDate>
-            #     <PubDate><MedlineDate>2012 Jan-Feb</MedlineDate></PubDate>
-            year = node.xpath('Year/text()')
-            month = node.xpath('Month/text()')
-            day = node.xpath('Day/text()')
-            if len(year) == 0:
-                node = node.xpath('MedlineDate/text()')
-                if node is None:
+                if len(node) == 0:
                     self._pub_date = ''
                 else:
-                    # eg. <MedlineDate>2012 Jan-Feb</MedlineDate> or <MedlineDate>2012</MedlineDate>
-                    self._pub_date = node[0]
-                    self._pub_year = node[0].split(' ')[0]
-            else:
-                self._pub_date = self._pub_year = year[0]
-                if len(month) > 0:
-                    self._pub_date += '-' + month[0]
-                    if len(day) > 0:
-                        self._pub_date += '-' + day[0]
+                    node = node[0]
+                    # eg. <PubDate><Year>2012</Year><Month>Jan</Month><Day>01</Day></PubDate>
+                    #     <PubDate><Year>2012</Year><Month>Jan-Feb</Month></PubDate>
+                    #     <PubDate><MedlineDate>2012 Jan-Feb</MedlineDate></PubDate>
+                    year = node.xpath('Year/text()')
+                    month = node.xpath('Month/text()')
+                    day = node.xpath('Day/text()')
+                    if len(year) == 0:
+                        node = node.xpath('MedlineDate/text()')
+                        if node is None:
+                            self._pub_date = ''
+                        else:
+                            # eg. <MedlineDate>2012 Jan-Feb</MedlineDate> or <MedlineDate>2012</MedlineDate>
+                            self._pub_date = node[0]
+                            self._pub_year = node[0].split(' ')[0]
+                    else:
+                        self._pub_date = self._pub_year = year[0]
+                        if len(month) > 0:
+                            self._pub_date += '-' + month[0]
+                            if len(day) > 0:
+                                self._pub_date += '-' + day[0]
+        if self._pub_year is None:
+            if self._pub_date:
+                self._pub_year = node[0].split(' ')[0]
 
 def fix_paper_info(input_xlsx, pubmed_dir):
     df = pd.read_excel(input_xlsx, dtype=str) # id,pmid,doi,journal,pub_year,title,source,index,pmid_from_cache,doi_from_cache,updated
@@ -524,23 +532,13 @@ def get_paper_info_new(identifier, identifier_type):
     print(f"Will try to fetch paper info from source '{source}' with index '{index}'")
 
     cache_filename = os.path.join(settings.BASE_DIR, "cache", "pubmed-data", f"pubmed24n{source:04}.xml.gz")
-    print(f"cache_filename: {cache_filename}")
     if not os.path.exists(cache_filename):
-        if not os.path.exists(os.path.join(settings.BASE_DIR, "cache")):
-            os.makedirs(os.path.join(settings.BASE_DIR, "cache"))
-        if not os.path.exists(os.path.join(settings.BASE_DIR, "cache", "pubmed-data")):
-            os.makedirs(os.path.join(settings.BASE_DIR, "cache", "pubmed-data"))
-        
         if source < 1912:
             url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed24n{source:04}.xml.gz"
         else:
             url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/pubmed24n{source:04}.xml.gz"
 
-        if not os.path.exists(cache_filename):
-            print(f"Fetching data from {url}")
-            #urllib.request.urlretrieve(url, cache_filename)
-
-    if not os.path.exists(cache_filename):
+        print(f"Local cache file '{cache_filename}' is missing, which could be downloaded from: {url}")
         paper_info, raw_dict = get_paper_info(identifier)
         return paper_info
 
@@ -550,6 +548,27 @@ def get_paper_info_new(identifier, identifier_type):
     article_node = root.xpath(f"/PubmedArticleSet/PubmedArticle[{index}]")
     paper_info = PaperInfo(article_node[0])
 
+    return paper_info
+
+def convert_paper_info(old_paper_info, raw_dict):
+    paper_info = PaperInfo()
+    paper_info._title = old_paper_info.get('title')
+    paper_info._journal = old_paper_info.get('journal')
+    paper_info._pub_date = old_paper_info.get('pub_date')
+    paper_info._pub_year = old_paper_info.get('pub_year')
+    paper_info._doi = old_paper_info.get('id', {}).get('doi')
+    paper_info._pmid = old_paper_info.get('id', {}).get('pmid')
+    paper_info._arxiv_id = old_paper_info.get('id', {}).get('arxiv_id')
+    paper_info._pmcid = old_paper_info.get('id', {}).get('pmcid')
+    paper_info._cnki_id = old_paper_info.get('id', {}).get('cnki_id')
+    #paper_info._issue = old_paper_info.issue
+    #paper_info._volume = old_paper_info.volume
+    #paper_info._page = old_paper_info.page
+    paper_info._authors = old_paper_info.get('authors', [])
+    paper_info._affiliations = old_paper_info.get('affiliations', [])
+    paper_info._abstract = old_paper_info.get('abstract')
+    paper_info._keywords = old_paper_info.get('keywords', [])
+    paper_info._language = old_paper_info.get('language')
     return paper_info
 
 def get_paper_info(identifier):

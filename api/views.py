@@ -7,6 +7,7 @@ import random
 import string
 import datetime
 import uuid
+from functools import wraps
 from urllib.parse import quote
 from django.utils import timezone
 from django.http import JsonResponse
@@ -22,9 +23,7 @@ from paperhub import settings
 from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
 from api.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
-from api.paper import get_abstract_by_doi
-
-from functools import wraps
+from api.paper import get_abstract_by_doi, convert_paper_info
 
 def json_view(func):
     @wraps(func)
@@ -244,106 +243,118 @@ def query_review(request, id):
             "urls": review_info.get('urls', []),
         }})
 
+@json_view
+@require_login
 def query_paper_info(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
+    data = request.json_data
+    identifier = data.get('identifier')
+    if identifier is None:
+        return JsonResponse({'success': False, 'error': f"Invalid request!"})
 
-    if request.method != 'POST':
-        return JsonResponse({
-            'success': False,
-            'error': 'POST method required!'
-            })
+    identifier_type, identifier = guess_identifier_type(identifier)
+    if identifier_type == "pmid" or identifier_type == "doi":
+        paper_info = get_paper_info_new(identifier, identifier_type)
+    else:
+        paper_info_old, raw_dict = get_paper_info(identifier)
+        paper_info = convert_paper_info(paper_info_old, raw_dict)
 
-    try:
-        identifier = request.POST['identifier']
-        print(f'query_paper_info: {identifier}')
+    return JsonResponse({
+        'success': True,
+        'results': {
+            'identifier': identifier,
+            'identifier_type': identifier_type,
+            'title': paper_info.title,
+            'journal': paper_info.journal,
+            'pub_date': paper_info.pub_date,
+            'pub_year': paper_info.pub_year,
+            'authors': paper_info.authors,
+            'affiliations': paper_info.affiliations,
+            'abstract': paper_info.abstract,
+            'keywords': paper_info.keywords,
+            'urls': paper_info.urls,
+            'doi': paper_info.doi,
+            'pmid': paper_info.pmid,
+            'arxiv_id': paper_info.arxiv_id,
+            'pmcid': paper_info.pmcid,
+            'cnki_id': paper_info.cnki_id,
+            'language': paper_info.language,
+        }
+    })
 
-        identifier_type, identifier = guess_identifier_type(identifier)
-        print(f'  identifier_type: {identifier_type}')
-        if identifier_type == "pmid" or identifier_type == "doi":
-            paper_info = get_paper_info_new(identifier, identifier_type)
-        else:
-            paper_info, raw_dict = get_paper_info(identifier)
-
-        return JsonResponse({
-            'success': True,
-            'results': {
-                'identifier': identifier,
-                'identifier_type': identifier_type,
-                'title': paper_info.title,
-                'journal': paper_info.journal,
-                'pub_date': paper_info.pub_date,
-                'pub_year': paper_info.pub_year,
-                'authors': paper_info.authors,
-                'affiliations': paper_info.affiliations,
-                'abstract': paper_info.abstract,
-                'keywords': paper_info.keywords,
-                'urls': paper_info.urls,
-                'doi': paper_info.doi,
-                'pmid': paper_info.pmid,
-                'arxiv_id': paper_info.arxiv_id,
-                'pmcid': paper_info.pmcid,
-                'cnki_id': paper_info.cnki_id,
-                'language': paper_info.language,
-            }
-        })
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
-
+@json_view
+@require_login
 def submit_review(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
+    data = request.json_data
+    review_id = data.get('review_id')
+    paper_id = data.get('paper_id')
+    comment = data.get('comment')
 
-    if request.method != 'POST':
-        return JsonResponse({
-            'success': False,
-            'error': 'POST method required!'
-            })
+    if review_id is None or paper_id is None:
+        return JsonResponse({'success': False, 'error': f"Invalid request!"})
+    review_id = int(review_id)
+    paper_id = int(paper_id)
 
-    try:
-        print(f'submit_review: {request.POST}')
+    review = Review.objects.get(pk=review_id)
+    if review is None:
+        return JsonResponse({'success': False, 'error': f"Review not found: {review_id}"})
+    if review.paper.pk != paper_id:
+        return JsonResponse({'success': False, 'error': f"Review {review_id} does not match paper {paper_id} (expected {review.paper.pk})"})
+    if not request.user.is_superuser and review.creator != request.user.custom_user:
+        return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {request.user.custom_user} (expected {review.creator})"})
 
-        review_id = int(request.POST['review_id'])
-        paper_id = int(request.POST['paper_id'])
-        comment = request.POST['comment']
+    if review.comment != comment:
+        review.comment = comment
+        review.save()
 
-        review = Review.objects.get(pk=review_id)
-        if review is None:
-            return JsonResponse({
-                'success': False,
-                'error': f"Review not found: {review_id}"
-            })
-        if review.paper.pk != paper_id:
-            return JsonResponse({
-                'success': False,
-                'error': f"Review {review_id} does not match paper {paper_id} (expected {review.paper.pk})"
-            })
-        if not request.user.is_superuser and review.creator != request.user.custom_user:
-            return JsonResponse({
-                'success': False,
-                'error': f"Review {review_id} is not created by user {request.user.custom_user} (expected {review.creator})"
-            })
+    if 'paper' in data:
+        paper_info = data['paper']
+        any_change = False
+        if review.paper.title != paper_info.get('title'):
+            review.paper.title = paper_info.get('title')
+            any_change = True
+        if review.paper.journal != paper_info.get('journal'):
+            review.paper.journal = paper_info.get('journal')
+            any_change = True
+        if review.paper.pub_year != paper_info.get('pub_year'):
+            review.paper.pub_year = paper_info.get('pub_year')
+            any_change = True
+        if review.paper.authors != paper_info.get('authors'):
+            review.paper.authors = paper_info.get('authors')
+            any_change = True
+        if review.paper.affiliations != paper_info.get('affiliations'):
+            review.paper.affiliations = paper_info.get('affiliations')
+            any_change = True
+        if review.paper.abstract != paper_info.get('abstract'):
+            review.paper.abstract = paper_info.get('abstract')
+            any_change = True
+        if review.paper.keywords != paper_info.get('keywords'):
+            review.paper.keywords = paper_info.get('keywords')
+            any_change = True
+        if review.paper.urls != paper_info.get('urls'):
+            review.paper.urls = paper_info.get('urls')
+            any_change = True
+        if review.paper.doi != paper_info.get('doi'):
+            review.paper.doi = paper_info.get('doi')
+            any_change = True
+        if review.paper.pmid != paper_info.get('pmid'):
+            review.paper.pmid = paper_info.get('pmid')
+            any_change = True
+        if review.paper.arxiv_id != paper_info.get('arxiv_id'):
+            review.paper.arxiv_id = paper_info.get('arxiv_id')
+            any_change = True
+        if review.paper.pmcid != paper_info.get('pmcid'):
+            review.paper.pmcid = paper_info.get('pmcid')
+            any_change = True
+        if review.paper.cnki_id != paper_info.get('cnki_id'):
+            review.paper.cnki_id = paper_info.get('cnki_id')
+            any_change = True
+        if review.paper.language != paper_info.get('lang'):
+            review.paper.language = paper_info.get('lang')
+            any_change = True
+        if any_change:
+            review.paper.save()
 
-        if review.comment != comment:
-            review.comment = comment
-            review.save()
-        return JsonResponse({'success': True})
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
+    return JsonResponse({'success': True})
 
 def add_review(request):
     if not request.user.is_authenticated:
