@@ -288,6 +288,8 @@ def submit_review(request):
             })
 
     try:
+        print(f'submit_review: {request.POST}')
+
         review_id = int(request.POST['review_id'])
         paper_id = int(request.POST['paper_id'])
         comment = request.POST['comment']
