@@ -454,7 +454,6 @@ function add_review() {
   $('#reviewModal').modal('show');
 }
 
-/*
 $(document).ready(function() {
   $('#reviewModal').on('shown.bs.modal', () => {
     if ($('#reviewModalLabel').text() == 'Add review') {
@@ -467,9 +466,8 @@ $(document).ready(function() {
   $('#reviewModalQuery').click(function () {
     review_id = $('#reviewModalreviewID').val();
     url = "{% url 'api:query_review' 'xxxxxx' %}".replace('xxxxxx', review_id);
-    $.ajax({
+    ajaxPostJson({
       url: url,
-      contentType: 'application/json',
       success: function (data) {
         if (!data.success) {
           alert('Failed to query review info by ID (' + review_id + ').\n' + data.error);
@@ -490,14 +488,12 @@ $(document).ready(function() {
           alert('请求处理发生未知错误: ' + error);
         }
       }
-    })
+    });
   })
 
   function ajax_add_review() {
-    $.ajax({
+    ajaxPostJson({
       url: "{% url 'api:add_review' %}",
-      type: 'POST',
-      contentType: 'application/json',
       headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: {
         group_name: '{{group.name}}',
@@ -527,14 +523,12 @@ $(document).ready(function() {
           alert('请求处理发生未知错误: ' + error);
         }
       }
-    })
+    });
   }
 
   function ajax_edit_review() {
-    $.ajax({
+    ajaxPostJson({
       url: "{% url 'api:edit_review' %}",
-      type: 'POST',
-      contentType: 'application/json',
       headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: {
         id: $('#reviewModalPk').val(),
@@ -562,7 +556,7 @@ $(document).ready(function() {
           alert('请求处理发生未知错误: ' + error);
         }
       }
-    })
+    });
   }
 
   $('#reviewModalSave').click(function () {
@@ -573,25 +567,18 @@ $(document).ready(function() {
     }
   })
 })
-*/
 
 function delete_review(id) {
   if (confirm('Are you sure to delete the item?')) {
-    $.ajax({
+    ajaxPostJson({
       url: "{% url 'api:delete_review' %}",
-      type: 'POST',
-      contentType: 'application/json',
       headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {
         if (!data.success) {
           alert('Delete review failed!\n' + data.error);
         } else {
-          {% if current_page == 'review' %}
-          location.href = "{% url 'group:all' group_name=group.name %}";
-          {% else %}
           location.reload(false);
-          {% endif %}
         }
       },
       error: function (xhr, status, error) {
@@ -610,10 +597,8 @@ function delete_review(id) {
 }
 
 function restore_review(id) {
-  $.ajax({
+  ajaxPostJson({
     url: "{% url 'api:restore_review' %}",
-    type: 'POST',
-    contentType: 'application/json',
     headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { review_id: id },
     success: function (data) {
@@ -639,10 +624,8 @@ function restore_review(id) {
 
 function delete_review_forever(id) {
   if (confirm('Are you sure to delete the item forever?')) {
-    $.ajax({
+    ajaxPostJson({
       url: "{% url 'api:delete_review_forever' %}",
-      type: 'POST',
-      contentType: 'application/json',
       headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {

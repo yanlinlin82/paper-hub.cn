@@ -14,7 +14,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.middleware.csrf import get_token
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -49,35 +49,18 @@ def require_login(func):
         return func(request, *args, **kwargs)
     return wrapper
 
-def parse_request(request):
-    print('parse_request:', request)
-    print(f'request.content_type = {request.content_type}')
-    if request.content_type != 'application/json':
-        return None, JsonResponse({'error': 'Invalid content type'}, status=400)
-    try:
-        print(f'parse_request: {request.body}')
-        json_data = json.loads(request.body.decode('utf-8'))
-        print(f'parse_request: {json_data}')
-        return json_data, None
-    except json.JSONDecodeError:
-        print(f'parse_request: Invalid JSON')
-        pass
-    return None, JsonResponse({'error': 'Invalid JSON'}, status=400)
-
 @csrf_exempt
+@json_view
 def wx_login(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    wx_code = json_data.get('code', '')
+    data = request.json_data
+    wx_code = data.get('code', '')
     if not wx_code:
-        return JsonResponse({'error': 'Invalid wx_code'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Invalid wx_code'}, status=400)
 
     APP_ID = os.getenv('WX_APP_ID')
     SECRET = os.getenv('WX_SECRET')
     if not APP_ID or not SECRET:
-        return JsonResponse({'error': 'Invalid APP_ID or SECRET'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Invalid APP_ID or SECRET'}, status=400)
 
     url = 'https://api.weixin.qq.com/sns/jscode2session'\
         f'?appid={APP_ID}&secret={SECRET}&js_code={wx_code}'\
@@ -122,18 +105,16 @@ def is_token_valid(token):
     except UserSession.DoesNotExist:
         return False
 
+@json_view
 def update_nickname(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    token = json_data.get('token')
+    data = request.json_data
+    token = data.get('token')
     if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
 
-    nickname = json_data.get('nickname')
+    nickname = data.get('nickname')
     if not nickname:
-        return JsonResponse({'error': 'Nickname is required'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Nickname is required'}, status=400)
     
     try:
         session = UserSession.objects.get(token=token)
@@ -608,86 +589,53 @@ def restore_recommendation(request):
 
     return JsonResponse({'success': True})
 
+@json_view
 def fetch_rank_full_list(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    token = json_data.get('token')
+    data = request.json_data
+    token = data.get('token')
     if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
 
-    try:
-        group_name = json_data.get('group_name')
-        group = GroupProfile.objects.get(name=group_name)
-        if group is None:
-            return JsonResponse({
-                'success': False,
-                'error': f"Group not found: {group_name}"
-            })
+    group_name = data.get('group_name')
+    group = GroupProfile.objects.get(name=group_name)
+    if group is None:
+        return JsonResponse({'success': False, 'error': f"Group not found: {group_name}"})
 
-        reviews = group.reviews.filter(delete_time__isnull=True)
+    reviews = group.reviews.filter(delete_time__isnull=True)
+    index = data.get('index', 0)
+    if index == 0:
+        stat = get_stat_this_month(reviews, group_name)
+    elif index == 1:
+        stat = get_stat_last_month(reviews, group_name)
+    elif index == 2:
+        stat = get_stat_all(reviews, group_name)
+    elif index == 3:
+        stat = get_stat_journal(reviews, group_name)
+    else:
+        return JsonResponse({'success': False, 'error': f"Invalid index: {index}"})
 
-        index = json_data.get('index', 0)
-        if index == 0:
-            stat = get_stat_this_month(reviews, group_name)
-        elif index == 1:
-            stat = get_stat_last_month(reviews, group_name)
-        elif index == 2:
-            stat = get_stat_all(reviews, group_name)
-        elif index == 3:
-            stat = get_stat_journal(reviews, group_name)
-        else:
-            return JsonResponse({
-                'success': False,
-                'error': f"Invalid index: {index}"
-            })
+    return JsonResponse({'success': True, 'results': stat})
 
-        return JsonResponse({
-            'success': True,
-            'results': stat
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
-
+@json_view
 def fetch_rank_list(request):
-    print('fetch_rank_list', request)
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    token = json_data.get('token')
+    data = request.json_data
+    token = data.get('token')
     if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
 
-    try:
-        group_name = json_data.get('group_name')
-        group = GroupProfile.objects.get(name=group_name)
-        if group is None:
-            return JsonResponse({
-                'success': False,
-                'error': f"Group not found: {group_name}"
-            })
+    group_name = data.get('group_name')
+    group = GroupProfile.objects.get(name=group_name)
+    if group is None:
+        return JsonResponse({'success': False, 'error': f"Group not found: {group_name}"})
 
-        reviews = group.reviews.filter(delete_time__isnull=True)
+    reviews = group.reviews.filter(delete_time__isnull=True)
 
-        stat_1 = get_stat_this_month(reviews, group_name, top_n=10)
-        stat_2 = get_stat_last_month(reviews, group_name, top_n=10)
-        stat_3 = get_stat_all(reviews, group_name, top_n=10)
-        stat_4 = get_stat_journal(reviews, group_name, top_n=10)
+    stat_1 = get_stat_this_month(reviews, group_name, top_n=10)
+    stat_2 = get_stat_last_month(reviews, group_name, top_n=10)
+    stat_3 = get_stat_all(reviews, group_name, top_n=10)
+    stat_4 = get_stat_journal(reviews, group_name, top_n=10)
 
-        return JsonResponse({
-            'success': True,
-            'results': [stat_1, stat_2, stat_3, stat_4]
-        })
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
+    return JsonResponse({'success': True, 'results': [stat_1, stat_2, stat_3, stat_4]})
 
 def get_user_aliases(user):
     aliases = [user]
@@ -697,87 +645,77 @@ def get_user_aliases(user):
         aliases.append(alias.user)
     return aliases
 
+@json_view
 def fetch_review_list(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    token = json_data.get('token')
+    data = request.json_data
+    token = data.get('token')
     if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
 
-    try:
-        group_name = json_data.get('group_name')
-        group = GroupProfile.objects.get(name=group_name)
-        if group is None:
-            return JsonResponse({
-                'success': False,
-                'error': f"Group not found: {group_name}"
-            })
-
-        reviews = group.reviews.filter(delete_time__isnull=True)
-        
-        mode = json_data.get('mode', 0)
-        if mode == 0: # all
-            pass
-        elif mode == 1: # this month
-            reviews = reviews.filter(create_time__year=timezone.now().year, create_time__month=timezone.now().month)
-        elif mode == 2: # last month
-            year = timezone.now().year
-            month = timezone.now().month
-            if month == 1:
-                year -= 1
-                month = 12
-            else:
-                month -= 1
-            reviews = reviews.filter(create_time__year=year, create_time__month=month)
-        elif mode == 3: # user own
-            token = json_data.get('token')
-            user = UserSession.objects.get(token=token).user
-            aliases = get_user_aliases(user)
-            reviews = reviews.filter(creator__in=aliases)
-        else:
-            return JsonResponse({
-                'success': False,
-                'error': f"Invalid mode: {mode}"
-            })
-
-        reviews = reviews.order_by('-create_time', '-pk')
-
-        index = json_data.get('index', 0)
-        end_index = index + 10
-        return JsonResponse({
-            'success': True,
-            'results': [{
-                'id': p.pk,
-                'creator': p.creator.nickname,
-                'create_time': timezone.localtime(p.create_time, timezone=zoneinfo.ZoneInfo(settings.TIME_ZONE)).strftime("%Y-%m-%d %H:%M"),
-                'pub_year': p.pub_year,
-                'title': p.title,
-                'journal': p.journal,
-                'comment': p.comment,
-                'doi': p.doi,
-                'pmid': p.pmid,
-                'arxiv_id': p.arxiv_id,
-                'pmcid': p.pmcid,
-            } for p in reviews[index:end_index]]
-        })
-    except Exception as e:
+    group_name = data.get('group_name')
+    group = GroupProfile.objects.get(name=group_name)
+    if group is None:
         return JsonResponse({
             'success': False,
-            'error': f"An error occurred: {e}"
+            'error': f"Group not found: {group_name}"
         })
 
+    reviews = group.reviews.filter(delete_time__isnull=True)
+    
+    mode = data.get('mode', 0)
+    if mode == 0: # all
+        pass
+    elif mode == 1: # this month
+        reviews = reviews.filter(create_time__year=timezone.now().year, create_time__month=timezone.now().month)
+    elif mode == 2: # last month
+        year = timezone.now().year
+        month = timezone.now().month
+        if month == 1:
+            year -= 1
+            month = 12
+        else:
+            month -= 1
+        reviews = reviews.filter(create_time__year=year, create_time__month=month)
+    elif mode == 3: # user own
+        token = data.get('token')
+        user = UserSession.objects.get(token=token).user
+        aliases = get_user_aliases(user)
+        reviews = reviews.filter(creator__in=aliases)
+    else:
+        return JsonResponse({
+            'success': False,
+            'error': f"Invalid mode: {mode}"
+        })
+
+    reviews = reviews.order_by('-create_time', '-pk')
+
+    index = data.get('index', 0)
+    end_index = index + 10
+    return JsonResponse({
+        'success': True,
+        'results': [{
+            'id': p.pk,
+            'creator': p.creator.nickname,
+            'create_time': timezone.localtime(p.create_time, timezone=zoneinfo.ZoneInfo(settings.TIME_ZONE)).strftime("%Y-%m-%d %H:%M"),
+            'pub_year': p.pub_year,
+            'title': p.title,
+            'journal': p.journal,
+            'comment': p.comment,
+            'doi': p.doi,
+            'pmid': p.pmid,
+            'arxiv_id': p.arxiv_id,
+            'pmcid': p.pmcid,
+        } for p in reviews[index:end_index]]
+    })
+
+@json_view
 def fetch_review_info(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    token = json_data.get('token')
+    data = request.json_data
+    token = data.get('token')
     if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
 
-    review_id = json_data.get('review_id')
+    review_id = data.get('review_id')
     review_info, raw_dict = get_paper_info(review_id)
     if review_info is None:
         return JsonResponse({
@@ -793,120 +731,102 @@ def fetch_review_info(request):
             "pub_year": review_info.get('pub_year', ''),
         }})
 
+@json_view
 def submit_comment(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    token = json_data.get('token')
+    data = request.json_data
+    token = data.get('token')
     if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
 
-    try:
-        group_name = json_data.get('group_name')
-        group = GroupProfile.objects.get(name=group_name)
-        if group is None:
-            return JsonResponse({
-                'success': False,
-                'error': f"Group not found: {group_name}"
-            })
-
-        review_id = json_data.get('review_id')
-        title = json_data.get('title')
-        pub_year = json_data.get('pub_year')
-        journal = json_data.get('journal')
-        nickname = json_data.get('nickname')
-        comment = json_data.get('comment')
-
-        review_info, raw_dict = get_paper_info(review_id)
-
-        user = UserSession.objects.get(token=token).user
-        if user.nickname != nickname:
-            user.nickname = nickname
-            user.save()
-
-        now = timezone.now()
-        review = Review(creator=user,
-                      create_time=now,
-                      update_time=now,
-                      title=title or review_info['title'],
-                      pub_year=pub_year or review_info['pub_year'],
-                      journal=journal or review_info['journal'],
-                      comment=comment)
-        if review_info is not None:
-            review.doi = review_info['id'].get('doi', '')
-            review.pmid = review_info['id'].get('pmid', '')
-            review.arxiv_id = review_info['id'].get('arxiv_id', '')
-            review.pmcid = review_info['id'].get('pmcid', '')
-            review.cnki_id = review_info['id'].get('cnki_id', '')
-            review.authors = "\n".join(review_info.get('authors', []))
-            review.abstract = review_info.get('abstract', '')
-            review.urls = "\n".join(review_info.get('urls', []))
-
-        review.save()
-
-        group.reviews.add(review)
-        group.save()
-
-    except Exception as e:
+    group_name = data.get('group_name')
+    group = GroupProfile.objects.get(name=group_name)
+    if group is None:
         return JsonResponse({
             'success': False,
-            'error': f"An error occurred: {e}"
+            'error': f"Group not found: {group_name}"
         })
+
+    review_id = data.get('review_id')
+    title = data.get('title')
+    pub_year = data.get('pub_year')
+    journal = data.get('journal')
+    nickname = data.get('nickname')
+    comment = data.get('comment')
+
+    review_info, raw_dict = get_paper_info(review_id)
+
+    user = UserSession.objects.get(token=token).user
+    if user.nickname != nickname:
+        user.nickname = nickname
+        user.save()
+
+    now = timezone.now()
+    review = Review(creator=user,
+                    create_time=now,
+                    update_time=now,
+                    title=title or review_info['title'],
+                    pub_year=pub_year or review_info['pub_year'],
+                    journal=journal or review_info['journal'],
+                    comment=comment)
+    if review_info is not None:
+        review.doi = review_info['id'].get('doi', '')
+        review.pmid = review_info['id'].get('pmid', '')
+        review.arxiv_id = review_info['id'].get('arxiv_id', '')
+        review.pmcid = review_info['id'].get('pmcid', '')
+        review.cnki_id = review_info['id'].get('cnki_id', '')
+        review.authors = "\n".join(review_info.get('authors', []))
+        review.abstract = review_info.get('abstract', '')
+        review.urls = "\n".join(review_info.get('urls', []))
+
+    review.save()
+
+    group.reviews.add(review)
+    group.save()
 
     return JsonResponse({'success': True})
 
+@json_view
 def summarize_by_gpt(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    token = json_data.get('token')
-    print('token:', token)
+    data = request.json_data
+    token = data.get('token')
     if not token or not is_token_valid(token):
-        return HttpResponseForbidden('Invalid or expired token')
+        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
 
-    try:
-        group_name = json_data.get('group_name')
-        group = GroupProfile.objects.get(name=group_name)
-        if group is None:
-            return JsonResponse({
-                'success': False,
-                'error': f"Group not found: {group_name}"
-            })
-
-        review_id = json_data.get('review_id')
-        print('review_id:', review_id)
-        review, raw_dict = get_paper_info(review_id)
-        print('review:', review)
-        if review is None:
-            return JsonResponse({"error": "review not found."})
-        if review['abstract'] == "":
-            review['abstract'] = get_abstract_by_doi(review['id']['doi'])
-
-        in_msg = [
-            {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
-            {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
-            {"role": "user", "content": f"Please summarize and comment on the following review in Chinese:\n\nTitle: {review['title']}\n\nAbstract:\n{review['abstract']}"},
-        ]
-        print('in_msg:', in_msg)
-        proxy_url = os.environ.get("OPENAI_PROXY_URL")
-        if proxy_url is None or proxy_url == "":
-            client = openai.OpenAI()
-        else:
-            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=in_msg,
-        )
-        out_msg = completion.choices[0].message.content
-        print('out_msg:', out_msg)
-        return JsonResponse({'answer': out_msg})
-    except Exception as e:
+    group_name = data.get('group_name')
+    group = GroupProfile.objects.get(name=group_name)
+    if group is None:
         return JsonResponse({
             'success': False,
-            'error': f"An error occurred: {e}"
+            'error': f"Group not found: {group_name}"
         })
+
+    review_id = data.get('review_id')
+    print('review_id:', review_id)
+    review, raw_dict = get_paper_info(review_id)
+    print('review:', review)
+    if review is None:
+        return JsonResponse({"error": "review not found."})
+    if review['abstract'] == "":
+        review['abstract'] = get_abstract_by_doi(review['id']['doi'])
+
+    in_msg = [
+        {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
+        {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
+        {"role": "user", "content": f"Please summarize and comment on the following review in Chinese:\n\nTitle: {review['title']}\n\nAbstract:\n{review['abstract']}"},
+    ]
+    print('in_msg:', in_msg)
+    proxy_url = os.environ.get("OPENAI_PROXY_URL")
+    if proxy_url is None or proxy_url == "":
+        client = openai.OpenAI()
+    else:
+        client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=in_msg,
+    )
+    out_msg = completion.choices[0].message.content
+    print('out_msg:', out_msg)
+    return JsonResponse({'answer': out_msg})
 
 def get_weixin_qr(request):
     appid = os.getenv('WEB_APP_ID')
@@ -933,7 +853,7 @@ def weixin_callback(request):
     #scope = data.get('scope')
     unionid = data.get('unionid')
     if openid is None or unionid is None:
-        return JsonResponse({'error': 'Invalid openid or unionid'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Invalid openid or unionid'}, status=400)
     
     userinfo_url = f"https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}"
     response2 = requests.get(userinfo_url)
