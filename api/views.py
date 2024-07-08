@@ -2,26 +2,53 @@ import os
 import requests
 import json
 import zoneinfo
-from paperhub import settings
+import httpx
+import random
+import string
+import datetime
+import uuid
+from urllib.parse import quote
 from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.middleware.csrf import get_token
+from django.db.models import Q
+from django.contrib.auth.models import User
+import openai
+from paperhub import settings
 from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
 from api.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponseForbidden, HttpResponseRedirect
-from django.middleware.csrf import get_token
-import openai
-import httpx
-from urllib.parse import quote
-import random
-import string
-from django.db.models import Q
-from django.contrib.auth.models import User
-import datetime
+
+from functools import wraps
+
+def json_view(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if request.method != 'POST':
+            return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+        try:
+            data = json.loads(request.body)
+            request.json_data = data
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+        try:
+            return func(request, *args, **kwargs)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return wrapper
+
+def require_login(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        return func(request, *args, **kwargs)
+    return wrapper
 
 def parse_request(request):
     print('parse_request:', request)
@@ -34,6 +61,7 @@ def parse_request(request):
         print(f'parse_request: {json_data}')
         return json_data, None
     except json.JSONDecodeError:
+        print(f'parse_request: Invalid JSON')
         pass
     return None, JsonResponse({'error': 'Invalid JSON'}, status=400)
 
@@ -118,22 +146,17 @@ def update_nickname(request):
 
     return JsonResponse({'success': True})
 
+@json_view
 def do_login(request):
-    json_data, response = parse_request(request)
-    if json_data is None:
-        return response
-
-    username = json_data.get('username')
-    password = json_data.get('password')
+    data = request.json_data
+    username = data.get('username')
+    password = data.get('password')
     if username is None or password is None:
-        return JsonResponse({'error': 'Invalid username or password'}, status=400)
+        return JsonResponse({'success': False, 'error': 'Invalid username or password'}, status=400)
 
     user = authenticate(request, username=username, password=password)
     if user is None:
-        return JsonResponse({
-            'success': False,
-            'error': 'Login failed. Please check your credentials.'
-            })
+        return JsonResponse({'success': False, 'error': 'Login failed. Please check your credentials.'})
 
     UserSession.objects.filter(user=user.custom_user, client_type='website').delete()
     session = UserSession(user=user.custom_user, client_type='website')
@@ -509,99 +532,68 @@ def add_search_result(request):
             'error': f"An error occurred: {e}"
         })
 
+@json_view
+@require_login
 def add_recommendation(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
-    
-    try:
-        paper_id = request.POST['paper_id']
-        comment = request.POST['comment']
+    data = request.json_data
+    paper_id = data.get('paper_id')
+    comment = data.get('comment')
 
-        user = request.user.custom_user
+    user = request.user.custom_user
+    paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
 
-        paper = Paper.objects.get(pk=paper_id)
-        print(f'add_recommendation: {paper_id} {paper}')
-
-        review_list = Review.objects.filter(creator=user, paper=paper)
-        if review_list.count() > 0:
-            review = review_list[0]
-        else:
-            review = Review(paper=paper, creator=user, comment=comment)
+    review_list = Review.objects.filter(creator=user, paper=paper)
+    if review_list.count() > 0:
+        review = review_list[0]
+        if review.comment != comment:
+            review.comment = comment
             review.save()
+    else:
+        review = Review(paper=paper, creator=user, comment=comment)
+        review.save()
 
-        any_change = False
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time=None):
-            for label in recommendation.labels.all():
-                if label not in review.labels.all():
-                    review.labels.add(label)
-                    any_change = True
-            recommendation.read_time = timezone.now()
-            recommendation.save()
-        if any_change:
-            review.save()
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
+    for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=True):
+        for label in recommendation.labels.all():
+            if label not in review.labels.all():
+                review.labels.add(label)
+        recommendation.read_time = timezone.now()
+        recommendation.save()
 
     return JsonResponse({'success': True})
 
-def delete_recommendation(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
-    
-    try:
-        paper_id = request.POST['paper_id']
+@json_view
+@require_login
+def mark_read_recommendation(request):
+    data = request.json_data
+    paper_id = data.get('paper_id')
 
-        user = request.user.custom_user
+    user = request.user.custom_user
+    paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
 
-        paper = Paper.objects.get(pk=paper_id)
-        print(f'delete_recommendation: {paper_id} {paper}')
-
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time=None):
-            recommendation.read_time = timezone.now()
-            recommendation.save()
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
+    for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=True):
+        recommendation.read_time = timezone.now()
+        recommendation.save()
 
     return JsonResponse({'success': True})
 
+@json_view
+@require_login
 def restore_recommendation(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
-    
-    try:
-        paper_id = request.POST['paper_id']
+    data = request.json_data
+    paper_id = data.get('paper_id')
 
-        user = request.user.custom_user
+    user = request.user.custom_user
+    paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
 
-        paper = Paper.objects.get(pk=paper_id)
-        print(f'restore_recommendation: {paper_id} {paper}')
-
-        for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=False):
-            recommendation.read_time = None
-            recommendation.save()
-
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
+    for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=False):
+        recommendation.read_time = None
+        recommendation.save()
 
     return JsonResponse({'success': True})
 
@@ -623,7 +615,7 @@ def fetch_rank_full_list(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        reviews = group.reviews.filter(delete_time=None)
+        reviews = group.reviews.filter(delete_time__isnull=True)
 
         index = json_data.get('index', 0)
         if index == 0:
@@ -669,7 +661,7 @@ def fetch_rank_list(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        reviews = group.reviews.filter(delete_time=None)
+        reviews = group.reviews.filter(delete_time__isnull=True)
 
         stat_1 = get_stat_this_month(reviews, group_name, top_n=10)
         stat_2 = get_stat_last_month(reviews, group_name, top_n=10)
@@ -712,7 +704,7 @@ def fetch_review_list(request):
                 'error': f"Group not found: {group_name}"
             })
 
-        reviews = group.reviews.filter(delete_time=None)
+        reviews = group.reviews.filter(delete_time__isnull=True)
         
         mode = json_data.get('mode', 0)
         if mode == 0: # all
@@ -976,8 +968,6 @@ def weixin_callback(request):
     login(request, user)
     redirect_to = request.GET.get('state')
     return HttpResponseRedirect(redirect_to)
-
-import requests, uuid, json
 
 def translate_text(s):
     try:

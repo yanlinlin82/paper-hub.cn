@@ -1,0 +1,42 @@
+<div class="scroll-to-top">
+  <a class="btn btn-primary" href="#top">
+    <span class="glyphicon glyphicon-chevron-up">回到顶部</span>
+  </a>
+</div>
+<style>
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: none;
+}
+</style>
+<script>
+window.onscroll = function () {
+  // When the user scrolls down 20px from the top of the document, show the button
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    document.querySelector(".scroll-to-top").style.display = "block";
+  } else {
+    document.querySelector(".scroll-to-top").style.display = "none";
+  }
+}
+
+$(document).ready(function () {
+  // Add smooth scrolling to all links with the "#top" anchor
+  $("a[href='#top']").on('click', function (event) {
+    if (this.hash !== "") {
+      event.preventDefault();
+
+      var hash = this.hash;
+
+      // Using jQuery's animate() method to add smooth page scroll
+      $('html, body').animate({
+      scrollTop: $(hash).offset().top
+      }, 0, function () {
+      // Add hash (#) to URL when done scrolling (default click behavior)
+      window.location.hash = hash;
+      });
+    }
+  });
+});
+</script>

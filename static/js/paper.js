@@ -91,6 +91,7 @@ function translate_abstract(paper_id, url, csrf_token) {
     $.ajax({
       url: url,
       type: 'POST',
+      contentType: 'application/json',
       headers: { "X-CSRFToken": csrf_token },
       data: { paper_id: paper_id },
       success: function (data) {

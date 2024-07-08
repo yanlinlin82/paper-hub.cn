@@ -1,0 +1,110 @@
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="loginModalLabel">登录</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <nav>
+          <div class="nav nav-tabs" id="loginTab" role="tablist">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#username-password" type="button" role="tab" aria-controls="username-password" aria-selected="true">密码登录</button>
+            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#weixin-scan" type="button" role="tab" aria-controls="weixin-scan" aria-selected="false">微信登录</button>
+          </div>
+        </nav>
+        <div class="border tab-content p-3">
+          <div class="tab-pane fade show active" id="username-password" role="tabpanel" aria-labelledby="home-tab">
+            <form id="loginForm" method="post">
+              {% csrf_token %}
+              <div class="form-group my-3">
+                <label for="username">用户名</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+              </div>
+              <div class="form-group my-3">
+                <label for="password">密码</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+              </div>
+            </form>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary" id="loginButton">登录</button>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="weixin-scan" role="tabpanel" aria-labelledby="profile-tab">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$(document).ready(function() {
+  $('#loginModal').on('shown.bs.modal', () => {
+    $('#username').focus();
+  })
+
+  $('#loginModal').on('keypress', function (event) {
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if (keycode == '13'){
+      $('#loginButton').click();   
+    }
+  });
+
+  $('#loginButton').click(function () {
+    var csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
+    ajaxPostJson({
+      url: "{% url 'api:login' %}",
+      headers: {'X-CSRFToken': csrf_token},
+      data: {
+        username: $('#username').val(),
+        password: $('#password').val()
+      },
+      success: function (data) {
+        if (!data.success) {
+          alert('Login failed. Please check your credentials.');
+        } else {
+          setCookie('token', data.token, 1);
+          location.reload(false);
+        }
+      },
+      error: function (xhr, status, error) {
+        alert('An error occurred while processing your request.', error);
+      }
+    });
+  });
+});
+
+function logout() {
+  if (confirm('Are you sure you want to log out?')) {
+    ajaxPostJson({
+      url: "{% url 'api:logout' %}",
+      success: function (data) {
+        location.reload(false);
+      }
+    });
+  }
+}
+
+document.getElementById('profile-tab').addEventListener('click', async function() {
+  const currentPageUrl = window.location.href;
+  try {
+    const response = await fetch(`/api/get-weixin-qr/?current_url=${encodeURIComponent(currentPageUrl)}`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok.');
+    }
+
+    const data = await response.json();
+    const qrFrame = document.getElementById('weixin-scan');
+    qrFrame.innerHTML = ''; // 清空可能存在的旧内容
+
+    const iframe = document.createElement('iframe');
+    iframe.src = data.url;
+    iframe.style.width = '100%';
+    iframe.style.height = '400px'; // 调整高度以适应二维码大小
+    qrFrame.appendChild(iframe);
+  } catch (error) {
+    console.error('Error fetching Weixin QR code:', error);
+    document.getElementById('weixin-scan').innerHTML = '<p>载入二维码失败，请稍后再重新尝试</p>';
+  }
+});
+</script>

@@ -265,6 +265,7 @@ function query_paper_info() {
   $.ajax({
     url: "{% url 'api:query_paper_info' %}",
     type: 'POST',
+    contentType: 'application/json',
     headers: { "X-CSRFToken": '{{csrf_token}}' },
     data: { identifier: identifier },
     success: function (data) {
@@ -323,6 +324,7 @@ function submit_review(event) {
   $.ajax({
     url: "{% url 'api:submit_review' %}",
     type: 'POST',
+    contentType: 'application/json',
     headers: { "X-CSRFToken": '{{csrf_token}}' },
     data: data,
     success: function (data) {
@@ -457,6 +459,7 @@ $(document).ready(function() {
     url = "{% url 'api:query_review' 'xxxxxx' %}".replace('xxxxxx', review_id);
     $.ajax({
       url: url,
+      contentType: 'application/json',
       success: function (data) {
         if (!data.success) {
           alert('Failed to query review info by ID (' + review_id + ').\n' + data.error);
@@ -476,6 +479,7 @@ $(document).ready(function() {
     $.ajax({
       url: "{% url 'api:add_review' %}",
       type: 'POST',
+      contentType: 'application/json',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
       data: {
         group_name: '{{group.name}}',
@@ -504,6 +508,7 @@ $(document).ready(function() {
     $.ajax({
       url: "{% url 'api:edit_review' %}",
       type: 'POST',
+      contentType: 'application/json',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
       data: {
         id: $('#reviewModalPk').val(),
@@ -541,6 +546,7 @@ function delete_review(id) {
     $.ajax({
       url: "{% url 'api:delete_review' %}",
       type: 'POST',
+      contentType: 'application/json',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {
@@ -565,6 +571,7 @@ function restore_review(id) {
   $.ajax({
     url: "{% url 'api:restore_review' %}",
     type: 'POST',
+    contentType: 'application/json',
     headers: { "X-CSRFToken": '{{csrf_token}}' },
     data: { review_id: id },
     success: function (data) {
@@ -585,6 +592,7 @@ function delete_review_forever(id) {
     $.ajax({
       url: "{% url 'api:delete_review_forever' %}",
       type: 'POST',
+      contentType: 'application/json',
       headers: { "X-CSRFToken": '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {

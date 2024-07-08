@@ -205,7 +205,7 @@ def user_page(request, id, group_name):
 
 def _rank_page(request, group_name, rank_type):
     group = get_object_or_404(GroupProfile, name=group_name)
-    reviews = group.reviews.filter(delete_time=None)
+    reviews = group.reviews.filter(delete_time__isnull=True)
     year, month, page_obj = None, None, None
 
     if rank_type == 'journal':
