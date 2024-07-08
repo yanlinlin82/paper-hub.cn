@@ -24,14 +24,14 @@ if __name__ == '__main__':
 
     total = 0
     for id_list_tsv_file in sys.argv[2:]:
-        print(f"Loading '{id_list_tsv_file}' ...")
+        print(f"Importing '{id_list_tsv_file}' ...")
         cnt = 0
         with open(id_list_tsv_file, 'rt') as file:
             for line in file:
                 source, index, doi, pmid = line.strip().split('\t')
                 source = int(source)
                 index = int(index)
-                pmid = int(pmid) + 1
+                pmid = int(pmid)
                 doi = None if doi == '' else doi
                 if pmid in deleted_pmids:
                     continue
@@ -58,7 +58,8 @@ if __name__ == '__main__':
                 pi = PubMedIndex(source=source, index=index, doi=doi, pmid=pmid)
                 pi.save()
                 cnt += 1
+                print(f"  {cnt}: {source}, {index}, {doi}, {pmid}")
 
-        print(f"Loaded {cnt} PubMedIndex records from '{id_list_tsv_file}'.")
+        print(f"Imported {cnt} PubMedIndex records from '{id_list_tsv_file}'.")
         total += cnt
     print(f"Total writed {total} PubMedIndex records into database.")

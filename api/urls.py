@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout', views.do_logout, name='logout'),
     path('query/user/<str:user>', views.query_user, name='query_user'),
     re_path(r'^query/review/(?P<id>.+)', views.query_review, name='query_review'),
+    path('submit_review', views.submit_review, name='submit_review'),
     path('add_review', views.add_review, name='add_review'),
     path('edit_review', views.edit_review, name='edit_review'),
     path('delete_review', views.delete_review, name='delete_review'),
@@ -29,4 +30,5 @@ urlpatterns = [
     path('weixin_callback/', views.weixin_callback, name='weixin_callback'),
     path('translate_title', views.translate_title, name='translate_title'),
     path('translate_abstract', views.translate_abstract, name='translate_abstract'),
+    path('query_paper_info', views.query_paper_info, name='query_paper_info'),
 ]

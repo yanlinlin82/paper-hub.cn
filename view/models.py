@@ -75,11 +75,11 @@ class Paper(models.Model):
     journal = models.CharField(max_length=256, default='', blank=True, db_index=True)
     pub_date = models.CharField(max_length=64, default='', blank=True)
     pub_year = models.IntegerField(blank=True, null=True, default=None, db_index=True)
-    authors = models.CharField(max_length=65536, default='', blank=True)
-    institutes = models.CharField(max_length=65536, default='', blank=True)
-    abstract = models.CharField(max_length=65536, default='', blank=True)
-    keywords = models.CharField(max_length=65536, default='', blank=True)
-    urls = models.CharField(max_length=65536, default='', blank=True)
+    authors = models.CharField(max_length=1024*1024, default='', blank=True)
+    affiliations = models.CharField(max_length=1024*1024, default='', blank=True)
+    abstract = models.CharField(max_length=1024*1024, default='', blank=True)
+    keywords = models.CharField(max_length=1024*1024, default='', blank=True)
+    urls = models.CharField(max_length=1024*1024, default='', blank=True)
 
     doi = models.CharField(max_length=128, default='', blank=True, db_index=True)
     pmid = models.CharField(max_length=128, default='', blank=True, db_index=True)
@@ -108,7 +108,7 @@ class Label(models.Model): # every user has his own labels
 
 class PaperTracking(models.Model): # every user has his own paper tracking rules
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    type = models.CharField(max_length=20, default='read') # keyword, author, institute, journal, cite
+    type = models.CharField(max_length=20, default='read') # keyword, author, affiliation, journal, cite
     value = models.CharField(max_length=100, default='', blank=True)
     label = models.ForeignKey(Label, on_delete=models.CASCADE)
     memo = models.CharField(max_length=2000, default='', blank=True)

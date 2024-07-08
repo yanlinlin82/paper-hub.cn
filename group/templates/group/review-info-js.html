@@ -1,5 +1,5 @@
-<div class="modal fade" id="editReviewModal" data-bs-backdrop="static" role="dialog">
-  <div class="modal-dialog modal-xl" role="document">
+<div id="editReviewModal" class="modal fade" data-bs-backdrop="static" role="dialog">
+  <div id="editReviewModalDialog" class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title text-center" id="editReviewModalDialogTitle">修改文献分享评论</h5>
@@ -8,10 +8,12 @@
       <div class="modal-body">
         <form id="editReviewForm" method="post">
           {% csrf_token %}
-          <input type="hidden" id="editReviewModalPk">
+          <input type="hidden" id="editReviewModalReviewId">
+          <input type="hidden" id="editReviewModalPaperId">
+          <input type="hidden" id="editReviewModalEditPaperInfo" value="false">
           <div class="from-group text-start flex-fill my-3">
             <label class="mb-3" id="editReviewModalLabel" for="editReviewModalComment"></label>
-            <textarea class="form-control" id="editReviewModalComment" name="comment" rows="6" placeholder="请输入评论" required></textarea>
+            <textarea class="form-control" id="editReviewModalComment" name="comment" rows="8" placeholder="请输入评论" required></textarea>
           </div>
           <div id="editReviewModalCard" class="card p-2">
             <div class="d-flex">
@@ -31,7 +33,7 @@
                 <div class="flex-fill form-group">
                   <div class="input-group w-auto">
                     <input type="text" class="form-control" id="editReviewModalID" name="editReviewModalID" required placeholder="DOI/PMID/PMCID/arXivID">
-                    <button type="button" class="btn btn-primary" id="reviewModalQuery">Query</button>
+                    <button type="button" class="btn btn-primary" onclick="javascript:query_paper_info()">Query</button>
                   </div>
                 </div>
                 <div class="text-end ms-2">
@@ -43,29 +45,29 @@
             <!-- 标题 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">标题</div>
-              <div class="col-5"><input type="text" class="form-control" id="editReviewModalTitle" name="editReviewModalTitle" required></div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalTitle" name="title" required></div>
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><input type="text" class="form-control" id="editReviewModalTitle2" name="editReviewModalTitle2" readonly></div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalTitle2" readonly></div>
             </div>
             <!-- 杂志 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">杂志</div>
-              <div class="col-5"><input type="text" class="form-control" id="editReviewModalJournal" name="editReviewModalJournal" required></div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalJournal" name="journal" required></div>
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><input type="text" class="form-control" id="editReviewModalJournal2" name="editReviewModalJournal2" readonly></div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalJournal2" readonly></div>
             </div>
             <!-- 发表日期 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">发表日期</div>
-              <div class="col-5"><input type="text" class="form-control" id="editReviewModalPubDate" name="editReviewModalPubDate" required></div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalPubDate" name="pub_date" required></div>
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><input type="text" class="form-control" id="editReviewModalPubDate2" name="editReviewModalPubDate2" readonly></div>
+              <div class="col-4"><input type="text" class="form-control" id="editReviewModalPubDate2" readonly></div>
             </div>
             <!-- 作者列表 -->
             <div class="row align-items-center p-2">
@@ -74,43 +76,43 @@
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors2" rows="3" readonly></textarea></div>
             </div>
             <!-- 机构列表 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">机构列表</div>
-              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalAffiliations" name="affiliations" rows="3" required></textarea></div>
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAffiliations2" rows="3" readonly></textarea></div>
             </div>
             <!-- 摘要 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">摘要</div>
-              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalAbstract" name="abstract" rows="3" required></textarea></div>
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalAbstract2" rows="3" readonly></textarea></div>
             </div>
             <!-- 关键词 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">关键词</div>
-              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalKeywords" name="keywords" rows="3" required></textarea></div>
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalKeywords2" rows="3" readonly></textarea></div>
             </div>
             <!-- URLs -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">URLs</div>
-              <div class="col-5"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" required></textarea></div>
+              <div class="col-5"><textarea class="form-control" id="editReviewModalURLs" name="urls" rows="3" required></textarea></div>
               <div class="col-1 text-center">
                 <a class="btn btn-outline-primary btn-sm">&lt;</a>
               </div>
-              <div class="col-4"><textarea class="form-control" id="editReviewModalAuthors" name="authors" rows="3" readonly></textarea></div>
+              <div class="col-4"><textarea class="form-control" id="editReviewModalURLs2" rows="3" readonly></textarea></div>
             </div>
             <!-- DOI -->
             <div class="row align-items-center p-2">
@@ -169,7 +171,7 @@
           </div>
           <div class="text-end">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-            <button type="submit" class="btn btn-primary">保存</button>
+            <button type="submit" class="btn btn-primary" onclick="javascript:submit_review()">保存</button>
           </div>
         </form>
       </div>
@@ -178,11 +180,97 @@
 </div>
 <script>
 function edit_review_new(review_id, paper_id) {
-  $('#editReviewModalPk').val(review_id);
+  $('#editReviewModalReviewId').val(review_id);
+  $('#editReviewModalPaperId').val(paper_id);
   $('#editReviewModalLabel').text($('#review_creator_' + review_id).text());
   $('#editReviewModalComment').text($('#review_comment_' + review_id).text());
-  //$('#editReviewModalCard').html($('#card_paper_' + paper_id).html());
+  $('#editReviewModalTitle').val($('#title_' + paper_id + '_text').text());
+  $('#editReviewModalJournal').val($('#journal_' + paper_id).text());
+  $('#editReviewModalDOI').val($('#doi_' + paper_id).text());
+  $('#editReviewModalPMID').val($('#pmid_' + paper_id).text());
+  $('#editReviewModalPMCID').val($('#pmcid_' + paper_id).text());
+  $('#editReviewModalArXivID').val($('#arxiv_' + paper_id).text());
+  $('#editReviewModalCNKIID').val($('#cnki_' + paper_id).text());
   $('#editReviewModal').modal('show');
+}
+
+function enable_edit_paper() {
+  $('#editReviewModalEditPaperInfo').val('true');
+  $('#editReviewModalPaperInfo').addClass('d-block');
+  $('#editReviewModalPaperInfo').removeClass('d-none');
+  $('#editReviewModalCard').addClass('d-none');
+  $('#editReviewModalCard').removeClass('d-block');
+  $('#editReviewModalDialog').addClass('modal-xl');
+  $('#editReviewModalDialog').removeClass('modal-lg');
+}
+
+function disable_edit_paper() {
+  $('#editReviewModalEditPaperInfo').val('false');
+  $('#editReviewModalPaperInfo').addClass('d-none');
+  $('#editReviewModalPaperInfo').removeClass('d-block');
+  $('#editReviewModalCard').addClass('d-block');
+  $('#editReviewModalCard').removeClass('d-none');
+  $('#editReviewModalDialog').addClass('modal-lg');
+  $('#editReviewModalDialog').removeClass('modal-xl');
+}
+
+function query_paper_info() {
+  var identifier = $('#editReviewModalID').val();
+  $.ajax({
+    url: "{% url 'api:query_paper_info' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: { identifier: identifier },
+    success: function (data) {
+      if (!data.success) {
+        alert('Failed to query paper info by ID (' + $('#editReviewModalID').val() + ').\n' + data.error);
+      } else {
+        console.log(data.results);
+        $('#editReviewModalTitle2').val(data.results.title);
+        $('#editReviewModalJournal2').val(data.results.journal);
+        $('#editReviewModalPubDate2').val(data.results.pub_date);
+        $('#editReviewModalAuthors2').text(data.results.authors.join('\n'));
+        $('#editReviewModalAffiliations2').text(data.results.affiliations.join('\n'));
+        $('#editReviewModalAbstract2').text(data.results.abstract);
+        $('#editReviewModalKeywords2').text(data.results.keywords.join('\n'));
+        $('#editReviewModalURLs2').text(data.results.urls.join('\n'));
+        $('#editReviewModalDOI2').val(data.results.doi);
+        $('#editReviewModalPMID2').val(data.results.pmid);
+        $('#editReviewModalArXivID2').val(data.results.arxiv_id);
+        $('#editReviewModalPMCID2').val(data.results.pmcid);
+        $('#editReviewModalCNKIID2').val(data.results.cnki_id);
+        $('#editReviewModalLang2').val(data.results.language);
+      }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
+}
+
+function submit_review() {
+  editPaperInfo = $('#editReviewModalEditPaperInfo').val();
+  data = {
+    review_id: $('#editReviewModalReviewId').val(),
+    paper_id: $('#editReviewModalPaperId').val(),
+    comment: $('#editReviewModalComment').val()
+  };
+  $.ajax({
+    url: "{% url 'api:submit_review' %}",
+    type: 'POST',
+    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    data: data,
+    success: function (data) {
+      if (!data.success) {
+        alert('Edit review failed!\n' + data.error);
+      } else {
+        location.reload(false);
+      }
+    },
+    error: function () {
+      alert('An error occurred while processing your request.');
+    }
+  });
 }
 </script>
 
@@ -242,20 +330,6 @@ function edit_review_new(review_id, paper_id) {
   </div>
 </div>
 <script>
-function enable_edit_paper() {
-  $('#editReviewModalPaperInfo').addClass('d-block');
-  $('#editReviewModalPaperInfo').removeClass('d-none');
-  $('#editReviewModalCard').addClass('d-none');
-  $('#editReviewModalCard').removeClass('d-block');
-}
-
-function disable_edit_paper() {
-  $('#editReviewModalPaperInfo').addClass('d-none');
-  $('#editReviewModalPaperInfo').removeClass('d-block');
-  $('#editReviewModalCard').addClass('d-block');
-  $('#editReviewModalCard').removeClass('d-none');
-}
-
 function get_review_id(id) {
   var review_id = '';
   if ($('#review-doi-' + id)) {
@@ -303,6 +377,7 @@ function add_review() {
 }
 
 $(document).ready(function() {
+  /*
   $('#reviewModal').on('shown.bs.modal', () => {
     if ($('#reviewModalLabel').text() == 'Add review') {
       $('#reviewModalUsername').focus();
@@ -328,7 +403,7 @@ $(document).ready(function() {
       error: function () {
         alert('An error occurred while processing your request.');
       }
-    })
+    })*/
   })
 
   function ajax_add_review() {

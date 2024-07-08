@@ -57,7 +57,7 @@ def query_papers(query):
                 pub_date=paper_info.get('pub_date', paper_info.get('pub_year', '')),
                 title=paper_info.get('title', ''),
                 authors='\n'.join(paper_info.get('authors', [])),
-                institutes='\n'.join(paper_info.get('institutes', [])),
+                affiliations='\n'.join(paper_info.get('affiliations', [])),
                 abstract=paper_info.get('abstract', ''),
                 keywords='\n'.join(paper_info.get('keywords', [])),
                 urls='\n'.join(paper_info.get('urls', [])),

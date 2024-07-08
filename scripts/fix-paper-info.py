@@ -22,7 +22,7 @@ class PaperInfo:
         self._doi = None
         self._pmid = None
         self._authors = None
-        self._institutes = None
+        self._affiliations = None
         self._abstract = None
         self._keywords = None
         self._language = None
@@ -92,13 +92,13 @@ class PaperInfo:
         return self._authors
 
     @property
-    def institutes(self):
-        if self._institutes is None:
-            institutes = []
+    def affiliations(self):
+        if self._affiliations is None:
+            affiliations = []
             for item in self.xml_node.xpath('MedlineCitation/Article/AuthorList/Author/AffiliationInfo/Affiliation/text()'):
-                institutes.append(item.strip())
-            self._institutes = institutes
-        return self._institutes
+                affiliations.append(item.strip())
+            self._affiliations = affiliations
+        return self._affiliations
 
     @property
     def abstract(self):
@@ -245,10 +245,10 @@ class PaperInfo:
                         return True
         return False
 
-    def match_institute(self, institute):
-        patterns = [r'\b{}\b'.format(re.escape(n)) for n in institute.split() if n]
+    def match_affiliation(self, affiliation):
+        patterns = [r'\b{}\b'.format(re.escape(n)) for n in affiliation.split() if n]
         if len(patterns) != 0:
-            for i in self.institutes:
+            for i in self.affiliations:
                 if all(re.search(p, i, re.IGNORECASE) for p in patterns):
                     return True
         return False
@@ -275,8 +275,8 @@ class PaperInfo:
                 if self.match_author(cond_item['value']):
                     matched = True
                     self.append_label(cond_item)
-            elif cond_item['type'] == 'institute':
-                if self.match_institute(cond_item['value']):
+            elif cond_item['type'] == 'affiliation':
+                if self.match_affiliation(cond_item['value']):
                     matched = True
                     self.append_label(cond_item)
             elif cond_item['type'] == 'journal':
@@ -400,7 +400,7 @@ def main():
         print(f'  DOI: {paper_info.doi}')
         print(f'  PMID: {paper_info.pmid}')
         print(f'  authors: {paper_info.authors}')
-        print(f'  institutes: {paper_info.institutes}')
+        print(f'  affiliations: {paper_info.affiliations}')
         print(f'  abstract: {paper_info.abstract}')
         print(f'  keywords: {paper_info.keywords}')
         print(f'  language: {paper_info.language}')
@@ -440,7 +440,7 @@ def main():
                 paper.doi = paper_info.doi
                 paper.pmid = paper_info.pmid
                 paper.authors = ', '.join(paper_info.authors)
-                paper.institutes = ', '.join(paper_info.institutes)
+                paper.affiliations = ', '.join(paper_info.affiliations)
                 paper.abstract = paper_info.abstract
                 paper.keywords = ', '.join(paper_info.keywords)
                 paper.language = paper_info.language

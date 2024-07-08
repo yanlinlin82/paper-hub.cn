@@ -4,3 +4,4 @@ cache/
 static_root/
 .env
 .venv/
+*.log

@@ -20,7 +20,7 @@ class PaperInfo:
         self._doi = None
         self._pmid = None
         self._authors = None
-        self._institutes = None
+        self._affiliations = None
         self._abstract = None
         self._keywords = None
         self._language = None
@@ -90,13 +90,13 @@ class PaperInfo:
         return self._authors
 
     @property
-    def institutes(self):
-        if self._institutes is None:
-            institutes = []
+    def affiliations(self):
+        if self._affiliations is None:
+            affiliations = []
             for item in self.xml_node.xpath('MedlineCitation/Article/AuthorList/Author/AffiliationInfo/Affiliation/text()'):
-                institutes.append(item.strip())
-            self._institutes = institutes
-        return self._institutes
+                affiliations.append(item.strip())
+            self._affiliations = affiliations
+        return self._affiliations
 
     @property
     def abstract(self):
@@ -244,10 +244,10 @@ def fix_paper_info(input_xlsx, pubmed_dir):
                     print(f"  authors: '{paper.authors}' -> '{authors}'")
                     paper.authors = authors
                     any_change = True
-                institutes = '\n'.join(paper_info.institutes)
-                if paper.institutes != institutes:
-                    print(f"  institutes: '{paper.institutes}' -> '{institutes}'")
-                    paper.institutes = institutes
+                affiliations = '\n'.join(paper_info.affiliations)
+                if paper.affiliations != affiliations:
+                    print(f"  affiliations: '{paper.affiliations}' -> '{affiliations}'")
+                    paper.affiliations = affiliations
                     any_change = True
                 if paper.abstract != paper_info.abstract:
                     print(f"  abstract: '{paper.abstract}' -> '{paper_info.abstract}'")

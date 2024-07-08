@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
-from api.paper import get_paper_info, convert_string_to_datetime
+from api.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi
 from django.views.decorators.csrf import csrf_exempt
@@ -220,6 +220,105 @@ def query_review(request, id):
             "abstract": review_info.get('abstract', ''),
             "urls": review_info.get('urls', []),
         }})
+
+def query_paper_info(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    try:
+        identifier = request.POST['identifier']
+        print(f'query_paper_info: {identifier}')
+
+        identifier_type, identifier = guess_identifier_type(identifier)
+        print(f'  identifier_type: {identifier_type}')
+        if identifier_type == "pmid" or identifier_type == "doi":
+            paper_info = get_paper_info_new(identifier, identifier_type)
+        else:
+            paper_info, raw_dict = get_paper_info(identifier)
+
+        return JsonResponse({
+            'success': True,
+            'results': {
+                'identifier': identifier,
+                'identifier_type': identifier_type,
+                'title': paper_info.title,
+                'journal': paper_info.journal,
+                'pub_date': paper_info.pub_date,
+                'pub_year': paper_info.pub_year,
+                'authors': paper_info.authors,
+                'affiliations': paper_info.affiliations,
+                'abstract': paper_info.abstract,
+                'keywords': paper_info.keywords,
+                'urls': paper_info.urls,
+                'doi': paper_info.doi,
+                'pmid': paper_info.pmid,
+                'arxiv_id': paper_info.arxiv_id,
+                'pmcid': paper_info.pmcid,
+                'cnki_id': paper_info.cnki_id,
+                'language': paper_info.language,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
+
+def submit_review(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'User is not authenticated!',
+        })
+
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'POST method required!'
+            })
+
+    try:
+        review_id = int(request.POST['review_id'])
+        paper_id = int(request.POST['paper_id'])
+        comment = request.POST['comment']
+
+        review = Review.objects.get(pk=review_id)
+        if review is None:
+            return JsonResponse({
+                'success': False,
+                'error': f"Review not found: {review_id}"
+            })
+        if review.paper.pk != paper_id:
+            return JsonResponse({
+                'success': False,
+                'error': f"Review {review_id} does not match paper {paper_id} (expected {review.paper.pk})"
+            })
+        if not request.user.is_superuser and review.creator != request.user.custom_user:
+            return JsonResponse({
+                'success': False,
+                'error': f"Review {review_id} is not created by user {request.user.custom_user} (expected {review.creator})"
+            })
+
+        if review.comment != comment:
+            review.comment = comment
+            review.save()
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"An error occurred: {e}"
+        })
 
 def add_review(request):
     if not request.user.is_authenticated:
