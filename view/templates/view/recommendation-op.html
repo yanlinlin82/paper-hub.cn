@@ -1,0 +1,148 @@
+<div class="modal fade" id="addToLibraryModal" tabindex="-1" aria-labelledby="addToLibraryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addToLibraryModalLabel">加入推荐文献到个人文献库</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addToLibraryModalForm">
+          <div class="mb-3">
+            <div id="addToLibraryModalInfo" class="text-start"></div>
+            <div id="addToLibraryModalTitle" class="text-start mt-3 fs-5 fw-bold"></div>
+          </div>
+          <div class="mb-3">
+            <label for="comment" class="form-label">笔记</label>
+            <textarea class="form-control" id="addToLibraryModalomment" rows="8" required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="addToLibraryModalOK">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+$(document).ready(function(){
+  $('#addToLibraryModal').on('shown.bs.modal', function () {
+      $('#addToLibraryModalomment').focus();
+  });
+});
+
+function expand_recommendations(paper_id) {
+  $('#historical_recommendations_' + paper_id).addClass('d-block');
+  $('#historical_recommendations_' + paper_id).removeClass('d-none');
+  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-none');
+  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-block');
+  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-block');
+  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-none');
+}
+
+function collapse_recommendations(paper_id) {
+  $('#historical_recommendations_' + paper_id).addClass('d-none');
+  $('#historical_recommendations_' + paper_id).removeClass('d-block');
+  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-block');
+  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-none');
+  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-none');
+  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-block');
+}
+
+function addToLibrary(id) {
+  $('#addToLibraryModalInfo').html($('#info_' + id).html());
+  $('#addToLibraryModalTitle').html($('#title_' + id + '_text').html());
+  $('#addToLibraryModalComment').val('');
+  $('#addToLibraryModal').modal('show');
+
+  $('#addToLibraryModalOK').off('click').on('click', function() {
+    const comment = $('#addToLibraryModalComment').val();
+    $('#addToLibraryModal').modal('hide');
+    ajaxPostJson({
+      url: "{% url 'api:add_recommendation' %}",
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
+      data: { paper_id: id, comment: comment },
+      success: function (data) {
+        console.log(data)
+        if (!data.success) {
+          alert('添加推荐失败！\n' + data.error);
+        } else {
+          $('#card_' + id).remove();
+          if ($('.card').length === 0) {
+            location.reload();
+          }
+        }
+      },
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
+      }
+    });
+  });
+}
+
+function mark_read_recommendation(id) {
+  ajaxPostJson({
+    url: "{% url 'api:mark_read_recommendation' %}",
+    headers: { 'X-CSRFToken': '{{csrf_token}}' },
+    data: { paper_id: id },
+    success: function (data) {
+      if (!data.success) {
+        alert('mark_read_recommendation failed!\n' + data.error);
+      } else {
+        $('#card_' + id).remove();
+        if ($('.card').length === 0) {
+          location.reload();
+        }
+      }
+    },
+    error: function (xhr, status, error) {
+      console.log("XHR:", xhr);
+      console.log("Status:", status);
+      console.log("Error:", error);
+      try {
+        var response = JSON.parse(xhr.responseText);
+        alert('请求处理发生错误: ' + response.error);
+      } catch (e) {
+        alert('请求处理发生未知错误: ' + error);
+      }
+    }
+  });
+}
+
+function restore_recommendation(id) {
+  ajaxPostJson({
+    url: "{% url 'api:restore_recommendation' %}",
+    headers: { 'X-CSRFToken': '{{csrf_token}}' },
+    data: { paper_id: id },
+    success: function (data) {
+      if (!data.success) {
+        alert('Restore recommendation failed!\n' + data.error);
+      } else {
+        $('#card_' + id).remove();
+        if ($('.card').length === 0) {
+          location.reload();
+        }
+      }
+    },
+    error: function (xhr, status, error) {
+      console.log("XHR:", xhr);
+      console.log("Status:", status);
+      console.log("Error:", error);
+      try {
+        var response = JSON.parse(xhr.responseText);
+        alert('请求处理发生错误: ' + response.error);
+      } catch (e) {
+        alert('请求处理发生未知错误: ' + error);
+      }
+    }
+  });
+}
+</script>

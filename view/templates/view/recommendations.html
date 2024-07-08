@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<div class="container my-3">
+<div class="my-3">
   <div class="d-flex">
     <div class="text-start align-self-start">筛选条件：</div>
     <div class="text-start align-self-start ms-2">
@@ -47,44 +47,46 @@
 {% include "view/paginator.html" %}
 
 {% for paper in papers %}
-<div id="card_{{paper.pk}}" class="card p-2 my-3 d-flex flex-row">
-  <div class="p-2 text-start">{{ paper.display_index }}.</div>
-  <div class="p-2 text-start flex-fill">
-    <div class="d-flex">
+<div id="card_{{paper.pk}}" class="card my-3 d-flex flex-row">
+  <div class="p-3">{{ paper.display_index }}.</div>
+  <div class="p-3 flex-fill">
+    <div class="d-flex flex-row">
       <div class="flex-fill">{% include "view/paper-info.html" %}</div>
-      {% if paper.recommended_count > 1 %}
-      <div class="text-end align-self-start">
-        <div class="badge bg-secondary ms-2">多次推送</div>
-      </div>
-      {% endif %}
-      <div class="text-end align-self-start">
-        {% if paper.has_any_review %}
-        <div class="badge bg-secondary ms-2">已加入个人文献库</div>
+      <div class="d-flex flex-column flex-lg-row">
+        {% if paper.recommended_count > 1 %}
+        <div class="text-end align-self-start">
+          <div class="badge bg-secondary ms-2">多次推送</div>
+        </div>
+        {% endif %}
+        <div class="text-end align-self-start">
+          {% if paper.has_any_review %}
+          <div class="badge bg-secondary ms-2 mb-2">已加入个人文献库</div>
+          {% else %}
+          <a class="btn btn-primary btn-sm text-nowrap ms-2 mb-2" href="javascript:addToLibrary({{paper.pk}})">加入个人文献库</a>
+          {% endif %}
+        </div>
+        {% if paper.recommendation_time %}
+        <div class="text-end align-self-start">
+          <a class="btn btn-outline-primary btn-sm text-nowrap ms-2 mb-2" href="javascript:mark_read_recommendation({{paper.pk}})">标记为已读</a>
+        </div>
         {% else %}
-        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_recommendation({{paper.pk}})">加入个人文献库</a>
+        <div class="text-end align-self-start">
+          <a class="btn btn-outline-primary btn-sm text-nowrap ms-2 mb-2" href="javascript:restore_recommendation({{paper.pk}})">恢复未读</a>
+        </div>
         {% endif %}
       </div>
-      {% if paper.recommendation_time %}
-      <div class="text-end align-self-start">
-        <a class="btn btn-outline-primary btn-sm text-nowrap ms-2" href="javascript:mark_read_recommendation({{paper.pk}})">标记为已读</a>
-      </div>
-      {% else %}
-      <div class="text-end align-self-start">
-        <a class="btn btn-outline-primary btn-sm text-nowrap ms-2" href="javascript:restore_recommendation({{paper.pk}})">恢复未读</a>
-      </div>
-      {% endif %}
     </div>
     <div class="mt-2">
       {% for review in paper.review_set.all %}
-        {% for label in review.labels.all %}
-      <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
-        {% endfor %}
+      {% for label in review.labels.all %}
+      <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{label.name}}</a>
+      {% endfor %}
       {% endfor %}
     </div>
-    <div class="my-3">
+    <div class="mt-3">
       <div id="title_{{paper.pk}}" class="d-inline text-start">
         <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
-        <a class="ms-2" href="javascript:translate_title({{ paper.pk }}, '{% url 'api:translate_title' %}', '{{csrf_token}}')">翻译</a>
+        <a class="ms-2" href="javascript:translate_title({{paper.pk}})">翻译</a>
       </div>
       <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
       {% if paper.translation and paper.translation.title_cn %}
@@ -100,29 +102,29 @@
     {% include "view/paper-author-list.html" %}
     {% include "view/paper-abstract.html" %}
     {% include "view/paper-keyword-list.html" %}
-    <div class="mt-4">
+    <div class="mt-2">
     {% if current_page == "recommendations" %}
       {% for recommendation in paper.recommendations %}
-      <div class="d-flex my-2">
-        <div class="text-start align-self-end me-3">推送标签：
+      <div class="my-2 d-flex flex-column flex-xl-row">
+        <div class="text-start align-self-start align-self-xl-end me-3">推送标签：
           {% for label in recommendation.labels.all %}
           <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
           {% endfor %}
         </div>
-        <div class="text-start align-self-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
-        <div class="text-start align-self-end me-3">推送源：{{ recommendation.source }}</div>
+        <div class="text-start align-self-start align-self-xl-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
+        <div class="text-start align-self-start align-self-xl-end me-3">推送源：{{ recommendation.source }}</div>
       </div>
       {% endfor %}
       {% if paper.historical_recommendations %}
         {% for recommendation in paper.historical_recommendations %}
-        <div id="historical_recommendations_{{paper.pk}}" class="d-flex my-2 d-none">
-          <div class="text-start align-self-end me-3">推送标签：
+        <div id="historical_recommendations_{{paper.pk}}" class="my-2 d-flex flex-column flex-xl-row d-none">
+          <div class="text-start align-self-start align-self-xl-end me-3">推送标签：
             {% for label in recommendation.labels.all %}
             <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
             {% endfor %}
           </div>
-          <div class="text-start align-self-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
-          <div class="text-start align-self-end me-3">推送源：{{ recommendation.source }}</div>
+          <div class="text-start align-self-start align-self-xl-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
+          <div class="text-start align-self-start align-self-xl-end me-3">推送源：{{ recommendation.source }}</div>
         </div>
         {% endfor %}
         <div id="button_expand_historical_recommendations_{{paper.pk}}" class="d-block">
@@ -135,13 +137,13 @@
     {% else %}
       {% for recommendation in paper.historical_recommendations %}
       <div class="d-flex my-2">
-        <div class="text-start align-self-end me-3">推送标签：
+        <div class="text-start align-self-start align-self-xl-end me-3">推送标签：
           {% for label in recommendation.labels.all %}
           <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
           {% endfor %}
         </div>
-        <div class="text-start align-self-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
-        <div class="text-start align-self-end me-3">推送源：{{ recommendation.source }}</div>
+        <div class="text-start align-self-start align-self-xl-end me-3">推送时间：{{ recommendation.create_time | date:"Y-m-d H:i" }}</div>
+        <div class="text-start align-self-start align-self-xl-end me-3">推送源：{{ recommendation.source }}</div>
       </div>
       {% endfor %}
     {% endif %}
@@ -151,137 +153,10 @@
 {% endfor %}
 
 {% include "view/paginator.html" %}
-
-<!-- Modal -->
-<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="commentModalLabel">加入推荐文献到个人文献库</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="commentForm">
-          <div class="mb-3">
-            <div id="dlg_info" class="text-start"></div>
-            <div id="dlg_title" class="text-start mt-3 fs-4 fw-bold"></div>
-          </div>
-          <div class="mb-3">
-            <label for="comment" class="form-label">笔记</label>
-            <textarea class="form-control" id="comment" rows="8" required></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" id="submitcomment">确定</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="{% static 'js/paper.js' %}"></script>
-<script>
-$(document).ready(function(){
-  $('#commentModal').on('shown.bs.modal', function () {
-      $('#comment').focus();
-  });
-});
-
-function expand_recommendations(paper_id) {
-  $('#historical_recommendations_' + paper_id).addClass('d-block');
-  $('#historical_recommendations_' + paper_id).removeClass('d-none');
-  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-none');
-  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-block');
-  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-block');
-  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-none');
-}
-
-function collapse_recommendations(paper_id) {
-  $('#historical_recommendations_' + paper_id).addClass('d-none');
-  $('#historical_recommendations_' + paper_id).removeClass('d-block');
-  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-block');
-  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-none');
-  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-none');
-  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-block');
-}
-
-function add_recommendation(id) {
-  $('#dlg_info').html($('#info_' + id).html());
-  $('#dlg_title').html($('#title_' + id + '_text').html());
-  $('#comment').val('');
-  $('#commentModal').modal('show');
-
-  $('#submitComment').off('click').on('click', function() {
-    const comment = $('#comment').val();
-    $('#commentModal').modal('hide');
-
-    ajaxPostJson({
-      url: "{% url 'api:add_recommendation' %}",
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
-      data: { paper_id: id, comment: comment },
-      success: function (data) {
-        if (!data.success) {
-          alert('添加推荐失败！\n' + data.error);
-        } else {
-          $('#card_' + id).remove();
-          if ($('.card').length === 0) {
-            location.reload();
-          }
-        }
-      },
-      error: function() {
-        alert('请求处理中发生错误。');
-      }
-    });
-  });
-}
-
-function mark_read_recommendation(id) {
-  ajaxPostJson({
-    url: "{% url 'api:mark_read_recommendation' %}",
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
-    data: { paper_id: id },
-    success: function (data) {
-      if (!data.success) {
-        alert('mark_read_recommendation failed!\n' + data.error);
-      } else {
-        $('#card_' + id).remove();
-        if ($('.card').length === 0) {
-          location.reload();
-        }
-      }
-    },
-    error: function () {
-      alert('An error occurred while processing your request.');
-    }
-  });
-}
-
-function restore_recommendation(id) {
-  ajaxPostJson({
-    url: "{% url 'api:restore_recommendation' %}",
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
-    data: { paper_id: id },
-    success: function (data) {
-      if (!data.success) {
-        alert('Restore recommendation failed!\n' + data.error);
-      } else {
-        $('#card_' + id).remove();
-        if ($('.card').length === 0) {
-          location.reload();
-        }
-      }
-    },
-    error: function () {
-      alert('An error occurred while processing your request.');
-    }
-  });
-}
-
-</script>
+{% include "view/recommendation-op.html" %}
+{% include "view/paper-js.html" %}
 {% else %}
-<div class="container">
+<div class="m-3">
   <div class="d-flex">
     <div class="flex-fill text-middle pt-5">
       暂无推荐文献。建议<a href="{% url "trackings" %}">添加推荐规则</a>，以便后续系统识别到符合条件的文献时进行推送。

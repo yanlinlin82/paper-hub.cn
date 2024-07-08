@@ -12,7 +12,7 @@
 {% block page_title %}社群榜单{% endblock page_title %}
 
 {% block content %}
-<div class="container">
+<div class="m-3">
   <ul class="nav nav-tabs">
     <li class="nav-item">
       <a class="nav-link{% if rank_type == 'this_month' %} active{% endif %}" href="{% url 'group:rank_type' rank_type='this_month' group_name=group.name %}">本月榜单</a>

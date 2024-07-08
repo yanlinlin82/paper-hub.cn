@@ -548,7 +548,7 @@ def add_search_result(request):
 def add_recommendation(request):
     data = request.json_data
     paper_id = data.get('paper_id')
-    comment = data.get('comment')
+    comment = data.get('comment') or ''
 
     user = request.user.custom_user
     paper = Paper.objects.get(pk=paper_id)
@@ -1013,62 +1013,70 @@ def translate_text(s):
     except Exception as e:
         return False, f"An error occurred: {e}"
 
+@json_view
 def translate_title(request):
-    print('translate_title:', request)
-    paper_id = request.POST['paper_id']
-    print('paper_id:', paper_id)
-
+    data = request.json_data
+    paper_id = data.get('paper_id')
     paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
+    if paper.title.strip() == '':
+        return JsonResponse({'success': True, 'answer': ''})
+
     pt = getattr(paper, 'translation', None)
     if pt and pt.title_cn:
-        print(f'already translated: {pt.title_cn}')
         return JsonResponse({'success': True, 'answer': pt.title_cn})
 
-    title = paper.title
-    print('to translate:', title)
-
-    success, result_text = translate_text(title)
-    print(f'translate_text: {success} {result_text}')
-
+    success, result_text = translate_text(paper.title)
     if not success:
-        return JsonResponse({
-            'success': False,
-            'error': result_text
-        })
+        return JsonResponse({'success': False, 'error': result_text})
+
+    if not pt:
+        pt = PaperTranslation(paper=paper, title_cn=result_text)
     else:
-        if not pt:
-            pt = PaperTranslation(paper=paper, title_cn=result_text)
-        else:
-            pt.title_cn = result_text
-        pt.save()
-        return JsonResponse({'success': True, 'answer': result_text})
+        pt.title_cn = result_text
+    pt.save()
+    return JsonResponse({'success': True, 'answer': result_text})
 
+@json_view
 def translate_abstract(request):
-    print('translate_abstract:', request)
-    paper_id = request.POST['paper_id']
-    print('paper_id:', paper_id)
-
+    data = request.json_data
+    paper_id = data.get('paper_id')
     paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
+    if paper.abstract.strip() == '':
+        return JsonResponse({'success': True, 'answer': ''})
+
     pt = getattr(paper, 'translation', None)
     if pt and pt.abstract_cn:
-        print(f'already translated: {pt.abstract_cn}')
         return JsonResponse({'success': True, 'answer': pt.abstract_cn})
 
-    abstract = paper.abstract
-    print('to translate:', abstract)
-
-    success, result_text = translate_text(abstract)
-    print(f'translate_text: {success} {result_text}')
-
+    success, result_text = translate_text(paper.abstract)
     if not success:
-        return JsonResponse({
-            'success': False,
-            'error': result_text
-        })
+        return JsonResponse({'success': False, 'error': result_text})
+
+    if not pt:
+        pt = PaperTranslation(paper=paper, abstract_cn=result_text)
     else:
-        if not pt:
-            pt = PaperTranslation(paper=paper, abstract_cn=result_text)
-        else:
-            pt.abstract_cn = result_text
-        pt.save()
-        return JsonResponse({'success': True, 'answer': result_text})
+        pt.abstract_cn = result_text
+    pt.save()
+    return JsonResponse({'success': True, 'answer': result_text})
+
+@json_view
+@require_login
+def check_in(request):
+    data = request.json_data
+    user = request.user.custom_user
+    today = timezone.now().date()
+    print(f"check_in: {user} {today} {data}")
+    return JsonResponse({'success': False, 'error': 'Not implemented!'})
+
+@json_view
+@require_login
+def check_in_by_admin(request):
+    data = request.json_data
+    user = request.user.custom_user
+    today = timezone.now().date()
+    print(f"check_in_by_admin: {user} {today} {data}")
+    return JsonResponse({'success': False, 'error': 'Not implemented!'})

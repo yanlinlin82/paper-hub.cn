@@ -1,3 +1,4 @@
+<script>
 function expand_authors(id) {
   $('#author_' + id + '_short').addClass('d-none');
   $('#author_' + id + '_short').removeClass('d-inline');
@@ -40,7 +41,7 @@ function collapse_keywords(id) {
   $('#keyword_' + id + '_long').removeClass('d-inline');
 }
 
-function translate_title(paper_id, url, csrf_token) {
+function translate_title(paper_id) {
   if ($('#title_cn_' + paper_id).html().trim() !== '') {
     if ($('#title_cn_' + paper_id).hasClass('d-none')) {
       $('#title_cn_' + paper_id).addClass('d-block');
@@ -53,28 +54,33 @@ function translate_title(paper_id, url, csrf_token) {
     $('#title_cn_' + paper_id).addClass('d-block');
     $('#title_cn_' + paper_id).removeClass('d-none');
     $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-    $.ajax({
-      url: url,
-      type: 'POST',
-      headers: { "X-CSRFToken": csrf_token },
+    ajaxPostJson({
+      url: "{% url 'api:translate_title' %}",
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { paper_id: paper_id },
       success: function (data) {
-        console.log(data)
         if (!data.success) {
           alert('Translate title failed!\n' + data.error);
         } else {
           $('#title_cn_' + paper_id).html(data.answer);
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     });
   }
 }
 
-function translate_abstract(paper_id, url, csrf_token) {
+function translate_abstract(paper_id) {
   if ($('#abstract_cn_' + paper_id).html().trim() !== '') {
     if ($('#abstract_cn_' + paper_id).hasClass('d-none')) {
       $('#abstract_cn_' + paper_id).addClass('d-block');
@@ -87,23 +93,29 @@ function translate_abstract(paper_id, url, csrf_token) {
     $('#abstract_cn_' + paper_id).addClass('d-block');
     $('#abstract_cn_' + paper_id).removeClass('d-none');
     $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
-
-    $.ajax({
-      url: url,
-      type: 'POST',
-      contentType: 'application/json',
-      headers: { "X-CSRFToken": csrf_token },
+    ajaxPostJson({
+      url: "{% url 'api:translate_abstract' %}",
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { paper_id: paper_id },
       success: function (data) {
         if (!data.success) {
-          alert('Translate title failed!\n' + data.error);
+          alert('Translate abstract failed!\n' + data.error);
         } else {
           $('#abstract_cn_' + paper_id).html(data.answer);
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     });
   }
 }
+</script>

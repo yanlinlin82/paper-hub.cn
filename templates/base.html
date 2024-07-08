@@ -10,7 +10,6 @@
   <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
   <link href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}" rel="stylesheet">
   <script src="{% static 'bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'js/cookie.js' %}"></script>
   <style>
     html {scroll-padding-top: 40px;}
     a {text-decoration: none;}
@@ -28,13 +27,14 @@
     $.ajax(settings);
   }
   </script>
+  {% include "cookie-js.html" %}
 </head>
 
 <body>
 <a id="top"></a>
 
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark py-0">
-  <div class="container">
+  <div class="container-lg">
     <a class="navbar-brand" href="{% url 'index' %}">Paper-Hub</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar"
       aria-controls="collapsibleNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@
 </nav>
 
 <div class="bg-primary text-white">
-  <div class="container px-3 py-3">
+  <div class="container-lg px-3 py-3">
     {% block banner %}
     <h2>{% block title %}文献库{% endblock title %}</h2>
     <p>{% block subtitle %}一个便捷的用于文献收藏、分享、社群打卡的轻量级在线平台{% endblock subtitle %}</p>
@@ -72,11 +72,11 @@
   </div>
 </div>
 
-<div class="container">
+<div class="container-lg">
   {% block main %}
-  <div class="d-flex">
-    <nav class="bg-light d-md-block col-4 col-sm-3 col-md-2">
-      <div id="collapse-group" class="sticky-top">
+  <div class="d-flex flex-column flex-md-row">
+    <nav class="bg-light col-12 col-md-4 col-lg-3 col-xl-2">
+      <div id="collapse-group" class="sticky-sm-top">
         {% if user.is_authenticated %}
         <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark" data-bs-toggle="collapse" data-bs-target="#collapse-group-1" role="button" aria-expanded="false" aria-controls="collapse-group-1">探索发现</div>
@@ -115,8 +115,8 @@
         </div>
       </div>
     </nav>
-    <div class="flex-fill ms-sm-auto p-3 col-8 col-sm-9 col-md-10">
-      <article class="container">
+    <div class="flex-fill p-3">
+      <article class="m-3">
         <h1 class="mb-4">{% block page_title %}{% endblock page_title %}</h1>
         <p class="text-start">{% block page_subtitle %}{% endblock page_subtitle %}</p>
         <div class="content">{% block content %}{% endblock content %}</div>

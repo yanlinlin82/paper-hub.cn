@@ -1,0 +1,106 @@
+{% if user.is_authenticated %}
+<section>
+<div class="my-4 d-flex justify-content-center">
+  <div class="text-center m-2">
+    <a class="btn btn-warning btn-lg" href="javascript:checkIn();">分享打卡</a>
+  </div>
+  {% if user.is_superuser %}
+  <div class="text-center m-2">
+    <a class="btn btn-danger btn-lg" href="javascript:checkInByAdmin();">管理员补录打卡</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="modal fade" id="checkInModal" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="checkInModalLabel">文献分享打卡</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="checkInForm" method="post">
+          <div class="form-group">
+            <label for="checkInComment">备注</label>
+            <textarea class="form-control my-2" id="checkInComment" name="comment" rows="6"></textarea>
+          </div>
+          <div class="form-group">
+            <div class="row align-items-center">
+              <div class="col-2 text-end align-middle"><label class="mt-3" for="editReviewModalID">文献ID</label></div>
+              <div class="col-10 d-flex">
+                <div class="flex-fill form-group">
+                  <div class="input-group w-auto">
+                    <input type="text" class="form-control" id="editReviewModalID" name="editReviewModalID" placeholder="DOI/PMID/PMCID/arXivID">
+                    <button type="button" class="btn btn-primary" onclick="javascript:query_paper_info()">提取文献信息</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="$('#checkInForm').submit();">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="checkInByAdminModal" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="checkInModalLabel">文献分享打卡补录</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="checkInForm" method="post">
+          <div class="form-group">
+            <label for="checkInDate">打卡日期</label>
+            <input type="date" class="form-control" id="checkInDate" name="check_in_date" required>
+          </div>
+          <div class="form-group">
+            <label for="checkInComment">备注</label>
+            <textarea class="form-control" id="checkInComment" name="comment" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="$('#checkInForm').submit();">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<script>
+function checkIn() {
+  $('#checkInModal').modal('show');
+  ajaxPostJson({
+    "url": "{% url 'api:check_in' %}",
+    "data": {},
+    "callback": function(data) {
+      if (data.status == "success") {
+        $('#checkInDate').val(data.check_in_date);
+      }
+    }
+  });
+}
+
+{% if user.is_superuser %}
+function checkInByAdmin() {
+  $('#checkInByAdminModal').modal('show');
+  ajaxPostJson({
+    "url": "{% url 'api:check_in_by_admin' %}",
+    "data": {},
+    "callback": function(data) {
+      if (data.status == "success") {
+        $('#checkInDate').val(data.check_in_date);
+      }
+    }
+  });
+}
+{% endif %}
+</script>
+{% endif %}

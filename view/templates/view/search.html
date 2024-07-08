@@ -69,7 +69,7 @@
       <div class="my-3">
         <div id="title_{{paper.pk}}" class="d-inline text-start">
           <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold"><a href="{% url "paper" id=paper.pk %}">{{ paper.title }}</a></div>
-          <a class="ms-2" href="javascript:translate_title({{ paper.pk }}, '{% url 'api:translate_title' %}', '{{csrf_token}}')">翻译</a>
+          <a class="ms-2" href="javascript:translate_title({{paper.pk}})">翻译</a>
         </div>
         <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
         {% if paper.translation and paper.translation.title_cn %}
@@ -120,7 +120,7 @@
   </div>
 </div>
 
-<script src="{% static 'js/paper.js' %}"></script>
+{% include "view/paper-js.html" %}
 <script>
 $(document).ready(function() {
   $('#shareModal').on('shown.bs.modal', () => {
@@ -140,15 +140,10 @@ function add_search_result(id) {
   $('#submitComment').off('click').on('click', function() {
     const comment = $('#comment').val();
     $('#commentModal').modal('hide');
-    $.ajax({
+    ajaxPostJson({
       url: "{% url 'api:add_search_result' %}",
-      type: 'POST',
-      contentType: 'application/json',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
-      data: {
-        paper_id: id,
-        comment: comment
-      },
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
+      data: {paper_id: id, comment: comment},
       success: function (data) {
         if (!data.success) {
           alert('添加推荐失败！\n' + data.error);
@@ -159,13 +154,20 @@ function add_search_result(id) {
           }
         }
       },
-      error: function() {
-        alert('请求处理中发生错误。');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     });
   });
 }
 </script>
-
 {% endif %}
 {% endblock content %}

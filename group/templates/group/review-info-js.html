@@ -7,7 +7,6 @@
       </div>
       <div class="modal-body">
         <form id="editReviewForm" method="post" onsubmit="return submit_review(event)">
-          {% csrf_token %}
           <input type="hidden" id="editReviewModalReviewId">
           <input type="hidden" id="editReviewModalPaperId">
           <input type="hidden" id="editReviewModalEditPaperInfo" value="false">
@@ -264,7 +263,7 @@ function query_paper_info() {
   var identifier = $('#editReviewModalID').val();
   ajaxPostJson({
     url: "{% url 'api:query_paper_info' %}",
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { identifier: identifier },
     success: function (data) {
       if (!data.success) {
@@ -287,8 +286,16 @@ function query_paper_info() {
         setAndCompareValues('Lang', data.results.language);
       }
     },
-    error: function () {
-      alert('An error occurred while processing your request.');
+    error: function (xhr, status, error) {
+      console.log("XHR:", xhr);
+      console.log("Status:", status);
+      console.log("Error:", error);
+      try {
+        var response = JSON.parse(xhr.responseText);
+        alert('请求处理发生错误: ' + response.error);
+      } catch (e) {
+        alert('请求处理发生未知错误: ' + error);
+      }
     }
   });
 }
@@ -321,7 +328,7 @@ function submit_review(event) {
   console.log(data);
   ajaxPostJson({
     url: "{% url 'api:submit_review' %}",
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: data,
     success: function (data) {
       if (!data.success) {
@@ -330,8 +337,16 @@ function submit_review(event) {
         location.reload(false);
       }
     },
-    error: function () {
-      alert('An error occurred while processing your request.');
+    error: function (xhr, status, error) {
+      console.log("XHR:", xhr);
+      console.log("Status:", status);
+      console.log("Error:", error);
+      try {
+        var response = JSON.parse(xhr.responseText);
+        alert('请求处理发生错误: ' + response.error);
+      } catch (e) {
+        alert('请求处理发生未知错误: ' + error);
+      }
     }
   });
   return false;
@@ -347,7 +362,6 @@ function submit_review(event) {
       </div>
       <div class="modal-body">
         <form id="reviewEditForm" method="post">
-          {% csrf_token %}
           <input type="hidden" id="reviewModalPk">
           <div class="row mb-3">
             <div class="col-6 form-group">
@@ -465,8 +479,16 @@ $(document).ready(function() {
           $('#reviewModalJournal').val(data.results.journal);
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     })
   })
@@ -476,7 +498,7 @@ $(document).ready(function() {
       url: "{% url 'api:add_review' %}",
       type: 'POST',
       contentType: 'application/json',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: {
         group_name: '{{group.name}}',
         username: $('#reviewModalUsername').val(),
@@ -494,8 +516,16 @@ $(document).ready(function() {
           location.reload(false);
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     })
   }
@@ -505,7 +535,7 @@ $(document).ready(function() {
       url: "{% url 'api:edit_review' %}",
       type: 'POST',
       contentType: 'application/json',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: {
         id: $('#reviewModalPk').val(),
         review_id: $('#reviewModalreviewID').val(),
@@ -521,8 +551,16 @@ $(document).ready(function() {
           location.reload(false);
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     })
   }
@@ -543,7 +581,7 @@ function delete_review(id) {
       url: "{% url 'api:delete_review' %}",
       type: 'POST',
       contentType: 'application/json',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {
         if (!data.success) {
@@ -556,8 +594,16 @@ function delete_review(id) {
           {% endif %}
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     });
   }
@@ -568,7 +614,7 @@ function restore_review(id) {
     url: "{% url 'api:restore_review' %}",
     type: 'POST',
     contentType: 'application/json',
-    headers: { "X-CSRFToken": '{{csrf_token}}' },
+    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { review_id: id },
     success: function (data) {
       if (!data.success) {
@@ -577,8 +623,16 @@ function restore_review(id) {
         location.reload(false);
       }
     },
-    error: function () {
-      alert('An error occurred while processing your request.');
+    error: function (xhr, status, error) {
+      console.log("XHR:", xhr);
+      console.log("Status:", status);
+      console.log("Error:", error);
+      try {
+        var response = JSON.parse(xhr.responseText);
+        alert('请求处理发生错误: ' + response.error);
+      } catch (e) {
+        alert('请求处理发生未知错误: ' + error);
+      }
     }
   });
 }
@@ -589,7 +643,7 @@ function delete_review_forever(id) {
       url: "{% url 'api:delete_review_forever' %}",
       type: 'POST',
       contentType: 'application/json',
-      headers: { "X-CSRFToken": '{{csrf_token}}' },
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {
         if (!data.success) {
@@ -598,8 +652,16 @@ function delete_review_forever(id) {
           location.reload(false);
         }
       },
-      error: function () {
-        alert('An error occurred while processing your request.');
+      error: function (xhr, status, error) {
+        console.log("XHR:", xhr);
+        console.log("Status:", status);
+        console.log("Error:", error);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          alert('请求处理发生错误: ' + response.error);
+        } catch (e) {
+          alert('请求处理发生未知错误: ' + error);
+        }
       }
     });
   }

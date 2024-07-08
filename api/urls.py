@@ -31,4 +31,6 @@ urlpatterns = [
     path('translate_title', views.translate_title, name='translate_title'),
     path('translate_abstract', views.translate_abstract, name='translate_abstract'),
     path('query_paper_info', views.query_paper_info, name='query_paper_info'),
+    path('check_in', views.check_in, name='check_in'),
+    path('check_in_by_admin', views.check_in_by_admin, name='check_in_by_admin'),
 ]
