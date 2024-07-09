@@ -68,7 +68,7 @@
       {% endif %}
       <div class="my-3">
         <div id="title_{{paper.pk}}" class="d-inline text-start">
-          <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold"><a href="{% url "paper" id=paper.pk %}">{{ paper.title }}</a></div>
+          <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold"><a href="{% url "library:paper" id=paper.pk %}">{{ paper.title }}</a></div>
           <a class="ms-2" href="javascript:translate_title({{paper.pk}})">翻译</a>
         </div>
         <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
