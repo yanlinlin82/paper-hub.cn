@@ -10,7 +10,7 @@ from django.utils import timezone
 
 class UserProfile(models.Model):
     auth_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='core_user_profile', null=True)
-    create_time = models.DateTimeField()#(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now_add=True)
     nickname = models.CharField(max_length=100, default='', blank=True)
     wx_openid = models.CharField(max_length=100, default='', blank=True)
     wx_unionid = models.CharField(max_length=100, default='', blank=True)
@@ -55,7 +55,7 @@ class UserSession(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     session_key = models.CharField(max_length=255)
     token = models.UUIDField(default=uuid.uuid4, editable=False)
-    created_at = models.DateTimeField()#(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     client_type = models.CharField(max_length=10, choices=CLIENT_TYPES)
 
@@ -68,8 +68,8 @@ class UserSession(models.Model):
         return f"{self.user.nickname}: {self.token} - {self.get_client_type_display()}"
 
 class Paper(models.Model):
-    create_time = models.DateTimeField()#(auto_now_add=True, db_index=True)
-    update_time = models.DateTimeField()#(auto_now=True, db_index=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    update_time = models.DateTimeField(auto_now=True, db_index=True)
 
     title = models.CharField(max_length=4096, default='', db_index=True)
     journal = models.CharField(max_length=256, default='', blank=True, db_index=True)
@@ -114,7 +114,7 @@ class PaperTracking(models.Model): # every user has his own paper tracking rules
     memo = models.CharField(max_length=2000, default='', blank=True)
 
 class Recommendation(models.Model): # recommended by system (daily automatically)
-    create_time = models.DateTimeField()#(auto_now_add=True, db_index=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     read_time = models.DateTimeField(null=True, default=None, db_index=True) # None means unread
     source = models.CharField(max_length=100, default='') # eg. 'pubmed24n1453.20240628'
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_index=True)
@@ -125,8 +125,8 @@ class Review(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
 
     creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    create_time = models.DateTimeField()#(default=timezone.now)
-    update_time = models.DateTimeField()#(default=timezone.now)
+    create_time = models.DateTimeField(default=timezone.now) # not using 'auto_now_add' because we need to update it, when admin adding reviews for users
+    update_time = models.DateTimeField(default=timezone.now) # same as above
     delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
 
     comment = models.CharField(max_length=1024*1024, default='', blank=True)
@@ -139,7 +139,7 @@ class GroupProfile(models.Model):
     name = models.CharField(max_length=64, default='')
     display_name = models.CharField(max_length=128, default='')
     desc = models.CharField(max_length=2000, default='')
-    create_time = models.DateTimeField()#(default=timezone.now)
+    create_time = models.DateTimeField(default=timezone.now)
     members = models.ManyToManyField(UserProfile)
     reviews = models.ManyToManyField(Review)
     def __str__(self):
