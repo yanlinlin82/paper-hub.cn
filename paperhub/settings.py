@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [ "localhost", "127.0.0.1", "paper-hub.cn" ]
 
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
+    'core.apps.CoreConfig',
     'view.apps.ViewConfig',
     'group.apps.GroupConfig',
     'django.contrib.admin',

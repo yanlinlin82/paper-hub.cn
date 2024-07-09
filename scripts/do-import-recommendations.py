@@ -7,7 +7,7 @@ sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 
-from view.models import PaperTracking, UserProfile, Paper, Label, Recommendation
+from core.models import PaperTracking, UserProfile, Paper, Label, Recommendation
 
 def ms(s, sep=', '): # print multi-line string
     return sep.join(s.split('\n'))

@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from django.urls import reverse
 from django.db.models import Count
 from django.db.models.aggregates import Min
-from view.models import CustomCheckInInterval, PubMedIndex, Paper
+from core.models import CustomCheckInInterval, PubMedIndex, Paper
 from paperhub import settings
 import requests
 from lxml import etree

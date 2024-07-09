@@ -7,7 +7,7 @@ sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 
-from view.models import Paper
+from core.models import Paper
 
 def list_paper_index(output_csv):
     data = []

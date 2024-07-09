@@ -7,7 +7,7 @@ sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 
-from view.models import PubMedIndex
+from core.models import PubMedIndex
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:

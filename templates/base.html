@@ -46,7 +46,7 @@
         {% if user.is_authenticated %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ user.custom_user.nickname }}
+            {{ user.core_user_profile.nickname }}
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>

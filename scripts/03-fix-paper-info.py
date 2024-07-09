@@ -8,7 +8,7 @@ sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
 django.setup()
 
-from view.models import Paper
+from core.models import Paper
 
 class PaperInfo:
     def __init__(self, xml_node):

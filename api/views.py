@@ -20,7 +20,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 import openai
 from paperhub import settings
-from view.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
+from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
 from api.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from api.paper import get_abstract_by_doi, convert_paper_info
@@ -138,17 +138,17 @@ def do_login(request):
     if user is None:
         return JsonResponse({'success': False, 'error': 'Login failed. Please check your credentials.'})
 
-    UserSession.objects.filter(user=user.custom_user, client_type='website').delete()
-    session = UserSession(user=user.custom_user, client_type='website')
+    UserSession.objects.filter(user=user.core_user_profile, client_type='website').delete()
+    session = UserSession(user=user.core_user_profile, client_type='website')
     session.save()
 
     login(request, user)
     return JsonResponse({
         'success': True,
-        'nickname': user.custom_user.nickname,
+        'nickname': user.core_user_profile.nickname,
         'csrfToken': get_token(request),
         'token': str(session.token),
-        'debug': user.custom_user.debug_mode
+        'debug': user.core_user_profile.debug_mode
     })
 
 def do_logout(request):
@@ -280,8 +280,8 @@ def submit_review(request):
         return JsonResponse({'success': False, 'error': f"Review not found: {review_id}"})
     if review.paper.pk != paper_id:
         return JsonResponse({'success': False, 'error': f"Review {review_id} does not match paper {paper_id} (expected {review.paper.pk})"})
-    if not request.user.is_superuser and review.creator != request.user.custom_user:
-        return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {request.user.custom_user} (expected {review.creator})"})
+    if not request.user.is_superuser and review.creator != request.user.core_user_profile:
+        return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {request.user.core_user_profile} (expected {review.creator})"})
 
     if review.comment != comment:
         review.comment = comment
@@ -505,7 +505,7 @@ def add_search_result(request):
         paper_id = request.POST['paper_id']
         comment = request.POST['comment']
 
-        user = request.user.custom_user
+        user = request.user.core_user_profile
 
         paper = Paper.objects.get(pk=paper_id)
         if paper is None:
@@ -531,7 +531,7 @@ def add_recommendation(request):
     paper_id = data.get('paper_id')
     comment = data.get('comment') or ''
 
-    user = request.user.custom_user
+    user = request.user.core_user_profile
     paper = Paper.objects.get(pk=paper_id)
     if paper is None:
         return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
@@ -561,7 +561,7 @@ def mark_read_recommendation(request):
     data = request.json_data
     paper_id = data.get('paper_id')
 
-    user = request.user.custom_user
+    user = request.user.core_user_profile
     paper = Paper.objects.get(pk=paper_id)
     if paper is None:
         return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
@@ -578,7 +578,7 @@ def restore_recommendation(request):
     data = request.json_data
     paper_id = data.get('paper_id')
 
-    user = request.user.custom_user
+    user = request.user.core_user_profile
     paper = Paper.objects.get(pk=paper_id)
     if paper is None:
         return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
@@ -987,7 +987,7 @@ def translate_abstract(request):
 @require_login
 def check_in(request):
     data = request.json_data
-    user = request.user.custom_user
+    user = request.user.core_user_profile
     today = timezone.now().date()
     print(f"check_in: {user} {today} {data}")
     return JsonResponse({'success': False, 'error': 'Not implemented!'})
@@ -996,7 +996,7 @@ def check_in(request):
 @require_login
 def check_in_by_admin(request):
     data = request.json_data
-    user = request.user.custom_user
+    user = request.user.core_user_profile
     today = timezone.now().date()
     print(f"check_in_by_admin: {user} {today} {data}")
     return JsonResponse({'success': False, 'error': 'Not implemented!'})
