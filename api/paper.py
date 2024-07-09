@@ -540,7 +540,9 @@ def get_paper_info_new(identifier, identifier_type):
     if source and index:
         print(f"Will try to fetch paper info from source '{source}' with index '{index}'")
 
-        cache_filename = os.path.join(settings.BASE_DIR, "cache", "pubmed-data", f"pubmed24n{source:04}.xml.gz")
+        PUBMED_DIR = os.getenv('PUBMED_DIR')
+        pubmed_data_part = 'baseline' if source < 1219 else 'updatefiles'
+        cache_filename = os.path.join(PUBMED_DIR, pubmed_data_part, f"pubmed24n{source:04}.xml.gz")
         if os.path.exists(cache_filename):
             print(f"Loading data from cache '{cache_filename}'")
             tree = etree.parse(cache_filename)
@@ -550,11 +552,7 @@ def get_paper_info_new(identifier, identifier_type):
 
             return paper_info
 
-        if source < 1912:
-            url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed24n{source:04}.xml.gz"
-        else:
-            url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/pubmed24n{source:04}.xml.gz"
-
+        url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/{pubmed_data_part}/pubmed24n{source:04}.xml.gz"
         print(f"Local cache file '{cache_filename}' is missing, which could be downloaded from: {url}")
     else:
         print(f"Not found in PubMedIndex: {identifier}")

@@ -71,6 +71,8 @@ An easy way to read and share papers for scientific research
     AZURE_ENDPOINT=https://api.cognitive.microsofttranslator.com
     AZURE_LOCATION=eastus
     AZURE_PATH=/translate
+
+    PUBMED_DIR=/path/to/pubmed/
     ```
 
 ## How to setup a development environment (Optional)
