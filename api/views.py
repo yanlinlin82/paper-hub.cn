@@ -933,55 +933,72 @@ def translate_text(s):
     except Exception as e:
         return False, f"An error occurred: {e}"
 
-@json_view
-def translate_title(request):
+from django.db import transaction, IntegrityError
+from django.http import JsonResponse
+
+def handle_translation(request, field_name, translation_func, model, translation_model, translation_field):
     data = request.json_data
     paper_id = data.get('paper_id')
-    paper = Paper.objects.get(pk=paper_id)
-    if paper is None:
+
+    try:
+        paper = Paper.objects.get(pk=paper_id)
+    except Paper.DoesNotExist:
         return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
-    if paper.title.strip() == '':
+    
+    field_value = getattr(paper, field_name, '').strip()
+    if not field_value:
         return JsonResponse({'success': True, 'answer': ''})
 
-    pt = getattr(paper, 'translation', None)
-    if pt and pt.title_cn:
-        return JsonResponse({'success': True, 'answer': pt.title_cn})
+    # 预先检查是否已经有翻译，减少不必要的翻译操作
+    translation_instance = translation_model.objects.filter(paper=paper).first()
+    if translation_instance and getattr(translation_instance, translation_field):
+        return JsonResponse({'success': True, 'answer': getattr(translation_instance, translation_field)})
 
-    success, result_text = translate_text(paper.title)
+    # 执行耗时的翻译操作
+    success, result_text = translation_func(field_value)
     if not success:
         return JsonResponse({'success': False, 'error': result_text})
 
-    if not pt:
-        pt = PaperTranslation(paper=paper, title_cn=result_text)
-    else:
-        pt.title_cn = result_text
-    pt.save()
+    # 使用数据库事务和锁来避免并发问题
+    try:
+        with transaction.atomic():
+            translation_instance, created = translation_model.objects.select_for_update().get_or_create(paper=paper)
+            if not created and getattr(translation_instance, translation_field):
+                return JsonResponse({'success': True, 'answer': getattr(translation_instance, translation_field)})
+
+            # 更新翻译内容
+            setattr(translation_instance, translation_field, result_text)
+            translation_instance.save()
+
+    except IntegrityError:
+        # 处理并发情况下的重复创建问题
+        translation_instance = translation_model.objects.get(paper=paper)
+        setattr(translation_instance, translation_field, result_text)
+        translation_instance.save()
+
     return JsonResponse({'success': True, 'answer': result_text})
+
+@json_view
+def translate_title(request):
+    return handle_translation(
+        request=request,
+        field_name='title',
+        translation_func=translate_text,
+        model=Paper,
+        translation_model=PaperTranslation,
+        translation_field='title_cn'
+    )
 
 @json_view
 def translate_abstract(request):
-    data = request.json_data
-    paper_id = data.get('paper_id')
-    paper = Paper.objects.get(pk=paper_id)
-    if paper is None:
-        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
-    if paper.abstract.strip() == '':
-        return JsonResponse({'success': True, 'answer': ''})
-
-    pt = getattr(paper, 'translation', None)
-    if pt and pt.abstract_cn:
-        return JsonResponse({'success': True, 'answer': pt.abstract_cn})
-
-    success, result_text = translate_text(paper.abstract)
-    if not success:
-        return JsonResponse({'success': False, 'error': result_text})
-
-    if not pt:
-        pt = PaperTranslation(paper=paper, abstract_cn=result_text)
-    else:
-        pt.abstract_cn = result_text
-    pt.save()
-    return JsonResponse({'success': True, 'answer': result_text})
+    return handle_translation(
+        request=request,
+        field_name='abstract',
+        translation_func=translate_text,
+        model=Paper,
+        translation_model=PaperTranslation,
+        translation_field='abstract_cn'
+    )
 
 @json_view
 @require_login
