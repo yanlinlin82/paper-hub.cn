@@ -4,21 +4,21 @@
   {% if paper.keyword_list|length > 3 %}
   <div id="keyword_{{ paper.pk }}_short" class="d-inline">
     {% for keyword in paper.keyword_list|slice:":3" %}
-    <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>,
+    <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ keyword|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ keyword }}</a>,
     {% endfor %}
     ...
     <a href="javascript:expand_keywords({{ paper.pk }})">&gt;&gt;&gt;</a>
   </div>
   <div id="keyword_{{ paper.pk }}_long" class="d-none">
     {% for keyword in paper.keyword_list %}
-    <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+    <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ keyword|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
     {% endfor %}
     <a href="javascript:collapse_keywords({{ paper.pk }})">&lt;&lt;&lt;</a>
   </div>
   {% else %}
   <div class="d-inline">
     {% for keyword in paper.keyword_list %}
-    <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+    <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ keyword|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
     {% endfor %}
   </div>
   {% endif %}

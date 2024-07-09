@@ -1,5 +1,6 @@
+{% load view_extras %}
 <div id="info_{{paper.pk}}" class="text-start">
-  {% if paper.journal %}<a id="journal_{{paper.pk}}" href="{% url 'search' %}?q={{paper.journal|urlencode}}">{{paper.journal}}</a>, {% endif %}
+  {% if paper.journal %}<a href="{% url 'group:journal' journal_name=paper.journal|urlencode_full group_name=group.name %}"><i>{{paper.journal}}</i></a>, {% endif %}
   {{paper.pub_date}}.
   {% if paper.doi %}DOI: <a id="doi_{{paper.pk}}" href="https://doi.org/{{paper.doi}}" target="_blank">{{paper.doi}}</a>{% endif %}
   {% if paper.pmid %}PMID: <a id="pmid_{{paper.pk}}" href="https://pubmed.ncbi.nlm.nih.gov/{{paper.pmid}}" target="_blank">{{paper.pmid}}</a>{% endif %}

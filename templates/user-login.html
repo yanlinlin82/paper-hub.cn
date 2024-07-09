@@ -84,6 +84,7 @@ function logout() {
   if (confirm('Are you sure you want to log out?')) {
     ajaxPostJson({
       url: "{% url 'api:logout' %}",
+      headers: {'X-CSRFToken': '{{csrf_token}}'},
       success: function (data) {
         location.reload(false);
       }

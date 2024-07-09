@@ -16,7 +16,7 @@
   {% with review.paper as paper %}
   <div id="card_{{paper.pk}}" class="card p-2">
     <div id="info_{{paper.pk}}" class="text-start">
-      <div class="flex-fill">{% include "view/paper-info.html" %}</div>
+      <div class="flex-fill">{% include "group/paper-info.html" %}</div>
     </div>
     <div class="my-2">
       <div id="title_{{paper.pk}}" class="d-inline text-start">
@@ -35,21 +35,21 @@
       {% if paper.author_list|length > 10 %}
       <div id="author_{{ paper.pk }}_short" class="d-inline">
         {% for author in paper.author_list|slice:":10" %}
-        <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>,
+        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ author|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ author }}</a>,
         {% endfor %}
         ...
         <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
       </div>
       <div id="author_{{ paper.pk }}_long" class="d-none">
         {% for author in paper.author_list %}
-        <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ author|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ author }}</a>{% if not forloop.last %},{% endif %}
         {% endfor %}
         <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
       </div>
       {% else %}
       <div class="d-inline">
         {% for author in paper.author_list %}
-        <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ author|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ author }}</a>{% if not forloop.last %},{% endif %}
         {% endfor %}
       </div>
       {% endif %}
@@ -80,27 +80,11 @@
     {% if paper.keyword_list %}
     <div>
       <b>Keywords:</b>
-      {% if paper.keyword_list|length > 3 %}
-      <div id="keyword_{{ paper.pk }}_short" class="d-inline">
-        {% for keyword in paper.keyword_list|slice:":3" %}
-        <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>,
-        {% endfor %}
-        ...
-        <a href="javascript:expand_keywords({{ paper.pk }})">&gt;&gt;&gt;</a>
-      </div>
-      <div id="keyword_{{ paper.pk }}_long" class="d-none">
-        {% for keyword in paper.keyword_list %}
-        <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
-        {% endfor %}
-        <a href="javascript:collapse_keywords({{ paper.pk }})">&lt;&lt;&lt;</a>
-      </div>
-      {% else %}
       <div class="d-inline">
         {% for keyword in paper.keyword_list %}
-        <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ keyword|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
         {% endfor %}
       </div>
-      {% endif %}
     </div>
     {% endif %}
 
@@ -110,7 +94,7 @@
       <div class="url-item"><ul>
         {% with review.paper.urls|splitlines as urls %}
         {% for u in urls %}
-        <li><a class="link-success" href="{{ u }}" target="_blank">{{ u }}</a></li>
+        <li><a href="{{ u }}" target="_blank">{{ u }}</a></li>
         {% endfor %}
         {% endwith %}
       </ul></div>

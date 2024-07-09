@@ -100,7 +100,7 @@
 
         <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark" data-bs-toggle="collapse" data-bs-target="#collapse-group-3" role="button" aria-expanded="false" aria-controls="collapse-group-3">社群</div>
-          <div class="collapse{% if current_page == "group_my_sharing" or current_page == "group_all" or current_page == "group_this_month" or current_page == "group_last_month" or current_page == "group_rank" or current_page == "group_trash" %} show{% endif %}" id="collapse-group-3" data-bs-parent="#collapse-group">
+          <div class="collapse{% if current_page == "group_my_sharing" or current_page == "group_all" or current_page == "group_this_month" or current_page == "group_last_month" or current_page == "group_rank" or current_page == "group_trash" or current_page == "group_user" or current_page == "group_journal" or current_page == "group_single" %} show{% endif %}" id="collapse-group-3" data-bs-parent="#collapse-group">
             {% if user.is_authenticated and user.is_superuser %}
             <a class="list-group-item list-group-item-action {% if current_page == "group_my_sharing" %}active{% endif %}" href="{% url 'group:my_sharing' group_name=group_name %}">我的分享</a>
             {% endif %}
