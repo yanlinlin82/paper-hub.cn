@@ -29,8 +29,8 @@
           {% if recommended == 'all' %}全部显示{% endif %}
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-          <li><a class="btn btn-sm dropdown-item" href="?recommended=first">首次推送</a></li>
-          <li><a class="btn btn-sm dropdown-item" href="?recommended=multi">多次推送</a></li>
+          <li><a class="btn btn-sm dropdown-item" href="?recommended=first">仅首次推送</a></li>
+          <li><a class="btn btn-sm dropdown-item" href="?recommended=multi">仅多次推送</a></li>
           <li><a class="btn btn-sm dropdown-item" href="?recommended=all">全部显示</a></li>
         </ul>
       </div>
@@ -159,7 +159,7 @@
 <div class="m-3">
   <div class="d-flex">
     <div class="flex-fill text-middle pt-5">
-      暂无推荐文献。建议<a href="{% url "trackings" %}">添加推荐规则</a>，以便后续系统识别到符合条件的文献时进行推送。
+      暂无推荐文献。
     </div>
   </div>
 </div>

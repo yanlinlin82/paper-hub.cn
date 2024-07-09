@@ -167,7 +167,7 @@ def recommendations_page(request):
         return redirect('/')
 
     status = request.GET.get('status', 'isunread')
-    recommended = request.GET.get('recommended', 'all')
+    recommended = request.GET.get('recommended', 'first')
     papers, items = _recommendation_list(request, status, recommended)
 
     get_params = request.GET.copy()

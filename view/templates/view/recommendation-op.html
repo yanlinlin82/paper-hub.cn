@@ -69,6 +69,7 @@ function addToLibrary(id) {
         } else {
           $('#card_' + id).remove();
           if ($('.card').length === 0) {
+            show_loading_modal('正在刷新页面，请稍候……');
             location.reload();
           }
         }
@@ -99,6 +100,7 @@ function mark_read_recommendation(id) {
       } else {
         $('#card_' + id).remove();
         if ($('.card').length === 0) {
+          show_loading_modal('正在刷新页面，请稍候……');
           location.reload();
         }
       }
@@ -128,6 +130,7 @@ function restore_recommendation(id) {
       } else {
         $('#card_' + id).remove();
         if ($('.card').length === 0) {
+          show_loading_modal('正在刷新页面，请稍候……');
           location.reload();
         }
       }

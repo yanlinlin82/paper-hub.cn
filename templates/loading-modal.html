@@ -1,0 +1,25 @@
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="spinner-border text-primary mt-4" role="status">
+        </div>
+        <p id="loadingModalText" class="mt-2">请稍候……</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function show_loading_modal(message) {
+  if (message) {
+    $('#loadingModalText').text(message);
+  } else {
+    $('#loadingModalText').text('请稍候……');
+  }
+  $('#loadingModal').modal('show');
+}
+function hide_loading_modal() {
+  $('#loadingModal').modal('hide');
+}
+</script>
