@@ -2,14 +2,13 @@
 
 An easy way to read and share papers for scientific research
 
-## Installation
+## Quick Start
 
 1. Prepare virtual environment (venv):
 
     ```sh
     python -m venv .venv
     . .venv/bin/activate
-    pip install --upgrade pip
     pip install -r requirements.txt
     ```
 
@@ -19,7 +18,21 @@ An easy way to read and share papers for scientific research
     python manage.py collectstatic
     ```
 
-3. Configure Apache (take '/var/www/paper-hub.cn/' as example):
+3. Establish database
+
+    ```sh
+    python manage.py migrate
+    ```
+
+4. Run Server
+
+    ```sh
+    python manage.py runserver
+    ```
+
+## Run on Apache HTTP Server
+
+1. Configure Apache (take '/var/www/paper-hub.cn/' as example):
 
     ```txt
     WSGIApplicationGroup %{GLOBAL}
@@ -39,7 +52,7 @@ An easy way to read and share papers for scientific research
     </Directory>
     ```
 
-4. Configure server side for mini program
+2. Configure server side for mini program
 
     ```sh
     $ cat .env
