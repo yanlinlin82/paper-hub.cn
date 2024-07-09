@@ -264,10 +264,10 @@ function query_paper_info() {
   ajaxPostJson({
     url: "{% url 'api:query_paper_info' %}",
     headers: { 'X-CSRFToken': '{{csrf_token}}' },
-    data: { identifier: identifier },
+    data: { 'identifier': identifier },
     success: function (data) {
       if (!data.success) {
-        alert('Failed to query paper info by ID (' + $('#editReviewModalID').val() + ').\n' + data.error);
+        alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
       } else {
         console.log(data.results);
         setAndCompareValues('Title', data.results.title);
@@ -284,17 +284,6 @@ function query_paper_info() {
         setAndCompareValues('PMCID', data.results.pmcid);
         setAndCompareValues('CNKIID', data.results.cnki_id);
         setAndCompareValues('Lang', data.results.language);
-      }
-    },
-    error: function (xhr, status, error) {
-      console.log("XHR:", xhr);
-      console.log("Status:", status);
-      console.log("Error:", error);
-      try {
-        var response = JSON.parse(xhr.responseText);
-        alert('请求处理发生错误: ' + response.error);
-      } catch (e) {
-        alert('请求处理发生未知错误: ' + error);
       }
     }
   });
@@ -335,17 +324,6 @@ function submit_review(event) {
         alert('submit_review failed!\n' + data.error);
       } else {
         location.reload(false);
-      }
-    },
-    error: function (xhr, status, error) {
-      console.log("XHR:", xhr);
-      console.log("Status:", status);
-      console.log("Error:", error);
-      try {
-        var response = JSON.parse(xhr.responseText);
-        alert('请求处理发生错误: ' + response.error);
-      } catch (e) {
-        alert('请求处理发生未知错误: ' + error);
       }
     }
   });
@@ -476,17 +454,6 @@ $(document).ready(function() {
           $('#reviewModalPubYear').val(data.results.pub_year);
           $('#reviewModalJournal').val(data.results.journal);
         }
-      },
-      error: function (xhr, status, error) {
-        console.log("XHR:", xhr);
-        console.log("Status:", status);
-        console.log("Error:", error);
-        try {
-          var response = JSON.parse(xhr.responseText);
-          alert('请求处理发生错误: ' + response.error);
-        } catch (e) {
-          alert('请求处理发生未知错误: ' + error);
-        }
       }
     });
   })
@@ -511,17 +478,6 @@ $(document).ready(function() {
         } else {
           location.reload(false);
         }
-      },
-      error: function (xhr, status, error) {
-        console.log("XHR:", xhr);
-        console.log("Status:", status);
-        console.log("Error:", error);
-        try {
-          var response = JSON.parse(xhr.responseText);
-          alert('请求处理发生错误: ' + response.error);
-        } catch (e) {
-          alert('请求处理发生未知错误: ' + error);
-        }
       }
     });
   }
@@ -543,17 +499,6 @@ $(document).ready(function() {
           alert('Edit review failed!\n' + data.error);
         } else {
           location.reload(false);
-        }
-      },
-      error: function (xhr, status, error) {
-        console.log("XHR:", xhr);
-        console.log("Status:", status);
-        console.log("Error:", error);
-        try {
-          var response = JSON.parse(xhr.responseText);
-          alert('请求处理发生错误: ' + response.error);
-        } catch (e) {
-          alert('请求处理发生未知错误: ' + error);
         }
       }
     });
@@ -580,17 +525,6 @@ function delete_review(id) {
         } else {
           location.reload(false);
         }
-      },
-      error: function (xhr, status, error) {
-        console.log("XHR:", xhr);
-        console.log("Status:", status);
-        console.log("Error:", error);
-        try {
-          var response = JSON.parse(xhr.responseText);
-          alert('请求处理发生错误: ' + response.error);
-        } catch (e) {
-          alert('请求处理发生未知错误: ' + error);
-        }
       }
     });
   }
@@ -607,17 +541,6 @@ function restore_review(id) {
       } else {
         location.reload(false);
       }
-    },
-    error: function (xhr, status, error) {
-      console.log("XHR:", xhr);
-      console.log("Status:", status);
-      console.log("Error:", error);
-      try {
-        var response = JSON.parse(xhr.responseText);
-        alert('请求处理发生错误: ' + response.error);
-      } catch (e) {
-        alert('请求处理发生未知错误: ' + error);
-      }
     }
   });
 }
@@ -633,17 +556,6 @@ function delete_review_forever(id) {
           alert('Delete review failed!\n' + data.error);
         } else {
           location.reload(false);
-        }
-      },
-      error: function (xhr, status, error) {
-        console.log("XHR:", xhr);
-        console.log("Status:", status);
-        console.log("Error:", error);
-        try {
-          var response = JSON.parse(xhr.responseText);
-          alert('请求处理发生错误: ' + response.error);
-        } catch (e) {
-          alert('请求处理发生未知错误: ' + error);
         }
       }
     });

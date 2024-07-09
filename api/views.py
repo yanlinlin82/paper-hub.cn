@@ -7,6 +7,7 @@ import random
 import string
 import datetime
 import uuid
+import re
 from functools import wraps
 from urllib.parse import quote
 from django.utils import timezone
@@ -35,10 +36,11 @@ def json_view(func):
             request.json_data = data
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
-        try:
-            return func(request, *args, **kwargs)
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        return func(request, *args, **kwargs)
+        #try:
+        #    return func(request, *args, **kwargs)
+        #except Exception as e:
+        #    return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return wrapper
 
 def require_login(func):
@@ -46,6 +48,14 @@ def require_login(func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'success': False, 'error': 'Authentication required'}, status=401)
+        return func(request, *args, **kwargs)
+    return wrapper
+
+def require_admin(func):
+    @wraps(func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated or not request.user.is_superuser:
+            return JsonResponse({'success': False, 'error': 'Admin required'}, status=401)
         return func(request, *args, **kwargs)
     return wrapper
 
@@ -229,13 +239,16 @@ def query_review(request, id):
 def query_paper_info(request):
     data = request.json_data
     identifier = data.get('identifier')
+    print(f'query_paper_info: {identifier}')
     if identifier is None:
         return JsonResponse({'success': False, 'error': f"Invalid request!"})
 
     identifier_type, identifier = guess_identifier_type(identifier)
     if identifier_type == "pmid" or identifier_type == "doi":
+        print(f'query_paper_info_new: {identifier}')
         paper_info = get_paper_info_new(identifier, identifier_type)
     else:
+        print(f'query_paper_info_old: {identifier}')
         paper_info_old, raw_dict = get_paper_info(identifier)
         paper_info = convert_paper_info(paper_info_old, raw_dict)
 
@@ -1000,20 +1013,153 @@ def translate_abstract(request):
         translation_field='abstract_cn'
     )
 
+def parse_pub_year(pub_date):
+    pattern = "^[0-9]{4}(\s|-)"
+    if re.match(pattern, pub_date):
+        return pub_date[:4]
+    dt = convert_string_to_datetime(pub_date)
+    if dt:
+        return dt.year
+    return None
+
+def update_paper_by_json_data(paper, paper_data):
+    pub_date = paper_data.get('pub_date')
+    pub_year = parse_pub_year(pub_date)
+    authors = paper_data.get('authors')
+    affiliations = paper_data.get('affiliations')
+    abstract = paper_data.get('abstract')
+    keywords = paper_data.get('keywords')
+    urls = paper_data.get('urls')
+    doi = paper_data.get('doi')
+    pmid = paper_data.get('pmid')
+    arxiv_id = paper_data.get('arxiv_id')
+    pmcid = paper_data.get('pmcid')
+    cnki_id = paper_data.get('cnki_id')
+    language = paper_data.get('language')
+
+    any_change = False
+    if pub_date and paper.pub_date != pub_date:
+        paper.pub_date = pub_date
+        any_change = True
+    if pub_year and paper.pub_year != pub_year:
+        paper.pub_year = pub_year
+        any_change = True
+    if authors and paper.authors != authors:
+        paper.authors = authors
+        any_change = True
+    if affiliations and paper.affiliations != affiliations:
+        paper.affiliations = affiliations
+        any_change = True
+    if abstract and paper.abstract != abstract:
+        paper.abstract = abstract
+        any_change = True
+    if keywords and paper.keywords != keywords:
+        paper.keywords = keywords
+        any_change = True
+    if urls and paper.urls != urls:
+        paper.urls = urls
+        any_change = True
+    if doi and paper.doi != doi:
+        paper.doi = doi
+        any_change = True
+    if pmid and paper.pmid != pmid:
+        paper.pmid = pmid
+        any_change = True
+    if arxiv_id and paper.arxiv_id != arxiv_id:
+        paper.arxiv_id = arxiv_id
+        any_change = True
+    if pmcid and paper.pmcid != pmcid:
+        paper.pmcid = pmcid
+        any_change = True
+    if cnki_id and paper.cnki_id != cnki_id:
+        paper.cnki_id = cnki_id
+        any_change = True
+    if language and paper.language != language:
+        paper.language = language
+        any_change = True
+    if any_change:
+        paper.save()
+
 @json_view
 @require_login
 def check_in(request):
     data = request.json_data
-    user = request.user.core_user_profile
-    today = timezone.now().date()
-    print(f"check_in: {user} {today} {data}")
-    return JsonResponse({'success': False, 'error': 'Not implemented!'})
+    print(f'check_in: {data}')
+
+    doi = data.get('paper', {}).get('doi')
+    pmid = data.get('paper', {}).get('pmid')
+    arxiv_id = data.get('paper', {}).get('arxiv_id')
+    if doi:
+        paper = Paper.objects.filter(doi=doi).first()
+    elif pmid:
+        paper = Paper.objects.filter(pmid=pmid).first()
+    elif arxiv_id:
+        paper = Paper.objects.filter(arxiv_id=arxiv_id).first()
+
+    title = data.get('paper', {}).get('title')
+    journal = data.get('paper', {}).get('journal')
+    if not paper or (paper.title != title or paper.journal != journal):
+        paper = Paper(title=title, journal=journal)
+        paper.save()
+
+    if 'paper' in data:
+        update_paper_by_json_data(paper, data.get('paper'))
+
+    review = Review(paper=paper, creator=request.user.core_user_profile, comment=data.get('comment'))
+    review.save()
+
+    group_name = 'xiangma'
+    if group_name:
+        group = GroupProfile.objects.get(name=group_name)
+        group.reviews.add(review)
+        group.save()
+
+    return JsonResponse({'success': True})
 
 @json_view
-@require_login
+@require_admin
 def check_in_by_admin(request):
     data = request.json_data
-    user = request.user.core_user_profile
-    today = timezone.now().date()
-    print(f"check_in_by_admin: {user} {today} {data}")
-    return JsonResponse({'success': False, 'error': 'Not implemented!'})
+    print(f'check_in_by_admin: {data}')
+
+    doi = data.get('paper', {}).get('doi')
+    pmid = data.get('paper', {}).get('pmid')
+    arxiv_id = data.get('paper', {}).get('arxiv_id')
+    if doi:
+        paper = Paper.objects.filter(doi=doi).first()
+    elif pmid:
+        paper = Paper.objects.filter(pmid=pmid).first()
+    elif arxiv_id:
+        paper = Paper.objects.filter(arxiv_id=arxiv_id).first()
+
+    title = data.get('paper', {}).get('title')
+    journal = data.get('paper', {}).get('journal')
+    if not paper or (paper.title != title or paper.journal != journal):
+        paper = Paper(title=title, journal=journal)
+        paper.save()
+
+    if 'paper' in data:
+        update_paper_by_json_data(paper, data.get('paper'))
+
+    user = UserProfile.objects.filter(nickname=data.get('user')).first()
+    if not user:
+        return JsonResponse({'success': False, 'error': f"User not found: {data.get('user')}"})
+    check_in_time = data.get('check_in_time')
+    if not check_in_time:
+        return JsonResponse({'success': False, 'error': f"Invalid check_in_time: {check_in_time}"})
+    check_in_time = convert_string_to_datetime(check_in_time)
+    if not check_in_time:
+        return JsonResponse({'success': False, 'error': f"Invalid check_in_time: {check_in_time}"})
+    check_in_time = timezone.make_aware(check_in_time, timezone.get_current_timezone())
+
+    review = Review(paper=paper, creator=user, comment=data.get('comment'),
+                    create_time=check_in_time, update_time=check_in_time)
+    review.save()
+
+    group_name = 'xiangma'
+    if group_name:
+        group = GroupProfile.objects.get(name=group_name)
+        group.reviews.add(review)
+        group.save()
+
+    return JsonResponse({'success': True})

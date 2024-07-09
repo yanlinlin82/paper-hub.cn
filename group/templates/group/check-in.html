@@ -11,94 +11,453 @@
   {% endif %}
 </div>
 
-<div class="modal fade" id="checkInModal" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
+<div class="modal fade" id="checkInModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="checkInModalLabel">文献分享打卡</h5>
+        <h5 class="modal-title" id="checkInModalDialogTitle">文献分享打卡</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="checkInForm" method="post">
-          <div class="form-group">
-            <label for="checkInComment">备注</label>
-            <textarea class="form-control my-2" id="checkInComment" name="comment" rows="6"></textarea>
+        <form>
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-2"></div>
+            <div class="col-2">
+              <label class="form-label" for="checkInModalPaperID">文献ID：</label>
+            </div>
+            <div class="col-6">
+              <div class="input-group">
+                <input type="text" class="form-control" id="checkInModalPaperID" placeholder="DOI/PMID/PMCID/arXivID">
+                <button id="checkInModalQuery" type="button" class="btn btn-primary">提取文献信息</button>
+              </div>
+            </div>
+            <div class="col-2"></div>
           </div>
-          <div class="form-group">
-            <div class="row align-items-center">
-              <div class="col-2 text-end align-middle"><label class="mt-3" for="editReviewModalID">文献ID</label></div>
-              <div class="col-10 d-flex">
-                <div class="flex-fill form-group">
-                  <div class="input-group w-auto">
-                    <input type="text" class="form-control" id="editReviewModalID" name="editReviewModalID" placeholder="DOI/PMID/PMCID/arXivID">
-                    <button type="button" class="btn btn-primary" onclick="javascript:query_paper_info()">提取文献信息</button>
-                  </div>
+          <div class="border p-3">
+            <div class="row g-3 align-items-center mb-3">
+              <div class="col-10 pt-3">
+                <div id="checkInModalMessage" class="text-danger">请在上方输入文献ID，通过点击“提取文献信息”按钮，来自动获取文献信息。或者也可以点击右方的“手动输入”按钮，手动输入文献信息。</div>
+                <div id="checkInModalPaperInfo" class="d-none"></div>
+              </div>
+              <div class="col-2 text-end">
+                <button id="checkInModalInput" type="button" class="btn btn-primary">手动输入</button>
+              </div>
+            </div>
+            <div id="checkInModalPaperInfoInput" class="d-none">
+              <hr>
+              <!-- row-1: 标题 -->
+              <div class="row g-3 align-items-center mb-3">
+                <div class="col-2 text-end">
+                  <label class="col-form-label" for="checkInModalTitle">标题：</label>
+                </div>
+                <div class="col-10">
+                  <input type="text" class="form-control" id="checkInModalTitle" name="title" required>
                 </div>
               </div>
+              <!-- row-2: 杂志、发表日期 -->
+              <div class="row g-3 align-items-center mb-3">
+                <div class="col-2 text-end">
+                  <label class="col-form-label" for="checkInModalJournal">杂志：</label>
+                </div>
+                <div class="col-3">
+                  <input type="text" class="form-control" id="checkInModalJournal" name="journal" required>
+                </div>
+                <div class="col-2 text-end">
+                  <label class="col-form-label" for="checkInModalPubDate">发表日期：</label>
+                </div>
+                <div class="col-3">
+                  <input type="text" class="form-control" id="checkInModalPubDate" name="pub_date" required>
+                </div>
+                <div class="col-2 text-end">
+                  <button id="checkInModalInputMore" type="button" class="btn btn-primary">显示更多</button>
+                </div>
+              </div>
+              <!-- END -->
+              <div id="checkInModalPaperInfoInputDetail" class="d-none">
+                <!-- 作者 -->
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalAuthors">作者：</label>
+                  </div>
+                  <div class="col-10">
+                    <textarea class="form-control" id="checkInModalAuthors" name="authors" rows="2" required></textarea>
+                  </div>
+                </div>
+                <!-- 机构 -->
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalAffiliations">机构：</label>
+                  </div>
+                  <div class="col-10">
+                    <textarea class="form-control" id="checkInModalAffiliations" name="affiliations" rows="2" required></textarea>
+                  </div>
+                </div>
+                <!-- 摘要 -->
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalAbstract">摘要：</label>
+                  </div>
+                  <div class="col-10">
+                    <textarea class="form-control" id="checkInModalAbstract" name="abstract" rows="3" required></textarea>
+                  </div>
+                </div>
+                <!-- 关键词 -->
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalKeywords">关键词：</label>
+                  </div>
+                  <div class="col-10">
+                    <textarea class="form-control" id="checkInModalKeywords" name="keywords" rows="2" required></textarea>
+                  </div>
+                </div>
+                <!-- 链接 -->
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalURLs">链接：</label>
+                  </div>
+                  <div class="col-10">
+                    <textarea class="form-control" id="checkInModalURLs" name="urls" rows="2" required></textarea>
+                  </div>
+                </div>
+                <!-- 文献编号（DOI、PMID等）、语言 -->
+                <div class="row g-3 align-items-center mb-3">
+                  <!-- DOI -->
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalDOI">DOI：</label>
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" id="checkInModalDOI" name="doi" required>
+                  </div>
+                  <!-- PMID -->
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalPMID">PMID：</label>
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" id="checkInModalPMID" name="pmid" required>
+                  </div>
+                  <!-- arXiv ID -->
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalArXivID">arXiv ID：</label>
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" id="checkInModalArXivID" name="arxiv_id" required>
+                  </div>
+                </div>
+                <div class="row g-3 align-items-center mb-3">
+                  <!-- PMCID -->
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalPMCID">PMCID：</label>
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" id="checkInModalPMCID" name="pmcid" required>
+                  </div>
+                  <!-- CNKI ID -->
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalCNKIID">CNKI ID：</label>
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" id="checkInModalCNKIID" name="cnki_id" required>
+                  </div>
+                  <!-- 语言 -->
+                  <div class="col-2 text-end">
+                    <label class="form-label text-end" for="checkInModalLanguage">语言：</label>
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" id="checkInModalLanguage" name="language" required>
+                  </div>
+                </div>
+                <!-- END -->
+              </div>
+            </div>
+          </div>
+          <div class="row g-3 align-items-center m-3" id="checkInModalCreatorAndTime">
+            <div class="col-2 text-end">
+              <label class="col-form-label" for="checkInModalUser">打卡人：</label>
+            </div>
+            <div class="col-3">
+              <input class="form-control" type="text" id="checkInModalUser" name="user" value="{{ user.username }}">
+            </div>
+            <div class="col-2 text-end">
+              <label class="col-form-label" for="checkInModalDate">打卡时间：</label>
+            </div>
+            <div class="col-5">
+              <div class="input-group">
+                <input type="date" class="form-control" id="checkInModalDate" name="date" required>
+                <input type="time" class="form-control" id="checkInModalTime" name="time" required>
+              </div>
+            </div>
+          </div>
+          <div class="row g-3 align-items-center">
+            <div class="form-group">
+              <label class="mt-3" for="checkInModalComment">评论：</label>
+              <textarea class="form-control my-2" id="checkInModalComment" name="comment" rows="6"></textarea>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" onclick="$('#checkInForm').submit();">提交</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="checkInByAdminModal" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="checkInModalLabel">文献分享打卡补录</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="checkInForm" method="post">
-          <div class="form-group">
-            <label for="checkInDate">打卡日期</label>
-            <input type="date" class="form-control" id="checkInDate" name="check_in_date" required>
-          </div>
-          <div class="form-group">
-            <label for="checkInComment">备注</label>
-            <textarea class="form-control" id="checkInComment" name="comment" rows="3"></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" onclick="$('#checkInForm').submit();">提交</button>
+        <button type="button" class="btn btn-primary" id="checkInModalOK">提交</button>
       </div>
     </div>
   </div>
 </div>
 </section>
 <script>
-function checkIn() {
-  $('#checkInModal').modal('show');
+function setPaperInfoValue(field, value) {
+  $('#' + field).text(value);
+}
+
+$('#checkInModalInput').on('click', function() {
+  if ($('#checkInModalPaperInfoInput').hasClass('d-none')) {
+    $('#checkInModalPaperInfoInput').addClass('d-block');
+    $('#checkInModalPaperInfoInput').removeClass('d-none');
+  } else {
+    $('#checkInModalPaperInfoInput').addClass('d-none');
+    $('#checkInModalPaperInfoInput').removeClass('d-block');
+  }
+});
+
+$('#checkInModalInputMore').on('click', function() {
+  if ($('#checkInModalPaperInfoInputDetail').hasClass('d-none')) {
+    $('#checkInModalInputMore').text('收起更多');
+    $('#checkInModalPaperInfoInputDetail').addClass('d-block');
+    $('#checkInModalPaperInfoInputDetail').removeClass('d-none');
+  } else {
+    $('#checkInModalInputMore').text('显示更多');
+    $('#checkInModalPaperInfoInputDetail').addClass('d-none');
+    $('#checkInModalPaperInfoInputDetail').removeClass('d-block');
+  }
+});
+
+function refreshPaperInfoDisplay() {
+  if ($('#checkInModalPaperInfo').hasClass('d-none')) {
+    $('#checkInModalMessage').addClass('d-none');
+    $('#checkInModalMessage').removeClass('d-block');
+    $('#checkInModalPaperInfo').addClass('d-block');
+    $('#checkInModalPaperInfo').removeClass('d-none');
+  }
+  var journal = $('#checkInModalJournal').val();
+  var pub_date = $('#checkInModalPubDate').val();
+  var title = $('#checkInModalTitle').val();
+  var html = '<div>';
+  if (journal) {
+    html += '<i>' + journal + '</i>, ';
+  }
+  if (pub_date) {
+    html += pub_date + '. ';
+  }
+  html += '</div>';
+  html += '<div><b>' + title + '</b></div>';
+  + pub_date + '. ';
+  $('#checkInModalPaperInfo').html(html);
+}
+
+$('#checkInModalJournal, #checkInModalPubDate, #checkInModalTitle').on('input', function() {
+  refreshPaperInfoDisplay();
+});
+
+$('#checkInModalQuery').on('click', function() {
+  show_loading_modal('正在查询文献信息……');
+  var identifier = $('#checkInModalPaperID').val();
   ajaxPostJson({
-    "url": "{% url 'api:check_in' %}",
-    "data": {},
-    "callback": function(data) {
-      if (data.status == "success") {
-        $('#checkInDate').val(data.check_in_date);
+    url: "{% url 'api:query_paper_info' %}",
+    headers: { 'X-CSRFToken': '{{csrf_token}}' },
+    data: { 'identifier': identifier },
+    error: function() {
+      console.log('error')
+    },
+    complete: function() {
+      console.log('complete')
+    },
+    success: function (data) {
+      hide_loading_modal();
+      if (!data.success) {
+        alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
+      } else {
+        console.log(data.results);
+        $('#checkInModalTitle').val(data.results.title);
+        $('#checkInModalJournal').val(data.results.journal);
+        $('#checkInModalPubDate').val(data.results.pub_date);
+        $('#checkInModalAuthors').val(data.results.authors.join('\n'));
+        $('#checkInModalAffiliations').val(data.results.affiliations.join('\n'));
+        $('#checkInModalAbstract').val(data.results.abstract);
+        $('#checkInModalKeywords').val(data.results.keywords.join('\n'));
+        $('#checkInModalURLs').val(data.results.urls.join('\n'));
+        $('#checkInModalDOI').val(data.results.doi);
+        $('#checkInModalPMID').val(data.results.pmid);
+        $('#checkInModalArXivID').val(data.results.arxiv_id);
+        $('#checkInModalPMCID').val(data.results.pmcid);
+        $('#checkInModalCNKIID').val(data.results.cnki_id);
+        $('#checkInModalLanguage').val(data.results.language);
+        refreshPaperInfoDisplay();
       }
+    },
+    always: function() {
+      console.log('Querying paper info by ID (' + identifier + ') done.');
+      hide_loading_modal();
     }
+  });
+});
+
+function confirmPaperInputed() {
+  var title = $('#checkInModalTitle').val();
+  var journal = $('#checkInModalJournal').val();
+  var pub_date = $('#checkInModalPubDate').val();
+  if (!title || !journal || !pub_date) {
+    alert('请先通过ID查询文献信息，或手工填写必要的文献信息！');
+    $('#checkInModalPaperID').focus();
+    return false;
+  }
+
+  var comment = $('#checkInModalComment').val();
+  if (!comment) {
+    alert('请填写评论！');
+    $('#checkInModalComment').focus();
+    return false;
+  }
+  return true;
+}
+
+function confirmUserAndDate() {
+  var user = $('#checkInModalUser').val();
+  if (!user) {
+    alert('请填写打卡人！');
+    $('#checkInModalUser').focus();
+    return false;
+  }
+  var date = $('#checkInModalDate').val();
+  if (!date) {
+    alert('请填写打卡时间！');
+    $('#checkInModalDate').focus();
+    return false;
+  }
+  return true;
+}
+
+function cleanUpCheckInModal() {
+  $('#checkInModalPaperID').val('');
+  $('#checkInModalTitle').val('');
+  $('#checkInModalJournal').val('');
+  $('#checkInModalPubDate').val('');
+  $('#checkInModalAuthors').val('');
+  $('#checkInModalAffiliations').val('');
+  $('#checkInModalAbstract').val('');
+  $('#checkInModalKeywords').val('');
+  $('#checkInModalURLs').val('');
+  $('#checkInModalDOI').val('');
+  $('#checkInModalPMID').val('');
+  $('#checkInModalArXivID').val('');
+  $('#checkInModalPMCID').val('');
+  $('#checkInModalCNKIID').val('');
+  $('#checkInModalLanguage').val('');
+  $('#checkInModalComment').val('');
+
+  $('#checkInModalMessage').addClass('d-block');
+  $('#checkInModalMessage').removeClass('d-none');
+  $('#checkInModalPaperInfo').addClass('d-none');
+  $('#checkInModalPaperInfo').removeClass('row');
+  $('#checkInModalPaperInfoInput').addClass('d-none');
+  $('#checkInModalPaperInfoInput').removeClass('row');
+  $('#checkInModalPaperInfoInputDetail').addClass('d-none');
+  $('#checkInModalPaperInfoInputDetail').removeClass('row');
+}
+
+function checkIn() {
+  $('#checkInModalDialogTitle').text('文献分享打卡');
+  cleanUpCheckInModal();
+  $('#checkInModalCreatorAndTime').addClass('d-none');
+  $('#checkInModalCreatorAndTime').removeClass('row');
+  $('#checkInModal').modal('show');
+  $('#checkInModalOK').on('click', function() {
+    if (!confirmPaperInputed()) {
+      return;
+    }
+    var data = {
+      "paper": {
+        "title": $('#checkInModalTitle').val(),
+        "journal": $('#checkInModalJournal').val(),
+        "pub_date": $('#checkInModalPubDate').val(),
+        "authors": $('#checkInModalAuthors').val(),
+        "affiliations": $('#checkInModalAffiliations').val(),
+        "abstract": $('#checkInModalAbstract').val(),
+        "keywords": $('#checkInModalKeywords').val(),
+        "urls": $('#checkInModalURLs').val(),
+        "doi": $('#checkInModalDOI').val(),
+        "pmid": $('#checkInModalPMID').val(),
+        "arxiv_id": $('#checkInModalArXivID').val(),
+        "pmcid": $('#checkInModalPMCID').val(),
+        "cnki_id": $('#checkInModalCNKIID').val(),
+        "language": $('#checkInModalLanguage').val()
+      },
+      "comment": $('#checkInModalComment').val()
+    };
+    ajaxPostJson({
+      url: "{% url 'api:check_in' %}",
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
+      data: data,
+      success: function(data) {
+        if (!data.success) {
+          alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
+        } else {
+          console.log(data.results);
+          $('#checkInModal').modal('hide');
+          location.reload();
+        }
+      }
+    });
   });
 }
 
 {% if user.is_superuser %}
 function checkInByAdmin() {
-  $('#checkInByAdminModal').modal('show');
-  ajaxPostJson({
-    "url": "{% url 'api:check_in_by_admin' %}",
-    "data": {},
-    "callback": function(data) {
-      if (data.status == "success") {
-        $('#checkInDate').val(data.check_in_date);
-      }
+  $('#checkInModalDialogTitle').text('文献分享打卡（管理员补录）');
+  cleanUpCheckInModal();
+  $('#checkInModalCreatorAndTime').addClass('row');
+  $('#checkInModalCreatorAndTime').removeClass('d-none');
+  $('#checkInModal').modal('show');
+  $('#checkInModalOK').on('click', function() {
+    if (!confirmPaperInputed()) {
+      return;
     }
+    if (!confirmUserAndDate()) {
+      return;
+    }
+    var data = {
+      "paper": {
+        "title": $('#checkInModalTitle').val(),
+        "journal": $('#checkInModalJournal').val(),
+        "pub_date": $('#checkInModalPubDate').val(),
+        "authors": $('#checkInModalAuthors').val(),
+        "affiliations": $('#checkInModalAffiliations').val(),
+        "abstract": $('#checkInModalAbstract').val(),
+        "keywords": $('#checkInModalKeywords').val(),
+        "urls": $('#checkInModalURLs').val(),
+        "doi": $('#checkInModalDOI').val(),
+        "pmid": $('#checkInModalPMID').val(),
+        "arxiv_id": $('#checkInModalArXivID').val(),
+        "pmcid": $('#checkInModalPMCID').val(),
+        "cnki_id": $('#checkInModalCNKIID').val(),
+        "language": $('#checkInModalLanguage').val()
+      },
+      "user": $('#checkInModalUser').val(),
+      "check_in_time": $('#checkInModalDate').val() + ' ' + $('#checkInModalTime').val(),
+      "comment": $('#checkInModalComment').val()
+    };
+    ajaxPostJson({
+      url: "{% url 'api:check_in_by_admin' %}",
+      headers: { 'X-CSRFToken': '{{csrf_token}}' },
+      data: data,
+      success: function(data) {
+        if (!data.success) {
+          alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
+        } else {
+          console.log(data.results);
+          $('#checkInModal').modal('hide');
+          location.reload();
+        }
+      }
+    });
   });
 }
 {% endif %}

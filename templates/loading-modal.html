@@ -12,6 +12,7 @@
 </div>
 <script>
 function show_loading_modal(message) {
+  console.log('show_loading_modal')
   if (message) {
     $('#loadingModalText').text(message);
   } else {
@@ -20,6 +21,9 @@ function show_loading_modal(message) {
   $('#loadingModal').modal('show');
 }
 function hide_loading_modal() {
-  $('#loadingModal').modal('hide');
+  console.log('hide_loading_modal')
+  $('#loadingModal').on('shown.bs.modal', function (e) {
+    $('#loadingModal').modal('hide');
+  });
 }
 </script>

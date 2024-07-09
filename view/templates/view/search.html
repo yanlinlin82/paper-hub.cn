@@ -153,17 +153,6 @@ function add_search_result(id) {
             location.reload();
           }
         }
-      },
-      error: function (xhr, status, error) {
-        console.log("XHR:", xhr);
-        console.log("Status:", status);
-        console.log("Error:", error);
-        try {
-          var response = JSON.parse(xhr.responseText);
-          alert('请求处理发生错误: ' + response.error);
-        } catch (e) {
-          alert('请求处理发生未知错误: ' + error);
-        }
       }
     });
   });

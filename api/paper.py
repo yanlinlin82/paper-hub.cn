@@ -13,9 +13,10 @@ from core.models import CustomCheckInInterval, PubMedIndex, Paper
 from paperhub import settings
 import requests
 from lxml import etree
+import pandas as pd
 
 class PaperInfo:
-    def __init__(self, xml_node):
+    def __init__(self, xml_node=None):
         self.xml_node = xml_node
         self._title = None
         self._journal = None
@@ -30,13 +31,14 @@ class PaperInfo:
         self._affiliations = None
         self._abstract = None
         self._keywords = None
+        self._urls = None
         self._language = None
         self.labels = []
 
     @property
     def title(self):
         if self._title is None:
-            if self.xml_node:
+            if self.xml_node is not None:
                 node_list = self.xml_node.xpath('MedlineCitation/Article/ArticleTitle')
                 text = []
                 for node in node_list:
@@ -52,7 +54,7 @@ class PaperInfo:
     @property
     def journal(self):
         if self._journal is None:
-            if self.xml_node:
+            if self.xml_node is not None:
                 self._journal = (self.xml_node.xpath('MedlineCitation/Article/Journal/Title/text()') or [''])[0]
         return self._journal
 
@@ -69,7 +71,7 @@ class PaperInfo:
     @property
     def doi(self):
         if self._doi is None:
-            if self.xml_node:
+            if self.xml_node is not None:
                 self._doi = (self.xml_node.xpath('MedlineCitation/Article/ELocationID[@EIdType="doi"]/text()') or [''])[0]
                 self._doi = self._doi.rstrip('.')
         return self._doi
@@ -77,71 +79,74 @@ class PaperInfo:
     @property
     def pmid(self):
         if self._pmid is None:
-            if self.xml_node:
+            if self.xml_node is not None:
                 self._pmid = (self.xml_node.xpath('MedlineCitation/PMID/text()') or [''])[0]
         return self._pmid
 
     @property
     def authors(self):
         if self._authors is None:
-            authors = []
-            for item in self.xml_node.xpath('MedlineCitation/Article/AuthorList/Author'):
-                try:
-                    if item.find('CollectiveName') is not None:
-                        authors.append(item.xpath('CollectiveName/text()')[0])
-                    elif item.find('ForeName') is not None and item.find('LastName') is not None:
-                        authors.append(item.xpath('ForeName/text()')[0] + ' ' + item.xpath('LastName/text()')[0])
-                    elif item.find('LastName') is not None:
-                        authors.append(item.xpath('LastName/text()')[0])
-                    elif item.find('ForeName') is not None:
-                        authors.append(item.xpath('ForeName/text()')[0])
-                except IndexError:
-                    print('IndexError: (author item not processed correctly)', etree.tostring(item), file=sys.stderr)
-            self._authors = authors
+            if self.xml_node is not None:
+                authors = []
+                for item in self.xml_node.xpath('MedlineCitation/Article/AuthorList/Author'):
+                    try:
+                        if item.find('CollectiveName') is not None:
+                            authors.append(item.xpath('CollectiveName/text()')[0])
+                        elif item.find('ForeName') is not None and item.find('LastName') is not None:
+                            authors.append(item.xpath('ForeName/text()')[0] + ' ' + item.xpath('LastName/text()')[0])
+                        elif item.find('LastName') is not None:
+                            authors.append(item.xpath('LastName/text()')[0])
+                        elif item.find('ForeName') is not None:
+                            authors.append(item.xpath('ForeName/text()')[0])
+                    except IndexError:
+                        print('IndexError: (author item not processed correctly)', etree.tostring(item), file=sys.stderr)
+                self._authors = authors
         return self._authors
 
     @property
     def affiliations(self):
         if self._affiliations is None:
-            affiliations = []
-            for item in self.xml_node.xpath('MedlineCitation/Article/AuthorList/Author/AffiliationInfo/Affiliation/text()'):
-                affiliations.append(item.strip())
-            self._affiliations = affiliations
+            if self.xml_node is not None:
+                affiliations = []
+                for item in self.xml_node.xpath('MedlineCitation/Article/AuthorList/Author/AffiliationInfo/Affiliation/text()'):
+                    affiliations.append(item.strip())
+                self._affiliations = affiliations
         return self._affiliations
 
     @property
     def abstract(self):
         if self._abstract is None:
-            node = self.xml_node.xpath('MedlineCitation/Article/Abstract')
-            if len(node) == 0:
-                self._abstract = ''
-            else:
-                node = node[0]
-                text_nodes = node.xpath('AbstractText[not(@Label)]/text()')
-                if len(text_nodes) > 0:
-                    self._abstract = ''.join(text_nodes)
+            if self.xml_node is not None:
+                node = self.xml_node.xpath('MedlineCitation/Article/Abstract')
+                if len(node) == 0:
+                    self._abstract = ''
                 else:
-                    sections = node.xpath('AbstractText[@Label]')
-                    if len(sections) == 0:
-                        self._abstract = ''
+                    node = node[0]
+                    text_nodes = node.xpath('AbstractText[not(@Label)]/text()')
+                    if len(text_nodes) > 0:
+                        self._abstract = ''.join(text_nodes)
                     else:
-                        section_text = []
-                        for section in sections:
-                            text = []
-                            text.append(section.get('Label') + ': ')
-                            for child in section.itertext(with_tail=True):
-                                if isinstance(child, etree._Element):
-                                    text.append(etree.tostring(child, encoding='unicode', method='html'))
-                                else:
-                                    text.append(child)
-                            section_text.append(''.join(text))
-                        self._abstract = '\n'.join(section_text)
+                        sections = node.xpath('AbstractText[@Label]')
+                        if len(sections) == 0:
+                            self._abstract = ''
+                        else:
+                            section_text = []
+                            for section in sections:
+                                text = []
+                                text.append(section.get('Label') + ': ')
+                                for child in section.itertext(with_tail=True):
+                                    if isinstance(child, etree._Element):
+                                        text.append(etree.tostring(child, encoding='unicode', method='html'))
+                                    else:
+                                        text.append(child)
+                                section_text.append(''.join(text))
+                            self._abstract = '\n'.join(section_text)
         return self._abstract
 
     @property
     def keywords(self):
         if self._keywords is None:
-            try:
+            if self.xml_node is not None:
                 keywords = []
                 for item in self.xml_node.xpath('MedlineCitation/KeywordList/Keyword'):
                     if item is not None and item.text is not None:
@@ -149,22 +154,25 @@ class PaperInfo:
                         if name != "" and name not in keywords:
                             keywords.append(name)
                 self._keywords = keywords
-            except IndexError:
-                self._keywords = []
         return self._keywords
 
     @property
     def language(self):
         if self._language is None:
-            self._language = (self.xml_node.xpath('MedlineCitation/Article/Language/text()') or [''])[0]
+            if self.xml_node is not None:
+                self._language = (self.xml_node.xpath('MedlineCitation/Article/Language/text()') or [''])[0]
         return self._language
 
     @property
     def urls(self):
-        return [
-            f"https://pubmed.ncbi.nlm.nih.gov/{self.pmid}/",
-            f"https://doi.org/{self.doi}",
-        ]
+        if self._urls is None:
+            url = []
+            if self.doi:
+                url.append(f"https://doi.org/{self.doi}")
+            if self.pmid:
+                url.append(f"https://pubmed.ncbi.nlm.nih.gov/{self.pmid}/")
+            self._urls = url
+        return self._urls
 
     @property
     def arxiv_id(self):
@@ -180,7 +188,7 @@ class PaperInfo:
 
     def _parse_date(self):
         if self._pub_date is None:
-            if self.xml_node:
+            if self.xml_node is not None:
                 node = self.xml_node.xpath('MedlineCitation/Article/Journal/JournalIssue/PubDate')
                 if len(node) == 0:
                     node = self.xml_node.xpath('MedlineCitation/Article/ArticleDate')
@@ -529,25 +537,30 @@ def get_paper_info_new(identifier, identifier_type):
             source = pubmed_index[0].source
             index = pubmed_index[0].index
 
-    print(f"Will try to fetch paper info from source '{source}' with index '{index}'")
+    if source and index:
+        print(f"Will try to fetch paper info from source '{source}' with index '{index}'")
 
-    cache_filename = os.path.join(settings.BASE_DIR, "cache", "pubmed-data", f"pubmed24n{source:04}.xml.gz")
-    if not os.path.exists(cache_filename):
+        cache_filename = os.path.join(settings.BASE_DIR, "cache", "pubmed-data", f"pubmed24n{source:04}.xml.gz")
+        if os.path.exists(cache_filename):
+            print(f"Loading data from cache '{cache_filename}'")
+            tree = etree.parse(cache_filename)
+            root = tree.getroot()
+            article_node = root.xpath(f"/PubmedArticleSet/PubmedArticle[{index}]")
+            paper_info = PaperInfo(article_node[0])
+
+            return paper_info
+
         if source < 1912:
             url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed24n{source:04}.xml.gz"
         else:
             url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/pubmed24n{source:04}.xml.gz"
 
         print(f"Local cache file '{cache_filename}' is missing, which could be downloaded from: {url}")
-        paper_info, raw_dict = get_paper_info(identifier)
-        return paper_info
+    else:
+        print(f"Not found in PubMedIndex: {identifier}")
 
-    print(f"Loading data from cache '{cache_filename}'")
-    tree = etree.parse(cache_filename)
-    root = tree.getroot()
-    article_node = root.xpath(f"/PubmedArticleSet/PubmedArticle[{index}]")
-    paper_info = PaperInfo(article_node[0])
-
+    paper_info_old, raw_dict = get_paper_info(identifier)
+    paper_info = convert_paper_info(paper_info_old, raw_dict)
     return paper_info
 
 def convert_paper_info(old_paper_info, raw_dict):
