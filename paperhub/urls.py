@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('group/', include('group.urls')),
-    path('', include('view.urls')),
+    path('library/', include('library.urls')),
+    path('', include('view.urls')), # for global function pages, such as search, recommendations, trackings
 ]

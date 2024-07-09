@@ -90,10 +90,10 @@
         <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark" data-bs-toggle="collapse" data-bs-target="#collapse-group-2" role="button" aria-expanded="false" aria-controls="collapse-group-2">个人文献库</div>
           <div class="collapse{% if current_page == "all" or current_page == "recent" or current_page == "labels" or current_page == "trash" %} show{% endif %}" id="collapse-group-2" data-bs-parent="#collapse-group">
-            <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}" href="{% url 'all' %}">全部文献</a>
-            <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}" href="{% url 'recent' %}">近期新增</a>
-            <a class="list-group-item list-group-item-action {% if current_page == "labels" %}active{% endif %}" href="{% url 'labels' %}">标签管理</a>
-            <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}" href="{% url 'trash' %}">回收站</a>
+            <a class="list-group-item list-group-item-action {% if current_page == "all" %}active{% endif %}" href="{% url 'library:index' %}">全部文献</a>
+            <a class="list-group-item list-group-item-action {% if current_page == "recent" %}active{% endif %}" href="{% url 'library:recent' %}">近期新增</a>
+            <a class="list-group-item list-group-item-action {% if current_page == "labels" %}active{% endif %}" href="{% url 'library:labels' %}">标签管理</a>
+            <a class="list-group-item list-group-item-action {% if current_page == "trash" %}active{% endif %}" href="{% url 'library:trash' %}">回收站</a>
           </div>
         </div>
         {% endif %}
