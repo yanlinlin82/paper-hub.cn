@@ -56,7 +56,6 @@ function translate_title(paper_id) {
     $('#title_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
     ajaxPostJson({
       url: "{% url 'api:translate_title' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { paper_id: paper_id },
       success: function (data) {
         if (!data.success) {
@@ -84,7 +83,6 @@ function translate_abstract(paper_id) {
     $('#abstract_cn_' + paper_id).html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
     ajaxPostJson({
       url: "{% url 'api:translate_abstract' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { paper_id: paper_id },
       success: function (data) {
         if (!data.success) {

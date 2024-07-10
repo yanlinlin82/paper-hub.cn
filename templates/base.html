@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paper-Hub</title>
   <meta name="google-site-verification" content="CJeulU9yTowOBo-3EpJYEAhlHcG1NAHauYkG4LiIVQY">
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
   <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
   <link href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}" rel="stylesheet">
@@ -17,9 +18,11 @@
   </style>
   <script>
   function ajaxPostJson(options) {
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
     var settings = $.extend(true, {
       type: 'POST',
       contentType: 'application/json',
+      headers: { 'X-CSRFToken': csrfToken },
       'error': function (xhr, status, error) {
         console.log("XHR:", xhr);
         console.log("Status:", status);

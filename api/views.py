@@ -11,11 +11,10 @@ import re
 from functools import wraps
 from urllib.parse import quote
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponseRedirect
 from django.middleware.csrf import get_token
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -59,7 +58,7 @@ def require_admin(func):
         return func(request, *args, **kwargs)
     return wrapper
 
-@csrf_exempt
+@csrf_exempt # no csrf token when first login in WeiXin mini program
 @json_view
 def wx_login(request):
     data = request.json_data
@@ -101,7 +100,7 @@ def wx_login(request):
     return JsonResponse({
         'success': True,
         'nickname': nickname,
-        'csrfToken': get_token(request),
+        'csrfToken': get_token(request), # to WeiXin mini program, make it post request with csrf token in future
         'token': str(session.token),
         'debug': user.debug_mode
     })
@@ -156,7 +155,6 @@ def do_login(request):
     return JsonResponse({
         'success': True,
         'nickname': user.core_user_profile.nickname,
-        'csrfToken': get_token(request),
         'token': str(session.token),
         'debug': user.core_user_profile.debug_mode
     })

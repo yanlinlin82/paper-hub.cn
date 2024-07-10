@@ -142,7 +142,6 @@ function add_search_result(id) {
     $('#commentModal').modal('hide');
     ajaxPostJson({
       url: "{% url 'api:add_search_result' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: {paper_id: id, comment: comment},
       success: function (data) {
         if (!data.success) {

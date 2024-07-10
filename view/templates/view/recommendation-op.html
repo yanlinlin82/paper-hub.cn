@@ -60,7 +60,6 @@ function addToLibrary(id) {
     $('#addToLibraryModal').modal('hide');
     ajaxPostJson({
       url: "{% url 'api:add_recommendation' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { paper_id: id, comment: comment },
       success: function (data) {
         console.log(data)
@@ -81,7 +80,6 @@ function addToLibrary(id) {
 function mark_read_recommendation(id) {
   ajaxPostJson({
     url: "{% url 'api:mark_read_recommendation' %}",
-    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { paper_id: id },
     success: function (data) {
       if (!data.success) {
@@ -100,7 +98,6 @@ function mark_read_recommendation(id) {
 function restore_recommendation(id) {
   ajaxPostJson({
     url: "{% url 'api:restore_recommendation' %}",
-    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { paper_id: id },
     success: function (data) {
       if (!data.success) {

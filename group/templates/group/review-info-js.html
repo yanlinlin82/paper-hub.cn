@@ -263,7 +263,6 @@ function query_paper_info() {
   var identifier = $('#editReviewModalID').val();
   ajaxPostJson({
     url: "{% url 'api:query_paper_info' %}",
-    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { 'identifier': identifier },
     success: function (data) {
       if (!data.success) {
@@ -317,7 +316,6 @@ function submit_review(event) {
   console.log(data);
   ajaxPostJson({
     url: "{% url 'api:submit_review' %}",
-    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: data,
     success: function (data) {
       if (!data.success) {
@@ -461,7 +459,6 @@ $(document).ready(function() {
   function ajax_add_review() {
     ajaxPostJson({
       url: "{% url 'api:add_review' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: {
         group_name: '{{group.name}}',
         username: $('#reviewModalUsername').val(),
@@ -485,7 +482,6 @@ $(document).ready(function() {
   function ajax_edit_review() {
     ajaxPostJson({
       url: "{% url 'api:edit_review' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: {
         id: $('#reviewModalPk').val(),
         review_id: $('#reviewModalreviewID').val(),
@@ -517,7 +513,6 @@ function delete_review(id) {
   if (confirm('Are you sure to delete the item?')) {
     ajaxPostJson({
       url: "{% url 'api:delete_review' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {
         if (!data.success) {
@@ -533,7 +528,6 @@ function delete_review(id) {
 function restore_review(id) {
   ajaxPostJson({
     url: "{% url 'api:restore_review' %}",
-    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { review_id: id },
     success: function (data) {
       if (!data.success) {
@@ -549,7 +543,6 @@ function delete_review_forever(id) {
   if (confirm('Are you sure to delete the item forever?')) {
     ajaxPostJson({
       url: "{% url 'api:delete_review_forever' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: { review_id: id },
       success: function (data) {
         if (!data.success) {

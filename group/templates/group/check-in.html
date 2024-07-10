@@ -262,7 +262,6 @@ $('#checkInModalQuery').on('click', function() {
   var identifier = $('#checkInModalPaperID').val();
   ajaxPostJson({
     url: "{% url 'api:query_paper_info' %}",
-    headers: { 'X-CSRFToken': '{{csrf_token}}' },
     data: { 'identifier': identifier },
     error: function() {
       console.log('error')
@@ -394,7 +393,6 @@ function checkIn() {
     };
     ajaxPostJson({
       url: "{% url 'api:check_in' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: data,
       success: function(data) {
         if (!data.success) {
@@ -446,7 +444,6 @@ function checkInByAdmin() {
     };
     ajaxPostJson({
       url: "{% url 'api:check_in_by_admin' %}",
-      headers: { 'X-CSRFToken': '{{csrf_token}}' },
       data: data,
       success: function(data) {
         if (!data.success) {
