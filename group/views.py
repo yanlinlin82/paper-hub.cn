@@ -7,9 +7,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, F, Min
 from urllib.parse import unquote
 
-def index_page(request):
-    return HttpResponseRedirect('xiangma')
-
 def get_paginated_reviews(reviews, page_number):
     if page_number is None:
         page_number = 1
@@ -157,7 +154,7 @@ def single_page(request, id, group_name):
 
     return render(request, 'group/single.html', {
         'group': group,
-        'current_page': 'group_single',
+        'current_page': 'group_review',
         'review': review,
     })
 

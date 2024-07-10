@@ -89,7 +89,7 @@ def all_page(request):
 
     papers, items = _all_page(request, is_trash=False)
     return render(request, 'library/list.html', {
-        'current_page': 'all',
+        'current_page': 'library_index',
         'papers': papers,
         'items': items,
         })
@@ -100,7 +100,7 @@ def recent_page(request):
 
     papers, items = _all_page(request, is_trash=False, last_week=True)
     return render(request, 'library/list.html', {
-        'current_page': 'recent',
+        'current_page': 'library_recent',
         'papers': papers,
         'items': items,
         })
@@ -111,7 +111,7 @@ def trash_page(request):
 
     papers, items = _all_page(request, is_trash=True)
     return render(request, 'library/list.html', {
-        'current_page': 'trash',
+        'current_page': 'library_trash',
         'papers': papers,
         'items': items,
     })
@@ -124,7 +124,7 @@ def single_page(request, id):
         user = UserProfile.objects.get(auth_user__username=request.user.username)
         paper.reviews = paper.review_set.filter(creator=user, delete_time__isnull=True)
     return render(request, 'library/single.html', {
-        'current_page': 'paper',
+        'current_page': 'library_paper',
         'paper': paper,
     })
 
@@ -136,6 +136,6 @@ def labels_page(request):
     label_list = Label.objects.filter(user=user).order_by('name')
 
     return render(request, 'library/labels.html', {
-        'current_page': 'labels',
+        'current_page': 'library_labels',
         'label_list': label_list,
     })

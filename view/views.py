@@ -52,20 +52,20 @@ def query_papers(query):
         if paper_info is not None:
             print(f'doi: {paper_info["id"].get("doi", "")}')
             paper = Paper(
-                journal=paper_info.get('journal', ''),
-                pub_year=paper_info.get('pub_year', ''),
-                pub_date=paper_info.get('pub_date', paper_info.get('pub_year', '')),
-                title=paper_info.get('title', ''),
+                journal=paper_info.get('journal', '') or '',
+                pub_year=paper_info.get('pub_year', '') or '',
+                pub_date=paper_info.get('pub_date', paper_info.get('pub_year', '') or ''),
+                title=paper_info.get('title', '') or '',
                 authors='\n'.join(paper_info.get('authors', [])),
                 affiliations='\n'.join(paper_info.get('affiliations', [])),
-                abstract=paper_info.get('abstract', ''),
+                abstract=paper_info.get('abstract', '') or '',
                 keywords='\n'.join(paper_info.get('keywords', [])),
                 urls='\n'.join(paper_info.get('urls', [])),
-                doi=paper_info['id'].get('doi', ''),
-                pmid=paper_info['id'].get('pmid', ''),
-                arxiv_id=paper_info['id'].get('arxiv_id', ''),
-                pmcid=paper_info['id'].get('pmcid', ''),
-                cnki_id=paper_info['id'].get('cnki_id', ''),
+                doi=paper_info['id'].get('doi', '') or '',
+                pmid=paper_info['id'].get('pmid', '') or '',
+                arxiv_id=paper_info['id'].get('arxiv_id', '') or '',
+                pmcid=paper_info['id'].get('pmcid', '') or '',
+                cnki_id=paper_info['id'].get('cnki_id', '') or '',
                 language=paper_info['id'].get('language', 'eng'),
             )
             paper.save()
@@ -106,6 +106,20 @@ def search_page(request):
     context['get_params'] = get_params
 
     return render(request, 'view/search.html', context)
+
+def single_page(request, id):
+    paper = get_object_or_404(Paper, pk=id)
+    paper.author_list = [k for k in paper.authors.split('\n') if k]
+    paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
+    paper.ref_list = paper.references.filter(type='ReferenceList').order_by('index')
+    paper.cc_list = paper.references.filter(type='CommentsCorrectionsList').order_by('index')
+    if request.user.is_authenticated:
+        user = UserProfile.objects.get(auth_user__username=request.user.username)
+        paper.reviews = paper.review_set.filter(creator=user, delete_time__isnull=True)
+    return render(request, 'view/single.html', {
+        'current_page': 'paper',
+        'paper': paper,
+    })
 
 def _recommendation_list(request, status, recommended):
     user = UserProfile.objects.get(

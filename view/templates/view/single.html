@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+{% load language_filters %}
+
+{% block content %}
+<section>
+  <div class="p-2 text-start flex-fill">
+    <div class="d-flex">
+      <div class="flex-fill">{% include "view/paper-info.html" %}</div>
+      {% if user.is_authenticated %}
+      <div class="text-end align-self-start">
+        {% if paper.has_any_review %}
+        <div class="badge bg-secondary">已加入个人文献库</div>
+        {% else %}
+        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_search_result({{ paper.pk }})">加入个人文献库</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    <div class="mt-2">
+      {% for review in paper.review_set.all %}
+        {% for label in review.labels.all %}
+      <a class="badge" style="background-color:{{ label.color }}" href="javascript:void(0)">{{ label.name }}</a>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="my-3">
+      <div id="title_{{ paper.pk }}" class="d-inline text-start">
+        <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+        <a class="ms-2" href="javascript:translate_title({{ paper.pk }})">翻译</a>
+      </div>
+      <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
+      {% if paper.translation and paper.translation.title_cn %}
+      {{ paper.translation.title_cn }}
+      {% endif %}
+      </div>
+      {% if paper.language != "eng" %}
+      <div class="mt-1">
+        <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if paper.author_list %}
+    <div>
+      {% for author in paper.author_list %}
+      <a href="{% url 'search' %}?q={{ author|urlencode }}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if paper.abstract %}
+    <div class="my-3">
+      <div>
+        <b>Abstract:</b>
+        <div id="abstract_{{ paper.pk }}_long" class="d-inline">
+          {{ paper.abstract }}
+        </div>
+        <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
+        <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
+          {% if paper.translation and paper.translation.abstract_cn %}
+          {{ paper.translation.abstract_cn }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if paper.keyword_list %}
+    <div>
+      <b>Keywords:</b>
+      <div class="d-inline">
+        {% for keyword in paper.keyword_list %}
+        <a href="{% url 'search' %}?q={{ keyword|urlencode }}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if paper.cc_list %}
+    <div>
+      {% for cc in paper.cc_list %}
+      <div>
+        <div class="pt-4 fs-5"><b>{{ cc.ref_type }}:</b></div>
+        <div class="pt-3 d-flex flex-row">
+          <div class="me-3">{{ cc.index }}.</div>
+          <div class="text-start">
+            <div>{{ cc.citation }}</div>
+            <div>
+              {% if cc.doi %}DOI: <a href="https://doi.org/{{ cc.doi }}" target="_blank" class="external-link">{{ cc.doi }}</a>{% endif %}
+              {% if cc.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ cc.pmid }}" target="_blank" class="external-link">{{ cc.pmid }}</a>{% endif %}
+              {% if cc.pmcid %}PMCID:<a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ cc.pmcid }} " target="_blank" class="external-link">{{ cc.pmcid }}</a>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if paper.ref_list %}
+    <div>
+      <div class="pt-4 fs-5"><b>Reference:</b></div>
+      {% for cc in paper.ref_list %}
+      <div class="pt-3 d-flex flex-row">
+        <div class="me-3">{{ cc.index }}.</div>
+        <div class="text-start">
+          <div>{{ cc.citation }}</div>
+          <div>
+            {% if cc.doi %}DOI: <a href="https://doi.org/{{ cc.doi }}" target="_blank" class="external-link">{{ cc.doi }}</a>{% endif %}
+            {% if cc.pmid %}PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/{{ cc.pmid }}" target="_blank" class="external-link">{{ cc.pmid }}</a>{% endif %}
+            {% if cc.pmcid %}PMCID:<a href="http://www.ncbi.nlm.nih.gov/pmc/articles/{{ cc.pmcid }} " target="_blank" class="external-link">{{ cc.pmcid }}</a>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% include "view/paper-js.html" %}
+{% endblock content %}

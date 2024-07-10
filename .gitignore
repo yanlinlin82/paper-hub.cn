@@ -5,3 +5,4 @@ static_root/
 .env
 .venv/
 *.log
+pubmed

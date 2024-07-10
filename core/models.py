@@ -101,15 +101,20 @@ class PaperTranslation(models.Model):
     abstract_cn = models.CharField(max_length=65536, default='', blank=True)
 
 class PaperReference(models.Model):
-    type = models.CharField(max_length=20, default='Reference') # Reference, CommentIn, ErratumIn, ExpressionOfConcernIn, etc.
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='references')
-    ref = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='cited_by')
+    type = models.CharField(max_length=128, default='Reference') # ReferenceList, CommentsCorrectionsList
+    ref_type = models.CharField(max_length=128, default='Reference') # CommentIn, ErratumIn, ExpressionOfConcernIn, etc.
+    index = models.IntegerField() # order in the list
+    citation = models.CharField(max_length=1024*1024, default='', blank=True) # citation text to display
+    doi = models.CharField(max_length=128, default='', blank=True, db_index=True)
+    pmid = models.CharField(max_length=128, default='', blank=True, db_index=True)
+    pmcid = models.CharField(max_length=128, default='', blank=True, db_index=True)
 
     class Meta:
-        unique_together = ('type', 'paper', 'ref')
+        unique_together = ('paper', 'type', 'ref_type', 'index')
 
     def __str__(self):
-        return f'{self.type}: {self.paper} -> {self.ref}'
+        return f'{self.index}. {self.citation}'
 
 class Label(models.Model): # every user has his own labels
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)

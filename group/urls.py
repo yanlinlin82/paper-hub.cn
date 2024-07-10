@@ -1,9 +1,13 @@
-from django.urls import path, re_path
+from django.urls import path
+from django.http import HttpResponseRedirect
 from . import views
+
+def redirect(request):
+    return HttpResponseRedirect('xiangma')
 
 app_name = 'group'
 urlpatterns = [
-    path('', views.index_page, name='index'),
+    path('', redirect, name='index'),
     path('<str:group_name>/', views.all_page, name='all'),
     path('<str:group_name>/my_sharing', views.my_sharing_page, name='my_sharing'),
     path('<str:group_name>/recent', views.recent_page, name='recent'),

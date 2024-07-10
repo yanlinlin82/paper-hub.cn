@@ -62,7 +62,7 @@ def require_admin(func):
 @json_view
 def wx_login(request):
     data = request.json_data
-    wx_code = data.get('code', '')
+    wx_code = data.get('code', '') or ''
     if not wx_code:
         return JsonResponse({'success': False, 'error': 'Invalid wx_code'}, status=400)
 
@@ -79,8 +79,8 @@ def wx_login(request):
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
     if response.json().get('errcode', 0) != 0:
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
-    session_key = response.json().get('session_key', '')
-    unionid = response.json().get('unionid', '')
+    session_key = response.json().get('session_key', '') or ''
+    unionid = response.json().get('unionid', '') or ''
     if session_key == '' or unionid == '':
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
 
@@ -220,16 +220,16 @@ def query_review(request, id):
         "query": id,
         "raw": raw_dict,
         "results": {
-            "doi": review_info.get('doi', ''),
-            "pmid": review_info.get('pmid', ''),
-            "arxiv_id": review_info.get('arxiv_id', ''),
-            "pmcid": review_info.get('pmcid', ''),
-            "title": review_info.get('title', ''),
-            "journal": review_info.get('journal', ''),
-            "pub_year": review_info.get('pub_year', ''),
-            "authors": review_info.get('authors', []),
-            "abstract": review_info.get('abstract', ''),
-            "urls": review_info.get('urls', []),
+            "doi": review_info.get('doi', '') or '',
+            "pmid": review_info.get('pmid', '') or '',
+            "arxiv_id": review_info.get('arxiv_id', '') or '',
+            "pmcid": review_info.get('pmcid', '') or '',
+            "title": review_info.get('title', '') or '',
+            "journal": review_info.get('journal', '') or '',
+            "pub_year": review_info.get('pub_year', '') or '',
+            "authors": review_info.get('authors', []) or [],
+            "abstract": review_info.get('abstract', '') or '',
+            "urls": review_info.get('urls', []) or [],
         }})
 
 @json_view
@@ -392,12 +392,12 @@ def add_review(request):
         review_id = request.POST['review_id']
         paper_info, raw_dict = get_paper_info(review_id)
         if paper_info is not None:
-            paper.doi = paper_info.get('doi', '')
-            paper.pmid = paper_info.get('pmid', '')
-            paper.arxiv_id = paper_info.get('arxiv_id', '')
-            paper.pmcid = paper_info.get('pmcid', '')
+            paper.doi = paper_info.get('doi', '') or ''
+            paper.pmid = paper_info.get('pmid', '') or ''
+            paper.arxiv_id = paper_info.get('arxiv_id', '') or ''
+            paper.pmcid = paper_info.get('pmcid', '') or ''
             paper.authors = "\n".join(paper_info.get('authors', []))
-            paper.abstract = paper_info.get('abstract', '')
+            paper.abstract = paper_info.get('abstract', '') or ''
             paper.urls = "\n".join(paper_info.get('urls', []))
         paper.save()
 
@@ -739,9 +739,9 @@ def fetch_review_info(request):
     return JsonResponse({
         'success': True,
         "results": {
-            "title": review_info.get('title', ''),
-            "journal": review_info.get('journal', ''),
-            "pub_year": review_info.get('pub_year', ''),
+            "title": review_info.get('title', '') or '',
+            "journal": review_info.get('journal', '') or '',
+            "pub_year": review_info.get('pub_year', '') or '',
         }})
 
 @json_view
@@ -782,13 +782,13 @@ def submit_comment(request):
                     journal=journal or review_info['journal'],
                     comment=comment)
     if review_info is not None:
-        review.doi = review_info['id'].get('doi', '')
-        review.pmid = review_info['id'].get('pmid', '')
-        review.arxiv_id = review_info['id'].get('arxiv_id', '')
-        review.pmcid = review_info['id'].get('pmcid', '')
-        review.cnki_id = review_info['id'].get('cnki_id', '')
+        review.doi = review_info['id'].get('doi', '') or ''
+        review.pmid = review_info['id'].get('pmid', '') or ''
+        review.arxiv_id = review_info['id'].get('arxiv_id', '') or ''
+        review.pmcid = review_info['id'].get('pmcid', '') or ''
+        review.cnki_id = review_info['id'].get('cnki_id', '') or ''
         review.authors = "\n".join(review_info.get('authors', []))
-        review.abstract = review_info.get('abstract', '')
+        review.abstract = review_info.get('abstract', '') or ''
         review.urls = "\n".join(review_info.get('urls', []))
 
     review.update_time = timezone.now()

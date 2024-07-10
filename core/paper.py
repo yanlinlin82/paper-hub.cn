@@ -222,9 +222,10 @@ class PaperInfo:
                         else:
                             # eg. <MedlineDate>2012 Jan-Feb</MedlineDate> or <MedlineDate>2012</MedlineDate>
                             self._pub_date = node[0]
-                            self._pub_year = node[0].split(' ')[0]
+                            self._pub_year = int(node[0].split(' ')[0])
                     else:
                         self._pub_date = self._pub_year = year[0]
+                        self._pub_year = int(self._pub_year)
                         if len(month) > 0:
                             self._pub_date += '-' + month[0]
                             if len(day) > 0:
@@ -232,6 +233,7 @@ class PaperInfo:
         if self._pub_year is None:
             if self._pub_date:
                 self._pub_year = node[0].split(' ')[0]
+                self._pub_year = int(self._pub_year)
 
     def get_references(self, type = 'ReferenceList'): # ReferenceList, CommentsCorrectionsList
         references = []
@@ -239,15 +241,18 @@ class PaperInfo:
             if type == 'ReferenceList':
                 for item in self.xml_node.xpath('PubmedData/ReferenceList/Reference'):
                     ref = {}
+                    ref['ref_type'] = 'Reference'
                     ref['citation'] = item.xpath('Citation/text()' or [None])[0]
-                    ref['pmid'] = item.xpath('ArticleIdList/ArticleId[@IdType="pubmed"]/text()' or [None])[0]
+                    ref['doi'] = (item.xpath('ArticleIdList/ArticleId[@IdType="doi"]/text()') or [None])[0]
+                    ref['pmid'] = (item.xpath('ArticleIdList/ArticleId[@IdType="pubmed"]/text()') or [None])[0]
+                    ref['pmcid'] = (item.xpath('ArticleIdList/ArticleId[@IdType="pmcid"]/text()') or [None])[0]
                     references.append(ref)
             elif type == 'CommentsCorrectionsList':
-                for item in self.xml_node.xpath('PubmedData/CommentsCorrectionsList/CommentsCorrections'):
+                for item in self.xml_node.xpath('MedlineCitation/CommentsCorrectionsList/CommentsCorrections'):
                     ref = {}
-                    ref['type'] = item.get('RefType')
-                    ref['citation'] = item.xpath('RefSource/text()')[0]
-                    ref['pmid'] = item.xpath('PMID/text()')
+                    ref['ref_type'] = item.get('RefType')
+                    ref['citation'] = (item.xpath('RefSource/text()') or [None])[0]
+                    ref['pmid'] = (item.xpath('PMID/text()') or [None])[0]
                     references.append(ref)
             else:
                 print(f"Error: Unknown type '{type}'")
@@ -455,9 +460,9 @@ def get_paper_info_by_arxiv_id(arxiv_id):
                 'doi': f"10.48550/arXiv.{arxiv_id}",
                 'arxiv_id': arxiv_id,
             },
-            'title': obj.get('title', ''),
+            'title': obj.get('title', '') or '',
             'journal': 'arXiv',
-            'abstract': obj.get('summary', ''),
+            'abstract': obj.get('summary', '') or '',
             'pub_date': pub_date,
             'pub_year': pub_year,
             'authors': [node.get('name') for node in obj.get('author', [])],
@@ -481,8 +486,8 @@ def get_paper_info_by_pmid(pmid):
         pub_date, pub_year = extract_date_and_year_from_dict(obj, 'pubdate')
         paper_info = {
             'id': {'pmid': pmid},
-            'title': obj.get('title', ''),
-            'journal': obj.get('fulljournalname', ''),
+            'title': obj.get('title', '') or '',
+            'journal': obj.get('fulljournalname', '') or '',
             'pub_date': pub_date,
             'pub_year': pub_year,
             'issue': obj.get('issue'),
@@ -538,15 +543,15 @@ def get_paper_info_by_doi(doi):
     data = fetch_json(api_url, cache_filename)
     if data is not None and 'message' in data:
         obj = data['message']
-        type = obj.get('type', '')
+        type = obj.get('type', '') or ''
         title = " ".join(obj.get('title', []))
         journal = " ".join(obj.get('container-title', []))
         if 'created' in obj:
             pub_date, pub_year = extract_date_and_year_from_dict(obj['created'], 'date-time')
-        issue = obj.get('issue', '')
-        volume = obj.get('volume', '')
-        page = obj.get('page', '')
-        abstract = obj.get('abstract', '')
+        issue = obj.get('issue', '') or ''
+        volume = obj.get('volume', '') or ''
+        page = obj.get('page', '') or ''
+        abstract = obj.get('abstract', '') or ''
 
         paper_info = {
             'id': {'doi': doi},
@@ -559,7 +564,7 @@ def get_paper_info_by_doi(doi):
             'volume': volume,
             'page': page,
             'abstract': abstract,
-            'authors': [node.get('given', '') + ' ' + node.get('family', '') for node in obj.get('author', [])],
+            'authors': [(node.get('given', '') or '') + ' ' + (node.get('family', '') or '').strip() for node in obj.get('author', [])],
             'urls': list(dict.fromkeys([node["URL"] for node in obj.get('link', [])]))
         }
         return paper_info, data
