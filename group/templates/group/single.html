@@ -94,7 +94,7 @@
       <div class="url-item"><ul>
         {% with review.paper.urls|splitlines as urls %}
         {% for u in urls %}
-        <li><a href="{{ u }}" target="_blank">{{ u }}</a></li>
+        <li><a href="{{ u }}" target="_blank" class="external-link">{{ u }}</a></li>
         {% endfor %}
         {% endwith %}
       </ul></div>

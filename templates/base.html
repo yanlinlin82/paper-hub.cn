@@ -15,6 +15,7 @@
     html {scroll-padding-top: 40px;}
     a {text-decoration: none;}
     a:hover {text-decoration: underline;}
+    .external-link::after {content: ' \2197'; font-size: 0.8em; margin-left: 0.2em; display: inline-block;}
   </style>
   <script>
   function ajaxPostJson(options) {
@@ -141,8 +142,8 @@
 </div>
 
 <footer class="bg-secondary text-white text-center py-3 mt-5">
-  <p><a class="link-light" href="https://yanlinlin.cn/" target="_blank">&copy; 2022 - 2024</a> | <a class="link-light" href="http://beian.miit.gov.cn/" target="_blank">京ICP备18031542号-9</a> | <a class="link-light" href="https://github.com/yanlinlin.cn/paper-hub.cn/" target="_blank">GitHub</a></p>
-<p>基于 <a class="link-light" href="https://www.djangoproject.com/" target="_blank">Django</a> 和 <a class="link-light" href="https://getbootstrap.com/" target="_blank">Bootstrap</a> 开发</p>
+  <p><a class="link-light external-link" href="https://yanlinlin.cn/" target="_blank">&copy; 2022 - 2024</a> | <a class="link-light external-link" href="http://beian.miit.gov.cn/" target="_blank">京ICP备18031542号-9</a> | <a class="link-light external-link" href="https://github.com/yanlinlin82/paper-hub.cn/" target="_blank">GitHub</a></p>
+<p>基于 <a class="link-light external-link" href="https://www.djangoproject.com/" target="_blank">Django</a> 和 <a class="link-light external-link" href="https://getbootstrap.com/" target="_blank">Bootstrap</a> 开发</p>
 </footer>
 
 {% include "scroll-to-top.html" %}
