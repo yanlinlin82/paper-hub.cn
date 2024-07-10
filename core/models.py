@@ -100,6 +100,17 @@ class PaperTranslation(models.Model):
     title_cn = models.CharField(max_length=4096, default='', blank=True)
     abstract_cn = models.CharField(max_length=65536, default='', blank=True)
 
+class PaperReference(models.Model):
+    type = models.CharField(max_length=20, default='Reference') # Reference, CommentIn, ErratumIn, ExpressionOfConcernIn, etc.
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='references')
+    ref = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='cited_by')
+
+    class Meta:
+        unique_together = ('type', 'paper', 'ref')
+
+    def __str__(self):
+        return f'{self.type}: {self.paper} -> {self.ref}'
+
 class Label(models.Model): # every user has his own labels
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     name = models.CharField(max_length=128, default='')

@@ -55,7 +55,7 @@ class PaperInfo:
     def journal(self):
         if self._journal is None:
             if self.xml_node is not None:
-                self._journal = (self.xml_node.xpath('MedlineCitation/Article/Journal/Title/text()') or [''])[0]
+                self._journal = (self.xml_node.xpath('MedlineCitation/Article/Journal/Title/text()') or [None])[0]
         return self._journal
 
     @property
@@ -72,15 +72,24 @@ class PaperInfo:
     def doi(self):
         if self._doi is None:
             if self.xml_node is not None:
-                self._doi = (self.xml_node.xpath('MedlineCitation/Article/ELocationID[@EIdType="doi"]/text()') or [''])[0]
-                self._doi = self._doi.rstrip('.')
+                self._doi = (self.xml_node.xpath('MedlineCitation/Article/ELocationID[@EIdType="doi"]/text()') or [None])[0]
+                if self._doi is not None:
+                    self._doi = self._doi.rstrip('.')
+        if self._doi is None:
+            if self.xml_node is not None:
+                self._doi = (self.xml_node.xpath('PubmedData/ArticleIdList/ArticleId[@IdType="doi"]/text()') or [None])[0]
+                if self._doi is not None:
+                    self._doi = self._doi.rstrip('.')
         return self._doi
 
     @property
     def pmid(self):
         if self._pmid is None:
             if self.xml_node is not None:
-                self._pmid = (self.xml_node.xpath('MedlineCitation/PMID/text()') or [''])[0]
+                self._pmid = (self.xml_node.xpath('MedlineCitation/PMID/text()') or [None])[0]
+        if self._pmid is None:
+            if self.xml_node is not None:
+                self._pmid = (self.xml_node.xpath('PubmedData/ArticleIdList/ArticleId[@IdType="pubmed"]/text()') or [None])[0]
         return self._pmid
 
     @property
@@ -160,7 +169,7 @@ class PaperInfo:
     def language(self):
         if self._language is None:
             if self.xml_node is not None:
-                self._language = (self.xml_node.xpath('MedlineCitation/Article/Language/text()') or [''])[0]
+                self._language = (self.xml_node.xpath('MedlineCitation/Article/Language/text()') or [None])[0]
         return self._language
 
     @property
@@ -177,11 +186,14 @@ class PaperInfo:
     @property
     def arxiv_id(self):
         return self._arxiv_id
-    
+
     @property
     def pmcid(self):
+        if self._pmcid is None:
+            if self.xml_node is not None:
+                self._pmcid = (self.xml_node.xpath('PubmedData/ArticleIdList/ArticleId[@IdType="pmc"]/text()') or [None])[0]
         return self._pmcid
-    
+
     @property
     def cnki_id(self):
         return self._cnki_id
@@ -220,6 +232,26 @@ class PaperInfo:
         if self._pub_year is None:
             if self._pub_date:
                 self._pub_year = node[0].split(' ')[0]
+
+    def get_references(self, type = 'ReferenceList'): # ReferenceList, CommentsCorrectionsList
+        references = []
+        if self.xml_node is not None:
+            if type == 'ReferenceList':
+                for item in self.xml_node.xpath('PubmedData/ReferenceList/Reference'):
+                    ref = {}
+                    ref['citation'] = item.xpath('Citation/text()' or [None])[0]
+                    ref['pmid'] = item.xpath('ArticleIdList/ArticleId[@IdType="pubmed"]/text()' or [None])[0]
+                    references.append(ref)
+            elif type == 'CommentsCorrectionsList':
+                for item in self.xml_node.xpath('PubmedData/CommentsCorrectionsList/CommentsCorrections'):
+                    ref = {}
+                    ref['type'] = item.get('RefType')
+                    ref['citation'] = item.xpath('RefSource/text()')[0]
+                    ref['pmid'] = item.xpath('PMID/text()')
+                    references.append(ref)
+            else:
+                print(f"Error: Unknown type '{type}'")
+        return references
 
 def fix_paper_info(input_xlsx, pubmed_dir):
     df = pd.read_excel(input_xlsx, dtype=str) # id,pmid,doi,journal,pub_year,title,source,index,pmid_from_cache,doi_from_cache,updated
@@ -263,53 +295,79 @@ def fix_paper_info(input_xlsx, pubmed_dir):
             if paper is not None:
                 print(f'Update paper: id={paper.id}')
                 any_change = False
-                if paper.journal != paper_info.journal:
-                    print(f"  journal: '{paper.journal}' -> '{paper_info.journal}'")
-                    paper.journal = paper_info.journal
-                    any_change = True
-                if paper.pub_date != paper_info.pub_date:
-                    print(f"  pub_date: '{paper.pub_date}' -> '{paper_info.pub_date}'")
-                    paper.pub_date = paper_info.pub_date
-                    any_change = True
-                if paper.pub_year != paper_info.pub_year:
-                    print(f"  pub_year: '{paper.pub_year}' -> '{paper_info.pub_year}'")
-                    paper.pub_year = paper_info.pub_year
-                    any_change = True
-                if paper.title != paper_info.title:
-                    print(f"  title: '{paper.title}' -> '{paper_info.title}'")
-                    paper.title = paper_info.title
-                    any_change = True
-                authors = '\n'.join(paper_info.authors)
-                if paper.authors != authors:
-                    print(f"  authors: '{paper.authors}' -> '{authors}'")
-                    paper.authors = authors
-                    any_change = True
-                affiliations = '\n'.join(paper_info.affiliations)
-                if paper.affiliations != affiliations:
-                    print(f"  affiliations: '{paper.affiliations}' -> '{affiliations}'")
-                    paper.affiliations = affiliations
-                    any_change = True
-                if paper.abstract != paper_info.abstract:
-                    print(f"  abstract: '{paper.abstract}' -> '{paper_info.abstract}'")
-                    paper.abstract = paper_info.abstract
-                    any_change = True
-                keywords = '\n'.join(paper_info.keywords)
-                if paper.keywords != keywords:
-                    print(f"  keywords: '{paper.keywords}' -> '{keywords}'")
-                    paper.keywords = keywords
-                    any_change = True
-                if paper.doi != paper_info.doi:
-                    print(f"  doi: '{paper.doi}' -> '{paper_info.doi}'")
-                    paper.doi = paper_info.doi
-                    any_change = True
-                if paper.pmid != paper_info.pmid:
-                    print(f"  pmid: '{paper.pmid}' -> '{paper_info.pmid}'")
-                    paper.pmid = paper_info.pmid
-                    any_change = True
-                if paper.language != paper_info.language:
-                    print(f"  language: '{paper.language}' -> '{paper_info.language}'")
-                    paper.language = paper_info.language
-                    any_change = True
+                if paper_info.journal is not None:
+                    if paper.journal != paper_info.journal:
+                        print(f"  journal: '{paper.journal}' -> '{paper_info.journal}'")
+                        paper.journal = paper_info.journal
+                        any_change = True
+                if paper_info.pub_date is not None:
+                    if paper.pub_date != paper_info.pub_date:
+                        print(f"  pub_date: '{paper.pub_date}' -> '{paper_info.pub_date}'")
+                        paper.pub_date = paper_info.pub_date
+                        any_change = True
+                if paper_info.pub_year is not None:
+                    if paper.pub_year != paper_info.pub_year:
+                        print(f"  pub_year: '{paper.pub_year}' -> '{paper_info.pub_year}'")
+                        paper.pub_year = paper_info.pub_year
+                        any_change = True
+                if paper_info.title is not None:
+                    if paper.title != paper_info.title:
+                        print(f"  title: '{paper.title}' -> '{paper_info.title}'")
+                        paper.title = paper_info.title
+                        any_change = True
+                if paper_info.authors is not None:
+                    authors = '\n'.join(paper_info.authors)
+                    if paper.authors != authors:
+                        print(f"  authors: '{paper.authors}' -> '{authors}'")
+                        paper.authors = authors
+                        any_change = True
+                if paper_info.affiliations is not None:
+                    affiliations = '\n'.join(paper_info.affiliations)
+                    if paper.affiliations != affiliations:
+                        print(f"  affiliations: '{paper.affiliations}' -> '{affiliations}'")
+                        paper.affiliations = affiliations
+                        any_change = True
+                if paper_info.abstract is not None:
+                    if paper.abstract != paper_info.abstract:
+                        print(f"  abstract: '{paper.abstract}' -> '{paper_info.abstract}'")
+                        paper.abstract = paper_info.abstract
+                        any_change = True
+                if paper_info.keywords is not None:
+                    keywords = '\n'.join(paper_info.keywords)
+                    if paper.keywords != keywords:
+                        print(f"  keywords: '{paper.keywords}' -> '{keywords}'")
+                        paper.keywords = keywords
+                        any_change = True
+                if paper_info.doi is not None:
+                    if paper.doi != paper_info.doi:
+                        print(f"  doi: '{paper.doi}' -> '{paper_info.doi}'")
+                        paper.doi = paper_info.doi
+                        any_change = True
+                if paper_info.pmid is not None:
+                    if paper.pmid != paper_info.pmid:
+                        print(f"  pmid: '{paper.pmid}' -> '{paper_info.pmid}'")
+                        paper.pmid = paper_info.pmid
+                        any_change = True
+                if paper_info.arxiv_id is not None:
+                    if paper.arxiv_id != paper_info.arxiv_id:
+                        print(f"  arxiv_id: '{paper.arxiv_id}' -> '{paper_info.arxiv_id}'")
+                        paper.arxiv_id = paper_info.arxiv_id
+                        any_change = True
+                if paper_info.pmcid is not None:
+                    if paper.pmcid != paper_info.pmcid:
+                        print(f"  pmcid: '{paper.pmcid}' -> '{paper_info.pmcid}'")
+                        paper.pmcid = paper_info.pmcid
+                        any_change = True
+                if paper_info.cnki_id is not None:
+                    if paper.cnki_id != paper_info.cnki_id:
+                        print(f"  cnki_id: '{paper.cnki_id}' -> '{paper_info.cnki_id}'")
+                        paper.cnki_id = paper_info.cnki_id
+                        any_change = True
+                if paper_info.language is not None:
+                    if paper.language != paper_info.language:
+                        print(f"  language: '{paper.language}' -> '{paper_info.language}'")
+                        paper.language = paper_info.language
+                        any_change = True
                 if any_change:
                     paper.save()
                     print(f"  Updated: {paper}")
