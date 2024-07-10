@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db.models import Subquery, OuterRef, Q, Max, Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from paperhub import settings
-from api.paper import get_paper_info, guess_identifier_type
+from core.paper import get_paper_info, guess_identifier_type
 from core.models import Paper, Review, Recommendation, PaperTracking, Label, UserProfile
 
 def get_paginated_reviews(reviews, page_number):

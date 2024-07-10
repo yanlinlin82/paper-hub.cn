@@ -21,9 +21,9 @@ from django.contrib.auth.models import User
 import openai
 from paperhub import settings
 from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
-from api.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
-from api.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
-from api.paper import get_abstract_by_doi, convert_paper_info
+from core.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
+from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
+from core.paper import get_abstract_by_doi, convert_paper_info
 
 def json_view(func):
     @wraps(func)
