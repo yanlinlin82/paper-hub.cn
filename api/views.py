@@ -296,6 +296,7 @@ def submit_review(request):
 
     if review.comment != comment:
         review.comment = comment
+        review.update_time = timezone.now()
         review.save()
 
     if 'paper' in data:
@@ -552,6 +553,7 @@ def add_recommendation(request):
         review = review_list[0]
         if review.comment != comment:
             review.comment = comment
+            review.update_time = timezone.now()
             review.save()
     else:
         review = Review(paper=paper, creator=user, comment=comment)
@@ -789,6 +791,7 @@ def submit_comment(request):
         review.abstract = review_info.get('abstract', '')
         review.urls = "\n".join(review_info.get('urls', []))
 
+    review.update_time = timezone.now()
     review.save()
 
     group.reviews.add(review)
@@ -1231,6 +1234,7 @@ def new_edit_review(request):
         return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {user}"})
 
     review.comment = comment
+    review.update_time = timezone.now()
     review.save()
 
     return JsonResponse({'success': True})

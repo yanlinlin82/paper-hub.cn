@@ -82,8 +82,10 @@
         <ul class="list-group">
         {% for review in paper.reviews %}
           <li id="card_{{ paper.pk }}_review_{{ review.pk }}" class="list-group-item my-2 d-flex align-items-center">
-            <div id="comment_{{ review.pk }}" class="d-inline flex-fill text-start my-2">{{ review.comment }}</div>
-            <div class="d-inline align-self-start">{{ review.create_time | date:"Y-m-d H:i" }}</div>
+            <div class="d-inline flex-fill align-self-start">
+              <div class="text-nowrap">{{ review.update_time | date:"Y-m-d H:i" }}</div>
+              <div id="comment_{{ review.pk }}" class="text-start my-2">{{ review.comment }}</div>
+            </div>
             {% if current_page == "trash" %}
             <div class="d-inline align-self-start">
               <a class="btn btn-sm btn-outline-primary text-nowrap ms-2" href="javascript:restoreReview({{ paper.pk }}, {{ review.pk }})">恢复</a>

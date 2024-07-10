@@ -43,7 +43,7 @@ def _all_page(request, is_trash=False, last_week=False):
         latest_update_time_subquery = Review.objects.filter(
                 paper=OuterRef('pk'),
                 creator=user,
-                delete_time__isnull=False
+                delete_time__isnull=True
             ).order_by('-update_time').values('update_time')[:1]
         papers = Paper.objects.filter(
                 pk__in=[r.paper_id for r in reviews]
