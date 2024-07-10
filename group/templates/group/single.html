@@ -14,14 +14,14 @@
   {% include "group/review-info.html" %}
   <div class="my-3">{{ review.comment }}</div>
   {% with review.paper as paper %}
-  <div id="card_{{paper.pk}}" class="card p-2">
-    <div id="info_{{paper.pk}}" class="text-start">
+  <div id="card_{{ paper.pk }}" class="card p-2">
+    <div id="info_{{ paper.pk }}" class="text-start">
       <div class="flex-fill">{% include "group/paper-info.html" %}</div>
     </div>
     <div class="my-2">
-      <div id="title_{{paper.pk}}" class="d-inline text-start">
-        <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
-        <a class="ms-2" href="javascript:translate_title({{paper.pk}})">翻译</a>
+      <div id="title_{{ paper.pk }}" class="d-inline text-start">
+        <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+        <a class="ms-2" href="javascript:translate_title({{ paper.pk }})">翻译</a>
       </div>
       <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
       {% if paper.translation and paper.translation.title_cn %}
@@ -65,7 +65,7 @@
         <div id="abstract_{{ paper.pk }}_long" class="d-inline">
           {{ paper.abstract }}
         </div>
-        <a class="ms-2" href="javascript:translate_abstract({{paper.pk}})">翻译</a>
+        <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
         <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
           {% if paper.translation and paper.translation.abstract_cn %}
           {{ paper.translation.abstract_cn }}
@@ -122,9 +122,9 @@ document.getElementById('summarize-by-gpt').addEventListener('click', function()
   });
   const token = getCookie('token');
   const postData = {
-    paper_id: '{% if review.paper.doi %}{{review.paper.doi}}{% else %}{% if review.paper.arxiv_id %}{{review.paper.arxiv_id}}{% else %}{% if review.paper.pmid %}{{ review.paper.pmid}}{% else %}{{review.pk}}{% endif %}{% endif %}{% endif %}',
+    paper_id: '{% if review.paper.doi %}{{ review.paper.doi }}{% else %}{% if review.paper.arxiv_id %}{{ review.paper.arxiv_id }}{% else %}{% if review.paper.pmid %}{{ review.paper.pmid }}{% else %}{{ review.pk }}{% endif %}{% endif %}{% endif %}',
     token: token,
-    group_name: '{{group.name}}'
+    group_name: '{{ group.name }}'
   };
   ajaxPostJson({
     url: '/api/summarize_by_gpt',

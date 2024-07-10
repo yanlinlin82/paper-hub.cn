@@ -1161,3 +1161,131 @@ def check_in_by_admin(request):
         group.save()
 
     return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def new_remove_paper(request):
+    data = request.json_data
+    paper_id = data.get('paper_id')
+
+    paper = Paper.objects.get(pk=paper_id)
+    if not paper:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
+
+    user = request.user.core_user_profile
+    review_list = Review.objects.filter(paper=paper, delete_time__isnull=True, creator=user)
+    if review_list.count() > 0:
+        for review in review_list:
+            review.delete_time = timezone.now()
+            review.save()
+
+    return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def new_restore_paper(request):
+    data = request.json_data
+    paper_id = data.get('paper_id')
+
+    paper = Paper.objects.get(pk=paper_id)
+    if not paper:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
+
+    user = request.user.core_user_profile
+    review_list = Review.objects.filter(paper=paper, delete_time__isnull=False, creator=user)
+    if review_list.count() > 0:
+        for review in review_list:
+            review.delete_time = None
+            review.save()
+
+    return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def new_remove_paper_permanently(request):
+    data = request.json_data
+    paper_id = data.get('paper_id')
+
+    paper = Paper.objects.get(pk=paper_id)
+    if not paper:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
+
+    user = request.user.core_user_profile
+    Review.objects.filter(paper=paper, delete_time__isnull=True, creator=user).delete()
+
+    return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def new_edit_review(request):
+    data = request.json_data
+    review_id = data.get('review_id')
+    comment = data.get('comment')
+
+    review = Review.objects.get(pk=review_id)
+    if not review:
+        return JsonResponse({'success': False, 'error': f"Review not found: {review_id}"})
+
+    user = request.user.core_user_profile
+    if review.creator != user:
+        return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {user}"})
+
+    review.comment = comment
+    review.save()
+
+    return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def new_remove_review(request):
+    data = request.json_data
+    review_id = data.get('review_id')
+
+    review = Review.objects.get(pk=review_id)
+    if not review:
+        return JsonResponse({'success': False, 'error': f"Review not found: {review_id}"})
+
+    user = request.user.core_user_profile
+    if review.creator != user:
+        return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {user}"})
+
+    review.delete_time = timezone.now()
+    review.save()
+
+    return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def new_restore_review(request):
+    data = request.json_data
+    review_id = data.get('review_id')
+
+    review = Review.objects.get(pk=review_id)
+    if not review:
+        return JsonResponse({'success': False, 'error': f"Review not found: {review_id}"})
+
+    user = request.user.core_user_profile
+    if review.creator != user:
+        return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {user}"})
+
+    review.delete_time = None
+    review.save()
+
+    return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def new_remove_review_permanently(request):
+    data = request.json_data
+    review_id = data.get('review_id')
+
+    review = Review.objects.get(pk=review_id)
+    if not review:
+        return JsonResponse({'success': False, 'error': f"Review not found: {review_id}"})
+
+    user = request.user.core_user_profile
+    if review.creator != user:
+        return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {user}"})
+
+    review.delete()
+    return JsonResponse({'success': True})

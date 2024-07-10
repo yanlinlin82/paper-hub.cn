@@ -460,7 +460,7 @@ $(document).ready(function() {
     ajaxPostJson({
       url: "{% url 'api:add_review' %}",
       data: {
-        group_name: '{{group.name}}',
+        group_name: '{{ group.name }}',
         username: $('#reviewModalUsername').val(),
         create_time: $('#reviewModalCreateTime').val(),
         review_id: $('#reviewModalreviewID').val(),

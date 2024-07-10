@@ -12,7 +12,7 @@
         {% if paper.has_any_review %}
         <div class="badge bg-secondary">已加入个人文献库</div>
         {% else %}
-        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_search_result({{paper.pk}})">加入个人文献库</a>
+        <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:add_search_result({{ paper.pk }})">加入个人文献库</a>
         {% endif %}
       </div>
       {% endif %}
@@ -20,14 +20,14 @@
     <div class="mt-2">
       {% for review in paper.review_set.all %}
         {% for label in review.labels.all %}
-      <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+      <a class="badge" style="background-color:{{ label.color }}" href="javascript:void(0)">{{ label.name }}</a>
         {% endfor %}
       {% endfor %}
     </div>
     <div class="my-3">
-      <div id="title_{{paper.pk}}" class="d-inline text-start">
-        <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
-        <a class="ms-2" href="javascript:translate_title({{paper.pk}})">翻译</a>
+      <div id="title_{{ paper.pk }}" class="d-inline text-start">
+        <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+        <a class="ms-2" href="javascript:translate_title({{ paper.pk }})">翻译</a>
       </div>
       <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
       {% if paper.translation and paper.translation.title_cn %}
@@ -56,7 +56,7 @@
         <div id="abstract_{{ paper.pk }}_long" class="d-inline">
           {{ paper.abstract }}
         </div>
-        <a class="ms-2" href="javascript:translate_abstract({{paper.pk}})">翻译</a>
+        <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
         <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
           {% if paper.translation and paper.translation.abstract_cn %}
           {{ paper.translation.abstract_cn }}

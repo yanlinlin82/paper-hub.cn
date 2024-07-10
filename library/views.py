@@ -76,7 +76,10 @@ def _all_page(request, is_trash=False, last_week=False):
         paper.display_index = index + papers.start_index()
         paper.author_list = [k for k in paper.authors.split('\n') if k]
         paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
-        paper.reviews = paper.review_set.filter(creator=user, delete_time__isnull=True)
+        if not is_trash:
+            paper.reviews = paper.review_set.filter(creator=user, delete_time__isnull=True)
+        else:
+            paper.reviews = paper.review_set.filter(creator=user, delete_time__isnull=False)
 
     return papers, items
 

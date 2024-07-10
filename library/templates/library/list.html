@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block customize_style %}
+<style>
+.list-group-item:hover {
+  background-color: #e9ecef; /* Bootstrap 的浅灰色背景 */
+}
+.star {
+  cursor: pointer;
+  font-size: 1.5em;
+  color: #ccc; /* 默认灰色 */
+  decoration: none;
+}
+.star.checked {
+  cursor: pointer;
+  color: gold; /* 选中时的金色 */
+  decoration: none;
+}
+</style>
+{% endblock customize_style %}
+
 {% block page_title %}
 {% if current_page == "all" %}全部文献{% endif %}
 {% if current_page == "recent" %}近期新增{% endif %}
@@ -17,29 +36,36 @@
   {% include "view/paginator.html" %}
 
   {% for paper in papers %}
-  <div id="card_{{paper.pk}}" class="card p-2 my-3 d-flex flex-row">
+  <div id="card_{{ paper.pk }}" class="card p-2 my-3 d-flex flex-row">
+    <div class="text-start"><div class="btn btn-sm star fs-4">&#9734;</div></div>
     <div class="p-2 text-start">{{ paper.display_index }}.</div>
     <div class="p-2 text-start flex-fill">
       <div class="d-flex">
         <div class="flex-fill">{% include "view/paper-info.html" %}</div>
+        {% if current_page == "trash" %}
         <div class="text-end align-self-start">
-          <a class="btn btn-primary btn-sm text-nowrap ms-2" href="javascript:alert('not implemented yet');void({{paper.pk}})">星标</a>
+          <a class="btn btn-sm btn-outline-primary text-nowrap ms-2" href="javascript:restorePaper({{ paper.pk }})">恢复</a>
         </div>
         <div class="text-end align-self-start">
-          <a class="btn btn-danger btn-sm text-nowrap ms-2" href="javascript:alert('not implemented yet');void({{paper.pk}})">删除</a>
+          <a class="btn btn-sm btn-outline-danger text-nowrap ms-2" href="javascript:removePaperPermanently({{ paper.pk }})">彻底删除</a>
         </div>
+        {% else %}
+        <div class="text-end align-self-start">
+          <a class="btn btn-sm btn-outline-danger text-nowrap ms-2" href="javascript:removePaper({{ paper.pk }})">删除</a>
+        </div>
+        {% endif %}
       </div>
       <div class="mt-2">
         {% for review in paper.review_set.all %}
           {% for label in review.labels.all %}
-        <a class="badge" style="background-color:{{label.color}}" href="javascript:void(0)">{{ label.name }}</a>
+        <a class="badge" style="background-color:{{ label.color }}" href="javascript:void(0)">{{ label.name }}</a>
           {% endfor %}
         {% endfor %}
       </div>
       <div class="my-3">
-        <div id="title_{{paper.pk}}" class="d-inline text-start">
-          <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
-          <a class="ms-2" href="javascript:translate_title({{paper.pk}})">翻译</a>
+        <div id="title_{{ paper.pk }}" class="d-inline text-start">
+          <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
+          <a class="ms-2" href="javascript:translate_title({{ paper.pk }})">翻译</a>
         </div>
         <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
         {% if paper.translation and paper.translation.title_cn %}
@@ -53,11 +79,26 @@
       <hr>
       <div class="mt-2">
         <div>共 {{ paper.reviews | length }} 条笔记：</div>
-        <ul>
+        <ul class="list-group">
         {% for review in paper.reviews %}
-          <li class="my-2">
-            <div class="d-inline text-start my-2">{{ review.create_time | date:"Y-m-d H:i" }}：</div>
-            <div class="d-inline text-start my-2">{{ review.comment }}</div>
+          <li id="card_{{ paper.pk }}_review_{{ review.pk }}" class="list-group-item my-2 d-flex align-items-center">
+            <div id="comment_{{ review.pk }}" class="d-inline flex-fill text-start my-2">{{ review.comment }}</div>
+            <div class="d-inline align-self-start">{{ review.create_time | date:"Y-m-d H:i" }}</div>
+            {% if current_page == "trash" %}
+            <div class="d-inline align-self-start">
+              <a class="btn btn-sm btn-outline-primary text-nowrap ms-2" href="javascript:restoreReview({{ paper.pk }}, {{ review.pk }})">恢复</a>
+            </div>
+            <div class="d-inline align-self-start">
+              <a class="btn btn-sm btn-outline-danger text-nowrap ms-2" href="javascript:removeReviewPermanently({{ paper.pk }}, {{ review.pk }})">彻底删除</a>
+            </div>
+            {% else %}
+            <div class="d-inline align-self-start">
+              <a class="btn btn-sm btn-outline-primary text-nowrap ms-2" href="javascript:editReview({{ paper.pk }}, {{ review.pk }})">修改</a>
+            </div>
+            <div class="d-inline align-self-start">
+              <a class="btn btn-sm btn-outline-danger text-nowrap ms-2" href="javascript:removeReview({{ paper.pk }}, {{ review.pk }})">删除</a>
+            </div>
+            {% endif %}
           </li>
         {% endfor %}
         </ul>
@@ -71,5 +112,173 @@
 {% else %}
   <p style="padding:20px; height:200px;">No paper is available.</p>
 {% endif %}
+
+<div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editReviewModalLabel">编辑笔记</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editReviewForm">
+          <div class="mb-3">
+            <label for="editReviewComment" class="form-label">笔记内容</label>
+            <textarea class="form-control" id="editReviewComment" name="comment" rows="6"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="editReviewModalOK">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  $('.star').click(function() {
+      $(this).toggleClass('checked');
+      $(this).html($(this).hasClass('checked') ? '&#9733;' : '&#9734;');
+  });
+});
+
+function removePaper(paperId) {
+  ajaxPostJson({
+    url: "{% url 'api:new_remove_paper' %}",
+    data: {paper_id: paperId},
+    success: function(data) {
+      if (data.success) {
+        $('#card_' + paperId).remove();
+        if ($('.card').length == 0) {
+          window.location.reload();
+        }
+      } else {
+        alert(data.message);
+      }
+    }
+  });
+}
+
+function restorePaper(paperId) {
+  ajaxPostJson({
+    url: "{% url 'api:new_restore_paper' %}",
+    data: {paper_id: paperId},
+    success: function(data) {
+      if (data.success) {
+        $('#card_' + paperId).remove();
+        if ($('.card').length == 0) {
+          window.location.reload();
+        }
+      } else {
+        alert(data.message);
+      }
+    }
+  });
+}
+
+function removePaperPermanently(paperId) {
+  ajaxPostJson({
+    url: "{% url 'api:new_remove_paper_permanently' %}",
+    data: {paper_id: paperId},
+    success: function(data) {
+      if (data.success) {
+        $('#card_' + paperId).remove();
+        if ($('.card').length == 0) {
+          window.location.reload();
+        }
+      } else {
+        alert(data.message);
+      }
+    }
+  });
+}
+
+function editReview(paperId, reviewId) {
+  var review = $('#card_' + paperId + '_review_' + reviewId);
+  $('#editReviewComment').val($('#comment_' + reviewId).text());
+  $('#editReviewModal').modal('show');
+  $('#editReviewModalOK').off('click').on('click', function() {
+    ajaxPostJson({
+      url: "{% url 'api:new_edit_review' %}",
+      data: {
+        paper_id: paperId,
+        review_id: reviewId,
+        comment: $('#editReviewComment').val(),
+      },
+      success: function(data) {
+        console.log('editReview: ', data);
+        if (data.success) {
+          $('#comment_' + reviewId).text($('#editReviewComment').val());
+          $('#editReviewModal').modal('hide');
+        } else {
+          alert(data.message);
+        }
+      }
+    });
+  });
+}
+
+function removeReview(paperId, reviewId) {
+  ajaxPostJson({
+    url: "{% url 'api:new_remove_review' %}",
+    data: {paper_id: paperId, review_id: reviewId},
+    success: function(data) {
+      if (data.success) {
+        $('#card_' + paperId + '_review_' + reviewId).remove();
+        if ($('#card_' + paperId + ' .list-group-item').length == 0) {
+          $('#card_' + paperId).remove();
+          if ($('.card').length == 0) {
+            window.location.reload();
+          }
+        }
+      } else {
+        alert(data.message);
+      }
+    }
+  });
+}
+
+function restoreReview(paperId, reviewId) {
+  ajaxPostJson({
+    url: "{% url 'api:new_restore_review' %}",
+    data: {paper_id: paperId, review_id: reviewId},
+    success: function(data) {
+      if (data.success) {
+        $('#card_' + paperId + '_review_' + reviewId).remove();
+        if ($('#card_' + paperId + ' .list-group-item').length == 0) {
+          $('#card_' + paperId).remove();
+          if ($('.card').length == 0) {
+            window.location.reload();
+          }
+        }
+      } else {
+        alert(data.message);
+      }
+    }
+  });
+}
+
+function removeReviewPermanently(paperId, reviewId) {
+  ajaxPostJson({
+    url: "{% url 'api:new_remove_review_permanently' %}",
+    data: {paper_id: paperId, review_id: reviewId},
+    success: function(data) {
+      if (data.success) {
+        $('#card_' + paperId + '_review_' + reviewId).remove();
+        if ($('#card_' + paperId + ' .list-group-item').length == 0) {
+          $('#card_' + paperId).remove();
+          if ($('.card').length == 0) {
+            window.location.reload();
+          }
+        }
+      } else {
+        alert(data.message);
+      }
+    }
+  });
+}
+</script>
 </section>
 {% endblock content %}

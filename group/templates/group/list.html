@@ -39,20 +39,20 @@
   {% include "group/paginator.html" %}
 
   {% for review, index in items %}
-  <div id="card_review_{{review.pk}}" class="card p-2 my-3 d-flex flex-row">
+  <div id="card_review_{{ review.pk }}" class="card p-2 my-3 d-flex flex-row">
     <div class="p-2 text-start">{{ index }}.</div>
     <div class="p-2 text-start flex-fill">
       {% include "group/review-info.html" %}
-      <div id="review_comment_{{review.pk}}" class="my-3">{{ review.comment }}</div>
+      <div id="review_comment_{{ review.pk }}" class="my-3">{{ review.comment }}</div>
       {% with review.paper as paper %}
-      <div id="card_paper_{{paper.pk}}" class="card p-2 ms-4">
-        <div id="info_{{paper.pk}}" class="text-start">
+      <div id="card_paper_{{ paper.pk }}" class="card p-2 ms-4">
+        <div id="info_{{ paper.pk }}" class="text-start">
           <div class="flex-fill">{% include "group/paper-info.html" %}</div>
         </div>
         <div class="my-2">
-          <div id="title_{{paper.pk}}" class="d-inline text-start">
-            <div id="title_{{paper.pk}}_text" class="d-inline fs-5 fw-bold"><a href="{% url 'group:review' id=review.pk group_name=group.name %}">{{ paper.title }}</a></div>
-            <a class="ms-2" href="javascript:translate_title({{paper.pk}})">翻译</a>
+          <div id="title_{{ paper.pk }}" class="d-inline text-start">
+            <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold"><a href="{% url 'group:review' id=review.pk group_name=group.name %}">{{ paper.title }}</a></div>
+            <a class="ms-2" href="javascript:translate_title({{ paper.pk }})">翻译</a>
           </div>
           <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
           {% if paper.translation and paper.translation.title_cn %}

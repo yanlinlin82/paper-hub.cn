@@ -33,4 +33,11 @@ urlpatterns = [
     path('query_paper_info', views.query_paper_info, name='query_paper_info'),
     path('check_in', views.check_in, name='check_in'),
     path('check_in_by_admin', views.check_in_by_admin, name='check_in_by_admin'),
+    path('new_remove_paper', views.new_remove_paper, name='new_remove_paper'),
+    path('new_restore_paper', views.new_restore_paper, name='new_restore_paper'),
+    path('new_remove_paper_permanently', views.new_remove_paper_permanently, name='new_remove_paper_permanently'),
+    path('new_edit_review', views.new_edit_review, name='new_edit_review'),
+    path('new_remove_review', views.new_remove_review, name='new_remove_review'),
+    path('new_restore_review', views.new_restore_review, name='new_restore_review'),
+    path('new_remove_review_permanently', views.new_remove_review_permanently, name='new_remove_review_permanently'),
 ]

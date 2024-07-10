@@ -138,7 +138,7 @@ def trash_page(request, group_name):
         review.display_index = index + reviews.start_index()
         review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
         review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
-        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=True)
+        review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=False)
 
     return render(request, 'group/list.html', {
         'group': group,

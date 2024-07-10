@@ -5,18 +5,18 @@
     {% if paper.abstract|length > 30 %}
     <div id="abstract_{{ paper.pk }}_short" class="d-inline">
       {{ paper.abstract | truncatewords:30 }}
-      <a href="javascript:expand_abstract({{paper.pk}})">&gt;&gt;&gt;</a>
+      <a href="javascript:expand_abstract({{ paper.pk }})">&gt;&gt;&gt;</a>
     </div>
     <div id="abstract_{{ paper.pk }}_long" class="d-none">
       {{ paper.abstract }}
-      <a href="javascript:collapse_abstract({{paper.pk}})">&lt;&lt;&lt;</a>
+      <a href="javascript:collapse_abstract({{ paper.pk }})">&lt;&lt;&lt;</a>
     </div>
     {% else %}
     <div id="abstract_{{ paper.pk }}_long" class="d-inline">
       {{ paper.abstract }}
     </div>
     {% endif %}
-    <a class="ms-2" href="javascript:translate_abstract({{paper.pk}})">翻译</a>
+    <a class="ms-2" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
     <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
       {% if paper.translation and paper.translation.abstract_cn %}
       {{ paper.translation.abstract_cn }}

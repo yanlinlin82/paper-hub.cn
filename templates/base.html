@@ -17,6 +17,7 @@
     a:hover {text-decoration: underline;}
     .external-link::after {content: ' \2197'; font-size: 0.8em; margin-left: 0.2em; display: inline-block;}
   </style>
+  {% block customize_style %}{% endblock customize_style %}
   <script>
   function ajaxPostJson(options) {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -42,6 +43,7 @@
     $.ajax(settings);
   }
   </script>
+  {% block customize_script %}{% endblock customize_script %}
   {% include "cookie-js.html" %}
 </head>
 
