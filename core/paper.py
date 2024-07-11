@@ -258,6 +258,9 @@ class PaperInfo:
                 print(f"Error: Unknown type '{type}'")
         return references
 
+    def __str__(self):
+        return f"<{self.journal}, {self.pub_year}, {self.title}>"
+
 def fix_paper_info(input_xlsx, pubmed_dir):
     df = pd.read_excel(input_xlsx, dtype=str) # id,pmid,doi,journal,pub_year,title,source,index,pmid_from_cache,doi_from_cache,updated
 
