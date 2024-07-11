@@ -506,35 +506,30 @@ def delete_review_forever(request):
 
     return JsonResponse({'success': True})
 
+@json_view
+@require_login
 def add_search_result(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
+    data = request.json_data
+    paper_id = data.get('paper_id')
+    comment = data.get('comment') or ''
 
-    try:
-        paper_id = request.POST['paper_id']
-        comment = request.POST['comment']
+    user = request.user.core_user_profile
+    paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
 
-        user = request.user.core_user_profile
-
-        paper = Paper.objects.get(pk=paper_id)
-        if paper is None:
-            return JsonResponse({
-                'success': False,
-                'error': f"Paper not found: {paper_id}"
-            })
-        print(f'add_search_result: {paper_id} {paper}')
-
+    review_list = Review.objects.filter(creator=user, paper=paper)
+    if review_list.count() > 0:
+        review = review_list[0]
+        if review.comment != comment:
+            review.comment = comment
+            review.update_time = timezone.now()
+            review.save()
+    else:
         review = Review(paper=paper, creator=user, comment=comment)
         review.save()
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
+
+    return JsonResponse({'success': True})
 
 @json_view
 @require_login
