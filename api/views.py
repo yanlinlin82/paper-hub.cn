@@ -62,6 +62,7 @@ def require_admin(func):
 @json_view
 def wx_login(request):
     data = request.json_data
+    print(f"wx_login: {data}")
     wx_code = data.get('code', '') or ''
     if not wx_code:
         return JsonResponse({'success': False, 'error': 'Invalid wx_code'}, status=400)
@@ -71,23 +72,22 @@ def wx_login(request):
     if not APP_ID or not SECRET:
         return JsonResponse({'success': False, 'error': 'Invalid APP_ID or SECRET'}, status=400)
 
-    url = 'https://api.weixin.qq.com/sns/jscode2session'\
-        f'?appid={APP_ID}&secret={SECRET}&js_code={wx_code}'\
-        '&grant_type=authorization_code'
+    url = f'https://api.weixin.qq.com/sns/jscode2session?appid={APP_ID}&secret={SECRET}&js_code={wx_code}&grant_type=authorization_code'
     response = requests.get(url)
     if response.status_code != 200:
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
     if response.json().get('errcode', 0) != 0:
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
     session_key = response.json().get('session_key', '') or ''
+    openid = response.json().get('openid', '') or ''
     unionid = response.json().get('unionid', '') or ''
-    if session_key == '' or unionid == '':
+    if session_key == '' or (openid == '' and unionid == ''):
         return JsonResponse({'success': False, 'error': 'Login failed! res: ' + response.text})
 
     nickname = ''
-    users = UserProfile.objects.filter(wx_unionid=unionid)
+    users = UserProfile.objects.filter(Q(wx_openid=openid) | Q(wx_unionid=unionid))
     if users.count() == 0:
-        user = UserProfile(wx_unionid=unionid)
+        user = UserProfile(wx_openid=openid, wx_unionid=unionid)
         user.save()
     else:
         user = users[0]
@@ -97,6 +97,7 @@ def wx_login(request):
     session = UserSession(user=user, session_key=session_key, client_type='weixin')
     session.save()
 
+    login(request, user.auth_user)
     return JsonResponse({
         'success': True,
         'nickname': nickname,
@@ -1287,4 +1288,11 @@ def new_remove_review_permanently(request):
         return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {user}"})
 
     review.delete()
+    return JsonResponse({'success': True})
+
+@json_view
+@require_login
+def fetch_paper_list(request):
+    data = request.json_data
+    print(f"fetch_paper_list: {data}")
     return JsonResponse({'success': True})
