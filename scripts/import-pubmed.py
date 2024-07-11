@@ -331,7 +331,7 @@ class PubMedXMLFile:
         if updated:
             cnt['paper']['updated'] += 1
 
-        if mode == 'default':
+        if mode == 'default' and paper is not None and labels:
             cnt['recommendation']['total'] += 1
             r_list = Recommendation.objects.filter(paper=paper, source=self.generate_source_text(), user=rule_item['user'])
             if r_list.exists():
