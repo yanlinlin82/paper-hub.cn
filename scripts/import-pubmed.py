@@ -130,19 +130,33 @@ class PubMedXMLFile:
                 print(f"  {type} for paper ({paper.pk}): {total} total, {new} new, {updated} updated, {deleted} deleted")
         return (new > 0 or updated > 0 or deleted > 0)
 
-    def _update_paper_info(self, paper_info, index, run, verbose):
+    def _update_paper_info(self, mode, paper_info, index, run, verbose):
         if paper_info.pmid in self.pmids_to_remove:
             print(f"Skip removed PMID: {paper_info.pmid}")
             return None, False, False
 
-        if not PubMedIndex.objects.filter(source=self.source, index=index).exists():
-            if not run:
-                print(f"Added PubMedIndex record: source {self.source}, index {index}, pmid {paper_info.pmid}, doi {paper_info.doi}")
-            else:
-                PubMedIndex.objects.filter(pmid=paper_info.pmid).delete()
-                PubMedIndex.objects.filter(doi=paper_info.doi).delete()
-                PubMedIndex.objects.create(source=self.source, index=index, pmid=paper_info.pmid, doi=paper_info.doi)
-                print(f"Added PubMedIndex record: source {self.source}, index {index}, pmid {paper_info.pmid}, doi {paper_info.doi}")
+        pi_list = PubMedIndex.objects.filter(source=self.source, index=index)
+        if pi_list.exists():
+            pi = pi_list[0]
+            any_change = False
+            if pi.pmid != paper_info.pmid:
+                pi.pmid = paper_info.pmid
+                any_change = True
+            if pi.doi != paper_info.doi:
+                pi.doi = paper_info.doi
+                any_change = True
+            if any_change:
+                if run:
+                    pi.save()
+                print(f"Updated PubMedIndex record: source {self.source}, index {index}, pmid {paper_info.pmid}, doi {paper_info.doi}")
+        else:
+            print(f"Added PubMedIndex record: source {self.source}, index {index}, pmid {paper_info.pmid}, doi {paper_info.doi}")
+            pi = PubMedIndex.objects.create(source=self.source, index=index, pmid=paper_info.pmid, doi=paper_info.doi)
+            if run:
+                pi.save()
+
+        if mode == 'update-index':
+            return None, False, False
 
         new, updated = False, False
         if paper_info.pmid is not None:
@@ -275,14 +289,9 @@ class PubMedXMLFile:
         any_ref_changed_2 = self.update_references(paper, paper_info, 'ReferenceList', run, verbose)
         return paper, new, (updated and (any_change or any_ref_changed_1 or any_ref_changed_2))
 
-    def scan_rules_for_single_paper(self, index, paper_info, force, rules, run, verbose, cnt):
-        matched = False
+    def scan_rules_for_single_paper(self, index, paper_info, mode, rules, run, verbose, cnt):
         labels = []
-        if force:
-            if verbose:
-                print(f"Force update paper [{index}]({paper_info}), skip rule matching")
-            matched = True
-        else:
+        if mode == 'default':
             for rule_item in rules:
                 matched = False
                 if rule_item['type'] == 'keyword':
@@ -300,55 +309,56 @@ class PubMedXMLFile:
                 elif rule_item['type'] == 'cite':
                     if self.match_cite(paper_info, rule_item['value']):
                         matched = True
-
                 if matched:
                     labels.append(rule_item['label'])
 
             if not labels:
                 if verbose:
                     print(f"Skip paper [{index}]({paper_info}), since no any rule matched.")
-                matched = False
+                    return
+
+            print(f"Found matched paper [{index}]({paper_info})")
+            print(f"  [{index}]matched labels:", ', '.join([i.name for i in labels]))
+
+        if mode == 'update-info':
+            if verbose:
+                print(f"Force update paper [{index}]({paper_info}), skip rule matching")
+
+        cnt['paper']['matched'] += 1
+        paper, new, updated = self._update_paper_info(mode, paper_info, index, run, verbose)
+        if new:
+            cnt['paper']['new'] += 1
+        if updated:
+            cnt['paper']['updated'] += 1
+
+        if mode == 'default':
+            cnt['recommendation']['total'] += 1
+            r_list = Recommendation.objects.filter(paper=paper, source=self.generate_source_text(), user=rule_item['user'])
+            if r_list.exists():
+                if verbose:
+                    print(f"  Recommendation already exists for paper [{index}]({paper.pk})")
+                recommendation = r_list[0]
             else:
-                matched = True
-                print(f"Found matched paper [{index}]({paper_info})")
-                print(f"  [{index}]matched labels:", ', '.join([i.name for i in labels]))
-
-        if matched:
-            cnt['paper']['matched'] += 1
-            paper, new, updated = self._update_paper_info(paper_info, index, run, verbose)
-            if new:
-                cnt['paper']['new'] += 1
-            if updated:
-                cnt['paper']['updated'] += 1
-
-            if not force:
-                cnt['recommendation']['total'] += 1
-                r_list = Recommendation.objects.filter(paper=paper, source=self.generate_source_text(), user=rule_item['user'])
-                if r_list.exists():
-                    if verbose:
-                        print(f"  Recommendation already exists for paper [{index}]({paper.pk})")
-                    recommendation = r_list[0]
-                else:
-                    cnt['recommendation']['new'] += 1
-                    recommendation = Recommendation(
-                        paper=paper,
-                        source=self.generate_source_text(),
-                        user=rule_item['user'],
-                    )
+                cnt['recommendation']['new'] += 1
+                recommendation = Recommendation(
+                    paper=paper,
+                    source=self.generate_source_text(),
+                    user=rule_item['user'],
+                )
+                if run:
+                    recommendation.save()
+                print(f"  Added recommendation ({recommendation.pk}) for paper [{index}]({paper.pk})")
+            any_changed = False
+            for label in labels:
+                if label not in recommendation.labels.all():
+                    any_changed = True
+                    print(f"    Add label '{label.name}' to recommendation ({recommendation.pk})")
                     if run:
-                        recommendation.save()
-                    print(f"  Added recommendation ({recommendation.pk}) for paper [{index}]({paper.pk})")
-                any_changed = False
-                for label in labels:
-                    if label not in recommendation.labels.all():
-                        any_changed = True
-                        print(f"    Add label '{label.name}' to recommendation ({recommendation.pk})")
-                        if run:
-                            recommendation.labels.add(label)
-                if any_changed and r_list.exists():
-                    cnt['recommendation']['updated'] += 1
+                        recommendation.labels.add(label)
+            if any_changed and r_list.exists():
+                cnt['recommendation']['updated'] += 1
 
-    def scan_rules(self, force, rules, run, verbose, cnt, start=None, end=None):
+    def scan_rules(self, mode, rules, run, verbose, cnt, start=None, end=None):
         if start is None and end is None:
             for index, article_node in enumerate(self.root.xpath('/PubmedArticleSet/PubmedArticle')):
                 cnt['paper']['total'] += 1
@@ -357,7 +367,7 @@ class PubMedXMLFile:
                     print(f"Processing article {index + 1} / {self.num_articles}")
 
                 paper_info = PaperInfo(article_node)
-                self.scan_rules_for_single_paper(index + 1, paper_info, force, rules, run, verbose, cnt)
+                self.scan_rules_for_single_paper(index + 1, paper_info, mode, rules, run, verbose, cnt)
         elif start is not None and end is not None:
             for index in range(start, end + 1):
                 cnt['paper']['total'] += 1
@@ -365,7 +375,7 @@ class PubMedXMLFile:
                 article_node = self.root.xpath(f'/PubmedArticleSet/PubmedArticle[{index}]')[0]
 
                 paper_info = PaperInfo(article_node)
-                self.scan_rules_for_single_paper(index, paper_info, force, rules, run, verbose, cnt)
+                self.scan_rules_for_single_paper(index, paper_info, mode, rules, run, verbose, cnt)
         else:
             index = start or end
             cnt['paper']['total'] += 1
@@ -373,7 +383,7 @@ class PubMedXMLFile:
             article_node = self.root.xpath(f'/PubmedArticleSet/PubmedArticle[{index}]')[0]
 
             paper_info = PaperInfo(article_node)
-            self.scan_rules_for_single_paper(index, paper_info, force, rules, run, verbose, cnt)
+            self.scan_rules_for_single_paper(index, paper_info, mode, rules, run, verbose, cnt)
 
     def generate_source_text(self):
         # eg. 'pubmed24n1453.20240628'
@@ -467,7 +477,8 @@ def main():
     parser.add_argument('source', type=int, help='Source of the data')
     parser.add_argument('index', type=str, nargs='?', default=None, help='Optional index value or range, eg. 2 or 3-5')
     parser.add_argument('-r', '--run', action='store_true', help='Run the import process, otherwise just test without writing anything to database')
-    parser.add_argument('-f', '--force', action='store_true', help='Skip rule scanning, force update paper info')
+    parser.add_argument('-m', '--mode', type=str, choices=['default', 'update-index', 'update-info'], default='default',
+                        help='Mode of operation: default, update-index, update-info')
     parser.add_argument('-v', '--verbose', action='store_true', help='Increase output verbosity')
     args = parser.parse_args()
 
@@ -502,7 +513,7 @@ def main():
             print(f"Deleted {cnt} PMIDs from database")
 
     rules = []
-    if not args.force:
+    if args.mode == 'default':
         for rule_item in PaperTracking.objects.all():
             rules.append({
                 'user': rule_item.user,
@@ -513,7 +524,7 @@ def main():
         print(f"Total {len(rules)} tracking rules")
     else:
         if args.verbose:
-            print(f"Skip loading rules, since it is forced to update paper info")
+            print(f"Skip loading rules, since running in '{args.mode}' mode")
 
     cnt = {
         'paper': {'total': 0, 'matched': 0, 'new': 0, 'updated': 0},
@@ -532,7 +543,7 @@ def main():
                 print(f"Index {end} out of range [1, {pubmed.num_articles}]")
                 return 1
 
-            pubmed.scan_rules(args.force, rules, args.run, args.verbose, cnt, start, end)
+            pubmed.scan_rules(args.mode, rules, args.run, args.verbose, cnt, start, end)
         else:
             if not args.index.isdigit():
                 print(f"Invalid index value, should be single positive integer or a range (formatted as '3-5').")
@@ -542,9 +553,9 @@ def main():
                 print(f"Index {index} out of range [1, {pubmed.num_articles}]")
                 return 1
 
-            pubmed.scan_rules(args.force, rules, args.run, args.verbose, cnt, index)
+            pubmed.scan_rules(args.mode, rules, args.run, args.verbose, cnt, index)
     else:
-        pubmed.scan_rules(args.force, rules, args.run, args.verbose, cnt)
+        pubmed.scan_rules(args.mode, rules, args.run, args.verbose, cnt)
 
     print("Total scanned {} papers ({} matched, {} new, {} updated)".format(
         cnt['paper']['total'], cnt['paper']['matched'], cnt['paper']['new'], cnt['paper']['updated']
