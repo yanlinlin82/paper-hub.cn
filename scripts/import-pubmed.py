@@ -315,7 +315,7 @@ class PubMedXMLFile:
             if not labels:
                 if verbose:
                     print(f"Skip paper [{index}]({paper_info}), since no any rule matched.")
-                    return
+                return
 
             print(f"Found matched paper [{index}]({paper_info})")
             print(f"  [{index}]matched labels:", ', '.join([i.name for i in labels]))
@@ -326,12 +326,14 @@ class PubMedXMLFile:
 
         cnt['paper']['matched'] += 1
         paper, new, updated = self._update_paper_info(mode, paper_info, index, run, verbose)
+        if paper is None:
+            return
         if new:
             cnt['paper']['new'] += 1
         if updated:
             cnt['paper']['updated'] += 1
 
-        if mode == 'default' and paper is not None and labels:
+        if mode == 'default':
             cnt['recommendation']['total'] += 1
             r_list = Recommendation.objects.filter(paper=paper, source=self.generate_source_text(), user=rule_item['user'])
             if r_list.exists():
