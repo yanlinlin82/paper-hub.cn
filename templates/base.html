@@ -4,7 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paper-Hub</title>
+  <title>文献收藏与分享平台 | Paper-Hub</title>
+  <meta name="description" content="轻量级在线平台，方便文献收藏、分享及社群互动。">
+  <meta name="keywords" content="文献, 收藏, 分享, 社群, 在线平台">
+  <meta name="author" content="颜林林">
   <meta name="google-site-verification" content="CJeulU9yTowOBo-3EpJYEAhlHcG1NAHauYkG4LiIVQY">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
@@ -50,33 +53,35 @@
 <body>
 <a id="top"></a>
 
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark py-0">
+<nav class="navbar navbar-expand-sm sticky-top bg-body-tertiary border-bottom border-body" data-bs-theme="dark">
   <div class="container-lg">
-    <a class="navbar-brand" href="{% url 'index' %}">Paper-Hub</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar"
-      aria-controls="collapsibleNavbar" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse justify-content-end" id="collapsibleNavbar">
-      {% if True %}
-      <ul class="navbar-nav">
-        {% if user.is_authenticated %}
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {{ user.core_user_profile.nickname }}
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>
-          </ul>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">登录</a>
-        </li>
-        {% endif %}
-      </ul>
-      {% endif %}
+    <div style="min-width:200px;">
+      <a class="navbar-brand" href="{% url 'index' %}"><img class="img-fluid" src="{% static 'images/banner-w.png' %}" alt="Paper-Hub"></a>
     </div>
+    {% if False %}
+    <form class="flex-fill">
+      <div class="input-group" style="min-width:250px; max-width:500px;">
+        <input class="form-control text-light bg-secondary border-secondary-subtle" type="search" name="q" placeholder="搜索文献" aria-label="Search">
+        <button class="btn btn-outline-light border-secondary-subtle text-nowrap" type="submit">搜索</button>
+      </div>
+    </form>
+    {% endif %}
+    <ul class="navbar-nav nav justify-content-end ms-3">
+      {% if user.is_authenticated %}
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ user.core_user_profile.nickname }}
+        </a>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>
+        </ul>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">登录</a>
+      </li>
+      {% endif %}
+    </ul>
   </div>
 </nav>
 
@@ -84,7 +89,7 @@
   <div class="container-lg px-3 py-3">
     {% block banner %}
     <h2>{% block title %}文献库{% endblock title %}</h2>
-    <p>{% block subtitle %}一个便捷的用于文献收藏、分享、社群打卡的轻量级在线平台{% endblock subtitle %}</p>
+    <p>{% block subtitle %}轻量级在线平台，方便文献收藏、分享及社群互动{% endblock subtitle %}</p>
     {% endblock banner %}
   </div>
 </div>
@@ -92,8 +97,8 @@
 <div class="container-lg">
   {% block main %}
   <div class="d-flex flex-column flex-md-row">
-    <nav class="bg-light col-12 col-md-4 col-lg-3 col-xl-2">
-      <div id="collapse-group" class="sticky-sm-top">
+    <nav class="bg-light col-12 col-md-3" style="width:200px">
+      <div id="collapse-group">
         {% if user.is_authenticated %}
         <div class="list-group text-center my-3">
           <div class="list-group-item list-group-item-dark" data-bs-toggle="collapse" data-bs-target="#collapse-group-1" role="button" aria-expanded="false" aria-controls="collapse-group-1">探索发现</div>
