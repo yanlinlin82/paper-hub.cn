@@ -13,10 +13,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
 from django.contrib import admin
 from django.urls import include, path
+from django.http import HttpResponse
+from paperhub import settings
+
+def baidu_verify_codeva(request):
+    filename = os.path.join(settings.BASE_DIR, 'static', 'baidu_verify_codeva-NJa4iPMlSa.html')
+    with open(filename, 'r') as f:
+        return HttpResponse(f.read())
 
 urlpatterns = [
+    path('baidu_verify_codeva-NJa4iPMlSa.html', baidu_verify_codeva), # for baidu search engine verification
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('group/', include('group.urls')),
