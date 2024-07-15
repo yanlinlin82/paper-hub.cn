@@ -3,13 +3,31 @@
 {% load static %}
 
 {% block content %}
-{% if current_page == "group_journal" %}来自杂志 <a href="{% url 'group:journal' journal_name=journal_name|urlencode_full group_name=group.name %}"><i>{{ journal_name }}</i></a> 的文献。{% endif %}
-{% if current_page == "group_user" %}来自用户 <a href="{% url "group:user" id=user_info.pk group_name=group.name %}">{{ user_info }}</a> 的文献。{% endif %}
-
 <section>
-{% if reviews %}
+  {% if current_page == "group_journal" %}
   <div class="my-3">
-    当前共有 {{ reviews.paginator.count }} 篇文献分享{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。
+  来自杂志 <a href="{% url 'group:journal' journal_name=journal_name|urlencode_full group_name=group.name %}"><i>{{ journal_name }}</i></a> 的文献。
+  </div>
+  {% endif %}
+  {% if current_page == "group_user" %}
+  <div class="my-3">
+    来自用户 <a href="{% url "group:user" id=user_info.pk group_name=group.name %}">{{ user_info }}</a> 的文献。
+  </div>
+  {% endif %}
+
+  {% if query %}
+  <div class="my-3">
+    当前搜索：<div class="d-inline text-success">{{ query }}</div>
+  </div>
+  {% endif %}
+
+  {% if not reviews %}
+  <div class="my-5 text-center" style="min-height:200px;">
+    暂无任何内容。
+  </div>
+  {% else %}
+  <div class="my-3">
+    当前共找到 {{ reviews.paginator.count }} 篇文献分享{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。
   </div>
 
   {% include "group/paginator.html" %}
@@ -47,8 +65,6 @@
   {% include "group/paginator.html" %}
   {% include "group/review-info-js.html" %}
   {% include "view/paper-js.html" %}
-{% else %}
-  <p style="padding:20px; height:200px;">暂无任何内容。</p>
 {% endif %}
 </section>
 {% endblock content %}
