@@ -142,8 +142,14 @@ def _recommendation_list(request, status, recommended):
                 user=user,
                 read_time__isnull=False
             )
+        recommendations2 = Recommendation.objects.filter(
+                user=user,
+                read_time__isnull=True
+            )
         papers = Paper.objects.filter(
             pk__in=recommendations.values('paper')
+        ).exclude(
+            pk__in=recommendations2.values('paper')
         ).annotate(
             latest_read_time=Max('recommendation__read_time'),
             recommended_count=Count('recommendation__pk')
@@ -165,8 +171,11 @@ def _recommendation_list(request, status, recommended):
         paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
         if paper.review_set.filter(creator=user, delete_time__isnull=True).count() > 0:
             paper.has_any_review = True
-        paper.recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=True).order_by('-create_time')
-        paper.historical_recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=False).order_by('-create_time')
+        if status == 'isunread':
+            paper.recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=True).order_by('-create_time')
+            paper.historical_recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=False).order_by('-create_time')
+        else:
+            paper.recommendations = paper.recommendation_set.filter(user=user).order_by('-create_time')
 
     return papers, items
 
