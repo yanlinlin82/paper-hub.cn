@@ -1,7 +1,6 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.template import loader
-from core.models import UserProfile, GroupProfile, Review, Paper
+from core.models import UserProfile, GroupProfile
 from core.paper import get_this_week_start_time, get_check_in_interval, get_this_month, get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal, get_last_month
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, F, Min
@@ -44,6 +43,14 @@ def my_sharing_page(request, group_name):
         'current_page': 'group_my_sharing',
         'reviews': reviews,
         'items': items,
+    })
+
+def index_page(request, group_name):
+    group = get_object_or_404(GroupProfile, name=group_name)
+
+    return render(request, 'group/index.html', {
+        'group': group,
+        'current_page': 'group_index',
     })
 
 def all_page(request, group_name):
@@ -126,6 +133,9 @@ def last_month_page(request, group_name):
     })
 
 def trash_page(request, group_name):
+    if not request.user.is_authenticated:
+        return redirect('/')
+
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews = group.reviews.filter(delete_time__isnull=False).order_by('-delete_time', '-pk')
     page_number = request.GET.get('page')

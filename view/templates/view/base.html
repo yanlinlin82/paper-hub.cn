@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{% if user.is_authenticated %}
+<div class="list-group text-center my-3">
+  <div class="list-group-item list-group-item-dark">探索发现</div>
+  <a class="list-group-item list-group-item-action {% if current_page == "search" %}active{% endif %}" href="{% url 'search' %}">文献搜索</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "recommendations" %}active{% endif %}" href="{% url 'recommendations' %}">文献推荐</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "trackings" %}active{% endif %}" href="{% url 'trackings' %}">推荐规则</a>
+</div>
+{% endif %}
+{% endblock navbar %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+{% if user.is_authenticated %}
+{% include "group/check-in.html" %}
+{% endif %}
+<div class="list-group text-center my-3">
+  <div class="list-group-item list-group-item-dark">响马读paper</div>
+  <a class="list-group-item list-group-item-action {% if current_page == "group_index" %}active{% endif %}" href="{% url 'group:index' group_name=group_name %}">社群首页</a>
+  {% if user.is_authenticated %}
+  <a class="list-group-item list-group-item-action {% if current_page == "group_my_sharing" %}active{% endif %}" href="{% url 'group:my_sharing' group_name=group_name %}">我的分享</a>
+  {% endif %}
+  <a class="list-group-item list-group-item-action {% if current_page == "group_all" %}active{% endif %}" href="{% url 'group:all' group_name=group_name %}">所有分享</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "group_this_month" %}active{% endif %}" href="{% url 'group:this_month' group_name=group_name %}">本月分享</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "group_last_month" %}active{% endif %}" href="{% url 'group:last_month' group_name=group_name %}">上月分享</a>
+  <a class="list-group-item list-group-item-action {% if current_page == "group_rank" %}active{% endif %}" href="{% url 'group:rank' group_name=group_name %}">社群榜单</a>
+  {% if user.is_authenticated %}
+  <a class="list-group-item list-group-item-action {% if current_page == "group_trash" %}active{% endif %}" href="{% url 'group:trash' group_name=group_name %}">回收站</a>
+  {% endif %}
+</div>
+{% endblock navbar %}

@@ -1,14 +1,8 @@
 {% if user.is_authenticated %}
-<section>
-<div class="my-4 d-flex justify-content-center">
+<div>
   <div class="text-center m-2">
-    <a class="btn btn-warning btn-lg" href="javascript:checkIn();">分享打卡</a>
+    <button id="buttonCheckIn" class="btn btn-warning">分享打卡</button>
   </div>
-  {% if user.is_superuser %}
-  <div class="text-center m-2">
-    <a class="btn btn-danger btn-lg" href="javascript:checkInByAdmin();">管理员补录打卡</a>
-  </div>
-  {% endif %}
 </div>
 
 <div class="modal fade" id="checkInModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
@@ -16,6 +10,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="checkInModalDialogTitle">文献分享打卡</h5>
+        {% if user.is_superuser %}
+        <div class="flex-fill"></div>
+        <div class="me-3 form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="switchCheckInByAdmin">
+          <label class="form-check-label" for="switchCheckInByAdmin">管理员补录</label>
+        </div>
+        {% endif %}      
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -170,7 +171,7 @@
               </div>
             </div>
           </div>
-          <div class="row g-3 align-items-center m-3" id="checkInModalCreatorAndTime">
+          <div class="row g-3 align-items-center m-3 d-none" id="checkInModalCreatorAndTime">
             <div class="col-2 text-end">
               <label class="col-form-label" for="checkInModalUser">打卡人：</label>
             </div>
@@ -188,7 +189,7 @@
             </div>
           </div>
           <div class="row g-3 align-items-center">
-            <div class="form-group">
+            <div class="form-group text-start">
               <label class="mt-3" for="checkInModalComment">评论：</label>
               <textarea class="form-control my-2" id="checkInModalComment" name="comment" rows="6"></textarea>
             </div>
@@ -202,261 +203,237 @@
     </div>
   </div>
 </div>
-</section>
+
 <script>
-function setPaperInfoValue(field, value) {
-  $('#' + field).text(value);
-}
+  $(document).ready(function() {
+    $('#buttonCheckIn').on('click', function() {
+      checkIn();
+    });
 
-$('#checkInModalInput').on('click', function() {
-  if ($('#checkInModalPaperInfoInput').hasClass('d-none')) {
-    $('#checkInModalPaperInfoInput').addClass('d-block');
-    $('#checkInModalPaperInfoInput').removeClass('d-none');
-  } else {
-    $('#checkInModalPaperInfoInput').addClass('d-none');
-    $('#checkInModalPaperInfoInput').removeClass('d-block');
-  }
-});
-
-$('#checkInModalInputMore').on('click', function() {
-  if ($('#checkInModalPaperInfoInputDetail').hasClass('d-none')) {
-    $('#checkInModalInputMore').text('收起更多');
-    $('#checkInModalPaperInfoInputDetail').addClass('d-block');
-    $('#checkInModalPaperInfoInputDetail').removeClass('d-none');
-  } else {
-    $('#checkInModalInputMore').text('显示更多');
-    $('#checkInModalPaperInfoInputDetail').addClass('d-none');
-    $('#checkInModalPaperInfoInputDetail').removeClass('d-block');
-  }
-});
-
-function refreshPaperInfoDisplay() {
-  if ($('#checkInModalPaperInfo').hasClass('d-none')) {
-    $('#checkInModalMessage').addClass('d-none');
-    $('#checkInModalMessage').removeClass('d-block');
-    $('#checkInModalPaperInfo').addClass('d-block');
-    $('#checkInModalPaperInfo').removeClass('d-none');
-  }
-  var journal = $('#checkInModalJournal').val();
-  var pub_date = $('#checkInModalPubDate').val();
-  var title = $('#checkInModalTitle').val();
-  var html = '<div>';
-  if (journal) {
-    html += '<i>' + journal + '</i>, ';
-  }
-  if (pub_date) {
-    html += pub_date + '. ';
-  }
-  html += '</div>';
-  html += '<div><b>' + title + '</b></div>';
-  + pub_date + '. ';
-  $('#checkInModalPaperInfo').html(html);
-}
-
-$('#checkInModalJournal, #checkInModalPubDate, #checkInModalTitle').on('input', function() {
-  refreshPaperInfoDisplay();
-});
-
-$('#checkInModalQuery').on('click', function() {
-  show_loading_modal('正在查询文献信息……');
-  var identifier = $('#checkInModalPaperID').val();
-  ajaxPostJson({
-    url: "{% url 'api:query_paper_info' %}",
-    data: { 'identifier': identifier },
-    error: function() {
-      console.log('error')
-    },
-    complete: function() {
-      console.log('complete')
-    },
-    success: function (data) {
-      hide_loading_modal();
-      if (!data.success) {
-        alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
+    $('#switchCheckInByAdmin').change(function() {
+      if ($(this).prop('checked')) {
+        $('#checkInModalCreatorAndTime').removeClass('d-none');
       } else {
-        console.log(data.results);
-        $('#checkInModalTitle').val(data.results.title);
-        $('#checkInModalJournal').val(data.results.journal);
-        $('#checkInModalPubDate').val(data.results.pub_date);
-        $('#checkInModalAuthors').val(data.results.authors.join('\n'));
-        $('#checkInModalAffiliations').val(data.results.affiliations.join('\n'));
-        $('#checkInModalAbstract').val(data.results.abstract);
-        $('#checkInModalKeywords').val(data.results.keywords.join('\n'));
-        $('#checkInModalURLs').val(data.results.urls.join('\n'));
-        $('#checkInModalDOI').val(data.results.doi);
-        $('#checkInModalPMID').val(data.results.pmid);
-        $('#checkInModalArXivID').val(data.results.arxiv_id);
-        $('#checkInModalPMCID').val(data.results.pmcid);
-        $('#checkInModalCNKIID').val(data.results.cnki_id);
-        $('#checkInModalLanguage').val(data.results.language);
-        refreshPaperInfoDisplay();
+        $('#checkInModalCreatorAndTime').addClass('d-none');
       }
-    },
-    always: function() {
-      console.log('Querying paper info by ID (' + identifier + ') done.');
-      hide_loading_modal();
+    })
+  });
+
+  function setPaperInfoValue(field, value) {
+    $('#' + field).text(value);
+  }
+
+  $('#checkInModalInput').on('click', function() {
+    if ($('#checkInModalPaperInfoInput').hasClass('d-none')) {
+      $('#checkInModalPaperInfoInput').addClass('d-block');
+      $('#checkInModalPaperInfoInput').removeClass('d-none');
+    } else {
+      $('#checkInModalPaperInfoInput').addClass('d-none');
+      $('#checkInModalPaperInfoInput').removeClass('d-block');
     }
   });
-});
 
-function confirmPaperInputed() {
-  var title = $('#checkInModalTitle').val();
-  var journal = $('#checkInModalJournal').val();
-  var pub_date = $('#checkInModalPubDate').val();
-  if (!title || !journal || !pub_date) {
-    alert('请先通过ID查询文献信息，或手工填写必要的文献信息！');
-    $('#checkInModalPaperID').focus();
-    return false;
-  }
-
-  var comment = $('#checkInModalComment').val();
-  if (!comment) {
-    alert('请填写评论！');
-    $('#checkInModalComment').focus();
-    return false;
-  }
-  return true;
-}
-
-function confirmUserAndDate() {
-  var user = $('#checkInModalUser').val();
-  if (!user) {
-    alert('请填写打卡人！');
-    $('#checkInModalUser').focus();
-    return false;
-  }
-  var date = $('#checkInModalDate').val();
-  if (!date) {
-    alert('请填写打卡时间！');
-    $('#checkInModalDate').focus();
-    return false;
-  }
-  return true;
-}
-
-function cleanUpCheckInModal() {
-  $('#checkInModalPaperID').val('');
-  $('#checkInModalTitle').val('');
-  $('#checkInModalJournal').val('');
-  $('#checkInModalPubDate').val('');
-  $('#checkInModalAuthors').val('');
-  $('#checkInModalAffiliations').val('');
-  $('#checkInModalAbstract').val('');
-  $('#checkInModalKeywords').val('');
-  $('#checkInModalURLs').val('');
-  $('#checkInModalDOI').val('');
-  $('#checkInModalPMID').val('');
-  $('#checkInModalArXivID').val('');
-  $('#checkInModalPMCID').val('');
-  $('#checkInModalCNKIID').val('');
-  $('#checkInModalLanguage').val('');
-  $('#checkInModalComment').val('');
-
-  $('#checkInModalMessage').addClass('d-block');
-  $('#checkInModalMessage').removeClass('d-none');
-  $('#checkInModalPaperInfo').addClass('d-none');
-  $('#checkInModalPaperInfo').removeClass('row');
-  $('#checkInModalPaperInfoInput').addClass('d-none');
-  $('#checkInModalPaperInfoInput').removeClass('row');
-  $('#checkInModalPaperInfoInputDetail').addClass('d-none');
-  $('#checkInModalPaperInfoInputDetail').removeClass('row');
-}
-
-function checkIn() {
-  $('#checkInModalDialogTitle').text('文献分享打卡');
-  cleanUpCheckInModal();
-  $('#checkInModalCreatorAndTime').addClass('d-none');
-  $('#checkInModalCreatorAndTime').removeClass('row');
-  $('#checkInModal').modal('show');
-  $('#checkInModalOK').on('click', function() {
-    if (!confirmPaperInputed()) {
-      return;
+  $('#checkInModalInputMore').on('click', function() {
+    if ($('#checkInModalPaperInfoInputDetail').hasClass('d-none')) {
+      $('#checkInModalInputMore').text('收起更多');
+      $('#checkInModalPaperInfoInputDetail').addClass('d-block');
+      $('#checkInModalPaperInfoInputDetail').removeClass('d-none');
+    } else {
+      $('#checkInModalInputMore').text('显示更多');
+      $('#checkInModalPaperInfoInputDetail').addClass('d-none');
+      $('#checkInModalPaperInfoInputDetail').removeClass('d-block');
     }
-    var data = {
-      "paper": {
-        "title": $('#checkInModalTitle').val(),
-        "journal": $('#checkInModalJournal').val(),
-        "pub_date": $('#checkInModalPubDate').val(),
-        "authors": $('#checkInModalAuthors').val(),
-        "affiliations": $('#checkInModalAffiliations').val(),
-        "abstract": $('#checkInModalAbstract').val(),
-        "keywords": $('#checkInModalKeywords').val(),
-        "urls": $('#checkInModalURLs').val(),
-        "doi": $('#checkInModalDOI').val(),
-        "pmid": $('#checkInModalPMID').val(),
-        "arxiv_id": $('#checkInModalArXivID').val(),
-        "pmcid": $('#checkInModalPMCID').val(),
-        "cnki_id": $('#checkInModalCNKIID').val(),
-        "language": $('#checkInModalLanguage').val()
-      },
-      "comment": $('#checkInModalComment').val()
-    };
+  });
+
+  function refreshPaperInfoDisplay() {
+    if ($('#checkInModalPaperInfo').hasClass('d-none')) {
+      $('#checkInModalMessage').addClass('d-none');
+      $('#checkInModalMessage').removeClass('d-block');
+      $('#checkInModalPaperInfo').addClass('d-block');
+      $('#checkInModalPaperInfo').removeClass('d-none');
+    }
+    var journal = $('#checkInModalJournal').val();
+    var pub_date = $('#checkInModalPubDate').val();
+    var title = $('#checkInModalTitle').val();
+    var html = '<div>';
+    if (journal) {
+      html += '<i>' + journal + '</i>, ';
+    }
+    if (pub_date) {
+      html += pub_date + '. ';
+    }
+    html += '</div>';
+    html += '<div><b>' + title + '</b></div>';
+    + pub_date + '. ';
+    $('#checkInModalPaperInfo').html(html);
+  }
+
+  $('#checkInModalJournal, #checkInModalPubDate, #checkInModalTitle').on('input', function() {
+    refreshPaperInfoDisplay();
+  });
+
+  $('#checkInModalQuery').on('click', function() {
+    show_loading_modal('正在查询文献信息……');
+    var identifier = $('#checkInModalPaperID').val();
     ajaxPostJson({
-      url: "{% url 'api:check_in' %}",
-      data: data,
-      success: function(data) {
+      url: "{% url 'api:query_paper_info' %}",
+      data: { 'identifier': identifier },
+      error: function() {
+        console.log('error')
+      },
+      complete: function() {
+        console.log('complete')
+      },
+      success: function (data) {
+        hide_loading_modal();
         if (!data.success) {
           alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
         } else {
           console.log(data.results);
-          $('#checkInModal').modal('hide');
-          location.reload();
+          $('#checkInModalTitle').val(data.results.title);
+          $('#checkInModalJournal').val(data.results.journal);
+          $('#checkInModalPubDate').val(data.results.pub_date);
+          $('#checkInModalAuthors').val(data.results.authors.join('\n'));
+          $('#checkInModalAffiliations').val(data.results.affiliations.join('\n'));
+          $('#checkInModalAbstract').val(data.results.abstract);
+          $('#checkInModalKeywords').val(data.results.keywords.join('\n'));
+          $('#checkInModalURLs').val(data.results.urls.join('\n'));
+          $('#checkInModalDOI').val(data.results.doi);
+          $('#checkInModalPMID').val(data.results.pmid);
+          $('#checkInModalArXivID').val(data.results.arxiv_id);
+          $('#checkInModalPMCID').val(data.results.pmcid);
+          $('#checkInModalCNKIID').val(data.results.cnki_id);
+          $('#checkInModalLanguage').val(data.results.language);
+          refreshPaperInfoDisplay();
         }
-      }
-    });
-  });
-}
-
-{% if user.is_superuser %}
-function checkInByAdmin() {
-  $('#checkInModalDialogTitle').text('文献分享打卡（管理员补录）');
-  cleanUpCheckInModal();
-  $('#checkInModalCreatorAndTime').addClass('row');
-  $('#checkInModalCreatorAndTime').removeClass('d-none');
-  $('#checkInModal').modal('show');
-  $('#checkInModalOK').on('click', function() {
-    if (!confirmPaperInputed()) {
-      return;
-    }
-    if (!confirmUserAndDate()) {
-      return;
-    }
-    var data = {
-      "paper": {
-        "title": $('#checkInModalTitle').val(),
-        "journal": $('#checkInModalJournal').val(),
-        "pub_date": $('#checkInModalPubDate').val(),
-        "authors": $('#checkInModalAuthors').val(),
-        "affiliations": $('#checkInModalAffiliations').val(),
-        "abstract": $('#checkInModalAbstract').val(),
-        "keywords": $('#checkInModalKeywords').val(),
-        "urls": $('#checkInModalURLs').val(),
-        "doi": $('#checkInModalDOI').val(),
-        "pmid": $('#checkInModalPMID').val(),
-        "arxiv_id": $('#checkInModalArXivID').val(),
-        "pmcid": $('#checkInModalPMCID').val(),
-        "cnki_id": $('#checkInModalCNKIID').val(),
-        "language": $('#checkInModalLanguage').val()
       },
-      "user": $('#checkInModalUser').val(),
-      "check_in_time": $('#checkInModalDate').val() + ' ' + $('#checkInModalTime').val(),
-      "comment": $('#checkInModalComment').val()
-    };
-    ajaxPostJson({
-      url: "{% url 'api:check_in_by_admin' %}",
-      data: data,
-      success: function(data) {
-        if (!data.success) {
-          alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
-        } else {
-          console.log(data.results);
-          $('#checkInModal').modal('hide');
-          location.reload();
-        }
+      always: function() {
+        console.log('Querying paper info by ID (' + identifier + ') done.');
+        hide_loading_modal();
       }
     });
   });
-}
-{% endif %}
+
+  function confirmPaperInputed() {
+    var title = $('#checkInModalTitle').val();
+    var journal = $('#checkInModalJournal').val();
+    var pub_date = $('#checkInModalPubDate').val();
+    if (!title || !journal || !pub_date) {
+      alert('请先通过ID查询文献信息，或手工填写必要的文献信息！');
+      $('#checkInModalPaperID').focus();
+      return false;
+    }
+
+    var comment = $('#checkInModalComment').val();
+    if (!comment) {
+      alert('请填写评论！');
+      $('#checkInModalComment').focus();
+      return false;
+    }
+    return true;
+  }
+
+  function confirmUserAndDate() {
+    var user = $('#checkInModalUser').val();
+    if (!user) {
+      alert('请填写打卡人！');
+      $('#checkInModalUser').focus();
+      return false;
+    }
+    var date = $('#checkInModalDate').val();
+    if (!date) {
+      alert('请填写打卡时间！');
+      $('#checkInModalDate').focus();
+      return false;
+    }
+    return true;
+  }
+
+  function cleanUpCheckInModal() {
+    $('#checkInModalPaperID').val('');
+    $('#checkInModalTitle').val('');
+    $('#checkInModalJournal').val('');
+    $('#checkInModalPubDate').val('');
+    $('#checkInModalAuthors').val('');
+    $('#checkInModalAffiliations').val('');
+    $('#checkInModalAbstract').val('');
+    $('#checkInModalKeywords').val('');
+    $('#checkInModalURLs').val('');
+    $('#checkInModalDOI').val('');
+    $('#checkInModalPMID').val('');
+    $('#checkInModalArXivID').val('');
+    $('#checkInModalPMCID').val('');
+    $('#checkInModalCNKIID').val('');
+    $('#checkInModalLanguage').val('');
+    $('#checkInModalComment').val('');
+
+    $('#checkInModalMessage').addClass('d-block');
+    $('#checkInModalMessage').removeClass('d-none');
+    $('#checkInModalPaperInfo').addClass('d-none');
+    $('#checkInModalPaperInfo').removeClass('row');
+    $('#checkInModalPaperInfoInput').addClass('d-none');
+    $('#checkInModalPaperInfoInput').removeClass('row');
+    $('#checkInModalPaperInfoInputDetail').addClass('d-none');
+    $('#checkInModalPaperInfoInputDetail').removeClass('row');
+  }
+
+  function checkIn() {
+    $('#checkInModalDialogTitle').text('文献分享打卡');
+    cleanUpCheckInModal();
+    $('#checkInModal').modal('show');
+    $('#checkInModalOK').on('click', function() {
+      if (!confirmPaperInputed()) {
+        return;
+      }
+      {% if user.is_superuser %}
+      if (!confirmUserAndDate()) {
+        return;
+      }
+      {% endif %}
+      var data = {
+        "paper": {
+          "title": $('#checkInModalTitle').val(),
+          "journal": $('#checkInModalJournal').val(),
+          "pub_date": $('#checkInModalPubDate').val(),
+          "authors": $('#checkInModalAuthors').val(),
+          "affiliations": $('#checkInModalAffiliations').val(),
+          "abstract": $('#checkInModalAbstract').val(),
+          "keywords": $('#checkInModalKeywords').val(),
+          "urls": $('#checkInModalURLs').val(),
+          "doi": $('#checkInModalDOI').val(),
+          "pmid": $('#checkInModalPMID').val(),
+          "arxiv_id": $('#checkInModalArXivID').val(),
+          "pmcid": $('#checkInModalPMCID').val(),
+          "cnki_id": $('#checkInModalCNKIID').val(),
+          "language": $('#checkInModalLanguage').val()
+        },
+        "comment": $('#checkInModalComment').val()
+      };
+      {% if user.is_superuser %}
+      if ($('#switchCheckInByAdmin').prop('checked')) {
+        data.user = $('#checkInModalUser').val();
+        data.check_in_time = $('#checkInModalDate').val() + ' ' + $('#checkInModalTime').val();
+        url = "{% url 'api:check_in_by_admin' %}";
+      } else {
+        url = "{% url 'api:check_in' %}";
+      }
+      {% else %}
+      url = "{% url 'api:check_in' %}";
+      {% endif %}
+      ajaxPostJson({
+        url: url,
+        data: data,
+        success: function(data) {
+          if (!data.success) {
+            alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
+          } else {
+            console.log(data.results);
+            $('#checkInModal').modal('hide');
+            location.reload();
+          }
+        }
+      });
+    });
+  }
 </script>
 {% endif %}

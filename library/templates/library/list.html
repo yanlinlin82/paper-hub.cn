@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "library/base.html" %}
 {% load static %}
 
 {% block customize_style %}
@@ -20,11 +20,6 @@
 </style>
 {% endblock customize_style %}
 
-{% block page_title %}
-{% if current_page == "all" %}全部文献{% endif %}
-{% if current_page == "recent" %}近期新增{% endif %}
-{% if current_page == "trash" %}回收站{% endif %}
-{% endblock page_title %}
 
 {% block content %}
 <section>

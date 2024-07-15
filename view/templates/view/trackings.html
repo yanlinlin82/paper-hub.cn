@@ -1,11 +1,7 @@
-{% extends "base.html" %}
-
-{% block page_title %}文献追踪规则{% endblock page_title %}
-{% block page_subtitle %}
-共有 {{ item_list | length }} 条文献追踪规则.
-{% endblock page_subtitle %}
+{% extends "view/base.html" %}
 
 {% block content %}
+<div>共有 {{ item_list | length }} 条文献追踪规则.</div>
 {% if item_list %}
 <table class="table">
   <thead>

@@ -1,34 +1,10 @@
-{% extends "base.html" %}
+{% extends "group/base.html" %}
 {% load view_extras %}
 {% load static %}
 
-{% block banner %}
-<div class="text-start">
-  <a class="navbar-brand fs-2" href="/group/{{ group.name }}">{{ group.display_name }}</a>
-  <p>{{ group.desc }}</p>
-</div>
-{% endblock banner %}
-
-{% block page_title %}
-{% if current_page == "group_my_sharing" %}我的社群文献分享列表{% endif %}
-{% if current_page == "group_all" %}社群文献分享列表{% endif %}
-{% if current_page == "group_recent" %}社群近期文献分享列表{% endif %}
-{% if current_page == "group_this_month" %}社群本月文献分享列表{% endif %}
-{% if current_page == "group_last_month" %}社群上月文献分享列表{% endif %}
-{% if current_page == "group_trash" %}社群文献分享列表（回收站）{% endif %}
-{% if current_page == "group_journal" %}社群文献分享列表{% endif %}
-{% if current_page == "group_user" %}社群文献分享列表{% endif %}
-{% endblock page_title %}
-
-{% block page_subtitle %}
+{% block content %}
 {% if current_page == "group_journal" %}来自杂志 <a href="{% url 'group:journal' journal_name=journal_name|urlencode_full group_name=group.name %}"><i>{{ journal_name }}</i></a> 的文献。{% endif %}
 {% if current_page == "group_user" %}来自用户 <a href="{% url "group:user" id=user_info.pk group_name=group.name %}">{{ user_info }}</a> 的文献。{% endif %}
-{% endblock page_subtitle %}
-
-{% block content %}
-{% if current_page != "group_trash" %}
-{% include "group/check-in.html" %}
-{% endif %}
 
 <section>
 {% if reviews %}

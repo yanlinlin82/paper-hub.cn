@@ -8,7 +8,8 @@ def redirect(request):
 app_name = 'group'
 urlpatterns = [
     path('', redirect, name='index'),
-    path('<str:group_name>/', views.all_page, name='all'),
+    path('<str:group_name>/', views.index_page, name='index'),
+    path('<str:group_name>/all', views.all_page, name='all'),
     path('<str:group_name>/my_sharing', views.my_sharing_page, name='my_sharing'),
     path('<str:group_name>/recent', views.recent_page, name='recent'),
     path('<str:group_name>/this_month', views.this_month_page, name='this_month'),
