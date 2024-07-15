@@ -209,7 +209,7 @@ def trash_page(request, group_name):
     })
 
 @redirect_query
-def single_page(request, id, group_name):
+def single_page(request, group_name, id):
     group = get_object_or_404(GroupProfile, name=group_name)
     review = get_object_or_404(group.reviews, pk=id)
 
