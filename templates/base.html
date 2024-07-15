@@ -58,11 +58,12 @@
 
 <body class="d-flex flex-column" style="width:100vw; height:100vh;">
 
-  <nav class="navbar navbar-expand-sm bg-body-tertiary border-bottom border-body">
+<nav class="navbar navbar-expand-sm bg-body-tertiary border-bottom border-body">
   <div class="container-xl">
     <div style="min-width:200px;">
       <a class="navbar-brand" href="{% url 'index' %}"><img class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
     </div>
+
     {% if False %}
     {% if current_page != "search" %}
     <form class="flex-fill">
@@ -73,6 +74,8 @@
     </form>
     {% endif %}
     {% endif %}
+
+    {% if False %}
     <ul class="navbar-nav nav justify-content-end ms-3">
       {% if user.is_authenticated %}
       <li class="nav-item">
@@ -98,6 +101,7 @@
       </li>
       {% endif %}
     </ul>
+{% endif %}
   </div>
 </nav>
 

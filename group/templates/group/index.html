@@ -1,8 +1,89 @@
 {% extends "group/base.html" %}
+{% load static %}
 
 {% block content %}
-<div>
-  <a class="navbar-brand fs-2" href="/group/{{ group.name }}">{{ group.display_name }}</a>
+<div class="p-3">
+  {% if group.name != "xiangma" %}
+  <h2 class="mb-3">{{ group.display_name }}</h2>
   <p>{{ group.desc }}</p>
+  {% else %}
+  <h2 class="mb-3">{{ group.display_name }}</h2>
+  <hr>
+
+  <h3>简介</h3>
+  <p>响马读paper是一个学术交流社群，旨在鼓励成员每月至少读一篇文献并打卡分享。我们相信在学术道路上，坚持阅读和分享是不断进步的关键。</p>
+
+  <h3>社群规则</h3>
+  <ol>
+    <li>
+      学术交流
+      <ul>
+        <li>本群为学术交流群，禁止广告、政治言论和不当言论，违规者立即踢出群。</li>
+        <li>不强制实名，但为确保统计正确，建议保持昵称稳定。</li>
+        <li>倡导敢于质疑、敢于不拘一格的“响马”精神，勇于挑战自我。</li>
+      </ul>
+    </li>
+    <li>
+      每月打卡
+      <ul>
+        <li>每月需读完1篇正式发表的学术论文，撰写推荐理由、评论或解读，并在群内打卡，首月可豁免。</li>
+        <li>每月1日检查上月打卡情况，未完成者将被移出群，离群一个月后可重新申请入群。</li>
+      </ul>
+    </li>
+    <li>
+      打卡方式
+      <ul>
+        {% if False %}
+        <li>可登录本网站后，通过点击“分享打卡”按钮进行提交操作。</li>
+        {% endif %}
+        <li>在微信群中，通过输入以“#paper”开头的文字信息进行打卡，建议格式为：“#paper doi 杂志, 年份, 标题。推荐理由”，如无doi，可用其它唯一标识（如arXivID、PMID或PMCID）注明，以便他人查找。</li>
+        <li>微信群打卡信息将由群主手动同步到网站，因此可能会有一定延迟。</li>
+      </ul>
+    </li>
+    <li>
+      论文分享
+      <ul>
+        <li>所有正式发表的学术论文均可分享，专业不限。内容需符合打卡格式，观点仅代表分享者个人。</li>
+        <li>欢迎成员对分享的论文展开讨论，促进学科间交流。</li>
+      </ul>
+    </li>
+    <li>
+      打卡查询
+      <ul>
+        <li>通过微信群聊天记录搜索“#paper”关键字进行查询。</li>
+        <li>也可浏览本网站，查看各期打卡情况及排名。</li>
+        <li>如有统计错误，请联系群主解决。</li>
+      </ul>
+    </li>
+    <li>
+      社群发展
+      <ul>
+        <li>本群成立于2022年1月8日，目标是坚持读paper，一起精进60年。</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h3>线上分享活动</h3>
+  <p>社群已举办过多次线上分享活动，除特殊情况外，均有录屏视频供回放。</p>
+  <p>
+    <ul>
+      <li>2024-07-12（第10期）：李翛然：全球首次真实量子计算的药物设计过程分享<span class="text-success"><i>（注：因部分内容暂不便大规模公开，故此次分享未录屏，没有回放）</i></span></li>
+      <li>2022-11-12（第9期）：<a class="external-link" href="https://www.bilibili.com/video/BV1PD4y147gK/" target="_blank">林海：Alpha智能体家族的进化与应用之路</a></li>
+      <li>2022-10-22（第8期）：<a class="external-link" href="https://www.bilibili.com/video/BV1jW4y1E7fr/" target="_blank">王昊：视觉问答算法简介</a></li>
+      <li>2022-09-17（第7期）：<a class="external-link" href="https://www.bilibili.com/video/BV1nW4y1q7ja/" target="_blank">尹志：对比学习图像翻译</a></li>
+      <li>2022-09-03（第6期）：<a class="external-link" href="https://www.bilibili.com/video/BV1fY4y1T7rq/" target="_blank">曾梓龙：基于变分自编码器的动态多因子模型</a></li>
+      <li>2022-08-13（第5期）：<a class="external-link" href="https://www.bilibili.com/video/BV1Ld4y1K7nh/" target="_blank">林海：Quantum-Reinforcement-Learning</a></li>
+      <li>2022-08-06（第4期）：<a class="external-link" href="https://www.bilibili.com/video/BV1RV4y1j7UF/" target="_blank">尹志：AI-based-Pathology-Biomarkers</a></li>
+      <li>2022-07-23（第3期）：<a class="external-link" href="https://www.bilibili.com/video/BV1ug4111728/" target="_blank">颜林林：用DNA分子实现生物计算机</a></li>
+      <li>2022-07-09（第2期）：<a class="external-link" href="https://www.bilibili.com/video/BV1tZ4y1Y79a/" target="_blank">曾梓龙：利用深度学习研究自闭症的神经解剖学变异</a></li>
+      <li>2022-06-28（第1期）：大象城南：神经纤维追踪算法<span class="text-success"><i>（注：因第一次活动未录屏，故没有回放）</i></span></li>
+    </ul>
+  </p>
+
+  <h3>加入我们</h3>
+  <p>愿意参加并坚持每月打卡（读至少一篇paper并分享）的，请加群主个人微信，并注明“加入响马读paper群”。</p>
+  <p class="text-center"><img class="img-fluid" src="{% static "images/wechat-qrcode.png" %}" width="120" height="120"></p>
+  <p>通过上述规则，我们希望创建一个有序、高效的学术交流平台，让每一位成员在这里都能有所收获，不断提升学术水平。欢迎新老朋友的加入，共同推动学术进步！</p>
+  {% endif %}
 </div>
 {% endblock content %}
