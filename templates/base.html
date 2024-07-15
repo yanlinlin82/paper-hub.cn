@@ -19,6 +19,12 @@
     a {text-decoration: none;}
     a:hover {text-decoration: underline;}
     .external-link::after {content: ' \2197'; font-size: 0.8em; margin-left: 0.2em; display: inline-block;}
+    .fixed-div {
+      width: 100%;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+      background-color: #f8f9fa;
+    }
   </style>
   {% block customize_style %}{% endblock customize_style %}
   <script>
@@ -50,10 +56,9 @@
   {% include "cookie-js.html" %}
 </head>
 
-<body>
-<a id="top"></a>
+<body class="d-flex flex-column" style="width:100vw; height:100vh;">
 
-<nav class="navbar navbar-expand-sm sticky-top bg-body-tertiary border-bottom border-body">
+  <nav class="navbar navbar-expand-sm bg-body-tertiary border-bottom border-body">
   <div class="container-xl">
     <div style="min-width:200px;">
       <a class="navbar-brand" href="{% url 'index' %}"><img class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
@@ -96,30 +101,37 @@
   </div>
 </nav>
 
-<div class="container-xl">
+<div class="flex-fill container-xl">
   {% block main %}
-  <div class="d-flex flex-column flex-md-row">
-    <nav class="bg-light col-12 col-md-3" style="width:200px">
+  <div class="d-flex flex-column flex-md-row" style="height:100%;">
+    <nav class="bg-light col-12 col-md-3 fixed-div" style="width:200px">
       {% block navbar %}{% endblock navbar %}
     </nav>
-    <div class="flex-fill text-start mt-3 ms-3" style="min-height:600px;">
-      <article>
-        {% block content %}{% endblock content %}
-      </article>
+    <div class="flex-fill text-start mt-3 ms-3 fixed-div">
+      <div class="d-flex flex-column" style="height:100%;">
+        <article class="flex-fill">
+          {% block content %}{% endblock content %}
+        </article>
+
+        <footer class="bg-secondary text-white text-center py-3">
+          <div class="py-2">
+            <a class="link-light external-link" href="https://yanlinlin.cn/" target="_blank">&copy; 2022 - 2024</a> | <a class="link-light external-link" href="http://beian.miit.gov.cn/" target="_blank">京ICP备18031542号-9</a> | <a class="link-light external-link" href="https://github.com/yanlinlin82/paper-hub.cn/" target="_blank">GitHub</a>
+          </div>
+          <div class="py-1">
+            基于 <a class="link-light external-link" href="https://www.djangoproject.com/" target="_blank">Django</a> 和 <a class="link-light external-link" href="https://getbootstrap.com/" target="_blank">Bootstrap</a> 开发
+          </div>
+        </footer>
+      </div>
     </div>
   </div>
   {% endblock main %}
 </div>
 
-<footer class="bg-secondary text-white text-center py-3">
-  <p><a class="link-light external-link" href="https://yanlinlin.cn/" target="_blank">&copy; 2022 - 2024</a> | <a class="link-light external-link" href="http://beian.miit.gov.cn/" target="_blank">京ICP备18031542号-9</a> | <a class="link-light external-link" href="https://github.com/yanlinlin82/paper-hub.cn/" target="_blank">GitHub</a></p>
-<p>基于 <a class="link-light external-link" href="https://www.djangoproject.com/" target="_blank">Django</a> 和 <a class="link-light external-link" href="https://getbootstrap.com/" target="_blank">Bootstrap</a> 开发</p>
-</footer>
-
 {% include "scroll-to-top.html" %}
 {% include "loading-modal.html" %}
 {% include "user-login.html" %}
 {% include "google-tag.html" %}
+
 </body>
 {% endtimezone %}
 </html>
