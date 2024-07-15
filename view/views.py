@@ -128,33 +128,26 @@ def _recommendation_list(request, status, recommended):
 
     if status == 'isunread':
         recommendations = Recommendation.objects.filter(
-                paper=OuterRef('pk'),
                 user=user,
                 read_time__isnull=True
-            ).values('paper').annotate(
-                latest_create_time=Max('create_time')
             )
-        papers = Paper.objects.annotate(
-                recommendation_time=Subquery(recommendations.values('latest_create_time')),
-                recommended_count=Count('recommendation__pk'),
-            ).filter(
-                recommendation_time__isnull=False
-            ).order_by('-recommendation_time', '-pk')
+        papers = Paper.objects.filter(
+            pk__in=recommendations.values('paper')
+        ).annotate(
+            latest_recommended_time=Max('recommendation__create_time'),
+            recommended_count=Count('recommendation__pk')
+        ).order_by('-latest_recommended_time')
     else:
         recommendations = Recommendation.objects.filter(
-                paper=OuterRef('pk'),
                 user=user,
                 read_time__isnull=False
-            ).values('paper').annotate(
-                latest_read_time=Max('read_time'),
-                recommended_count=Count('pk')
             )
-        papers = Paper.objects.annotate(
-                read_time=Subquery(recommendations.values('latest_read_time')),
-                recommended_count=Subquery(recommendations.values('recommended_count')),
-            ).filter(
-                read_time__isnull=False
-            ).order_by('-read_time', '-pk')
+        papers = Paper.objects.filter(
+            pk__in=recommendations.values('paper')
+        ).annotate(
+            latest_read_time=Max('recommendation__read_time'),
+            recommended_count=Count('recommendation__pk')
+        ).order_by('-latest_read_time')
 
     if recommended == 'first':
         papers = papers.filter(recommended_count=1)
@@ -174,6 +167,7 @@ def _recommendation_list(request, status, recommended):
             paper.has_any_review = True
         paper.recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=True).order_by('-create_time')
         paper.historical_recommendations = paper.recommendation_set.filter(user=user, read_time__isnull=False).order_by('-create_time')
+
     return papers, items
 
 def recommendations_page(request):
