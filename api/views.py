@@ -145,7 +145,7 @@ def do_login(request):
         return JsonResponse({'success': False, 'error': 'Invalid username or password'}, status=400)
 
     user = authenticate(request, username=username, password=password)
-    if user is None:
+    if user is None or user.core_user_profile.pk != 1:
         return JsonResponse({'success': False, 'error': 'Login failed. Please check your credentials.'})
 
     UserSession.objects.filter(user=user.core_user_profile, client_type='website').delete()

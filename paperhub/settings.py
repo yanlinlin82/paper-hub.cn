@@ -85,7 +85,31 @@ WSGI_APPLICATION = 'paperhub.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'production': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT') or '5432',
+    },
+    'development': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DEV_DB_NAME'),
+        'USER': os.getenv('DEV_DB_USER'),
+        'PASSWORD': os.getenv('DEV_DB_PASSWORD'),
+        'HOST': os.getenv('DEV_DB_HOST'),
+        'PORT': os.getenv('DEV_DB_PORT') or '5432',
+    },
+    'local': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('LOCAL_DB_NAME'),
+        'USER': os.getenv('LOCAL_DB_USER'),
+        'PASSWORD': os.getenv('LOCAL_DB_PASSWORD'),
+        'HOST': os.getenv('LOCAL_DB_HOST'),
+        'PORT': os.getenv('LOCAL_DB_PORT') or '5432',
+    },
+    'sqlite': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
         'DATE_FORMAT': 'Y-m-d',
@@ -94,6 +118,16 @@ DATABASES = {
         'DATETIME_INPUT_FORMATS': '%Y-%m-%d %H:%M:%S',
     }
 }
+
+django_env = os.getenv('DJANGO_ENV') or 'production'
+if django_env in DATABASES:
+    DATABASES['default'] = DATABASES[django_env]
+    if django_env == 'production':
+        DEBUG = False
+else:
+    print(f'Unknown environment {django_env}, using production database')
+    DATABASES['default'] = DATABASES['production']
+    DEBUG = False
 
 
 # Password validation

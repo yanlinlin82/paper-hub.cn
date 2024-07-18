@@ -73,6 +73,23 @@ An easy way to read and share papers for scientific research
     AZURE_PATH=/translate
 
     PUBMED_DIR=/path/to/pubmed/
+
+    DB_NAME=xxxx
+    DB_USER=xxxx
+    DB_PASSWORD=xxxx
+    DB_HOST=xxxx
+
+    DEV_DB_NAME=xxxx
+    DEV_DB_USER=xxxx
+    DEV_DB_PASSWORD=xxxx
+    DEV_DB_HOST=xxxx
+
+    LOCAL_DB_NAME=xxxx
+    LOCAL_DB_USER=xxxx
+    LOCAL_DB_PASSWORD=xxxx
+    LOCAL_DB_HOST=xxxx
+
+    DJANGO_ENV=production # production / development / local / sqlite
     ```
 
 ## How to setup a development environment (Optional)
