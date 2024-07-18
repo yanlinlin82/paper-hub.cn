@@ -877,6 +877,8 @@ def weixin_callback(request):
     profiles = UserProfile.objects.filter(
         Q(wx_unionid=unionid) | Q(wx_openid=openid)
     )
+    if profiles.count() == 0 or profiles[0].pk != 1:
+        return JsonResponse({'success': False, 'error': 'Login failed. Please check your credentials.'})
     if profiles.count() == 0:
         def generate_random_username():
             letters = string.ascii_letters
