@@ -273,17 +273,13 @@
   });
 
   $('#checkInModalQuery').on('click', function() {
-    show_loading_modal('正在查询文献信息……');
+    show_loading_modal('正在查询文献信息……',
+        allowCancel = true, cancerButtonText = '取消',
+        cancelButtonCallback = function() { hide_loading_modal(); });
     var identifier = $('#checkInModalPaperID').val();
     ajaxPostJson({
       url: "{% url 'api:query_paper_info' %}",
       data: { 'identifier': identifier },
-      error: function() {
-        console.log('error')
-      },
-      complete: function() {
-        console.log('complete')
-      },
       success: function (data) {
         hide_loading_modal();
         if (!data.success) {
@@ -386,8 +382,10 @@
         return;
       }
       {% if user.is_superuser %}
-      if (!confirmUserAndDate()) {
-        return;
+      if ($('#switchCheckInByAdmin').prop('checked')) {
+        if (!confirmUserAndDate()) {
+          return;
+        }
       }
       {% endif %}
       var data = {

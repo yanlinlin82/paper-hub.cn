@@ -31,6 +31,8 @@ function show_loading_modal(message, allowCancel=false, cancerButtonText='Cancel
 }
 
 function hide_loading_modal() {
+  console.log('hide_loading_modal');
+  $('#loadingModal').modal('hide');
   $('#loadingModal').on('shown.bs.modal', function (e) {
     $('#loadingModal').modal('hide');
   });
