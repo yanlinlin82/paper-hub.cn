@@ -36,7 +36,7 @@ An easy way to read and share papers for scientific research
 
     ```txt
     WSGIApplicationGroup %{GLOBAL}
-    WSGIDaemonProcess paperhub python-home=/var/www/paper-hub.cn/venv python-path=/var/www/paper-hub.cn
+    WSGIDaemonProcess paperhub python-home=/var/www/paper-hub.cn/.venv python-path=/var/www/paper-hub.cn
     WSGIProcessGroup paperhub
     WSGIScriptAlias / /var/www/paper-hub.cn/paperhub/wsgi.py
     WSGIPassAuthorization On
@@ -98,7 +98,7 @@ An easy way to read and share papers for scientific research
 
     ```sh
     # run this command in a separated terminal
-    . venv/bin/activate
+    . .venv/bin/activate
     python manage.py runserver
     ```
 
@@ -136,3 +136,26 @@ An easy way to read and share papers for scientific research
     This will open 8443 port as https server, and map the request/response to 8000 on remote server.
 
 4. After all these, port 8443 on the remote server could be accessed as <https://paper-hub.cn:8443/>, which could be set as a safe domain in Mini Program development.
+
+
+## FAQ
+
+1. **Q:** How do I configure a SOCKS5 proxy server when installing packages with pip?
+
+    **A:** Before calling pip install, define the environment variable ALL_PROXY:
+
+    ```sh
+    export ALL_PROXY=socks5://xxx.xxx.xxx.xxx:1090
+    ```
+
+2. **Q:** What should I do if I encounter the following error during installation:
+
+    ```
+    ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.
+    ```
+
+    **A:** You need to remove the proxy configuration first, install the PySocks package, and then use the proxy again:
+
+    ```sh
+    pip install PySocks
+    ```

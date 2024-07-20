@@ -130,10 +130,8 @@ if django_env in DATABASES:
     if django_env == 'production':
         DEBUG = False
 else:
-    print(f'Unknown environment {django_env}, using production database')
     DATABASES['default'] = DATABASES['production']
     DEBUG = False
-print(f"DATABASES['default'] = {DATABASES['default']}")
 
 
 # Password validation
