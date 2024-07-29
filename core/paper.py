@@ -414,7 +414,7 @@ def extract_date_and_year_from_dict(data, key):
     dt = convert_string_to_datetime(data[key])
     if dt is None:
         return None, None
-    return dt, dt.year
+    return data[key], dt.year
 
 def fetch_and_cache(url, cache_filename):
     if os.path.exists(cache_filename):
@@ -549,8 +549,11 @@ def get_paper_info_by_doi(doi):
         type = obj.get('type', '') or ''
         title = " ".join(obj.get('title', []))
         journal = " ".join(obj.get('container-title', []))
-        if 'created' in obj:
-            pub_date, pub_year = extract_date_and_year_from_dict(obj['created'], 'date-time')
+
+        pub_date = obj.get('published-print', obj.get('published-online', {})).get('date-parts', [])
+        pub_year = pub_date[0][0] if len(pub_date) > 0 and len(pub_date[0]) > 0 else None
+        pub_date = "-".join([str(x) for x in pub_date[0]]) if len(pub_date) > 0 and len(pub_date[0]) > 0 else None
+
         issue = obj.get('issue', '') or ''
         volume = obj.get('volume', '') or ''
         page = obj.get('page', '') or ''
