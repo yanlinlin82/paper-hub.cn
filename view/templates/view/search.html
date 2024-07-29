@@ -3,9 +3,9 @@
 {% load language_filters %}
 
 {% block content %}
-<section>
+<section style="min-height:500px">
   <div class="p-3">
-    <form class="col-md-8 mx-auto mt-3" style="min-height:500px">
+    <form class="col-md-8 mx-auto mt-3">
       <div class="row">
         <label class="form-label mb-3" for="q">文献搜索：</label>
       </div>
@@ -31,10 +31,8 @@
       </script>
     </form>
   </div>
-</section>
 
-{% if query %}
-<section>
+  {% if query %}
   <div class="my-3 text-start">
     当前共找到 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
   </div>
@@ -90,72 +88,73 @@
   {% endfor %}
 
   {% include "view/paginator.html" %}
-</section>
-
-<!-- Modal -->
-<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="commentModalLabel">加入推荐文献到个人文献库</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="commentForm">
-          <div class="mb-3">
-            <div id="dlg_info" class="text-start"></div>
-            <div id="dlg_title" class="text-start mt-3 fs-4 fw-bold"></div>
-          </div>
-          <div class="mb-3">
-            <label for="comment" class="form-label">笔记</label>
-            <textarea class="form-control" id="comment" rows="8" required></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" id="submitComment">确定</button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="commentModalLabel">加入推荐文献到个人文献库</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="commentForm">
+            <div class="mb-3">
+              <div id="dlg_info" class="text-start"></div>
+              <div id="dlg_title" class="text-start mt-3 fs-4 fw-bold"></div>
+            </div>
+            <div class="mb-3">
+              <label for="comment" class="form-label">笔记</label>
+              <textarea class="form-control" id="comment" rows="8" required></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="submitComment">确定</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
-{% include "view/paper-js.html" %}
-<script>
-$(document).ready(function() {
-  $('#shareModal').on('shown.bs.modal', () => {
-    $('#shareModalPaperID').focus();
+  
+  {% include "view/paper-js.html" %}
+  <script>
+  $(document).ready(function() {
+    $('#shareModal').on('shown.bs.modal', () => {
+      $('#shareModalPaperID').focus();
+    })
+    $('#commentModal').on('shown.bs.modal', () => {
+      $('#comment').focus();
+    })
   })
-  $('#commentModal').on('shown.bs.modal', () => {
-    $('#comment').focus();
-  })
-})
-
-function add_search_result(id) {
-  $('#dlg_info').html($('#info_' + id).html());
-  $('#dlg_title').html($('#title_' + id + '_text').html());
-  $('#comment').val('');
-  $('#commentModal').modal('show');
-
-  $('#submitComment').off('click').on('click', function() {
-    const comment = $('#comment').val();
-    $('#commentModal').modal('hide');
-    ajaxPostJson({
-      url: "{% url 'api:add_search_result' %}",
-      data: {paper_id: id, comment: comment},
-      success: function (data) {
-        if (!data.success) {
-          alert('添加推荐失败！\n' + data.error);
-        } else {
-          $('#card_' + id).remove();
-          if ($('.card').length === 0) {
-            location.reload();
+  
+  function add_search_result(id) {
+    $('#dlg_info').html($('#info_' + id).html());
+    $('#dlg_title').html($('#title_' + id + '_text').html());
+    $('#comment').val('');
+    $('#commentModal').modal('show');
+  
+    $('#submitComment').off('click').on('click', function() {
+      const comment = $('#comment').val();
+      $('#commentModal').modal('hide');
+      ajaxPostJson({
+        url: "{% url 'api:add_search_result' %}",
+        data: {paper_id: id, comment: comment},
+        success: function (data) {
+          if (!data.success) {
+            alert('添加推荐失败！\n' + data.error);
+          } else {
+            $('#card_' + id).remove();
+            if ($('.card').length === 0) {
+              location.reload();
+            }
           }
         }
-      }
+      });
     });
-  });
-}
-</script>
-{% endif %}
+  }
+  </script>
+  {% endif %}
+</section>
+
 {% endblock content %}
