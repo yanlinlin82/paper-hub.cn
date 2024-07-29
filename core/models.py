@@ -9,11 +9,11 @@ from django.db import models
 from django.utils import timezone
 
 class UserProfile(models.Model):
-    auth_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='core_user_profile', null=True)
+    auth_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='core_user_profile', null=True, blank=True)
     create_time = models.DateTimeField(auto_now_add=True)
-    nickname = models.CharField(max_length=100, default='', blank=True)
-    wx_openid = models.CharField(max_length=100, default='', blank=True)
-    wx_unionid = models.CharField(max_length=100, default='', blank=True)
+    nickname = models.CharField(max_length=100, blank=True, default='')
+    wx_openid = models.CharField(max_length=100, blank=True, default='')
+    wx_unionid = models.CharField(max_length=100, blank=True, default='')
     debug_mode = models.BooleanField(default=False)
 
     def __str__(self):
@@ -72,20 +72,20 @@ class Paper(models.Model):
     update_time = models.DateTimeField(auto_now=True, db_index=True)
 
     title = models.CharField(max_length=4096, default='', db_index=True)
-    journal = models.CharField(max_length=256, default='', blank=True, db_index=True)
-    pub_date = models.CharField(max_length=64, default='', blank=True)
-    pub_year = models.IntegerField(blank=True, null=True, default=None, db_index=True)
-    authors = models.CharField(max_length=1024*1024, default='', blank=True)
-    affiliations = models.CharField(max_length=1024*1024, default='', blank=True)
-    abstract = models.CharField(max_length=1024*1024, default='', blank=True)
-    keywords = models.CharField(max_length=1024*1024, default='', blank=True)
-    urls = models.CharField(max_length=1024*1024, default='', blank=True)
+    journal = models.CharField(max_length=256, blank=True, default='', db_index=True)
+    pub_date = models.CharField(max_length=64, blank=True, default='')
+    pub_year = models.IntegerField(null=True, blank=True, db_index=True)
+    authors = models.CharField(max_length=1024*1024, blank=True, default='')
+    affiliations = models.CharField(max_length=1024*1024, blank=True, default='')
+    abstract = models.CharField(max_length=1024*1024, blank=True, default='')
+    keywords = models.CharField(max_length=1024*1024, blank=True, default='')
+    urls = models.CharField(max_length=1024*1024, blank=True, default='')
 
-    doi = models.CharField(max_length=128, default='', blank=True, db_index=True)
-    pmid = models.CharField(max_length=128, default='', blank=True, db_index=True)
-    arxiv_id = models.CharField(max_length=128, default='', blank=True, db_index=True)
-    pmcid = models.CharField(max_length=128, default='', blank=True, db_index=True)
-    cnki_id = models.CharField(max_length=128, default='', blank=True, db_index=True) # CNKI CJFD ID
+    doi = models.CharField(max_length=128, blank=True, default='', db_index=True)
+    pmid = models.CharField(max_length=128, blank=True, default='', db_index=True)
+    arxiv_id = models.CharField(max_length=128, blank=True, default='', db_index=True)
+    pmcid = models.CharField(max_length=128, blank=True, default='', db_index=True)
+    cnki_id = models.CharField(max_length=128, blank=True, default='', db_index=True) # CNKI CJFD ID
 
     language = models.CharField(max_length=20, default='eng') # eng, chi, etc.
 
@@ -97,18 +97,18 @@ class Paper(models.Model):
 
 class PaperTranslation(models.Model):
     paper = models.OneToOneField(Paper, on_delete=models.CASCADE, related_name='translation')
-    title_cn = models.CharField(max_length=4096, default='', blank=True)
-    abstract_cn = models.CharField(max_length=65536, default='', blank=True)
+    title_cn = models.CharField(max_length=4096, blank=True, default='')
+    abstract_cn = models.CharField(max_length=65536, blank=True, default='')
 
 class PaperReference(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='references')
     type = models.CharField(max_length=128, default='Reference') # ReferenceList, CommentsCorrectionsList
     ref_type = models.CharField(max_length=128, default='Reference') # CommentIn, ErratumIn, ExpressionOfConcernIn, etc.
     index = models.IntegerField() # order in the list
-    citation = models.CharField(max_length=1024*1024, default='', blank=True) # citation text to display
-    doi = models.CharField(max_length=128, default='', blank=True, db_index=True)
-    pmid = models.CharField(max_length=128, default='', blank=True, db_index=True)
-    pmcid = models.CharField(max_length=128, default='', blank=True, db_index=True)
+    citation = models.CharField(max_length=1024*1024, blank=True, default='') # citation text to display
+    doi = models.CharField(max_length=128, blank=True, default='', db_index=True)
+    pmid = models.CharField(max_length=128, blank=True, default='', db_index=True)
+    pmcid = models.CharField(max_length=128, blank=True, default='', db_index=True)
 
     class Meta:
         unique_together = ('paper', 'type', 'ref_type', 'index')
@@ -125,13 +125,13 @@ class Label(models.Model): # every user has his own labels
 class PaperTracking(models.Model): # every user has his own paper tracking rules
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     type = models.CharField(max_length=20, default='read') # keyword, author, affiliation, journal, cite
-    value = models.CharField(max_length=100, default='', blank=True)
+    value = models.CharField(max_length=100, blank=True, default='')
     label = models.ForeignKey(Label, on_delete=models.CASCADE)
-    memo = models.CharField(max_length=2000, default='', blank=True)
+    memo = models.CharField(max_length=2000, blank=True, default='')
 
 class Recommendation(models.Model): # recommended by system (daily automatically)
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    read_time = models.DateTimeField(null=True, default=None, db_index=True) # None means unread
+    read_time = models.DateTimeField(null=True, blank=True, db_index=True) # None means unread
     source = models.CharField(max_length=100, default='') # eg. 'pubmed24n1453.20240628'
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_index=True)
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE, db_index=True)
@@ -143,9 +143,9 @@ class Review(models.Model):
     creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     create_time = models.DateTimeField(default=timezone.now) # not using 'auto_now_add' because we need to update it, when admin adding reviews for users
     update_time = models.DateTimeField(default=timezone.now) # same as above
-    delete_time = models.DateTimeField(null=True, default=None) # if not None, it means in Trash
+    delete_time = models.DateTimeField(null=True, blank=True) # if not None, it means in Trash
 
-    comment = models.CharField(max_length=1024*1024, default='', blank=True)
+    comment = models.CharField(max_length=1024*1024, blank=True, default='')
     labels = models.ManyToManyField(Label, blank=True, related_name='reviews')
 
     def __str__(self):
