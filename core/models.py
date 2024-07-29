@@ -87,7 +87,7 @@ class Paper(models.Model):
     pmcid = models.CharField(max_length=128, blank=True, default='', db_index=True)
     cnki_id = models.CharField(max_length=128, blank=True, default='', db_index=True) # CNKI CJFD ID
 
-    language = models.CharField(max_length=20, default='eng') # eng, chi, etc.
+    language = models.CharField(max_length=20, blank=True, default='eng') # eng, chi, etc.
 
     class Meta:
         ordering = ['-create_time']
