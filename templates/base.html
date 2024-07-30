@@ -67,58 +67,64 @@
 
 <body class="d-flex flex-column" style="width:100vw; height:100vh;">
 
-<nav class="navbar navbar-expand-sm bg-body-tertiary border-bottom border-body">
+<nav class="navbar navbar-expand bg-body-tertiary border-bottom border-body">
   <div class="container-xl">
     <div style="min-width:200px;">
       <a class="navbar-brand" href="{% url 'index' %}"><img class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
     </div>
 
-    {% if current_page != "search" %}
-    <form class="flex-fill">
-      <div class="input-group" style="min-width:250px; max-width:500px;">
-        <input id="q" name="q" class="form-control border-secondary-subtle" type="search" value="{{ query }}" placeholder="搜索文献" aria-label="Search">
-        <button class="btn btn-outline border-secondary-subtle text-nowrap" type="submit">搜索</button>
-        <div id="hint" class="border border-warning p-3 text-danger">
-          <p><small>
-            注意：本站仅支持搜索站内已收录的文献{% if user.is_authenticated %}，或根据ID获取单篇文献信息{% endif %}，如需搜索更大范围的其他文献，请移步使用 <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" class="external-link">PubMed</a>、<a href="https://scholar.google.com/" target="_blank" class="external-link">Google Scholar</a> 或 <a href="https://arxiv.org/" target="_blank" class="external-link">arXiv</a> 等其他网站。
-          </small></p>
-        </div>
+    <div class="row" style="width:100%;">
+      <div class="col-12 col-lg-7">
+        {% if current_page != "search" %}
+        <form class="flex-fill">
+          <div class="input-group text-start" style="min-width:250px; max-width:500px;">
+            <input id="q" name="q" class="form-control border-secondary-subtle" type="search" value="{{ query }}" placeholder="搜索文献" aria-label="Search">
+            <button class="btn btn-outline border-secondary-subtle text-nowrap" type="submit">搜索</button>
+            <div id="hint" class="border border-warning p-3 text-danger">
+              <p><small>
+                注意：本站仅支持搜索站内已收录的文献{% if user.is_authenticated %}，或根据ID获取单篇文献信息{% endif %}，如需搜索更大范围的其他文献，请移步使用 <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" class="external-link">PubMed</a>、<a href="https://scholar.google.com/" target="_blank" class="external-link">Google Scholar</a> 或 <a href="https://arxiv.org/" target="_blank" class="external-link">arXiv</a> 等其他网站。
+              </small></p>
+            </div>
+          </div>
+        </form>
+        {% endif %}
       </div>
-    </form>
-    {% endif %}
 
-    <ul class="navbar-nav nav justify-content-end ms-3">
-      {% if user.is_authenticated %}
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'index' %}">首页</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'library:index' %}">文献库</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'group:index' %}">社群</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          {{ user.core_user_profile.nickname }}
-        </a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>
+      <div class="col-12 col-lg-5">
+        <ul class="navbar-nav nav justify-content-end ms-3">
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">首页</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'library:index' %}">文献库</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'group:index' %}">社群</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {{ user.core_user_profile.nickname }}
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">登录</a>
+          </li>
+          {% endif %}
         </ul>
-      </li>
-      {% else %}
-      <li class="nav-item">
-        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">登录</a>
-      </li>
-      {% endif %}
-    </ul>
+      </div>
+    </div>
   </div>
 </nav>
 
 <div class="flex-fill container-xl">
   {% block main %}
-  <div class="d-flex flex-column flex-md-row" style="height:100%;">
-    <nav class="bg-light col-12 col-md-3 fixed-div" style="width:200px">
+  <div class="d-flex flex-row" style="width:100%; height:100%; min-width: 600px;">
+    <nav class="bg-light col-12 fixed-div" style="width:200px">
       {% block navbar %}{% endblock navbar %}
     </nav>
     <div class="flex-fill text-start mt-3 ms-3 fixed-div">
