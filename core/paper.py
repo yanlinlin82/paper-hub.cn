@@ -548,9 +548,16 @@ def get_paper_info_by_doi(doi):
         obj = data['message']
         type = obj.get('type', '') or ''
         title = " ".join(obj.get('title', []))
-        journal = " ".join(obj.get('container-title', []))
 
-        pub_date = obj.get('published-print', obj.get('published-online', {})).get('date-parts', [])
+        journal = " ".join(obj.get('container-title', []))
+        if journal == "":
+            journal = " ".join(obj.get('short-container-title', []))
+        if journal == "":
+            journal = obj.get('institution', [])[0].get('name', '')
+        if journal == "":
+            journal = " ".join(obj.get('publisher', []))
+
+        pub_date = obj.get('published-print', obj.get('published-online', obj.get('accepted', {}))).get('date-parts', [])
         pub_year = pub_date[0][0] if len(pub_date) > 0 and len(pub_date[0]) > 0 else None
         pub_date = "-".join([str(x) for x in pub_date[0]]) if len(pub_date) > 0 and len(pub_date[0]) > 0 else None
 
