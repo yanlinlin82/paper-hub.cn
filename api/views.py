@@ -20,7 +20,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 import openai
 from paperhub import settings
-from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation
+from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation, CustomCheckInInterval
 from core.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from core.paper import get_abstract_by_doi, convert_paper_info
@@ -448,27 +448,47 @@ def edit_review(request):
 
     return JsonResponse({'success': True})
 
+def get_latest_deadline():
+    now = timezone.now()
+    year = now.year
+    month = now.month
+    if month == 1:
+        year -= 1
+        month = 12
+    else:
+        month -= 1
+    cci = CustomCheckInInterval.objects.filter(year=year, month=month)
+    if cci.count() > 0:
+        deadline = cci.deadline
+    else:
+        deadline = timezone.make_aware(datetime.datetime(now.year, now.month, 1), timezone.get_current_timezone())
+    return deadline
+
+@json_view
+@require_login
 def delete_review(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'error': 'User is not authenticated!',
-        })
-
-    try:
-        id = request.POST['review_id']
-        p = Review.objects.get(pk=id)
-        p.delete_time = timezone.now()
-        p.save()
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': f"An error occurred: {e}"
-        })
-
+    data = request.json_data
+    review_id = data.get('review_id')
+    review = Review.objects.get(pk=review_id)
+    if review is None:
+        return JsonResponse({'success': False, 'error': f"Review not found: {review_id}"})
+    if not request.user.is_superuser:
+        if review.creator != request.user.core_user_profile:
+            return JsonResponse({
+                'success': False,
+                'error': f"Review {review_id} is not created by user {request.user.core_user_profile} (expected {review.creator})"
+                })
+        if review.create_time < get_latest_deadline():
+            return JsonResponse({
+                'success': False,
+                'error': f"Review {review_id} is too old to delete!"
+                })
+    review.delete_time = timezone.now()
+    review.save()
     return JsonResponse({'success': True})
 
 def restore_review(request):
+
     if not request.user.is_authenticated:
         return JsonResponse({
             'success': False,
