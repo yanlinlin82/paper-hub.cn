@@ -828,7 +828,7 @@ def summarize_by_gpt(request):
     if chat_list.count() > 0:
         chat = chat_list[0]
         if chat.chat_response is not None and chat.chat_response != '':
-            return JsonResponse({'answer': chat.chat_response})
+            return JsonResponse({'success': True, 'answer': chat.chat_response})
 
     chat = PaperChat(paper=paper, user=request.user.core_user_profile)
     chat.chat_request = 'Please summarize and comment on the following literature in Chinese:\n\n'
@@ -851,20 +851,27 @@ def summarize_by_gpt(request):
             "content": chat.chat_request
         },
     ]
-    proxy_url = os.environ.get("OPENAI_PROXY_URL")
-    if proxy_url is None or proxy_url == "":
-        client = openai.OpenAI()
-    else:
-        client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
-    completion = client.chat.completions.create(
-        model = os.environ.get("OPENAI_MODEL"),
-        messages = in_msg,
-    )
+    try:
+        proxy_url = os.environ.get("OPENAI_PROXY_URL")
+        if proxy_url is None or proxy_url == "":
+            client = openai.OpenAI()
+        else:
+            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
+        completion = client.chat.completions.create(
+            model = os.environ.get("OPENAI_MODEL"),
+            messages = in_msg,
+        )
+        out_msg = completion.choices[0].message.content.strip()
+        if out_msg == '':
+            return JsonResponse({'success': False, 'error': 'Failed to summarize the paper!'})
+    except Exception as e:
+        print("Failed to connect to OpenAI server! " + str(e))
+        return JsonResponse({'success': False, 'error': 'Failed to connect to OpenAI server! ' + str(e)})
 
     chat.response_time = timezone.now()
-    chat.chat_response = completion.choices[0].message.content
+    chat.chat_response = out_msg
     chat.save()
-    return JsonResponse({'answer': chat.chat_response})
+    return JsonResponse({'success': True, 'answer': chat.chat_response})
 
 def get_weixin_qr(request):
     appid = os.getenv('WEB_APP_ID')
