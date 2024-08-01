@@ -835,7 +835,7 @@ def summarize_by_gpt(request):
     chat.chat_request += f"Title: {paper.title}\n\n"
     if paper.abstract is not None and paper.abstract != '':
         chat.chat_request += f"Abstract:\n{paper.abstract}\n\n"
-    chat.chat_request += "Please summarize the core ideas and major innovations of the article. If it is a study on medicine or biology, please specify key information such as research subjects, types of diseases, research methods used, and sample types. If it involves computational biology, bioinformatics, or high-throughput omics, also mention whether the corresponding data and code are publicly available."
+    chat.chat_request += "Please summarize the core ideas and major innovations of the article. Also, please identify any shortcomings or areas for improvement. If it is a study on medicine or biology, please specify key information such as research subjects, types of diseases, research methods used, and sample types. If it involves computational biology, bioinformatics, or high-throughput omics, also mention whether the corresponding data and code are publicly available."
 
     in_msg = [
         {
