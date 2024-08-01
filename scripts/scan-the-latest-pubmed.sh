@@ -9,4 +9,4 @@ echo "Got source: $SOURCE"
 
 mkdir -pv log/pubmed
 ./.venv/bin/python scripts/import-pubmed.py pubmed $SOURCE -r -m default >>log/pubmed/$SOURCE.log 2>&1
-./.venv/bin/python scripts/import-pubmed.py pubmed $SOURCE -r -m update-index >>log/pubmed/$SOURCE-update-index.log 2>&1
+#./.venv/bin/python scripts/import-pubmed.py pubmed $SOURCE -r -m update-index >>log/pubmed/$SOURCE-update-index.log 2>&1
