@@ -100,6 +100,14 @@ class PaperTranslation(models.Model):
     title_cn = models.CharField(max_length=4096, blank=True, default='')
     abstract_cn = models.CharField(max_length=65536, blank=True, default='')
 
+class PaperChat(models.Model):
+    paper = models.OneToOneField(Paper, on_delete=models.CASCADE, related_name='chat_summary')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    request_time = models.DateTimeField(default=timezone.now)
+    chat_request = models.CharField(max_length=1024*1024, blank=True, default='')
+    response_time = models.DateTimeField(default=timezone.now, null=True, blank=True)
+    chat_response = models.CharField(max_length=1024*1024, blank=True, default='')
+
 class PaperReference(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='references')
     type = models.CharField(max_length=128, default='Reference') # ReferenceList, CommentsCorrectionsList

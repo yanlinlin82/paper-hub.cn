@@ -20,7 +20,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 import openai
 from paperhub import settings
-from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation, CustomCheckInInterval
+from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation, CustomCheckInInterval, PaperChat
 from core.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from core.paper import get_abstract_by_doi, convert_paper_info
@@ -816,33 +816,44 @@ def submit_comment(request):
     return JsonResponse({'success': True})
 
 @json_view
+@require_login
 def summarize_by_gpt(request):
     data = request.json_data
-    token = data.get('token')
-    if not token or not is_token_valid(token):
-        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
+    paper_id = data.get('paper_id')
+    if paper_id is None:
+        return JsonResponse({'success': False, 'error': 'Invalid request!'})
+    paper = Paper.objects.get(pk=paper_id)
+    if paper is None:
+        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
+    if paper.title is None or paper.title == '':
+        return JsonResponse({'success': False, 'error': f"Paper title is empty: {paper_id}"})
 
-    group_name = data.get('group_name')
-    group = GroupProfile.objects.get(name=group_name)
-    if group is None:
-        return JsonResponse({
-            'success': False,
-            'error': f"Group not found: {group_name}"
-        })
+    chat_list = PaperChat.objects.filter(paper=paper, user=request.user.core_user_profile)
+    if chat_list.count() > 0:
+        chat = chat_list[0]
+        if chat.chat_response is not None and chat.chat_response != '':
+            return JsonResponse({'answer': chat.chat_response})
 
-    review_id = data.get('review_id')
-    print('review_id:', review_id)
-    review, raw_dict = get_paper_info(review_id)
-    print('review:', review)
-    if review is None:
-        return JsonResponse({"error": "review not found."})
-    if review['abstract'] == "":
-        review['abstract'] = get_abstract_by_doi(review['id']['doi'])
+    chat = PaperChat(paper=paper, user=request.user.core_user_profile)
+    chat.chat_request = 'Please summarize and comment on the following literature in Chinese:\n\n'
+    chat.chat_request += f"Title: {paper.title}\n\n"
+    if paper.abstract is not None and paper.abstract != '':
+        chat.chat_request += f"Abstract:\n{paper.abstract}\n\n"
+    chat.chat_request += "Please summarize the core ideas and major innovations of the article. If it is a study on medicine or biology, please specify key information such as research subjects, types of diseases, research methods used, and sample types. If it involves computational biology, bioinformatics, or high-throughput omics, also mention whether the corresponding data and code are publicly available."
 
     in_msg = [
-        {"role": "system", "content": "This is a scientific review reading assistance chatbot, using mainly Chinese to chat with user."},
-        {"role": "system", "content": "You can ask questions about the review, or ask for a summary of the review."},
-        {"role": "user", "content": f"Please summarize and comment on the following review in Chinese:\n\nTitle: {review['title']}\n\nAbstract:\n{review['abstract']}"},
+        {
+            "role": "system",
+            "content": "This is a scientific literature reading assistance chatbot. It mainly uses Chinese to communicate with the user."
+        },
+        {
+            "role": "system",
+            "content": "You can ask questions about the literature or request a summary of the literature."
+        },
+        {
+            "role": "user",
+            "content": chat.chat_request
+        },
     ]
     print('in_msg:', in_msg)
     proxy_url = os.environ.get("OPENAI_PROXY_URL")
@@ -851,12 +862,15 @@ def summarize_by_gpt(request):
     else:
         client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
     completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=in_msg,
     )
-    out_msg = completion.choices[0].message.content
-    print('out_msg:', out_msg)
-    return JsonResponse({'answer': out_msg})
+    print('out_msg:', chat.chat_response)
+
+    chat.response_time = timezone.now()
+    chat.chat_response = completion.choices[0].message.content
+    chat.save()
+    return JsonResponse({'answer': chat.chat_response})
 
 def get_weixin_qr(request):
     appid = os.getenv('WEB_APP_ID')

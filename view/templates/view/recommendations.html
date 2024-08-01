@@ -136,6 +136,7 @@
       {% endfor %}
     {% endif %}
     </div>
+    {% include "view/includes/gpt-div.html" %}
   </div>
 </div>
 {% endfor %}
@@ -143,6 +144,7 @@
 {% include "view/includes/paginator.html" %}
 {% include "view/includes/recommendation-op.html" %}
 {% include "view/includes/paper-js.html" %}
+{% include "view/includes/gpt-js.html" %}
 {% else %}
 <div class="m-3">
   <div class="d-flex">

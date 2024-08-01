@@ -1,0 +1,26 @@
+{% if user.is_authenticated %}
+<script>
+function summarize_by_gpt(paper_id) {
+  ask_button = $('#gpt-ask-' + paper_id);
+  ask_button.prop('disabled', true);
+
+  answer_div = $('#gpt-answer-' + paper_id);
+  if (answer_div.html().length > 0) {
+    return;
+  }
+  console.log('summarize_by_gpt', paper_id);
+  answer_div.addClass('d-block');
+  answer_div.removeClass('d-none');
+  answer_div.html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+  ajaxPostJson({
+    url: '/api/summarize_by_gpt',
+    data: { paper_id: paper_id },
+    success: function(data) {
+      console.log('summarize_by_gpt return:\n', data);
+      var htmlContent = marked.parse(data.answer);
+      answer_div.html(htmlContent);
+    }
+  });
+}
+</script>
+{% endif %}

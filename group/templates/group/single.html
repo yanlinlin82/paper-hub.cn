@@ -69,43 +69,11 @@
     </div>
     {% endif %}
   </div>
+  {% include "view/includes/gpt-div.html" %}
   {% endwith %}
 </div>
 
 {% include "group/includes/review-info-js.html" %}
 {% include "view/includes/paper-js.html" %}
-
-{% if user.is_authenticated %}
-<form method="post">
-<button type="button" id="summarize-by-gpt" class="btn btn-outline-info btn-sm">Summarize by ChatGPT</button>
-<textarea id="gpt-answer" class="form-control" style="width:100%;min-height:200px;"></textarea>
-</form>
-<script>
-document.getElementById('summarize-by-gpt').addEventListener('click', function() {
-  const abortController = new AbortController();
-  const signal = abortController.signal;
-  show_loading_modal('正在通过 ChatGPT 对文献进行总结...', true, '取消', function() {
-    abortController.abort();
-    hide_loading_modal();
-  });
-  const token = getCookie('token');
-  const postData = {
-    paper_id: '{% if review.paper.doi %}{{ review.paper.doi }}{% else %}{% if review.paper.arxiv_id %}{{ review.paper.arxiv_id }}{% else %}{% if review.paper.pmid %}{{ review.paper.pmid }}{% else %}{{ review.pk }}{% endif %}{% endif %}{% endif %}',
-    token: token,
-    group_name: '{{ group.name }}'
-  };
-  ajaxPostJson({
-    url: '/api/summarize_by_gpt',
-    data: postData,
-    signal: signal,
-    success: function(data) {
-      hide_loading_modal();
-      console.log(data);
-      document.getElementById('gpt-answer').value = data.answer;
-    }
-  });
-});
-</script>
-{% endif %}
-
+{% include "view/includes/gpt-js.html" %}
 {% endblock content %}
