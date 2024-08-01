@@ -62,7 +62,6 @@ def require_admin(func):
 @json_view
 def wx_login(request):
     data = request.json_data
-    print(f"wx_login: {data}")
     wx_code = data.get('code', '') or ''
     if not wx_code:
         return JsonResponse({'success': False, 'error': 'Invalid wx_code'}, status=400)
@@ -238,16 +237,13 @@ def query_review(request, id):
 def query_paper_info(request):
     data = request.json_data
     identifier = data.get('identifier')
-    print(f'query_paper_info: {identifier}')
     if identifier is None:
         return JsonResponse({'success': False, 'error': f"Invalid request!"})
 
     identifier_type, identifier = guess_identifier_type(identifier)
     if identifier_type == "pmid" or identifier_type == "doi":
-        print(f'query_paper_info_new: {identifier}')
         paper_info = get_paper_info_new(identifier, identifier_type)
     else:
-        print(f'query_paper_info_old: {identifier}')
         paper_info_old, raw_dict = get_paper_info(identifier)
         paper_info = convert_paper_info(paper_info_old, raw_dict)
 
@@ -855,7 +851,6 @@ def summarize_by_gpt(request):
             "content": chat.chat_request
         },
     ]
-    print('in_msg:', in_msg)
     proxy_url = os.environ.get("OPENAI_PROXY_URL")
     if proxy_url is None or proxy_url == "":
         client = openai.OpenAI()
@@ -865,7 +860,6 @@ def summarize_by_gpt(request):
         model="gpt-4o-mini",
         messages=in_msg,
     )
-    print('out_msg:', chat.chat_response)
 
     chat.response_time = timezone.now()
     chat.chat_response = completion.choices[0].message.content
@@ -879,7 +873,6 @@ def get_weixin_qr(request):
     current_url = request.GET.get('current_url', f'https://{web_domain}/')
     state = quote(current_url)
     url = f"https://open.weixin.qq.com/connect/qrconnect?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope=snsapi_login&state={state}#wechat_redirect"
-    print('get_weixin_qr:', url)
     return JsonResponse({'url': url})
 
 def weixin_callback(request):
@@ -889,7 +882,6 @@ def weixin_callback(request):
     token_url = f"https://api.weixin.qq.com/sns/oauth2/access_token?appid={appid}&secret={secret}&code={code}&grant_type=authorization_code"
     response = requests.get(token_url)
     data = response.json()
-    print('weixin_callback:', data)
     access_token = data.get('access_token')
     #expires_in = data.get('expires_in')
     openid = data.get('openid')
@@ -901,12 +893,7 @@ def weixin_callback(request):
     
     userinfo_url = f"https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}"
     response2 = requests.get(userinfo_url)
-    print('=============', datetime.datetime.now())
-    print('response2.content:', response2.content)
-    print('response2.text:', response2.text)
-    print('response2.headers:', response2.headers)
     nickname = str.encode(response2.json()['nickname'], 'latin1').decode('utf8')
-    print('nickname:', nickname)
     
     profiles = UserProfile.objects.filter(
         Q(wx_unionid=unionid) | Q(wx_openid=openid)
@@ -973,8 +960,6 @@ def translate_text(s):
 
         request = requests.post(constructed_url, params=params, headers=headers, json=body)
         response = request.json()
-
-        #print(json.dumps(response, sort_keys=True, ensure_ascii=False, indent=4, separators=(',', ': ')))
         return True, response[0]['translations'][0]['text']
     except Exception as e:
         return False, f"An error occurred: {e}"
@@ -1117,7 +1102,6 @@ def update_paper_by_json_data(paper, paper_data):
 @require_login
 def check_in(request):
     data = request.json_data
-    print(f'check_in: {data}')
 
     doi = data.get('paper', {}).get('doi')
     pmid = data.get('paper', {}).get('pmid')
@@ -1153,7 +1137,6 @@ def check_in(request):
 @require_admin
 def check_in_by_admin(request):
     data = request.json_data
-    print(f'check_in_by_admin: {data}')
 
     doi = data.get('paper', {}).get('doi')
     pmid = data.get('paper', {}).get('pmid')
@@ -1324,11 +1307,4 @@ def new_remove_review_permanently(request):
         return JsonResponse({'success': False, 'error': f"Review {review_id} is not created by user {user}"})
 
     review.delete()
-    return JsonResponse({'success': True})
-
-@json_view
-@require_login
-def fetch_paper_list(request):
-    data = request.json_data
-    print(f"fetch_paper_list: {data}")
     return JsonResponse({'success': True})

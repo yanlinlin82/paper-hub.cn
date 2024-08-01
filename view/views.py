@@ -50,7 +50,6 @@ def query_papers(query):
     if identifier_type != "unknown" and papers.count() == 0:
         paper_info, raw_dict = get_paper_info(query)
         if paper_info is not None:
-            print(f'doi: {paper_info["id"].get("doi", "")}')
             paper = Paper(
                 journal=paper_info.get('journal', '') or '',
                 pub_year=paper_info.get('pub_year', '') or '',
@@ -69,7 +68,6 @@ def query_papers(query):
                 language=paper_info['id'].get('language', 'eng'),
             )
             paper.save()
-            print(f'Save paper into database: {paper.pk} {paper.title}')
             papers = Paper.objects.filter(pk=paper.pk).order_by('-pk')
 
     return papers

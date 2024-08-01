@@ -36,8 +36,6 @@ urlpatterns = [
     path('restore_recommendation', views.restore_recommendation, name='restore_recommendation'),
 
     # fetch data for weixin mini program
-    path('fetch_paper_list', views.fetch_paper_list, name='fetch_paper_list'),
-
     path('query/user/<str:user>', views.query_user, name='query_user'),
     re_path(r'^query/review/(?P<id>.+)', views.query_review, name='query_review'),
     path('submit_review', views.submit_review, name='submit_review'),

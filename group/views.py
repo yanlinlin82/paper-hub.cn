@@ -41,8 +41,6 @@ def get_paginated_reviews(reviews, page_number):
 
 def filter_review_by_query(reviews, query):
     if query != '':
-        print(f"query: {query}")
-        print("before filter:", reviews.count())
         reviews = reviews.filter(
             Q(creator__nickname=query) |
             Q(comment__icontains=query) |
@@ -51,7 +49,6 @@ def filter_review_by_query(reviews, query):
             Q(paper__journal__icontains=query) |
             Q(paper__abstract__icontains=query) |
             Q(paper__keywords__icontains=query))
-        print("after filter:", reviews.count())
     return reviews
 
 def my_sharing_page(request, group_name):
@@ -253,7 +250,6 @@ def user_page(request, id, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
     reviews = group.reviews.filter(creator=user, delete_time__isnull=True)
     query = request.GET.get('q', '').strip()
-    print(f"query: {query}")
     reviews = filter_review_by_query(reviews, query)
     reviews = reviews.order_by('-create_time', '-pk')
     page_number = request.GET.get('page')
@@ -289,27 +285,23 @@ def _rank_page(request, group_name, rank_type):
         if rank_type == 'this_month':
             year, month = get_this_month()
             start_time, end_time = get_check_in_interval(year, month)
-            print(f'start_time: {start_time}, end_time: {end_time}')
             reviews = reviews.filter(create_time__gte=start_time)
         elif rank_type == 'last_month':
             year, month = get_this_month()
             year, month = get_last_month(year, month)
             start_time, end_time = get_check_in_interval(year, month)
-            print(f'start_time: {start_time}, end_time: {end_time}')
             reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
         elif rank_type == 'monthly':
             year, month = get_this_month()
             year = int(request.GET.get('year', year))
             month = int(request.GET.get('month', month))
             start_time, end_time = get_check_in_interval(year, month)
-            print(f'start_time: {start_time}, end_time: {end_time}')
             reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
         elif rank_type == 'yearly':
             year, _ = get_this_month()
             year = int(request.GET.get('year', year))
             start_time, _ = get_check_in_interval(year, 1)
             _, end_time = get_check_in_interval(year, 12)
-            print(f'start_time: {start_time}, end_time: {end_time}')
             reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
         elif rank_type == 'all':
             pass
