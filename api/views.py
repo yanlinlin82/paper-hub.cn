@@ -857,8 +857,8 @@ def summarize_by_gpt(request):
     else:
         client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
     completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=in_msg,
+        model = os.environ.get("OPENAI_MODEL"),
+        messages = in_msg,
     )
 
     chat.response_time = timezone.now()
