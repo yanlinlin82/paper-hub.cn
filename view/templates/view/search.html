@@ -37,14 +37,14 @@
     当前共找到 {{ papers.paginator.count }} 篇文献{% if papers.paginator.num_pages > 1 %}，本页显示第 {{ papers.start_index }} - {{ papers.end_index }} 篇{% endif %}。
   </div>
 
-  {% include "view/paginator.html" %}
+  {% include "view/includes/paginator.html" %}
 
   {% for paper in papers %}
   <div id="card_{{ paper.pk }}" class="card p-2 my-3 d-flex flex-row">
     <div class="p-2 text-start">{{ paper.display_index }}.</div>
     <div class="p-2 text-start flex-fill">
       <div class="d-flex">
-        <div class="flex-fill">{% include "view/paper-info.html" %}</div>
+        <div class="flex-fill">{% include "view/includes/paper-info.html" %}</div>
         {% if user.is_authenticated %}
         <div class="text-end align-self-start">
           {% if paper.has_any_review %}
@@ -80,14 +80,14 @@
         </div>
         {% endif %}
       </div>
-      {% include "view/paper-author-list.html" %}
-      {% include "view/paper-abstract.html" %}
-      {% include "view/paper-keyword-list.html" %}
+      {% include "view/includes/paper-author-list.html" %}
+      {% include "view/includes/paper-abstract.html" %}
+      {% include "view/includes/paper-keyword-list.html" %}
     </div>
   </div>
   {% endfor %}
 
-  {% include "view/paginator.html" %}
+  {% include "view/includes/paginator.html" %}
   
   <!-- Modal -->
   <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
@@ -117,7 +117,7 @@
     </div>
   </div>
   
-  {% include "view/paper-js.html" %}
+  {% include "view/includes/paper-js.html" %}
   <script>
   $(document).ready(function() {
     $('#shareModal').on('shown.bs.modal', () => {

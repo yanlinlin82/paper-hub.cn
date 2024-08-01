@@ -30,18 +30,18 @@
     当前共找到 {{ reviews.paginator.count }} 篇文献分享{% if reviews.paginator.num_pages > 1 %}，本页显示第 {{ reviews.start_index }} - {{ reviews.end_index }} 篇{% endif %}。
   </div>
 
-  {% include "group/paginator.html" %}
+  {% include "group/includes/paginator.html" %}
 
   {% for review, index in items %}
   <div id="card_review_{{ review.pk }}" class="card p-2 my-3 d-flex flex-row">
     <div class="p-2 text-start">{{ index }}.</div>
     <div class="p-2 text-start flex-fill">
-      {% include "group/review-info.html" %}
+      {% include "group/includes/review-info.html" %}
       <div id="review_comment_{{ review.pk }}" class="my-3">{{ review.comment }}</div>
       {% with review.paper as paper %}
       <div id="card_paper_{{ paper.pk }}" class="card p-2 ms-4">
         <div id="info_{{ paper.pk }}" class="text-start">
-          <div class="flex-fill">{% include "group/paper-info.html" %}</div>
+          <div class="flex-fill">{% include "group/includes/paper-info.html" %}</div>
         </div>
         <div class="my-2">
           <div id="title_{{ paper.pk }}" class="d-inline text-start">
@@ -54,17 +54,17 @@
           {% endif %}
           </div>
         </div>
-        {% include "view/paper-author-list.html" %}
-        {% include "view/paper-abstract.html" %}
+        {% include "view/includes/paper-author-list.html" %}
+        {% include "view/includes/paper-abstract.html" %}
       </div>
       {% endwith %}
     </div>
   </div>
   {% endfor %}
 
-  {% include "group/paginator.html" %}
-  {% include "group/review-info-js.html" %}
-  {% include "view/paper-js.html" %}
+  {% include "group/includes/paginator.html" %}
+  {% include "group/includes/review-info-js.html" %}
+  {% include "view/includes/paper-js.html" %}
 {% endif %}
 </section>
 {% endblock content %}

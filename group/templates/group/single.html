@@ -11,12 +11,12 @@
 
 {% block content %}
 <div class="p-2 text-start flex-fill">
-  {% include "group/review-info.html" %}
+  {% include "group/includes/review-info.html" %}
   <div class="my-3">{{ review.comment }}</div>
   {% with review.paper as paper %}
   <div id="card_{{ paper.pk }}" class="card p-2">
     <div id="info_{{ paper.pk }}" class="text-start">
-      <div class="flex-fill">{% include "group/paper-info.html" %}</div>
+      <div class="flex-fill">{% include "group/includes/paper-info.html" %}</div>
     </div>
     <div class="my-2">
       <div id="title_{{ paper.pk }}" class="d-inline text-start">
@@ -104,8 +104,8 @@
   {% endwith %}
 </div>
 
-{% include "group/review-info-js.html" %}
-{% include "view/paper-js.html" %}
+{% include "group/includes/review-info-js.html" %}
+{% include "view/includes/paper-js.html" %}
 
 {% if user.is_authenticated %}
 <form method="post">

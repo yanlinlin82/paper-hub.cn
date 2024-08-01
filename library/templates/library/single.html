@@ -6,7 +6,7 @@
 <section>
   <div class="p-2 text-start flex-fill">
     <div class="d-flex">
-      <div class="flex-fill">{% include "view/paper-info.html" %}</div>
+      <div class="flex-fill">{% include "view/includes/paper-info.html" %}</div>
       {% if user.is_authenticated %}
       <div class="text-end align-self-start">
         {% if paper.has_any_review %}
@@ -78,5 +78,5 @@
     {% endif %}
   </div>
 </section>
-{% include "view/paper-js.html" %}
+{% include "view/includes/paper-js.html" %}
 {% endblock content %}
