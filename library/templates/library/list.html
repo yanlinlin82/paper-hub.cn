@@ -57,9 +57,9 @@
           {% endfor %}
         {% endfor %}
       </div>
-      {% include "group/includes/title-with-trans.html" with title_link=False link_paper=False link_lib_paper=False %}
+      {% include "view/includes/paper-title.html" with title_link=False link_paper=False link_lib_paper=False %}
       {% include "view/includes/paper-author-list.html" %}
-      {% include "group/includes/abstract-with-trans.html" with allow_collapse=True %}
+      {% include "view/includes/paper-abstract.html" with allow_collapse=True %}
       {% include "view/includes/paper-keyword-list.html" %}
       <hr>
       <div class="mt-2">

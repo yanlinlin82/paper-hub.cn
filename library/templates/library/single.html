@@ -24,7 +24,7 @@
         {% endfor %}
       {% endfor %}
     </div>
-    {% include "group/includes/title-with-trans.html" with title_link=False link_paper=False link_lib_paper=False %}
+    {% include "view/includes/paper-title.html" with title_link=False link_paper=False link_lib_paper=False %}
     {% if paper.language != "eng" %}
     <div class="my-2">
       <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
@@ -38,7 +38,7 @@
       {% endfor %}
     </div>
     {% endif %}
-    {% include "group/includes/abstract-with-trans.html" with allow_collapse=False %}
+    {% include "view/includes/paper-abstract.html" with allow_collapse=False %}
     {% if paper.keyword_list %}
     <div>
       <b>Keywords:</b>

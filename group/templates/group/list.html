@@ -43,9 +43,9 @@
         <div id="info_{{ paper.pk }}" class="text-start">
           <div class="flex-fill">{% include "group/includes/paper-info.html" %}</div>
         </div>
-        {% include "group/includes/title-with-trans.html" with title_link=True link_paper=False link_lib_paper=False %}
+        {% include "view/includes/paper-title.html" with title_link=True link_paper=False link_lib_paper=False %}
         {% include "view/includes/paper-author-list.html" %}
-        {% include "group/includes/abstract-with-trans.html" with allow_collapse=True %}
+        {% include "view/includes/paper-abstract.html" with allow_collapse=True %}
       </div>
       {% endwith %}
     </div>

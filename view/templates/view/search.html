@@ -64,14 +64,14 @@
         {% endfor %}
       </div>
       {% endif %}
-      {% include "group/includes/title-with-trans.html" with title_link=True link_paper=False link_lib_paper=True %}
+      {% include "view/includes/paper-title.html" with title_link=True link_paper=False link_lib_paper=True %}
       {% if paper.language != "eng" %}
       <div class="my-2">
         <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
       </div>
       {% endif %}
       {% include "view/includes/paper-author-list.html" %}
-      {% include "group/includes/abstract-with-trans.html" with allow_collapse=True %}
+      {% include "view/includes/paper-abstract.html" with allow_collapse=True %}
       {% include "view/includes/paper-keyword-list.html" %}
     </div>
   </div>
