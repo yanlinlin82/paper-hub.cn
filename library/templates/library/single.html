@@ -38,24 +38,7 @@
       {% endfor %}
     </div>
     {% endif %}
-    
-    {% if paper.abstract %}
-    <div class="my-3">
-      <div>
-        <b>Abstract:</b>
-        <div id="abstract_{{ paper.pk }}_long" class="d-inline">
-          {{ paper.abstract }}
-        </div>
-        <a class="ms-2 text-nowrap" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
-        <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
-          {% if paper.translation and paper.translation.abstract_cn %}
-          {{ paper.translation.abstract_cn }}
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    {% endif %}
-
+    {% include "group/includes/abstract-with-trans.html" with allow_collapse=False %}
     {% if paper.keyword_list %}
     <div>
       <b>Keywords:</b>
