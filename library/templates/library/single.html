@@ -24,22 +24,12 @@
         {% endfor %}
       {% endfor %}
     </div>
-    <div class="my-3">
-      <div id="title_{{ paper.pk }}" class="d-inline text-start">
-        <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold">{{ paper.title }}</div>
-        <a class="ms-2 text-nowrap" href="javascript:translate_title({{ paper.pk }})">翻译</a>
-      </div>
-      <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
-      {% if paper.translation and paper.translation.title_cn %}
-      {{ paper.translation.title_cn }}
-      {% endif %}
-      </div>
-      {% if paper.language != "eng" %}
-      <div class="mt-1">
-        <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
-      </div>
-      {% endif %}
+    {% include "group/includes/title-with-trans.html" with title_link=False link_paper=False link_lib_paper=False %}
+    {% if paper.language != "eng" %}
+    <div class="my-2">
+      <span class="text-start">论文语言：{{ paper.language|readable_language }}</span>
     </div>
+    {% endif %}
 
     {% if paper.author_list %}
     <div>

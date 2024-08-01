@@ -1,0 +1,25 @@
+<div class="my-2">
+  <div id="title_{{ paper.pk }}" class="d-inline text-start">
+    <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold">
+      {% if title_link %}
+        {% if link_lib_paper %}
+          <a href="{% url "library:paper" id=paper.pk %}">{{ paper.title }}</a>
+        {% else %}
+          {% if link_paper %}
+            <a href="{% url "paper" id=paper.pk %}">{{ paper.title }}</a>
+          {% else %}
+            <a href="{% url 'group:review' id=review.pk group_name=group.name %}">{{ paper.title }}</a>
+          {% endif %}
+        {% endif %}
+      {% else %}
+        {{ paper.title }}
+      {% endif %}
+    </div>
+    <a class="ms-2 text-nowrap" href="javascript:translate_title({{ paper.pk }})">翻译</a>
+  </div>
+  <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
+  {% if paper.translation and paper.translation.title_cn %}
+  {{ paper.translation.title_cn }}
+  {% endif %}
+  </div>
+</div>
