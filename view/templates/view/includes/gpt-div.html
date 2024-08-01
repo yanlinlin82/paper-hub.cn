@@ -1,6 +1,9 @@
 {% if user.is_authenticated %}
 <div class="my-2">
-  <button id="gpt-ask-{{ paper.pk }}" class="btn btn-outline-primary btn-sm text-nowrap" onclick="summarize_by_gpt({{ paper.pk }})">用GPT总结</button>
+  <div>
+    <button id="gpt-ask-{{ paper.pk }}" class="btn btn-outline-primary btn-sm text-nowrap" onclick="summarize_by_gpt({{ paper.pk }})">用GPT总结</button>
+    <div class="d-inline text-danger">GPT可能会捏造信息，请注意甄别！</div>
+  </div>
   <div id="gpt-answer-{{ paper.pk }}" class="border p-2 d-none"></div>
 </div>
 {% endif %}
