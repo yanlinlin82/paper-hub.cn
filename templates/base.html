@@ -24,12 +24,10 @@
       width: 100%;
       height: calc(100vh - 80px);
       overflow-y: auto;
-      background-color: #f8f9fa;
     }
     #hint {
       display: none;
       position: absolute;
-      background: #eee;
       z-index: 1000;
       padding: 10px;
       border-radius: 5px;
@@ -82,7 +80,7 @@
 <nav class="navbar navbar-expand bg-body-tertiary border-bottom border-body">
   <div id="navbarContainer" class="container-xl">
     <div style="min-width:200px;">
-      <a class="navbar-brand" href="{% url 'index' %}"><img class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
+      <a class="navbar-brand" href="{% url 'index' %}"><img id="logo" class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
     </div>
 
     <div class="row" style="width:100%;">
@@ -92,7 +90,7 @@
           <div class="input-group text-start" style="min-width:250px; max-width:500px;">
             <input id="q" name="q" class="form-control border-secondary-subtle" type="search" value="{{ query }}" placeholder="搜索文献" aria-label="Search">
             <button class="btn btn-outline border-secondary-subtle text-nowrap" type="submit">搜索</button>
-            <div id="hint" class="border border-warning p-3 text-danger">
+            <div id="hint" class="bg-light-subtle border border-warning p-3 text-danger">
               <p><small>
                 注意：本站仅支持搜索站内已收录的文献{% if user.is_authenticated %}，或根据ID获取单篇文献信息{% endif %}，如需搜索更大范围的其他文献，请移步使用 <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" class="external-link">PubMed</a>、<a href="https://scholar.google.com/" target="_blank" class="external-link">Google Scholar</a> 或 <a href="https://arxiv.org/" target="_blank" class="external-link">arXiv</a> 等其他网站。
               </small></p>
@@ -138,6 +136,12 @@
                   <label class="form-check-label" for="toggleContainer">全宽显示</label>
                 </div>
               </li>
+              <li class="p-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="toggleTheme">
+                  <label class="form-check-label" for="toggleTheme">深色模式</label>
+                </div>
+              </li>
             </ul>
           </li>
         </ul>
@@ -149,7 +153,7 @@
 <div id="mainContainer" class="flex-fill container-xl">
   {% block main %}
   <div class="d-flex flex-row" style="width:100%; height:100%; min-width: 600px;">
-    <nav class="bg-light col-12 fixed-div" style="width:200px">
+    <nav class="col-12 fixed-div" style="width:200px">
       {% block navbar %}{% endblock navbar %}
     </nav>
     <div class="flex-fill text-start mt-3 ms-3 fixed-div">
@@ -219,6 +223,7 @@ $(document).ready(function() {
   });
 });
 </script>
+{% include "includes/bootstrap-theme.html" %}
 </body>
 </html>
 {% endtimezone %}
