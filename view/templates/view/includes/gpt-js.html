@@ -17,7 +17,7 @@ function summarize_by_gpt(paper_id) {
         htmlContent = marked.parse(data.answer);
         answer_div.html(htmlContent);
       } else {
-        answer_div.html('<div font="color:red">' + data.error + '</div>');
+        answer_div.html('<div class="danger">' + data.error + '</div>');
         ask_button.prop('disabled', false);
       }
     }
