@@ -177,18 +177,7 @@
   </div>
   {% endblock main %}
 </div>
-<script>
-if (localStorage.getItem('containerState') === 'fluid') {
-  $('#navbarContainer').removeClass('container-xl').addClass('container-fluid');
-  $('#mainContainer').removeClass('container-xl').addClass('container-fluid');
-  $('#toggleContainer').prop('checked', true);
-} else {
-  $('#navbarContainer').removeClass('container-fluid').addClass('container-xl');
-  $('#mainContainer').removeClass('container-fluid').addClass('container-xl');
-  $('#toggleContainer').prop('checked', false);
-}
-</script>
-
+{% include "includes/container-state-js.html" %}
 {% include "includes/scroll-to-top.html" %}
 {% include "includes/loading-modal.html" %}
 {% include "includes/user-login.html" %}
@@ -206,20 +195,6 @@ $(() => {
     });
   }).blur(function() {
     $('#hint').css('display', 'none');
-  });
-});
-
-$(() => {
-  $('#toggleContainer').on('change', function() {
-    if ($('#mainContainer').hasClass('container-xl')) {
-      $('#mainContainer').removeClass('container-xl').addClass('container-fluid');
-      $('#navbarContainer').removeClass('container-xl').addClass('container-fluid');
-      localStorage.setItem('containerState', 'fluid');
-    } else {
-      $('#mainContainer').removeClass('container-fluid').addClass('container-xl');
-      $('#navbarContainer').removeClass('container-fluid').addClass('container-xl');
-      localStorage.setItem('containerState', 'fixed');
-    }
   });
 });
 </script>

@@ -1,0 +1,24 @@
+<script>
+function setContainerState(fluid) {
+  if (fluid) {
+    $('#navbarContainer').removeClass('container-xl').addClass('container-fluid');
+    $('#mainContainer').removeClass('container-xl').addClass('container-fluid');
+  } else {
+    $('#navbarContainer').removeClass('container-fluid').addClass('container-xl');
+    $('#mainContainer').removeClass('container-fluid').addClass('container-xl');
+  }
+}
+
+(() => {
+  state = (localStorage.getItem('containerState') === 'fluid');
+  setContainerState(state);
+  $('#toggleContainer').prop('checked', state);
+})();
+
+$(() => {
+  $('#toggleContainer').on('change', function() {
+    setContainerState(this.checked);
+    localStorage.setItem('containerState', this.checked ? 'fluid' : 'fixed');
+  });
+});
+</script>
