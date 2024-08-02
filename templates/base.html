@@ -80,7 +80,7 @@
 <body class="d-flex flex-column" style="width:100vw; height:100vh;">
 
 <nav class="navbar navbar-expand bg-body-tertiary border-bottom border-body">
-  <div class="container-xl">
+  <div id="navbarContainer" class="container-xl">
     <div style="min-width:200px;">
       <a class="navbar-brand" href="{% url 'index' %}"><img class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
     </div>
@@ -118,7 +118,7 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               {{ user.core_user_profile.nickname }}
             </a>
-            <ul class="dropdown-menu">
+            <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>
             </ul>
           </li>
@@ -127,13 +127,26 @@
             <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">登录</a>
           </li>
           {% endif %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              外观
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li class="p-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="toggleContainer">
+                  <label class="form-check-label" for="toggleContainer">全宽显示</label>
+                </div>
+              </li>
+            </ul>
+          </li>
         </ul>
       </div>
     </div>
   </div>
 </nav>
 
-<div class="flex-fill container-xl">
+<div id="mainContainer" class="flex-fill container-xl">
   {% block main %}
   <div class="d-flex flex-row" style="width:100%; height:100%; min-width: 600px;">
     <nav class="bg-light col-12 fixed-div" style="width:200px">
@@ -160,6 +173,17 @@
   </div>
   {% endblock main %}
 </div>
+<script>
+if (localStorage.getItem('containerState') === 'fluid') {
+  $('#navbarContainer').removeClass('container-xl').addClass('container-fluid');
+  $('#mainContainer').removeClass('container-xl').addClass('container-fluid');
+  $('#toggleContainer').prop('checked', true);
+} else {
+  $('#navbarContainer').removeClass('container-fluid').addClass('container-xl');
+  $('#mainContainer').removeClass('container-fluid').addClass('container-xl');
+  $('#toggleContainer').prop('checked', false);
+}
+</script>
 
 {% include "includes/scroll-to-top.html" %}
 {% include "includes/loading-modal.html" %}
@@ -178,6 +202,20 @@ $(document).ready(function() {
     });
   }).blur(function() {
     $('#hint').css('display', 'none');
+  });
+});
+
+$(document).ready(function() {
+  $('#toggleContainer').on('change', function() {
+    if ($('#mainContainer').hasClass('container-xl')) {
+      $('#mainContainer').removeClass('container-xl').addClass('container-fluid');
+      $('#navbarContainer').removeClass('container-xl').addClass('container-fluid');
+      localStorage.setItem('containerState', 'fluid');
+    } else {
+      $('#mainContainer').removeClass('container-fluid').addClass('container-xl');
+      $('#navbarContainer').removeClass('container-fluid').addClass('container-xl');
+      localStorage.setItem('containerState', 'fixed');
+    }
   });
 });
 </script>
