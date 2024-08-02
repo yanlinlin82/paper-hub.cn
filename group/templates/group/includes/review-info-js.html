@@ -430,7 +430,7 @@ function add_review() {
   $('#reviewModal').modal('show');
 }
 
-$(document).ready(function() {
+$(() => {
   $('#reviewModal').on('shown.bs.modal', () => {
     if ($('#reviewModalLabel').text() == 'Add review') {
       $('#reviewModalUsername').focus();

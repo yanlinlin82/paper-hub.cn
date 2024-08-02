@@ -109,7 +109,7 @@
   
   {% include "view/includes/paper-js.html" %}
   <script>
-  $(document).ready(function() {
+  $(() => {
     $('#shareModal').on('shown.bs.modal', () => {
       $('#shareModalPaperID').focus();
     })

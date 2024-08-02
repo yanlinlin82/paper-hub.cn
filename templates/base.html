@@ -195,7 +195,7 @@ if (localStorage.getItem('containerState') === 'fluid') {
 {% include "includes/cookie-js.html" %}
 
 <script>
-$(document).ready(function() {
+$(() => {
   $('#q').focus(function() {
     var inputWidth = $(this).outerWidth();
     $('#hint').css({
@@ -209,7 +209,7 @@ $(document).ready(function() {
   });
 });
 
-$(document).ready(function() {
+$(() => {
   $('#toggleContainer').on('change', function() {
     if ($('#mainContainer').hasClass('container-xl')) {
       $('#mainContainer').removeClass('container-xl').addClass('container-fluid');

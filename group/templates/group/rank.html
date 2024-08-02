@@ -95,7 +95,7 @@
 </div>
 {% if rank_type == "monthly" %}
 <script>
-$(document).ready(function() {
+$(() => {
   $('#yearSelect, #monthSelect').change(function() {
       var year = $('#yearSelect').val();
       var month = $('#monthSelect').val();
@@ -108,7 +108,7 @@ $(document).ready(function() {
 {% endif %}
 {% if rank_type == "yearly" %}
 <script>
-$(document).ready(function() {
+$(() => {
   $('#yearSelect').change(function() {
       var year = $('#yearSelect').val();
       if (year) {
