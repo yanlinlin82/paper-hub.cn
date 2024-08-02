@@ -35,6 +35,18 @@
       border-radius: 5px;
       width: 200px;
     }
+    .cookie-banner {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #f8f9fa;
+      padding: 20px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
   </style>
   {% block customize_style %}{% endblock customize_style %}
   <script>
@@ -63,7 +75,6 @@
   }
   </script>
   {% block customize_script %}{% endblock customize_script %}
-  {% include "includes/cookie-js.html" %}
 </head>
 
 <body class="d-flex flex-column" style="width:100vw; height:100vh;">
@@ -153,7 +164,7 @@
 {% include "includes/scroll-to-top.html" %}
 {% include "includes/loading-modal.html" %}
 {% include "includes/user-login.html" %}
-{% include "includes/google-tag.html" %}
+{% include "includes/cookie-js.html" %}
 
 <script>
 $(document).ready(function() {

@@ -1,3 +1,37 @@
+<!-- Cookie Banner -->
+<div id="cookie-banner" class="cookie-banner d-none">
+  <p>We use cookies that are necessary to make our site work. We may also use additional cookies to analyze, improve, and personalize our content and your digital experience. For more information, <a href="#" id="view-details" class="text-primary">see our Cookie Policy</a>.</p>
+  <div class="cookie-buttons">
+    <button id="accept-cookies" class="btn btn-primary">Accept all cookies</button>
+    <button id="reject-cookies" class="btn btn-secondary mt-2">Reject cookies</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="cookieModal" tabindex="-1" aria-labelledby="cookieModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cookieModalLabel">Cookie Policy</h5>
+        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>We use cookies that are necessary to make our site work. We may also use additional cookies to analyze, improve, and personalize our content and your digital experience.</p>
+        <p>Detailed description of our cookie usage:</p>
+        <ul>
+          <li><strong>Necessary Cookies:</strong> Essential for the website to function properly, such as CSRF tokens.</li>
+          <li><strong>Analytics Cookies:</strong> Help us understand how our website is used and how we can improve it.</li>
+          <li><strong>Personalization Cookies:</strong> Enhance your experience by remembering your preferences.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button id="modal-accept-cookies" class="btn btn-primary">Accept all cookies</button>
+        <button id="modal-reject-cookies" class="btn btn-secondary">Reject cookies</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 function setCookie(name, value, daysToExpire) {
   var expires = "";
@@ -11,7 +45,8 @@ function setCookie(name, value, daysToExpire) {
 
 function getCookie(name) {
   var nameEQ = name + "=";
-  var ca = document.cookie.split(';');
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
   for (var i = 0; i < ca.length; i++) {
     var c = ca[i];
     while (c.charAt(0) == ' ') c = c.substring(1, c.length);
@@ -28,4 +63,67 @@ function deleteCookie(name) {
       ';expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }
 }
+
+$(document).ready(function() {
+  const cookieBanner = $('#cookie-banner');
+  const cookieModal = $('#cookieModal');
+
+  // Check for cookie consent
+  const cookieConsent = getCookie('cookies_accepted');
+
+  if (!cookieConsent) {
+    cookieBanner.removeClass('d-none');
+  } else if (cookieConsent === 'true') {
+    enableGACookies();
+  }
+
+  $('#accept-cookies').on('click', function() {
+    setCookie('cookies_accepted', 'true', 365);
+    enableGACookies();
+    cookieBanner.addClass('d-none');
+  });
+
+  $('#reject-cookies').on('click', function() {
+    setCookie('cookies_accepted', 'false', 365);
+    cookieBanner.addClass('d-none');
+  });
+
+  $('#view-details').on('click', function(event) {
+    event.preventDefault();
+    cookieModal.modal('show');
+  });
+
+  $('#modal-accept-cookies').on('click', function() {
+    setCookie('cookies_accepted', 'true', 365);
+    enableGACookies();
+    cookieModal.modal('hide');
+    cookieBanner.addClass('d-none');
+  });
+
+  $('#modal-reject-cookies').on('click', function() {
+    setCookie('cookies_accepted', 'false', 365);
+    cookieModal.modal('hide');
+    cookieBanner.addClass('d-none');
+  });
+
+  function enableGACookies() {
+    // Load the gtag.js script only if cookies are accepted
+    $.getScript('https://www.googletagmanager.com/gtag/js?id=G-1JBLE3S3G0', function() {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-1JBLE3S3G0');
+    });
+  }
+
+  // Function to disable features that use cookies if not accepted
+  function disableCookiesFeatures() {
+    // Add your code to disable features that require cookies here
+  }
+
+  // Automatically disable features if cookies are rejected
+  if (cookieConsent === 'false') {
+    disableCookiesFeatures();
+  }
+});
 </script>
