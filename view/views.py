@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db.models import Subquery, OuterRef, Q, Max, Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from paperhub import settings
-from core.paper import get_paper_info, guess_identifier_type
+from core.paper import get_paper_info, guess_identifier_type, prepare_single_paper
 from core.models import Paper, Review, Recommendation, PaperTracking, Label, UserProfile
 
 def get_paginated_reviews(reviews, page_number):
@@ -107,8 +107,7 @@ def search_page(request):
 
 def single_page(request, id):
     paper = get_object_or_404(Paper, pk=id)
-    paper.author_list = [k for k in paper.authors.split('\n') if k]
-    paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
+    paper = prepare_single_paper(paper)    
     paper.ref_list = paper.references.filter(type='ReferenceList').order_by('index')
     paper.cc_list = paper.references.filter(type='CommentsCorrectionsList').order_by('index')
     if request.user.is_authenticated:

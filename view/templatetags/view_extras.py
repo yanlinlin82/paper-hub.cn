@@ -1,5 +1,8 @@
-from django import template
+import re
 from urllib.parse import quote
+from django import template
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -22,3 +25,12 @@ def splitlines(value):
 @register.filter
 def urlencode_full(value):
     return quote(value, safe='') # 'abc/def' => 'abc%2Fdef'
+
+@register.filter(name='custom_escape')
+def custom_escape(value):
+    escaped_value = escape(value)
+    allowed_tags = ['b', 'i']
+    for tag in allowed_tags:
+        escaped_value = re.sub(f'&lt;({tag})&gt;', r'<\1>', escaped_value)
+        escaped_value = re.sub(f'&lt;/({tag})&gt;', r'</\1>', escaped_value)
+    return mark_safe(escaped_value)

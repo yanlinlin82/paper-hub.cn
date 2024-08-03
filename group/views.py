@@ -1,3 +1,4 @@
+import re
 from functools import wraps
 from urllib.parse import unquote
 from django.http import HttpResponse
@@ -6,7 +7,7 @@ from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, F, Min, Q
 from core.models import UserProfile, GroupProfile
-from core.paper import get_this_week_start_time, get_check_in_interval, get_this_month, get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal, get_last_month
+from core.paper import get_this_week_start_time, get_check_in_interval, get_this_month, get_last_month, prepare_reviews, prepare_single_review
 
 def redirect_query(func):
     @wraps(func)
@@ -49,18 +50,6 @@ def filter_review_by_query(reviews, query):
             Q(paper__journal__icontains=query) |
             Q(paper__abstract__icontains=query) |
             Q(paper__keywords__icontains=query))
-    return reviews
-
-def prepare_single_review(review, is_trash=False):
-    review.paper.author_list = [k for k in review.paper.authors.split('\n') if k]
-    review.paper.keyword_list = [k for k in review.paper.keywords.split('\n') if k]
-    review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=not is_trash)
-    return review
-
-def prepare_reviews(reviews, is_trash=False):
-    for index, review in enumerate(reviews):
-        review.display_index = index + reviews.start_index()
-        prepare_single_review(review, is_trash)
     return reviews
 
 def my_sharing_page(request, group_name):

@@ -15,6 +15,32 @@ import requests
 from lxml import etree
 import pandas as pd
 
+def process_xml_tags(abstract):
+    abstract = re.sub(r'\n', '<br>', abstract)
+    abstract = re.sub(r'\s+', ' ', abstract)
+    abstract = re.sub(r'<(/?)jats:bold>', r'<\1b>', abstract)
+    abstract = re.sub(r'<(/?)jats:italic>', r'<\1i>', abstract)
+    abstract = re.sub(r'</?jats:[^>]+>', '', abstract)
+    return abstract
+
+def prepare_single_paper(paper):
+    paper.title = process_xml_tags(paper.title)
+    paper.abstract = process_xml_tags(paper.abstract)
+    paper.author_list = [k for k in paper.authors.split('\n') if k]
+    paper.keyword_list = [k for k in paper.keywords.split('\n') if k]
+    return paper
+
+def prepare_single_review(review, is_trash=False):
+    prepare_single_paper(review.paper)
+    review.other_reviews = review.paper.review_set.exclude(pk=review.pk).filter(delete_time__isnull=not is_trash)
+    return review
+
+def prepare_reviews(reviews, is_trash=False):
+    for index, review in enumerate(reviews):
+        review.display_index = index + reviews.start_index()
+        prepare_single_review(review, is_trash)
+    return reviews
+
 class PaperInfo:
     def __init__(self, xml_node=None):
         self.xml_node = xml_node

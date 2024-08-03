@@ -1,18 +1,20 @@
+{% load view_extras %}
 <div class="my-2">
+  {% with paper.title|custom_escape as title %}
   <div id="title_{{ paper.pk }}" class="d-inline text-start">
     <div id="title_{{ paper.pk }}_text" class="d-inline fs-5 fw-bold">
       {% if title_link %}
         {% if link_lib_paper %}
-          <a href="{% url "library:paper" id=paper.pk %}">{{ paper.title }}</a>
+          <a href="{% url "library:paper" id=paper.pk %}">{{ title }}</a>
         {% else %}
           {% if link_paper %}
-            <a href="{% url "paper" id=paper.pk %}">{{ paper.title }}</a>
+            <a href="{% url "paper" id=paper.pk %}">{{ title }}</a>
           {% else %}
-            <a href="{% url 'group:review' id=review.pk group_name=group.name %}">{{ paper.title }}</a>
+            <a href="{% url 'group:review' id=review.pk group_name=group.name %}">{{ title }}</a>
           {% endif %}
         {% endif %}
       {% else %}
-        {{ paper.title }}
+        {{ title }}
       {% endif %}
     </div>
     <a class="ms-2 text-nowrap" href="javascript:translate_title({{ paper.pk }})">翻译</a>
@@ -22,4 +24,5 @@
   {{ paper.translation.title_cn }}
   {% endif %}
   </div>
+  {% endwith %}
 </div>

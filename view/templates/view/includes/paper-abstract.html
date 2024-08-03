@@ -1,33 +1,36 @@
+{% load view_extras %}
 <div class="mt-3">
   <b>Abstract:</b>
-  {% if paper.abstract %}
-    {% if allow_collapse %}
-      {% if paper.abstract|length > 30 %}
-      <div id="abstract_{{ paper.pk }}_short" class="d-inline">
-        {{ paper.abstract | truncatewords:30 }}
-        <a class="text-nowrap" href="javascript:expand_abstract({{ paper.pk }})">&gt;&gt;&gt;</a>
-      </div>
-      <div id="abstract_{{ paper.pk }}_long" class="d-none">
-        {{ paper.abstract }}
-        <a class="text-nowrap" href="javascript:collapse_abstract({{ paper.pk }})">&lt;&lt;&lt;</a>
-      </div>
+  {% with paper.abstract|custom_escape as abstract %}
+    {% if abstract %}
+      {% if allow_collapse %}
+        {% if abstract|length > 30 %}
+        <div id="abstract_{{ paper.pk }}_short" class="d-inline">
+          {{ abstract | truncatewords:30 }}
+          <a class="text-nowrap" href="javascript:expand_abstract({{ paper.pk }})">&gt;&gt;&gt;</a>
+        </div>
+        <div id="abstract_{{ paper.pk }}_long" class="d-none">
+          {{ abstract }}
+          <a class="text-nowrap" href="javascript:collapse_abstract({{ paper.pk }})">&lt;&lt;&lt;</a>
+        </div>
+        {% else %}
+        <div id="abstract_{{ paper.pk }}_long" class="d-inline">
+          {{ abstract }}
+        </div>
+        {% endif %}
       {% else %}
-      <div id="abstract_{{ paper.pk }}_long" class="d-inline">
-        {{ paper.abstract }}
-      </div>
+        <div id="abstract_{{ paper.pk }}_long" class="d-inline">
+          {{ abstract }}
+        </div>
       {% endif %}
+      <a class="ms-2 text-nowrap" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
+      <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
+        {% if paper.translation and paper.translation.abstract_cn %}
+        {{ paper.translation.abstract_cn }}
+        {% endif %}
+      </div>
     {% else %}
-      <div id="abstract_{{ paper.pk }}_long" class="d-inline">
-        {{ paper.abstract }}
-      </div>
+      <i>No abstract available.</i>
     {% endif %}
-    <a class="ms-2 text-nowrap" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
-    <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
-      {% if paper.translation and paper.translation.abstract_cn %}
-      {{ paper.translation.abstract_cn }}
-      {% endif %}
-    </div>
-  {% else %}
-    <i>No abstract available.</i>
-  {% endif %}
+  {% endwith %}
 </div>
