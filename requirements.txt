@@ -9,3 +9,8 @@ socksio
 httpcore[socks]
 lxml
 psycopg2-binary
+bottleneck
+numexpr
+numpy
+pip
+PySocks
