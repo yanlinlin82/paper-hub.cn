@@ -10,14 +10,39 @@ sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 django.setup()
 
-from core.models import Paper, PaperReference, PubMedIndex, PaperTracking, Recommendation, Label
+from core.models import Paper, Journal, PaperReference, PubMedIndex, PaperTracking, Recommendation, Label
 from core.paper import PaperInfo
+
+def match_journal(name):
+    journal = Journal.objects.filter(name__iexact=name).first()
+    if not journal:
+        journal = Journal.objects.filter(abbreviation__iexact=name).first()
+    return journal
 
 def get_file_modification_time(file_path):
     modification_time = os.path.getmtime(file_path)
     mod_time_dt = datetime.fromtimestamp(modification_time)
     formatted_time = mod_time_dt.strftime('%Y%m%d')
     return formatted_time
+
+def update_journal_info(paper):
+    journal_name = paper.journal.strip()
+    journal_name = re.sub(r'\s+', ' ', journal_name)
+    if not journal_name:
+        return
+
+    journal = match_journal(journal_name)
+    if not journal:
+        journal_name_2 = re.sub(r'\s+:\s+.*$', '', journal_name)
+        journal = match_journal(journal_name_2)
+        if not journal:
+            journal_name_3 = re.sub(r'the journal of', 'journal of', journal_name, flags=re.IGNORECASE)
+            journal = match_journal(journal_name_3)
+
+    if journal:
+        paper.journal_abbreviation = journal.abbreviation
+        paper.journal_impact_factor = journal.impact_factor
+        paper.journal_impact_factor_quartile = journal.impact_factor_quartile
 
 def J(s):
     return ', '.join(s.split('\n'))
@@ -194,6 +219,7 @@ class PubMedXMLFile:
                 if verbose:
                     print(f"  [{index}]journal: '{paper.journal}' -> '{paper_info.journal}'")
                 paper.journal = paper_info.journal
+                update_journal_info(paper)
                 any_change = True
         if paper_info.pub_date is not None:
             if paper.pub_date != paper_info.pub_date:
