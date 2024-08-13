@@ -67,6 +67,16 @@ class UserSession(models.Model):
     def __str__(self):
         return f"{self.user.nickname}: {self.token} - {self.get_client_type_display()}"
 
+class Journal(models.Model):
+    name = models.CharField(max_length=512, unique=True)
+    abbreviation = models.CharField(max_length=32, unique=True)
+    impact_factor = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, default=None)
+    impact_factor_year = models.IntegerField(null=True, blank=True, default=None)
+    impact_factor_quartile = models.CharField(max_length=1, null=True, blank=True, default=None)
+
+    def __str__(self):
+        return f"{self.name} - {self.abbreviation}"
+
 class Paper(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     update_time = models.DateTimeField(auto_now=True, db_index=True)
