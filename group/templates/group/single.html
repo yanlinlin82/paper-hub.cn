@@ -2,6 +2,10 @@
 {% load view_extras %}
 {% load static %}
 
+{% block customize_style %}
+{% include "view/includes/impact-factor.css.html" %}
+{% endblock %}
+
 {% block banner %}
 <div class="text-start">
   <a class="navbar-brand fs-2" href="/group/{{ group.name }}">{{ group.display_name }}</a>

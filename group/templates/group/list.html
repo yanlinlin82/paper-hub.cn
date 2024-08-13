@@ -2,6 +2,10 @@
 {% load view_extras %}
 {% load static %}
 
+{% block customize_style %}
+{% include "view/includes/impact-factor.css.html" %}
+{% endblock %}
+
 {% block content %}
 <section>
   {% if current_page == "group_journal" %}

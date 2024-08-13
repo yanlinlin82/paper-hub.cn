@@ -2,6 +2,10 @@
 {% load static %}
 {% load language_filters %}
 
+{% block customize_style %}
+{% include "view/includes/impact-factor.css.html" %}
+{% endblock %}
+
 {% block content %}
 <section>
   <div class="p-2 text-start flex-fill">

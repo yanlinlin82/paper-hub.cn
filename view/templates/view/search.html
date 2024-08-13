@@ -2,6 +2,10 @@
 {% load static %}
 {% load language_filters %}
 
+{% block customize_style %}
+{% include "view/includes/impact-factor.css.html" %}
+{% endblock %}
+
 {% block content %}
 <section style="min-height:500px">
   <div class="p-3">

@@ -1,5 +1,8 @@
 {% load view_extras %}
 <div id="info_{{ paper.pk }}" class="text-start">
+  {% if paper.journal_impact_factor and paper.journal_impact_factor_quartile %}
+  <span class="journal-if">IF:{{ paper.journal_impact_factor }}</span><span class="journal-q{{ paper.journal_impact_factor_quartile }}">Q{{ paper.journal_impact_factor_quartile }}</span>
+  {% endif %}
   {% if paper.journal %}<a href="{% url 'group:journal' journal_name=paper.journal|urlencode_full group_name=group.name %}"><i>{{ paper.journal }}</i></a>, {% endif %}
   {{ paper.pub_date }}.
   {% if paper.doi %}DOI: <a id="doi_{{ paper.pk }}" href="https://doi.org/{{ paper.doi }}" target="_blank" class="external-link">{{ paper.doi }}</a>{% endif %}

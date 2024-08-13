@@ -15,8 +15,8 @@
   decoration: none;
 }
 </style>
+{% include "view/includes/impact-factor.css.html" %}
 {% endblock customize_style %}
-
 
 {% block content %}
 <section>
@@ -54,7 +54,7 @@
           {% endfor %}
         {% endfor %}
       </div>
-      {% include "view/includes/paper-title.html" with title_link=False link_paper=False link_lib_paper=False %}
+      {% include "view/includes/paper-title.html" with title_link=True link_paper=True link_lib_paper=False %}
       {% include "view/includes/paper-author-list.html" %}
       {% include "view/includes/paper-abstract.html" with allow_collapse=True %}
       {% include "view/includes/paper-keyword-list.html" %}
