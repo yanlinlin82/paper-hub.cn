@@ -19,7 +19,7 @@ from django.middleware.csrf import get_token
 from django.db.models import Q
 from django.contrib.auth.models import User
 import openai
-from paperhub import settings
+from mysite import settings
 from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation, CustomCheckInInterval, PaperChat
 from core.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal

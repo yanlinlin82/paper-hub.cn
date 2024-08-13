@@ -63,7 +63,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://servicewechat.com',
 ]
 
-ROOT_URLCONF = 'paperhub.urls'
+ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 TEMPLATES = [
@@ -77,13 +77,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'paperhub.context_processors.my_configures',
+                'mysite.context_processors.my_configures',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'paperhub.wsgi.application'
+WSGI_APPLICATION = 'mysite.wsgi.application'
 
 
 # Database

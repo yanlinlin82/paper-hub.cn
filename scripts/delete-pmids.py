@@ -5,7 +5,7 @@ import django
 from django.db import transaction
 
 sys.path.append('.')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'paperhub.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 django.setup()
 
 from core.models import PubMedIndex

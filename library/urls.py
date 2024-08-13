@@ -1,6 +1,6 @@
 from django.urls import path
 from django.http import HttpResponseRedirect
-from paperhub import settings
+from mysite import settings
 
 from . import views
 

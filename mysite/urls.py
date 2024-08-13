@@ -17,7 +17,7 @@ import os
 from django.contrib import admin
 from django.urls import include, path
 from django.http import HttpResponse
-from paperhub import settings
+from mysite import settings
 
 def baidu_verify_codeva(request):
     filename = os.path.join(settings.BASE_DIR, 'static', 'baidu_verify_codeva-NJa4iPMlSa.html')
