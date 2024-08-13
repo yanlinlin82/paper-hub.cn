@@ -83,6 +83,9 @@ class Paper(models.Model):
 
     title = models.CharField(max_length=4096, default='', db_index=True)
     journal = models.CharField(max_length=256, blank=True, default='', db_index=True)
+    journal_abbreviation = models.CharField(max_length=32, null=True, blank=True, default='')
+    journal_impact_factor = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, default=None)
+    journal_impact_factor_quartile = models.CharField(max_length=1, null=True, blank=True, default='')
     pub_date = models.CharField(max_length=64, blank=True, default='')
     pub_year = models.IntegerField(null=True, blank=True, db_index=True)
     authors = models.CharField(max_length=1024*1024, blank=True, default='')
