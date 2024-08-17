@@ -14,3 +14,4 @@ numexpr
 numpy
 pip
 PySocks
+bleach

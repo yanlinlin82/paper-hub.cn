@@ -3,6 +3,8 @@ from urllib.parse import quote
 from django import template
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+import bleach
+import html
 
 register = template.Library()
 
@@ -27,10 +29,8 @@ def urlencode_full(value):
     return quote(value, safe='') # 'abc/def' => 'abc%2Fdef'
 
 @register.filter(name='custom_escape')
-def custom_escape(value):
-    escaped_value = escape(value)
-    allowed_tags = ['b', 'i']
-    for tag in allowed_tags:
-        escaped_value = re.sub(f'&lt;({tag})&gt;', r'<\1>', escaped_value)
-        escaped_value = re.sub(f'&lt;/({tag})&gt;', r'</\1>', escaped_value)
-    return mark_safe(escaped_value)
+def custom_escape(html_input):
+    unescaped_input = html.unescape(html_input)
+    allowed_tags = ['b', 'i', 'u', 'a', 'strong', 'em']
+    clean_html = bleach.clean(unescaped_input, tags=allowed_tags, strip=True)
+    return mark_safe(clean_html)
