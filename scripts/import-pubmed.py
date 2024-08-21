@@ -173,9 +173,9 @@ class PubMedXMLFile:
             if any_change:
                 if run:
                     pi.save()
-                print(f"Updated PubMedIndex record: source {self.source}, index {index}, pmid {paper_info.pmid}, doi {paper_info.doi}")
+                print(f"Updated PubMedIndex record: source {self.source}, index {index}/{self.num_articles}, pmid {paper_info.pmid}, doi {paper_info.doi}")
         else:
-            print(f"Added PubMedIndex record: source {self.source}, index {index}, pmid {paper_info.pmid}, doi {paper_info.doi}")
+            print(f"Added PubMedIndex record: source {self.source}, index {index}/{self.num_articles}, pmid {paper_info.pmid}, doi {paper_info.doi}")
             pi = PubMedIndex.objects.create(source=self.source, index=index, pmid=paper_info.pmid, doi=paper_info.doi)
             if run:
                 pi.save()
