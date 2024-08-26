@@ -21,6 +21,7 @@ urlpatterns = [
     # new api (request from web '/group/...')
     path('check_in', views.check_in, name='check_in'),
     path('check_in_by_admin', views.check_in_by_admin, name='check_in_by_admin'),
+    path('create_user', views.create_user, name='create_user'),
     path('new_remove_paper', views.new_remove_paper, name='new_remove_paper'),
     path('new_restore_paper', views.new_restore_paper, name='new_restore_paper'),
     path('new_remove_paper_permanently', views.new_remove_paper_permanently, name='new_remove_paper_permanently'),

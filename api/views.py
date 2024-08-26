@@ -12,7 +12,6 @@ from functools import wraps
 from urllib.parse import quote
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
@@ -20,10 +19,13 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 import openai
 from mysite import settings
-from core.models import UserProfile, UserAlias, UserSession, Review, GroupProfile, Recommendation, Paper, PaperTranslation, CustomCheckInInterval, PaperChat
+from core.models import UserProfile, UserAlias, UserSession
+from core.models import Review, CustomCheckInInterval
+from core.models import GroupProfile, Recommendation
+from core.models import Paper, PaperTranslation, PaperChat
 from core.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
-from core.paper import get_abstract_by_doi, convert_paper_info
+from core.paper import convert_paper_info
 
 def json_post_handler(func):
     @wraps(func)
@@ -1180,6 +1182,17 @@ def check_in_by_admin(request):
         group = GroupProfile.objects.get(name=group_name)
         group.reviews.add(review)
         group.save()
+
+    return JsonResponse({'success': True})
+
+@json_post_handler
+@require_login
+def create_user(request):
+    data = request.json_data
+    username = data.get('username')
+    print(f"create_user: {username}")
+    profile = UserProfile(nickname=username)
+    profile.save()
 
     return JsonResponse({'success': True})
 

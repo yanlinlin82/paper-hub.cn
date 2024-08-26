@@ -453,7 +453,24 @@
         data: data,
         success: function(data) {
           if (!data.success) {
-            alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
+            if (data.error.startsWith("User not found:")) {
+              username = $('#checkInModalUser').val();
+              if (confirm('User not found: ' + username + '\nDo you want to create a new user?')) {
+                ajaxPostJson({
+                  url: '{% url 'api:create_user' %}',
+                  data: { 'username': username },
+                  success: function(data) {
+                    if (!data.success) {
+                      alert('Failed to create user.\n' + data.error);
+                    } else {
+                      alert('User created successfully. Please checkin again.');
+                    }
+                  }
+                })
+              }
+            } else {
+              alert('Failed to checkin.\n' + data.error);
+            }
           } else {
             console.log(data.results);
             $('#checkInModal').modal('hide');
