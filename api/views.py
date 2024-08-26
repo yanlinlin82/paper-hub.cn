@@ -1315,3 +1315,13 @@ def new_remove_review_permanently(request):
 
     review.delete()
     return JsonResponse({'success': True})
+
+@require_login
+def username_autocomplete(request):
+    if 'term' in request.GET:
+        term = request.GET.get('term')
+        print(f"term: '{term}'")
+        qs = UserProfile.objects.filter(nickname__icontains=term)
+        usernames = list(qs.values_list('nickname', flat=True))
+        return JsonResponse(usernames, safe=False)
+    return JsonResponse([], safe=False)

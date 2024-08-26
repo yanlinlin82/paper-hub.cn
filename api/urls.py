@@ -53,4 +53,6 @@ urlpatterns = [
     path('submit_comment', views.submit_comment, name='submit_comment'),
     path('summarize_by_gpt', views.summarize_by_gpt, name='summarize_by_gpt'),
     path('query_paper_info', views.query_paper_info, name='query_paper_info'),
+
+    path('username_autocomplete', views.username_autocomplete, name='username_autocomplete'),
 ]

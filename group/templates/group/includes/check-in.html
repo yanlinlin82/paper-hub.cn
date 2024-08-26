@@ -177,6 +177,36 @@
             </div>
             <div class="col-3">
               <input class="form-control" type="text" id="checkInModalUser" name="user" value="{{ user.username }}">
+              <script>
+                $(function() {
+                  $("#checkInModalUser").autocomplete({
+                    source: function(request, response) {
+                      console.log('autocomplete:', request.term);
+                      $.ajax({
+                        url: "{% url 'api:username_autocomplete' %}",
+                        dataType: "json",
+                        data: {
+                          term: request.term
+                        },
+                        success: function(data) {
+                          console.log('autocomplete return:', data);
+                          response(data);
+                        }
+                      });
+                    },
+                    minLength: 1,
+                    select: function(event, ui) {
+                      $('#checkInModalUser').val(ui.item.value);
+                      return false;
+                    },
+                    open: function() {
+                      // 设置 z-index 为高于 modal 的值
+                      console.log('autocomplete open');
+                      $('.ui-autocomplete').css('z-index', 2050); // Bootstrap modal 的 z-index 通常为 1040 或 1050
+                    }
+                  });
+                });
+              </script>
             </div>
             <div class="col-2 text-end">
               <label class="col-form-label" for="checkInModalDate">打卡时间：</label>
