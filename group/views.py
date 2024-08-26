@@ -63,12 +63,17 @@ def my_sharing_page(request, group_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_my_sharing',
         'query': query,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 @redirect_query
@@ -90,12 +95,17 @@ def all_page(request, group_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_all',
         'query': query,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 def recent_page(request, group_name):
@@ -109,12 +119,17 @@ def recent_page(request, group_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_recent',
         'query': query,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 def this_month_page(request, group_name):
@@ -128,12 +143,17 @@ def this_month_page(request, group_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_this_month',
         'query': query,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 def last_month_page(request, group_name):
@@ -147,12 +167,17 @@ def last_month_page(request, group_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_last_month',
         'query': query,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 def trash_page(request, group_name):
@@ -168,12 +193,17 @@ def trash_page(request, group_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews, is_trash=True)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_trash',
         'query': query,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 @redirect_query
@@ -199,6 +229,10 @@ def journal_page(request, group_name, journal_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_journal',
@@ -206,6 +240,7 @@ def journal_page(request, group_name, journal_name):
         'journal_name': journal_name,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 def user_page(request, id, group_name):
@@ -219,6 +254,10 @@ def user_page(request, id, group_name):
     reviews, items = get_paginated_reviews(reviews, page_number)
     prepare_reviews(reviews)
 
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+
     return render(request, 'group/list.html', {
         'group': group,
         'current_page': 'group_user',
@@ -226,6 +265,7 @@ def user_page(request, id, group_name):
         'user_info': user,
         'reviews': reviews,
         'items': items,
+        'get_params': get_params,
     })
 
 def _rank_page(request, group_name, rank_type):
