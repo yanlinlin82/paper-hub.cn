@@ -25,7 +25,7 @@ from core.paper import guess_identifier_type, get_paper_info_new, get_paper_info
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from core.paper import get_abstract_by_doi, convert_paper_info
 
-def json_view(func):
+def json_post_handler(func):
     @wraps(func)
     def wrapper(request, *args, **kwargs):
         if request.method != 'POST':
@@ -36,10 +36,6 @@ def json_view(func):
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
         return func(request, *args, **kwargs)
-        #try:
-        #    return func(request, *args, **kwargs)
-        #except Exception as e:
-        #    return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return wrapper
 
 def require_login(func):
@@ -59,7 +55,7 @@ def require_admin(func):
     return wrapper
 
 @csrf_exempt # no csrf token when first login in WeiXin mini program
-@json_view
+@json_post_handler
 def wx_login(request):
     data = request.json_data
     wx_code = data.get('code', '') or ''
@@ -114,7 +110,7 @@ def is_token_valid(token):
     except UserSession.DoesNotExist:
         return False
 
-@json_view
+@json_post_handler
 def update_nickname(request):
     data = request.json_data
     token = data.get('token')
@@ -135,7 +131,7 @@ def update_nickname(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 def do_login(request):
     data = request.json_data
     username = data.get('username')
@@ -232,7 +228,7 @@ def query_review(request, id):
             "urls": review_info.get('urls', []) or [],
         }})
 
-@json_view
+@json_post_handler
 @require_login
 def query_paper_info(request):
     data = request.json_data
@@ -270,7 +266,7 @@ def query_paper_info(request):
         }
     })
 
-@json_view
+@json_post_handler
 @require_login
 def submit_review(request):
     data = request.json_data
@@ -460,7 +456,7 @@ def get_latest_deadline():
         deadline = timezone.make_aware(datetime.datetime(now.year, now.month, 1), timezone.get_current_timezone())
     return deadline
 
-@json_view
+@json_post_handler
 @require_login
 def delete_review(request):
     data = request.json_data
@@ -523,7 +519,7 @@ def delete_review_forever(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def add_search_result(request):
     data = request.json_data
@@ -548,7 +544,7 @@ def add_search_result(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def add_recommendation(request):
     data = request.json_data
@@ -580,7 +576,7 @@ def add_recommendation(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def mark_read_recommendation(request):
     data = request.json_data
@@ -597,7 +593,7 @@ def mark_read_recommendation(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def restore_recommendation(request):
     data = request.json_data
@@ -614,7 +610,7 @@ def restore_recommendation(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 def fetch_rank_full_list(request):
     data = request.json_data
     token = data.get('token')
@@ -641,7 +637,7 @@ def fetch_rank_full_list(request):
 
     return JsonResponse({'success': True, 'results': stat})
 
-@json_view
+@json_post_handler
 def fetch_rank_list(request):
     data = request.json_data
     token = data.get('token')
@@ -670,7 +666,7 @@ def get_user_aliases(user):
         aliases.append(alias.user)
     return aliases
 
-@json_view
+@json_post_handler
 def fetch_review_list(request):
     data = request.json_data
     token = data.get('token')
@@ -733,7 +729,7 @@ def fetch_review_list(request):
         } for p in reviews[index:end_index]]
     })
 
-@json_view
+@json_post_handler
 def fetch_review_info(request):
     data = request.json_data
     token = data.get('token')
@@ -756,7 +752,7 @@ def fetch_review_info(request):
             "pub_year": review_info.get('pub_year', '') or '',
         }})
 
-@json_view
+@json_post_handler
 def submit_comment(request):
     data = request.json_data
     token = data.get('token')
@@ -811,7 +807,7 @@ def submit_comment(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def summarize_by_gpt(request):
     data = request.json_data
@@ -1016,7 +1012,7 @@ def handle_translation(request, field_name, translation_func, model, translation
 
     return JsonResponse({'success': True, 'answer': result_text})
 
-@json_view
+@json_post_handler
 def translate_title(request):
     return handle_translation(
         request=request,
@@ -1027,7 +1023,7 @@ def translate_title(request):
         translation_field='title_cn'
     )
 
-@json_view
+@json_post_handler
 def translate_abstract(request):
     return handle_translation(
         request=request,
@@ -1105,7 +1101,7 @@ def update_paper_by_json_data(paper, paper_data):
     if any_change:
         paper.save()
 
-@json_view
+@json_post_handler
 @require_login
 def check_in(request):
     data = request.json_data
@@ -1140,7 +1136,7 @@ def check_in(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_admin
 def check_in_by_admin(request):
     data = request.json_data
@@ -1187,7 +1183,7 @@ def check_in_by_admin(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def new_remove_paper(request):
     data = request.json_data
@@ -1206,7 +1202,7 @@ def new_remove_paper(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def new_restore_paper(request):
     data = request.json_data
@@ -1225,7 +1221,7 @@ def new_restore_paper(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def new_remove_paper_permanently(request):
     data = request.json_data
@@ -1240,7 +1236,7 @@ def new_remove_paper_permanently(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def new_edit_review(request):
     data = request.json_data
@@ -1261,7 +1257,7 @@ def new_edit_review(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def new_remove_review(request):
     data = request.json_data
@@ -1280,7 +1276,7 @@ def new_remove_review(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def new_restore_review(request):
     data = request.json_data
@@ -1299,7 +1295,7 @@ def new_restore_review(request):
 
     return JsonResponse({'success': True})
 
-@json_view
+@json_post_handler
 @require_login
 def new_remove_review_permanently(request):
     data = request.json_data
