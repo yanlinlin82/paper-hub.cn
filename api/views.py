@@ -1037,7 +1037,7 @@ def translate_abstract(request):
     )
 
 def parse_pub_year(pub_date):
-    pattern = "^[0-9]{4}(\s|-)"
+    pattern = r"^[0-9]{4}(\s|-)"
     if re.match(pattern, pub_date):
         return pub_date[:4]
     dt = convert_string_to_datetime(pub_date)
