@@ -1152,6 +1152,8 @@ def check_in_by_admin(request):
         paper = Paper.objects.filter(pmid=pmid).first()
     elif arxiv_id:
         paper = Paper.objects.filter(arxiv_id=arxiv_id).first()
+    else:
+        paper = None
 
     title = data.get('paper', {}).get('title')
     journal = data.get('paper', {}).get('journal')
