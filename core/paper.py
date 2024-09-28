@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from django.urls import reverse
 from django.db.models import Count
 from django.db.models.aggregates import Min
-from core.models import CustomCheckInInterval, PubMedIndex, Paper
+from core.models import CustomCheckInInterval, Paper
 from mysite import settings
 import requests
 from lxml import etree
@@ -625,43 +625,6 @@ def guess_identifier_type(identifier):
         return "pmcid", identifier
     else:
         return "unknown", identifier
-
-def get_paper_info_new(identifier, identifier_type):
-    source, index = None, None
-    if identifier_type == "doi":
-        pubmed_index = PubMedIndex.objects.filter(doi=identifier)
-        if pubmed_index.count() > 0:
-            source = pubmed_index[0].source
-            index = pubmed_index[0].index
-    elif identifier_type == "pmid":
-        pubmed_index = PubMedIndex.objects.filter(pmid=identifier)
-        if pubmed_index.count() > 0:
-            source = pubmed_index[0].source
-            index = pubmed_index[0].index
-
-    if source and index:
-        print(f"Will try to fetch paper info from source '{source}' with index '{index}'")
-
-        PUBMED_DIR = os.getenv('PUBMED_DIR')
-        pubmed_data_part = 'baseline' if source < 1219 else 'updatefiles'
-        cache_filename = os.path.join(PUBMED_DIR, pubmed_data_part, f"pubmed24n{source:04}.xml.gz")
-        if os.path.exists(cache_filename):
-            print(f"Loading data from cache '{cache_filename}'")
-            tree = etree.parse(cache_filename)
-            root = tree.getroot()
-            article_node = root.xpath(f"/PubmedArticleSet/PubmedArticle[{index}]")
-            paper_info = PaperInfo(article_node[0])
-
-            return paper_info
-
-        url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/{pubmed_data_part}/pubmed24n{source:04}.xml.gz"
-        print(f"Local cache file '{cache_filename}' is missing, which could be downloaded from: {url}")
-    else:
-        print(f"Not found in PubMedIndex: {identifier}")
-
-    paper_info_old, raw_dict = get_paper_info(identifier)
-    paper_info = convert_paper_info(paper_info_old, raw_dict)
-    return paper_info
 
 def convert_paper_info(old_paper_info, raw_dict):
     paper_info = PaperInfo()

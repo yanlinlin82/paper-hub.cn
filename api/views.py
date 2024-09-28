@@ -23,7 +23,7 @@ from core.models import UserProfile, UserAlias, UserSession
 from core.models import Review, CustomCheckInInterval
 from core.models import GroupProfile, Recommendation
 from core.models import Paper, PaperTranslation, PaperChat
-from core.paper import guess_identifier_type, get_paper_info_new, get_paper_info, convert_string_to_datetime
+from core.paper import guess_identifier_type, get_paper_info, convert_string_to_datetime
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from core.paper import convert_paper_info
 
@@ -239,11 +239,8 @@ def query_paper_info(request):
         return JsonResponse({'success': False, 'error': f"Invalid request!"})
 
     identifier_type, identifier = guess_identifier_type(identifier)
-    if identifier_type == "pmid" or identifier_type == "doi":
-        paper_info = get_paper_info_new(identifier, identifier_type)
-    else:
-        paper_info_old, raw_dict = get_paper_info(identifier)
-        paper_info = convert_paper_info(paper_info_old, raw_dict)
+    paper_info_old, raw_dict = get_paper_info(identifier)
+    paper_info = convert_paper_info(paper_info_old, raw_dict)
 
     return JsonResponse({
         'success': True,

@@ -10,7 +10,7 @@ sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 django.setup()
 
-from core.models import Paper, Journal, PaperReference, PubMedIndex, PaperTracking, Recommendation, Label
+from core.models import Paper, Journal, PaperReference, PaperTracking, Recommendation, Label
 from core.paper import PaperInfo
 
 def match_journal(name):
@@ -159,26 +159,6 @@ class PubMedXMLFile:
         if paper_info.pmid in self.pmids_to_remove:
             print(f"Skip removed PMID: {paper_info.pmid}")
             return None, False, False
-
-        pi_list = PubMedIndex.objects.filter(source=self.source, index=index)
-        if pi_list.exists():
-            pi = pi_list[0]
-            any_change = False
-            if pi.pmid != paper_info.pmid:
-                pi.pmid = paper_info.pmid
-                any_change = True
-            if pi.doi != paper_info.doi:
-                pi.doi = paper_info.doi
-                any_change = True
-            if any_change:
-                if run:
-                    pi.save()
-                print(f"Updated PubMedIndex record: source {self.source}, index {index}/{self.num_articles}, pmid {paper_info.pmid}, doi {paper_info.doi}")
-        else:
-            print(f"Added PubMedIndex record: source {self.source}, index {index}/{self.num_articles}, pmid {paper_info.pmid}, doi {paper_info.doi}")
-            pi = PubMedIndex.objects.create(source=self.source, index=index, pmid=paper_info.pmid, doi=paper_info.doi)
-            if run:
-                pi.save()
 
         if mode == 'update-index':
             return None, False, False
@@ -527,18 +507,6 @@ def main():
     pubmed = PubMedXMLFile()
     if not pubmed.load(args.pubmed_dir, args.source):
         return 1
-
-    if pubmed.pmids_to_remove:
-        if not args.run:
-            cnt = PubMedIndex.objects.filter(pmid__in=pubmed.pmids_to_remove).count()
-            print(f"Found {cnt} PMIDs to remove from PubMedIndex")
-        if args.verbose:
-            print("PMIDs to remove from database:")
-            for i, r in enumerate(PubMedIndex.objects.filter(pmid__in=pubmed.pmids_to_remove)):
-                print(f"  {i}. PMID {r.pmid} (pk={r.pk}, source={r.source}, index={r.index}, doi={r.doi})")
-        if args.run:
-            cnt, _ = PubMedIndex.objects.filter(pmid__in=pubmed.pmids_to_remove).delete()
-            print(f"Deleted {cnt} PMIDs from database")
 
     rules = []
     if args.mode == 'default':
