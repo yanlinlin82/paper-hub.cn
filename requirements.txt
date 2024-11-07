@@ -15,3 +15,4 @@ numpy
 pip
 PySocks
 bleach
+httpx
