@@ -1,5 +1,12 @@
 #!/bin/bash
 
+BAK_FILE=db.sqlite3.bak-$(date +%Y%m%d)
+if [ -e "${BAK_FILE}" ]; then
+	echo "It has been updated already today"
+	exit 0
+fi
+cp -av db.sqlite3 ${BAK_FILE}
+
 PUBMED_XML_GZ=$(find pubmed/updatefiles/ -type f -name '*.xml.gz' | sort | tail -n1)
 echo "Latest PubMed XML file: $PUBMED_XML_GZ"
 
