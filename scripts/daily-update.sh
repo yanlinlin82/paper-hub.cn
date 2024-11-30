@@ -1,7 +1,8 @@
 #!/bin/bash
 
+APP_NAME=$(basename $(pwd))
 echo "========== $(date) =========="
-echo ">>> Updating for paper-hub.cn"
+echo ">>> Updating for $APP_NAME"
 
 BAK_FILE=db.sqlite3.bak-$(date +%Y%m%d)
 if [ -e "${BAK_FILE}" ]; then
@@ -21,4 +22,4 @@ mkdir -pv log/pubmed
 ./.venv/bin/python scripts/import-pubmed.py pubmed $SOURCE -r -m default >>log/pubmed/$SOURCE.log 2>&1
 ./.venv/bin/python scripts/import-pubmed.py pubmed $SOURCE -r -m update-index >>log/pubmed/$SOURCE-update-index.log 2>&1
 
-echo ">>> Updating for paper-hub.cn done"
+echo ">>> Updating for $APP_NAME done"
