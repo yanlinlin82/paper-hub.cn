@@ -57,8 +57,8 @@ class PubMedXMLFile:
         self.pmids_to_remove = set()
 
     def load(self, pubmed_dir, source):
-        pubmed_part = 'baseline' if source < 1220 else 'updatefiles'
-        self.pubmed_xml_gz = os.path.join(pubmed_dir, pubmed_part, f'pubmed24n{source}.xml.gz')
+        pubmed_part = 'baseline' if source < 1225 else 'updatefiles'
+        self.pubmed_xml_gz = os.path.join(pubmed_dir, pubmed_part, f'pubmed25n{source}.xml.gz')
         if not os.path.exists(self.pubmed_xml_gz):
             print(f"File not found: {self.pubmed_xml_gz}")
             return False
@@ -394,8 +394,8 @@ class PubMedXMLFile:
             self.scan_rules_for_single_paper(index, paper_info, mode, rules, run, verbose, cnt)
 
     def generate_source_text(self):
-        # eg. 'pubmed24n1453.20240628'
-        return f'pubmed24n{self.source}.' + get_file_modification_time(self.pubmed_xml_gz)
+        # eg. 'pubmed25n1453.20240628'
+        return f'pubmed25n{self.source}.' + get_file_modification_time(self.pubmed_xml_gz)
 
     def match_keyword(self, paper_info, keyword):
         pattern = r'\b{}\b'.format(re.escape(keyword))

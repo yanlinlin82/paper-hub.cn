@@ -304,10 +304,10 @@ def fix_paper_info(input_xlsx, pubmed_dir):
     cnt, updated = 0, 0
     for source in grouped:
         print(f"Processing source: {source}")
-        if int(source) <= 1219:
-            xml_gz_file = os.path.join(pubmed_dir, 'pubmed', 'baseline', f'pubmed24n{source}.xml.gz')
+        if int(source) <= 1274:
+            xml_gz_file = os.path.join(pubmed_dir, 'pubmed', 'baseline', f'pubmed25n{source}.xml.gz')
         else:
-            xml_gz_file = os.path.join(pubmed_dir, 'pubmed', 'updatefiles', f'pubmed24n{source}.xml.gz')
+            xml_gz_file = os.path.join(pubmed_dir, 'pubmed', 'updatefiles', f'pubmed25n{source}.xml.gz')
         if not os.path.exists(xml_gz_file):
             print(f"Warning: {xml_gz_file} not found")
             continue
