@@ -1,0 +1,23 @@
+# Include production dependencies
+-r requirements.in
+
+# Code quality and linting
+flake8
+black
+isort
+mypy
+bandit
+
+# Testing
+pytest
+pytest-django
+pytest-xdist
+pytest-cov
+coverage
+
+# Code analysis
+pylint
+pylint-django
+
+# Development tools
+watchdog # for command 'watchmedo'

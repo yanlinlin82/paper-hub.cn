@@ -1,8 +1,44 @@
-__pycache__
-db.sqlite3*
-cache/
-static_root/
-.env
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+backend/.venv/
 .venv/
+
+# Django
+backend/db.sqlite3*
+backend/static_root/
+backend/cache/
+backend/*.log
+
+# Environment Variables
+backend/.env
+.env
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node.js (Frontend)
+frontend/node_modules/
+frontend/dist/
+
+# Logs
+backend/log/
 *.log
-pubmed
+npm-debug.log*
+
+# Project specific
+backend/pubmed/
+backend/import-pubmed-index*.log
+backend/db.sqlite3.bak*
+
+# R files
+.RData
+.Rhistory
