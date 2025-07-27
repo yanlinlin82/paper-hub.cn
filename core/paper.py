@@ -611,7 +611,7 @@ def get_paper_info_by_doi(doi):
 
 def guess_identifier_type(identifier):
     if identifier.startswith("10."):
-        pattern_arxiv = re.compile('^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
+        pattern_arxiv = re.compile(r'^10\.48550\/arXiv\.([0-9]+\.[0-9]+)$')
         m = pattern_arxiv.match(identifier)
         if m:
             return "arxiv_id", m.group(1)
