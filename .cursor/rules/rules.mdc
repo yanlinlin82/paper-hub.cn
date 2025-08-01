@@ -1,0 +1,37 @@
+# Cursor Rules
+
+## Principles
+
+- Think before coding
+- Prefer simple, maintainable solutions
+- Avoid code duplication
+- Do not fabricate information
+- Use examples to explain before editing code
+- Only edit code when explicitly requested
+
+## Code Style & Formatting
+
+- Use semicolons in JavaScript and TypeScript
+- Use 2-space indentation in Markdown, TypeScript, JavaScript, and JSON
+- Use correct indentation per language
+- No trailing spaces at line ends
+- End all files with a single newline
+- No trailing commas in JSON
+- Sort and group TypeScript imports at the top without duplicates
+
+## Comments & Documentation
+
+- Write comments in English
+- Follow Markdown best practices
+- Don't add documentation unless requested
+- Record lessons in `.cursor/rules/lessons.mdc` when issues arise
+
+## Tooling & Conventions
+
+- Auto-apply generated code
+
+## Bash Command Execution
+
+- Always run bash commands from the project root directory to ensure relative path stability
+- Use `(cd subdirectory && command)` syntax when subdirectory operations are needed to automatically return to root
+- Avoid changing working directory permanently during command execution
