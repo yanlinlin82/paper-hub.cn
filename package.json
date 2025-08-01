@@ -1,0 +1,21 @@
+{
+  "name": "paper-hub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "./scripts/setup.sh",
+    "setup:upgrade": "./scripts/setup.sh -u",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && . .venv/bin/activate && python manage.py runserver",
+    "build": "cd frontend && npm run build",
+    "test": "cd frontend && npm run test",
+    "lint": "cd frontend && npm run lint",
+    "format": "cd frontend && npm run format",
+    "migrate": "cd backend && . .venv/bin/activate && python manage.py migrate",
+    "shell": "cd backend && . .venv/bin/activate && python manage.py shell"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
