@@ -48,6 +48,7 @@ urlpatterns = [
 
     path('fetch_rank_list', views.fetch_rank_list, name='fetch_rank_list'),
     path('fetch_rank_full_list', views.fetch_rank_full_list, name='fetch_rank_full_list'),
+    path('fetch_rank_by_type', views.fetch_rank_by_type, name='fetch_rank_by_type'),
     path('fetch_review_list', views.fetch_review_list, name='fetch_review_list'),
     path('fetch_review_info', views.fetch_review_info, name='fetch_review_info'),
 

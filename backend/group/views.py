@@ -79,10 +79,35 @@ def my_sharing_page(request, group_name):
 @redirect_query
 def index_page(request, group_name):
     group = get_object_or_404(GroupProfile, name=group_name)
+    
+    # 获取最新分享的论文
+    recent_reviews = group.reviews.filter(delete_time__isnull=True).order_by('-create_time')[:4]
+    # 为每个review准备数据
+    for review in recent_reviews:
+        prepare_single_review(review)
+    
+    # 获取本月分享数量
+    from django.utils import timezone
+    now = timezone.now()
+    this_month_count = group.reviews.filter(
+        delete_time__isnull=True,
+        create_time__year=now.year,
+        create_time__month=now.month
+    ).count()
+    
+    # 获取分享达人数量（分享最多的用户）
+    from django.db.models import Count
+    top_contributor = group.reviews.filter(delete_time__isnull=True).values('creator').annotate(
+        count=Count('id')
+    ).order_by('-count').first()
+    top_contributor_count = top_contributor['count'] if top_contributor else 0
 
     return render(request, 'group/index.html', {
         'group': group,
         'current_page': 'group_index',
+        'recent_reviews': recent_reviews,
+        'this_month_count': this_month_count,
+        'top_contributor_count': top_contributor_count,
     })
 
 def all_page(request, group_name):

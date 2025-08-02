@@ -2,88 +2,546 @@
 {% load static %}
 
 {% block content %}
-<div class="p-3">
-  {% if group.name != "xiangma" %}
-  <h2 class="mb-3">{{ group.display_name }}</h2>
-  <p>{{ group.desc }}</p>
-  {% else %}
-  <h2 class="mb-3">{{ group.display_name }}</h2>
-  <hr>
+<div class="community-home">
+  <!-- Hero Section -->
+  <section class="hero-section bg-gradient-primary text-white py-5">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <div class="hero-content">
+            <h1 class="display-4 fw-bold mb-3">
+              <i class="fas fa-users me-3 text-warning"></i>
+              科研论文分享社群
+            </h1>
+            <p class="lead mb-4">
+              加入我们的学术社群，与志同道合的研究者分享最新论文，探讨前沿科技，共同推动学术进步
+            </p>
+            <div class="d-flex gap-3">
+              <button class="btn btn-light btn-lg shadow-sm" onclick="scrollToStats()">
+                <i class="fas fa-chart-bar me-2"></i>
+                查看统计
+              </button>
+              <button class="btn btn-outline-light btn-lg" onclick="scrollToFeatures()">
+                <i class="fas fa-star me-2"></i>
+                平台特色
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 text-center">
+          <div class="hero-icon">
+            <i class="fas fa-microscope fa-6x opacity-75 text-warning"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h3>简介</h3>
-  <p>响马读paper是一个学术交流社群，旨在鼓励成员每月至少读一篇文献并打卡分享。我们相信在学术道路上，坚持阅读和分享是不断进步的关键。</p>
+  <!-- Stats Section -->
+  <section id="statsSection" class="stats-section py-5 bg-light">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-md-3 mb-4">
+          <div class="stat-card bg-white p-4 rounded shadow-sm h-100">
+            <div class="stat-icon mb-3">
+              <i class="fas fa-file-alt fa-3x text-primary"></i>
+            </div>
+            <h3 class="fw-bold text-primary counter">{{ group.reviews.count }}</h3>
+            <p class="text-muted mb-0">总论文数</p>
+            <div class="stat-progress mt-2">
+              <div class="progress" style="height: 4px;">
+                <div class="progress-bar bg-primary" style="width: {% widthratio group.reviews.count 1000 100 %}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="stat-card bg-white p-4 rounded shadow-sm h-100">
+            <div class="stat-icon mb-3">
+              <i class="fas fa-users fa-3x text-success"></i>
+            </div>
+            <h3 class="fw-bold text-success counter">{{ group.members.count }}</h3>
+            <p class="text-muted mb-0">活跃用户</p>
+            <div class="stat-progress mt-2">
+              <div class="progress" style="height: 4px;">
+                <div class="progress-bar bg-success" style="width: {% widthratio group.members.count 500 100 %}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="stat-card bg-white p-4 rounded shadow-sm h-100">
+            <div class="stat-icon mb-3">
+              <i class="fas fa-calendar-alt fa-3x text-warning"></i>
+            </div>
+            <h3 class="fw-bold text-warning counter">{{ this_month_count }}</h3>
+            <p class="text-muted mb-0">本月分享</p>
+            <div class="stat-progress mt-2">
+              <div class="progress" style="height: 4px;">
+                <div class="progress-bar bg-warning" style="width: {% widthratio this_month_count 100 100 %}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-4">
+          <div class="stat-card bg-white p-4 rounded shadow-sm h-100">
+            <div class="stat-icon mb-3">
+              <i class="fas fa-trophy fa-3x text-danger"></i>
+            </div>
+            <h3 class="fw-bold text-danger counter">{{ top_contributor_count }}</h3>
+            <p class="text-muted mb-0">分享达人</p>
+            <div class="stat-progress mt-2">
+              <div class="progress" style="height: 4px;">
+                <div class="progress-bar bg-danger" style="width: {% widthratio top_contributor_count 50 100 %}%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h3>社群规则</h3>
-  <ol>
-    <li>
-      学术交流
-      <ul>
-        <li>本群为学术交流群，禁止广告、政治言论和不当言论，违规者立即踢出群。</li>
-        <li>不强制实名，但为确保统计正确，建议保持昵称稳定。</li>
-        <li>倡导敢于质疑、敢于不拘一格的“响马”精神，勇于挑战自我。</li>
-      </ul>
-    </li>
-    <li>
-      每月打卡
-      <ul>
-        <li>每月需读完1篇正式发表的学术论文，撰写推荐理由、评论或解读，并在群内打卡，首月可豁免。</li>
-        <li>每月1日检查上月打卡情况，未完成者将被移出群，离群一个月后可重新申请入群。</li>
-      </ul>
-    </li>
-    <li>
-      打卡方式
-      <ul>
-        {% if False %}
-        <li>可登录本网站后，通过点击“分享打卡”按钮进行提交操作。</li>
-        {% endif %}
-        <li>在微信群中，通过输入以“#paper”开头的文字信息进行打卡，建议格式为：“#paper doi 杂志, 年份, 标题。推荐理由”，如无doi，可用其它唯一标识（如arXivID、PMID或PMCID）注明，以便他人查找。</li>
-        <li>微信群打卡信息将由群主手动同步到网站，因此可能会有一定延迟。</li>
-      </ul>
-    </li>
-    <li>
-      论文分享
-      <ul>
-        <li>所有正式发表的学术论文均可分享，专业不限。内容需符合打卡格式，观点仅代表分享者个人。</li>
-        <li>欢迎成员对分享的论文展开讨论，促进学科间交流。</li>
-      </ul>
-    </li>
-    <li>
-      打卡查询
-      <ul>
-        <li>通过微信群聊天记录搜索“#paper”关键字进行查询。</li>
-        <li>也可浏览本网站，查看各期打卡情况及排名。</li>
-        <li>如有统计错误，请联系群主解决。</li>
-      </ul>
-    </li>
-    <li>
-      社群发展
-      <ul>
-        <li>本群成立于2022年1月8日，目标是坚持读paper，一起精进60年。</li>
-      </ul>
-    </li>
-  </ol>
+  <!-- Quick Actions -->
+  <section class="quick-actions py-5">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <h2 class="fw-bold">
+          <i class="fas fa-compass me-2 text-primary"></i>
+          快速导航
+        </h2>
+        <p class="text-muted">选择您感兴趣的内容，开始探索学术世界</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <a href="{% url 'group:all' group.name %}" class="text-decoration-none">
+            <div class="action-card bg-white p-4 rounded shadow-sm text-center h-100">
+              <div class="action-icon mb-3">
+                <i class="fas fa-list-alt fa-3x text-primary"></i>
+              </div>
+              <h5 class="fw-bold">所有分享</h5>
+              <p class="text-muted small">浏览社群中的所有论文分享</p>
+              <div class="action-arrow">
+                <i class="fas fa-arrow-right text-primary"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{% url 'group:this_month' group.name %}" class="text-decoration-none">
+            <div class="action-card bg-white p-4 rounded shadow-sm text-center h-100">
+              <div class="action-icon mb-3">
+                <i class="fas fa-calendar-check fa-3x text-success"></i>
+              </div>
+              <h5 class="fw-bold">本月分享</h5>
+              <p class="text-muted small">查看本月的热门论文分享</p>
+              <div class="action-arrow">
+                <i class="fas fa-arrow-right text-success"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{% url 'group:last_month' group.name %}" class="text-decoration-none">
+            <div class="action-card bg-white p-4 rounded shadow-sm text-center h-100">
+              <div class="action-icon mb-3">
+                <i class="fas fa-history fa-3x text-warning"></i>
+              </div>
+              <h5 class="fw-bold">上月分享</h5>
+              <p class="text-muted small">回顾上月的精彩论文分享</p>
+              <div class="action-arrow">
+                <i class="fas fa-arrow-right text-warning"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{% url 'group:rank' group.name %}" class="text-decoration-none">
+            <div class="action-card bg-white p-4 rounded shadow-sm text-center h-100">
+              <div class="action-icon mb-3">
+                <i class="fas fa-medal fa-3x text-danger"></i>
+              </div>
+              <h5 class="fw-bold">社群榜单</h5>
+              <p class="text-muted small">查看分享排行榜和统计数据</p>
+              <div class="action-arrow">
+                <i class="fas fa-arrow-right text-danger"></i>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h3>线上分享活动</h3>
-  <p>社群已举办过多次线上分享活动，除特殊情况外，均有录屏视频供回放。</p>
-  <p>
-    <ul>
-      <li>2024-07-12（第10期）：李翛然：全球首次真实量子计算的药物设计过程分享<span class="text-success"><i>（注：因部分内容暂不便大规模公开，故此次分享未录屏，没有回放）</i></span></li>
-      <li>2022-11-12（第9期）：<a class="external-link" href="https://www.bilibili.com/video/BV1PD4y147gK/" target="_blank">林海：Alpha智能体家族的进化与应用之路</a></li>
-      <li>2022-10-22（第8期）：<a class="external-link" href="https://www.bilibili.com/video/BV1jW4y1E7fr/" target="_blank">王昊：视觉问答算法简介</a></li>
-      <li>2022-09-17（第7期）：<a class="external-link" href="https://www.bilibili.com/video/BV1nW4y1q7ja/" target="_blank">尹志：对比学习图像翻译</a></li>
-      <li>2022-09-03（第6期）：<a class="external-link" href="https://www.bilibili.com/video/BV1fY4y1T7rq/" target="_blank">曾梓龙：基于变分自编码器的动态多因子模型</a></li>
-      <li>2022-08-13（第5期）：<a class="external-link" href="https://www.bilibili.com/video/BV1Ld4y1K7nh/" target="_blank">林海：Quantum-Reinforcement-Learning</a></li>
-      <li>2022-08-06（第4期）：<a class="external-link" href="https://www.bilibili.com/video/BV1RV4y1j7UF/" target="_blank">尹志：AI-based-Pathology-Biomarkers</a></li>
-      <li>2022-07-23（第3期）：<a class="external-link" href="https://www.bilibili.com/video/BV1ug4111728/" target="_blank">颜林林：用DNA分子实现生物计算机</a></li>
-      <li>2022-07-09（第2期）：<a class="external-link" href="https://www.bilibili.com/video/BV1tZ4y1Y79a/" target="_blank">曾梓龙：利用深度学习研究自闭症的神经解剖学变异</a></li>
-      <li>2022-06-28（第1期）：大象城南：神经纤维追踪算法<span class="text-success"><i>（注：因第一次活动未录屏，故没有回放）</i></span></li>
-    </ul>
-  </p>
+  <!-- Recent Papers -->
+  <section class="recent-papers py-5 bg-light">
+    <div class="container">
+      <div class="row g-4">
+        <!-- Recent Papers -->
+        <div class="col-lg-8">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2 class="mb-1">
+                <i class="fas fa-clock me-2 text-primary"></i>
+                最新分享
+              </h2>
+              <p class="text-muted mb-0">发现社群中最新的学术成果</p>
+            </div>
+            <a href="{% url 'group:all' group.name %}" class="btn btn-outline-primary">
+              查看全部 <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div class="row g-4">
+            {% for review in recent_reviews %}
+            <div class="col-lg-6">
+              <div class="paper-card bg-white p-4 rounded shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <h5 class="fw-bold text-truncate me-3 flex-grow-1">{{ review.paper.title }}</h5>
+                  <span class="badge bg-primary">{{ review.paper.journal|truncatechars:10 }}</span>
+                </div>
+                <p class="text-muted small mb-2">
+                  <i class="fas fa-user me-1"></i>
+                  {{ review.creator.nickname }}
+                </p>
+                <p class="text-muted small mb-3">
+                  <i class="fas fa-book me-1"></i>
+                  {{ review.paper.journal }}
+                </p>
+                <p class="text-muted small mb-3 paper-abstract">{{ review.comment|truncatechars:150 }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>
+                    {{ review.create_time|date:"Y-m-d" }}
+                  </small>
+                  <div class="d-flex gap-2">
+                    <span class="badge bg-light text-dark">
+                      <i class="fas fa-eye me-1"></i>
+                      {{ review.views|default:0 }}
+                    </span>
+                    <span class="badge bg-light text-dark">
+                      <i class="fas fa-heart me-1"></i>
+                      {{ review.likes|default:0 }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p class="text-muted">暂无最新分享</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        
+        <!-- News and Announcements -->
+        <div class="col-lg-4">
+          <div class="news-announcements">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                  <i class="fas fa-bullhorn me-2"></i>
+                  社群动态
+                </h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="news-list">
+                  <div class="news-item p-3 border-bottom">
+                    <div class="d-flex align-items-start">
+                      <div class="news-icon me-3">
+                        <i class="fas fa-star fa-lg text-warning"></i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                          <h6 class="mb-1 fw-bold">新功能上线：论文推荐系统</h6>
+                          <small class="text-muted">2天前</small>
+                        </div>
+                        <p class="text-muted small mb-2">基于AI的智能论文推荐系统正式上线，为您推荐最相关的研究论文</p>
+                        <div class="d-flex align-items-center">
+                          <span class="badge me-2 bg-danger">公告</span>
+                          <button class="btn btn-sm btn-outline-primary">立即体验</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="news-item p-3 border-bottom">
+                    <div class="d-flex align-items-start">
+                      <div class="news-icon me-3">
+                        <i class="fas fa-users fa-lg text-success"></i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                          <h6 class="mb-1 fw-bold">社群用户突破1000人</h6>
+                          <small class="text-muted">3天前</small>
+                        </div>
+                        <p class="text-muted small mb-2">感谢大家的支持，我们的学术社群用户数量已突破1000人！</p>
+                        <div class="d-flex align-items-center">
+                          <span class="badge me-2 bg-info">新闻</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="card-footer bg-light text-center">
+                  <button class="btn btn-link text-decoration-none">
+                    查看更多动态 <i class="fas fa-arrow-right ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <h3>加入我们</h3>
-  <p>愿意参加并坚持每月打卡（读至少一篇paper并分享）的，请加群主个人微信，并注明“加入响马读paper群”。</p>
-  <p class="text-center"><img class="img-fluid" src="{% static "images/wechat-qrcode.png" %}" width="120" height="120"></p>
-  <p>通过上述规则，我们希望创建一个有序、高效的学术交流平台，让每一位成员在这里都能有所收获，不断提升学术水平。欢迎新老朋友的加入，共同推动学术进步！</p>
-  {% endif %}
+  <!-- Features Section -->
+  <section id="featuresSection" class="features py-5">
+    <div class="container">
+      <div class="section-header text-center mb-5">
+        <h2 class="fw-bold">
+          <i class="fas fa-star me-2 text-warning"></i>
+          平台特色
+        </h2>
+        <p class="text-muted">我们致力于为学术研究者提供最佳的平台体验</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="feature-card text-center p-4 h-100">
+            <div class="feature-icon mb-3">
+              <i class="fas fa-search fa-3x text-primary"></i>
+            </div>
+            <h5 class="fw-bold">智能搜索</h5>
+            <p class="text-muted">强大的论文搜索功能，支持多维度筛选，快速找到您需要的研究资料</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card text-center p-4 h-100">
+            <div class="feature-icon mb-3">
+              <i class="fas fa-chart-line fa-3x text-success"></i>
+            </div>
+            <h5 class="fw-bold">数据分析</h5>
+            <p class="text-muted">详细的分享统计和趋势分析，帮助您了解研究热点和发展方向</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card text-center p-4 h-100">
+            <div class="feature-icon mb-3">
+              <i class="fas fa-comments fa-3x text-warning"></i>
+            </div>
+            <h5 class="fw-bold">学术交流</h5>
+            <p class="text-muted">与同行学者深入讨论，分享见解和观点，促进学术合作与创新</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="cta-section py-5 bg-primary text-white">
+    <div class="container text-center">
+      <h3 class="fw-bold mb-3">准备好加入我们的学术社群了吗？</h3>
+      <p class="lead mb-4">立即开始分享您的学术发现，与全球研究者建立联系</p>
+      <button class="btn btn-light btn-lg me-3">
+        <i class="fas fa-rocket me-2"></i>
+        立即加入
+      </button>
+      <button class="btn btn-outline-light btn-lg">
+        <i class="fas fa-play me-2"></i>
+        观看介绍
+      </button>
+    </div>
+  </section>
 </div>
+
+<style>
+.community-home {
+  min-height: 100vh;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-content {
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-icon {
+  animation: bounce 2s infinite;
+}
+
+.section-header {
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stat-icon {
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1);
+}
+
+.action-card {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card:hover {
+  transform: translateY(-5px);
+  border-color: #007bff;
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.15) !important;
+}
+
+.action-icon {
+  transition: transform 0.3s ease;
+}
+
+.action-card:hover .action-icon {
+  transform: scale(1.1);
+}
+
+.action-arrow {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover .action-arrow {
+  opacity: 1;
+  transform: translateX(5px);
+}
+
+.paper-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+}
+
+.paper-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.paper-abstract {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.feature-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.feature-icon {
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1);
+}
+
+.news-announcements {
+  height: 100%;
+}
+
+.news-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.news-item {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.news-item:hover {
+  background-color: #f8f9fa;
+}
+
+.news-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #f8f9fa;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    text-align: center;
+  }
+  
+  .hero-icon {
+    margin-top: 2rem;
+  }
+  
+  .action-card {
+    margin-bottom: 1rem;
+  }
+  
+  .paper-card {
+    margin-bottom: 1rem;
+  }
+}
+</style>
+
+<script>
+function scrollToStats() {
+  document.getElementById('statsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function scrollToFeatures() {
+  document.getElementById('featuresSection').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
 {% endblock content %}

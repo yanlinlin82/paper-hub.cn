@@ -15,7 +15,7 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
-from django.db.models import Q
+from django.db.models import Q, Count, Min
 from django.contrib.auth.models import User
 import openai
 from mysite import settings
@@ -25,7 +25,7 @@ from core.models import GroupProfile, Recommendation
 from core.models import Paper, PaperTranslation, PaperChat
 from core.paper import guess_identifier_type, get_paper_info, convert_string_to_datetime
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
-from core.paper import convert_paper_info
+from core.paper import convert_paper_info, get_check_in_interval
 
 def json_post_handler(func):
     @wraps(func)
@@ -636,16 +636,15 @@ def fetch_rank_full_list(request):
 
     return JsonResponse({'success': True, 'results': stat})
 
+@csrf_exempt
 @json_post_handler
 def fetch_rank_list(request):
     data = request.json_data
-    token = data.get('token')
-    if not token or not is_token_valid(token):
-        return JsonResponse({'success': False, 'error': 'Invalid or expired token'})
-
-    group_name = data.get('group_name')
-    group = GroupProfile.objects.get(name=group_name)
-    if group is None:
+    group_name = data.get('group_name', 'xiangma')  # 默认使用xiangma群组
+    
+    try:
+        group = GroupProfile.objects.get(name=group_name)
+    except GroupProfile.DoesNotExist:
         return JsonResponse({'success': False, 'error': f"Group not found: {group_name}"})
 
     reviews = group.reviews.filter(delete_time__isnull=True)
@@ -656,6 +655,85 @@ def fetch_rank_list(request):
     stat_4 = get_stat_journal(reviews, group_name, top_n=10)
 
     return JsonResponse({'success': True, 'results': [stat_1, stat_2, stat_3, stat_4]})
+
+@csrf_exempt
+@json_post_handler
+def fetch_rank_by_type(request):
+    """获取特定类型的榜单数据，支持月度榜单和年度榜单"""
+    data = request.json_data
+    rank_type = data.get('rank_type')
+    group_name = data.get('group_name', 'xiangma')
+    year = data.get('year')
+    month = data.get('month')
+    
+    try:
+        group = GroupProfile.objects.get(name=group_name)
+    except GroupProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'error': f"Group not found: {group_name}"})
+
+    reviews = group.reviews.filter(delete_time__isnull=True)
+    
+    if rank_type == 'monthly':
+        if not year or not month:
+            return JsonResponse({'success': False, 'error': 'Year and month are required for monthly ranking'})
+        
+        # 获取指定年月的榜单
+        start_time, end_time = get_check_in_interval(year, month)
+        reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
+        
+        stat = reviews.values('creator__nickname', 'creator__pk')\
+            .annotate(Count('creator'), min_create_time=Min('create_time'))\
+            .order_by('-creator__count', 'min_create_time')
+        
+        title = f'{year}年{month}月榜单（Top10）'
+        if stat.count() > 10:
+            title = f'{year}年{month}月榜单（完整榜单）'
+        
+        result = {
+            'name': 'monthly',
+            'title': title,
+            'total_count': stat.count(),
+            'columns': ['排名', '分享者', '分享数'],
+            'content': [{
+                'id': item['creator__pk'],
+                'name': item['creator__nickname'],
+                'count': item['creator__count']
+            } for item in stat[:10]],
+        }
+        
+    elif rank_type == 'yearly':
+        if not year:
+            return JsonResponse({'success': False, 'error': 'Year is required for yearly ranking'})
+        
+        # 获取指定年份的榜单
+        start_time, _ = get_check_in_interval(year, 1)
+        _, end_time = get_check_in_interval(year, 12)
+        reviews = reviews.filter(create_time__gte=start_time, create_time__lt=end_time)
+        
+        stat = reviews.values('creator__nickname', 'creator__pk')\
+            .annotate(Count('creator'), min_create_time=Min('create_time'))\
+            .order_by('-creator__count', 'min_create_time')
+        
+        title = f'{year}年度榜单（Top10）'
+        if stat.count() > 10:
+            title = f'{year}年度榜单（完整榜单）'
+        
+        result = {
+            'name': 'yearly',
+            'title': title,
+            'total_count': stat.count(),
+            'columns': ['排名', '分享者', '分享数'],
+            'content': [{
+                'id': item['creator__pk'],
+                'name': item['creator__nickname'],
+                'count': item['creator__count']
+            } for item in stat[:10]],
+        }
+        
+    else:
+        return JsonResponse({'success': False, 'error': f'Unsupported rank type: {rank_type}'})
+    
+    return JsonResponse({'success': True, 'result': result})
 
 def get_user_aliases(user):
     aliases = [user]

@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_CONTAINER_PORT:-3000}:80"
+    environment:
+      - VITE_API_BASE_URL=${PRODUCTION_API_BASE_URL:-http://localhost:8000/api}
+    depends_on:
+      - backend
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_CONTAINER_PORT:-8000}:8000"
+    environment:
+      - DJANGO_ENV=${DJANGO_ENV:-production}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-paperhub}
+      - DB_USER=${DB_USER:-paperhub}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+    volumes:
+      - static_files:/app/static_root
+    depends_on:
+      - db
+
+  # 数据库服务
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME:-paperhub}
+      - POSTGRES_USER=${DB_USER:-paperhub}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  postgres_data:
+  static_files:

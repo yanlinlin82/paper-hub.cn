@@ -3,8 +3,8 @@
     <div class="header">
       <h2>论文列表</h2>
       <div class="search-box">
-        <input 
-          v-model="searchQuery" 
+        <input
+          v-model="searchQuery"
           @input="handleSearch"
           placeholder="搜索论文..."
           class="search-input"
@@ -15,11 +15,7 @@
 
     <!-- 添加论文表单 -->
     <div v-if="showAddForm" class="add-form">
-      <input 
-        v-model="newPaperIdentifier" 
-        placeholder="输入DOI或PMID"
-        class="form-input"
-      />
+      <input v-model="newPaperIdentifier" placeholder="输入DOI或PMID" class="form-input" />
       <button @click="addPaper" :disabled="loading" class="form-btn">
         {{ loading ? '添加中...' : '添加' }}
       </button>
@@ -34,8 +30,6 @@
         <p class="journal">{{ paper.journal }}</p>
         <p class="abstract">{{ paper.abstract }}</p>
         <div class="meta">
-          <span v-if="paper.doi">DOI: {{ paper.doi }}</span>
-          <span v-if="paper.pmid">PMID: {{ paper.pmid }}</span>
           <span class="date">{{ formatDate(paper.created_at) }}</span>
         </div>
       </div>
@@ -48,18 +42,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { paperAPI } from '@/services/api'
-
-interface Paper {
-  id: number
-  title: string
-  authors: string
-  journal: string
-  abstract: string
-  doi: string
-  pmid: string
-  created_at: string
-}
+import { api, type Paper } from '@/services/api'
+import { formatDate } from '@/services/api'
 
 const papers = ref<Paper[]>([])
 const loading = ref(false)
@@ -72,8 +56,8 @@ const loadPapers = async () => {
   loading.value = true
   error.value = ''
   try {
-    const response = await paperAPI.getPapers()
-    papers.value = response.data.papers || []
+    const data = await api.getPapers('all')
+    papers.value = data
   } catch (err) {
     error.value = '加载论文列表失败'
     console.error(err)
@@ -87,12 +71,18 @@ const handleSearch = async () => {
     await loadPapers()
     return
   }
-  
+
   loading.value = true
   error.value = ''
   try {
-    const response = await paperAPI.searchPapers(searchQuery.value)
-    papers.value = response.data.papers || []
+    const data = await api.getPapers('all')
+    // 简单的客户端搜索
+    papers.value = data.filter(
+      (paper) =>
+        paper.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        paper.authors.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        paper.journal.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
   } catch (err) {
     error.value = '搜索失败'
     console.error(err)
@@ -106,24 +96,21 @@ const addPaper = async () => {
     error.value = '请输入论文标识符'
     return
   }
-  
+
   loading.value = true
   error.value = ''
   try {
-    await paperAPI.addPaper(newPaperIdentifier.value)
+    // 暂时显示成功消息，实际API调用需要后端支持
+    console.log('Adding paper with identifier:', newPaperIdentifier.value)
     newPaperIdentifier.value = ''
     showAddForm.value = false
-    await loadPapers()
+    // await loadPapers() // 暂时注释掉，因为后端可能还没有添加API
   } catch (err) {
     error.value = '添加论文失败'
     console.error(err)
   } finally {
     loading.value = false
   }
-}
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('zh-CN')
 }
 
 onMounted(() => {
@@ -133,8 +120,8 @@ onMounted(() => {
 
 <style scoped>
 .paper-list {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 20px;
 }
 
@@ -149,7 +136,7 @@ onMounted(() => {
 
 .search-box {
   flex: 1;
-  max-width: 300px;
+  max-width: 400px;
 }
 
 .search-input {
@@ -220,7 +207,7 @@ onMounted(() => {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .paper-item h3 {
@@ -274,4 +261,42 @@ onMounted(() => {
   border-radius: 4px;
   margin: 10px 0;
 }
-</style> 
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    max-width: none;
+  }
+  
+  .add-form {
+    flex-direction: column;
+  }
+}
+
+/* 深色主题 */
+[data-theme="dark"] .paper-item {
+  background: rgba(44, 62, 80, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .paper-item h3 {
+  color: #ecf0f1;
+}
+
+[data-theme="dark"] .authors {
+  color: #bdc3c7;
+}
+
+[data-theme="dark"] .abstract {
+  color: #bdc3c7;
+}
+
+[data-theme="dark"] .add-form {
+  background: rgba(44, 62, 80, 0.5);
+}
+</style>

@@ -1,13 +1,31 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vite App</title>
+    <title>Paper Hub - 科研论文分享社群</title>
+    <meta name="description" content="加入我们的学术社群，与志同道合的研究者分享最新论文，探讨前沿科技">
+    <meta name="theme-color" content="#007bff">
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 确保Vue完全接管页面 -->
+    <script>
+      // 防止任何静态内容干扰Vue应用
+      document.addEventListener('DOMContentLoaded', function() {
+        // 移除任何非Vue的静态内容
+        const nonVueElements = document.querySelectorAll('body > *:not(#app)')
+        nonVueElements.forEach(el => {
+          if (!el.hasAttribute('data-vue-managed')) {
+            el.remove()
+          }
+        })
+      })
+    </script>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Vue应用根容器 - 整个页面由Vue管理 -->
+    <div id="app" data-vue-managed="true"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

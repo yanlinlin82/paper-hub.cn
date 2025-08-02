@@ -690,7 +690,7 @@ def get_stat_all(reviews, group_name, top_n = None):
         } for item in stat_all[:top_n]],
     }
     if stat_all.count() > top_n:
-        stat['full_rank'] = reverse('group:stat_all', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:rank_type', kwargs={'group_name':group_name, 'rank_type':'all'})
 
     return stat
 
@@ -754,7 +754,7 @@ def get_stat_this_month(reviews, group_name, top_n = None):
         } for item in stat_this_month[:top_n]],
     }
     if stat_this_month.count() > top_n:
-        stat['full_rank'] = reverse('group:stat_this_month', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:rank_type', kwargs={'group_name':group_name, 'rank_type':'this_month'})
 
     return stat
 
@@ -791,7 +791,7 @@ def get_stat_last_month(reviews, group_name, top_n = None):
         } for item in stat_last_month[:top_n]],
     }
     if stat_last_month.count() > top_n:
-        stat['full_rank'] = reverse('group:stat_last_month', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:rank_type', kwargs={'group_name':group_name, 'rank_type':'last_month'})
 
     return stat
 
@@ -820,7 +820,7 @@ def get_stat_journal(reviews, group_name, top_n = None):
         } for item in stat_journal[:top_n]],
     }
     if stat_journal.count() > top_n:
-        stat['full_rank'] = reverse('group:stat_journal', kwargs={'group_name':group_name})
+        stat['full_rank'] = reverse('group:rank_type', kwargs={'group_name':group_name, 'rank_type':'journal'})
 
     return stat
 
