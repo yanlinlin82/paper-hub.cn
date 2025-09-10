@@ -6,3 +6,4 @@ static_root/
 .venv/
 *.log
 pubmed
+secret_key.txt
