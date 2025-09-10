@@ -9,7 +9,10 @@ An easy way to read and share papers for scientific research
     ```sh
     python -m venv .venv
     . .venv/bin/activate
-    pip install -U -r requirements.txt
+    pip install -U pip
+    pip install -U pip-tools
+    pip-compile requirements.in -o requirements.txt
+    pip install -r requirements.txt
     ```
 
 2. Prepare static files:
