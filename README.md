@@ -4,7 +4,14 @@ An easy way to read and share papers for scientific research
 
 ## Quick Start
 
-1. Prepare virtual environment (venv):
+1. Install node packages and build:
+
+    ```sh
+    npm install
+    npm run build
+    ```
+
+2. Prepare virtual environment (venv):
 
     ```sh
     python -m venv .venv
@@ -15,19 +22,19 @@ An easy way to read and share papers for scientific research
     pip install -r requirements.txt
     ```
 
-2. Prepare static files:
+3. Prepare static files:
 
     ```sh
     python manage.py collectstatic
     ```
 
-3. Establish database
+4. Establish database
 
     ```sh
     python manage.py migrate
     ```
 
-4. Run Server
+5. Run Server
 
     ```sh
     python manage.py runserver
@@ -153,7 +160,7 @@ An easy way to read and share papers for scientific research
 
 2. **Q:** What should I do if I encounter the following error during installation:
 
-    ```
+    ```txt
     ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.
     ```
 
