@@ -2,16 +2,18 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
+    lib: {
+      entry: 'src/main.js',
+      name: 'Main',
+      fileName: 'js/main',
+      formats: ['iife']
+    },
     outDir: 'static/assets',
     rollupOptions: {
-      input: {
-        'js/main': 'src/main.js'
-      },
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
-        assetFileNames: '[name][extname]',
-        cssFileName: 'css/[name][extname]'
+        assetFileNames: '[name][extname]'
       }
     }
   }
