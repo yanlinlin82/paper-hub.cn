@@ -187,58 +187,145 @@
 </div>
 <script>
 function edit_review_new(review_id, paper_id) {
-  $('#editReviewModalReviewId').val(review_id);
-  $('#editReviewModalPaperId').val(paper_id);
-  $('#editReviewModalLabel').text($('#review_creator_' + review_id).text());
-  $('#editReviewModalComment').text($('#review_comment_' + review_id).text());
-  $('#editReviewModalTitle').val($('#title_' + paper_id + '_text').text());
-  $('#editReviewModalJournal').val($('#journal_' + paper_id).text());
-  $('#editReviewModalDOI').val($('#doi_' + paper_id).text());
-  $('#editReviewModalPMID').val($('#pmid_' + paper_id).text());
-  $('#editReviewModalPMCID').val($('#pmcid_' + paper_id).text());
-  $('#editReviewModalArXivID').val($('#arxiv_' + paper_id).text());
-  $('#editReviewModalCNKIID').val($('#cnki_' + paper_id).text());
-  $('#editReviewModal').modal('show');
+  var reviewIdField = document.getElementById('editReviewModalReviewId');
+  var paperIdField = document.getElementById('editReviewModalPaperId');
+  var labelField = document.getElementById('editReviewModalLabel');
+  var commentField = document.getElementById('editReviewModalComment');
+  var titleField = document.getElementById('editReviewModalTitle');
+  var journalField = document.getElementById('editReviewModalJournal');
+  var doiField = document.getElementById('editReviewModalDOI');
+  var pmidField = document.getElementById('editReviewModalPMID');
+  var pmcidField = document.getElementById('editReviewModalPMCID');
+  var arxivField = document.getElementById('editReviewModalArXivID');
+  var cnkiField = document.getElementById('editReviewModalCNKIID');
+  var modal = document.getElementById('editReviewModal');
+  
+  if (reviewIdField) reviewIdField.value = review_id;
+  if (paperIdField) paperIdField.value = paper_id;
+  
+  var creatorElement = document.getElementById('review_creator_' + review_id);
+  if (labelField && creatorElement) {
+    labelField.textContent = creatorElement.textContent;
+  }
+  
+  var commentElement = document.getElementById('review_comment_' + review_id);
+  if (commentField && commentElement) {
+    commentField.textContent = commentElement.textContent;
+  }
+  
+  var titleElement = document.getElementById('title_' + paper_id + '_text');
+  if (titleField && titleElement) {
+    titleField.value = titleElement.textContent;
+  }
+  
+  var journalElement = document.getElementById('journal_' + paper_id);
+  if (journalField && journalElement) {
+    journalField.value = journalElement.textContent;
+  }
+  
+  var doiElement = document.getElementById('doi_' + paper_id);
+  if (doiField && doiElement) {
+    doiField.value = doiElement.textContent;
+  }
+  
+  var pmidElement = document.getElementById('pmid_' + paper_id);
+  if (pmidField && pmidElement) {
+    pmidField.value = pmidElement.textContent;
+  }
+  
+  var pmcidElement = document.getElementById('pmcid_' + paper_id);
+  if (pmcidField && pmcidElement) {
+    pmcidField.value = pmcidElement.textContent;
+  }
+  
+  var arxivElement = document.getElementById('arxiv_' + paper_id);
+  if (arxivField && arxivElement) {
+    arxivField.value = arxivElement.textContent;
+  }
+  
+  var cnkiElement = document.getElementById('cnki_' + paper_id);
+  if (cnkiField && cnkiElement) {
+    cnkiField.value = cnkiElement.textContent;
+  }
+  
+  if (modal) {
+    var bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+  }
 }
 
 function enable_edit_paper() {
-  $('#editReviewModalEditPaperInfo').val('true');
-  $('#editReviewModalPaperInfo').addClass('d-block');
-  $('#editReviewModalPaperInfo').removeClass('d-none');
-  $('#editReviewModalCard').addClass('d-none');
-  $('#editReviewModalCard').removeClass('d-block');
-  $('#editReviewModalDialog').addClass('modal-xl');
-  $('#editReviewModalDialog').removeClass('modal-lg');
+  var editPaperInfoField = document.getElementById('editReviewModalEditPaperInfo');
+  var paperInfo = document.getElementById('editReviewModalPaperInfo');
+  var card = document.getElementById('editReviewModalCard');
+  var dialog = document.getElementById('editReviewModalDialog');
+  
+  if (editPaperInfoField) editPaperInfoField.value = 'true';
+  if (paperInfo) {
+    paperInfo.classList.add('d-block');
+    paperInfo.classList.remove('d-none');
+  }
+  if (card) {
+    card.classList.add('d-none');
+    card.classList.remove('d-block');
+  }
+  if (dialog) {
+    dialog.classList.add('modal-xl');
+    dialog.classList.remove('modal-lg');
+  }
 }
 
 function disable_edit_paper() {
-  $('#editReviewModalEditPaperInfo').val('false');
-  $('#editReviewModalPaperInfo').addClass('d-none');
-  $('#editReviewModalPaperInfo').removeClass('d-block');
-  $('#editReviewModalCard').addClass('d-block');
-  $('#editReviewModalCard').removeClass('d-none');
-  $('#editReviewModalDialog').addClass('modal-lg');
-  $('#editReviewModalDialog').removeClass('modal-xl');
+  var editPaperInfoField = document.getElementById('editReviewModalEditPaperInfo');
+  var paperInfo = document.getElementById('editReviewModalPaperInfo');
+  var card = document.getElementById('editReviewModalCard');
+  var dialog = document.getElementById('editReviewModalDialog');
+  
+  if (editPaperInfoField) editPaperInfoField.value = 'false';
+  if (paperInfo) {
+    paperInfo.classList.add('d-none');
+    paperInfo.classList.remove('d-block');
+  }
+  if (card) {
+    card.classList.add('d-block');
+    card.classList.remove('d-none');
+  }
+  if (dialog) {
+    dialog.classList.add('modal-lg');
+    dialog.classList.remove('modal-xl');
+  }
 }
 
 function setAndCompareValues(field, value) {
-  var element = $('#editReviewModal' + field + '2');
-  if (Array.isArray(value)) {
-      element.val(value.join('\n'));
-  } else {
-      element.val(value);
+  var element = document.getElementById('editReviewModal' + field + '2');
+  var originalElement = document.getElementById('editReviewModal' + field);
+  var confirmButton = document.getElementById('editReviewModal' + field + 'Confirm');
+  
+  if (element) {
+    if (Array.isArray(value)) {
+      element.value = value.join('\n');
+    } else {
+      element.value = value;
+    }
   }
-  var originalValue = $('#editReviewModal' + field).val();
-  var newValue = element.val();
+  
+  var originalValue = originalElement ? originalElement.value : '';
+  var newValue = element ? element.value : '';
   var isDisabled = originalValue === newValue || newValue === '';
   console.log(field + ': ' + originalValue + ' -> ' + newValue + ' (' + isDisabled + ')');
-  $('#editReviewModal' + field + 'Confirm').prop("disabled", isDisabled);
+  
+  if (confirmButton) {
+    confirmButton.disabled = isDisabled;
+  }
 }
 
 function fill_input(id) {
-  if (!$('#editReviewModal' + id + 'Confirm').prop("disabled")) {
-    var value = $('#editReviewModal' + id + '2').val();
-    $('#editReviewModal' + id).val(value);
+  var confirmButton = document.getElementById('editReviewModal' + id + 'Confirm');
+  var sourceElement = document.getElementById('editReviewModal' + id + '2');
+  var targetElement = document.getElementById('editReviewModal' + id);
+  
+  if (confirmButton && !confirmButton.disabled && sourceElement && targetElement) {
+    targetElement.value = sourceElement.value;
   }
 }
 
@@ -260,7 +347,9 @@ function fill_input_all() {
 }
 
 function query_paper_info() {
-  var identifier = $('#editReviewModalID').val();
+  var identifierField = document.getElementById('editReviewModalID');
+  var identifier = identifierField ? identifierField.value : '';
+  
   ajaxPostJson({
     url: "{% url 'api:query_paper_info' %}",
     data: { 'identifier': identifier },
@@ -290,29 +379,53 @@ function query_paper_info() {
 
 function submit_review(event) {
   event.preventDefault();
-  data = {
-    review_id: $('#editReviewModalReviewId').val(),
-    paper_id: $('#editReviewModalPaperId').val(),
-    comment: $('#editReviewModalComment').val()
+  
+  var reviewIdField = document.getElementById('editReviewModalReviewId');
+  var paperIdField = document.getElementById('editReviewModalPaperId');
+  var commentField = document.getElementById('editReviewModalComment');
+  var editPaperInfoField = document.getElementById('editReviewModalEditPaperInfo');
+  
+  var data = {
+    review_id: reviewIdField ? reviewIdField.value : '',
+    paper_id: paperIdField ? paperIdField.value : '',
+    comment: commentField ? commentField.value : ''
   };
-  editPaperInfo = $('#editReviewModalEditPaperInfo').val();
+  
+  var editPaperInfo = editPaperInfoField ? editPaperInfoField.value : '';
   if (editPaperInfo) {
     data.paper = {};
-    data.paper.title = $('#editReviewModalTitle').val();
-    data.paper.journal = $('#editReviewModalJournal').val();
-    data.paper.pub_date = $('#editReviewModalPubDate').val();
-    data.paper.authors = $('#editReviewModalAuthors').val();
-    data.paper.affiliations = $('#editReviewModalAffiliations').val();
-    data.paper.abstract = $('#editReviewModalAbstract').val();
-    data.paper.keywords = $('#editReviewModalKeywords').val();
-    data.paper.urls = $('#editReviewModalURLs').val();
-    data.paper.doi = $('#editReviewModalDOI').val();
-    data.paper.pmid = $('#editReviewModalPMID').val();
-    data.paper.arxiv_id = $('#editReviewModalArXivID').val();
-    data.paper.pmcid = $('#editReviewModalPMCID').val();
-    data.paper.cnki_id = $('#editReviewModalCNKIID').val();
-    data.paper.lang = $('#editReviewModalLang').val();
+    
+    var titleField = document.getElementById('editReviewModalTitle');
+    var journalField = document.getElementById('editReviewModalJournal');
+    var pubDateField = document.getElementById('editReviewModalPubDate');
+    var authorsField = document.getElementById('editReviewModalAuthors');
+    var affiliationsField = document.getElementById('editReviewModalAffiliations');
+    var abstractField = document.getElementById('editReviewModalAbstract');
+    var keywordsField = document.getElementById('editReviewModalKeywords');
+    var urlsField = document.getElementById('editReviewModalURLs');
+    var doiField = document.getElementById('editReviewModalDOI');
+    var pmidField = document.getElementById('editReviewModalPMID');
+    var arxivField = document.getElementById('editReviewModalArXivID');
+    var pmcidField = document.getElementById('editReviewModalPMCID');
+    var cnkiField = document.getElementById('editReviewModalCNKIID');
+    var langField = document.getElementById('editReviewModalLang');
+    
+    data.paper.title = titleField ? titleField.value : '';
+    data.paper.journal = journalField ? journalField.value : '';
+    data.paper.pub_date = pubDateField ? pubDateField.value : '';
+    data.paper.authors = authorsField ? authorsField.value : '';
+    data.paper.affiliations = affiliationsField ? affiliationsField.value : '';
+    data.paper.abstract = abstractField ? abstractField.value : '';
+    data.paper.keywords = keywordsField ? keywordsField.value : '';
+    data.paper.urls = urlsField ? urlsField.value : '';
+    data.paper.doi = doiField ? doiField.value : '';
+    data.paper.pmid = pmidField ? pmidField.value : '';
+    data.paper.arxiv_id = arxivField ? arxivField.value : '';
+    data.paper.pmcid = pmcidField ? pmcidField.value : '';
+    data.paper.cnki_id = cnkiField ? cnkiField.value : '';
+    data.paper.lang = langField ? langField.value : '';
   }
+  
   console.log(data);
   ajaxPostJson({
     url: "{% url 'api:submit_review' %}",
@@ -386,88 +499,179 @@ function submit_review(event) {
 <script>
 function get_review_id(id) {
   var review_id = '';
-  if ($('#review-doi-' + id)) {
-    review_id = $('#review-doi-' + id).text();
-  } else if ($('#review-pmid-' + id)) {
-    review_id = $('#review-pmid-' + id).text();
-  } else if ($('#review-pmcid-' + id)) {
-    review_id = $('#review-pmcid-' + id).text();
-  } else if ($('#review-arxiv-id-' + id)) {
-    review_id = $('#review-arxiv-id-' + id).text();
-  } else if ($('#review-cnki-id-' + id)) {
-    review_id = $('#review-cnki-id-' + id).text();
+  var doiElement = document.getElementById('review-doi-' + id);
+  var pmidElement = document.getElementById('review-pmid-' + id);
+  var pmcidElement = document.getElementById('review-pmcid-' + id);
+  var arxivElement = document.getElementById('review-arxiv-id-' + id);
+  var cnkiElement = document.getElementById('review-cnki-id-' + id);
+  
+  if (doiElement) {
+    review_id = doiElement.textContent;
+  } else if (pmidElement) {
+    review_id = pmidElement.textContent;
+  } else if (pmcidElement) {
+    review_id = pmcidElement.textContent;
+  } else if (arxivElement) {
+    review_id = arxivElement.textContent;
+  } else if (cnkiElement) {
+    review_id = cnkiElement.textContent;
   }
   return review_id;
 }
 
 function edit_review(id) {
-  $('#reviewModalLabel').text('Edit review');
-  $('#reviewModalUsername').prop("readonly", true);
-  $('#reviewModalCreateTime').prop("readonly", true);
-  $('#reviewModalPk').val(id);
-  $('#reviewModalUsername').val($('#review-user-' + id).text());
-  $('#reviewModalCreateTime').val($('#review-create-time-' + id).text());
-  $('#reviewModalreviewID').val(get_review_id(id));
-  $('#reviewModalTitle').val($('#review-title-' + id).text());
-  $('#reviewModalPubYear').val($('#review-pub-year-' + id).text());
-  $('#reviewModalJournal').val($('#review-journal-' + id).text());
-  $('#reviewModalComment').val($('#review-comment-' + id).text());
-  $('#reviewModal').modal('show');
+  var label = document.getElementById('reviewModalLabel');
+  var usernameField = document.getElementById('reviewModalUsername');
+  var createTimeField = document.getElementById('reviewModalCreateTime');
+  var pkField = document.getElementById('reviewModalPk');
+  var reviewIdField = document.getElementById('reviewModalreviewID');
+  var titleField = document.getElementById('reviewModalTitle');
+  var pubYearField = document.getElementById('reviewModalPubYear');
+  var journalField = document.getElementById('reviewModalJournal');
+  var commentField = document.getElementById('reviewModalComment');
+  var modal = document.getElementById('reviewModal');
+  
+  if (label) label.textContent = 'Edit review';
+  if (usernameField) usernameField.readOnly = true;
+  if (createTimeField) createTimeField.readOnly = true;
+  if (pkField) pkField.value = id;
+  
+  var userElement = document.getElementById('review-user-' + id);
+  if (usernameField && userElement) {
+    usernameField.value = userElement.textContent;
+  }
+  
+  var createTimeElement = document.getElementById('review-create-time-' + id);
+  if (createTimeField && createTimeElement) {
+    createTimeField.value = createTimeElement.textContent;
+  }
+  
+  if (reviewIdField) {
+    reviewIdField.value = get_review_id(id);
+  }
+  
+  var titleElement = document.getElementById('review-title-' + id);
+  if (titleField && titleElement) {
+    titleField.value = titleElement.textContent;
+  }
+  
+  var pubYearElement = document.getElementById('review-pub-year-' + id);
+  if (pubYearField && pubYearElement) {
+    pubYearField.value = pubYearElement.textContent;
+  }
+  
+  var journalElement = document.getElementById('review-journal-' + id);
+  if (journalField && journalElement) {
+    journalField.value = journalElement.textContent;
+  }
+  
+  var commentElement = document.getElementById('review-comment-' + id);
+  if (commentField && commentElement) {
+    commentField.value = commentElement.textContent;
+  }
+  
+  if (modal) {
+    var bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+  }
 }
 
 function add_review() {
-  $('#reviewModalLabel').text('Add review');
-  $('#reviewModalUsername').prop("readonly", false);
-  $('#reviewModalCreateTime').prop("readonly", false);
-  $('#reviewModalPk').val('');
-  $('#reviewModalUsername').val('');
-  $('#reviewModalCreateTime').val('');
-  $('#reviewModalreviewID').val('');
-  $('#reviewModalTitle').val('');
-  $('#reviewModalPubYear').val('');
-  $('#reviewModalJournal').val('');
-  $('#reviewModalComment').val('');
-  $('#reviewModal').modal('show');
+  var label = document.getElementById('reviewModalLabel');
+  var usernameField = document.getElementById('reviewModalUsername');
+  var createTimeField = document.getElementById('reviewModalCreateTime');
+  var pkField = document.getElementById('reviewModalPk');
+  var reviewIdField = document.getElementById('reviewModalreviewID');
+  var titleField = document.getElementById('reviewModalTitle');
+  var pubYearField = document.getElementById('reviewModalPubYear');
+  var journalField = document.getElementById('reviewModalJournal');
+  var commentField = document.getElementById('reviewModalComment');
+  var modal = document.getElementById('reviewModal');
+  
+  if (label) label.textContent = 'Add review';
+  if (usernameField) usernameField.readOnly = false;
+  if (createTimeField) createTimeField.readOnly = false;
+  if (pkField) pkField.value = '';
+  if (usernameField) usernameField.value = '';
+  if (createTimeField) createTimeField.value = '';
+  if (reviewIdField) reviewIdField.value = '';
+  if (titleField) titleField.value = '';
+  if (pubYearField) pubYearField.value = '';
+  if (journalField) journalField.value = '';
+  if (commentField) commentField.value = '';
+  
+  if (modal) {
+    var bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+  }
 }
 
-$(() => {
-  $('#reviewModal').on('shown.bs.modal', () => {
-    if ($('#reviewModalLabel').text() == 'Add review') {
-      $('#reviewModalUsername').focus();
-    } else {
-      $('#reviewModalreviewID').focus();
-    }
-  })
-
-  $('#reviewModalQuery').click(function () {
-    review_id = $('#reviewModalreviewID').val();
-    url = "{% url 'api:query_review' 'xxxxxx' %}".replace('xxxxxx', review_id);
-    ajaxPostJson({
-      url: url,
-      success: function (data) {
-        if (!data.success) {
-          alert('Failed to query review info by ID (' + review_id + ').\n' + data.error);
-        } else {
-          $('#reviewModalTitle').val(data.results.title);
-          $('#reviewModalPubYear').val(data.results.pub_year);
-          $('#reviewModalJournal').val(data.results.journal);
+document.addEventListener('DOMContentLoaded', function() {
+  var reviewModal = document.getElementById('reviewModal');
+  if (reviewModal) {
+    reviewModal.addEventListener('shown.bs.modal', function() {
+      var label = document.getElementById('reviewModalLabel');
+      var usernameField = document.getElementById('reviewModalUsername');
+      var reviewIdField = document.getElementById('reviewModalreviewID');
+      
+      if (label && label.textContent == 'Add review') {
+        if (usernameField) {
+          usernameField.focus();
+        }
+      } else {
+        if (reviewIdField) {
+          reviewIdField.focus();
         }
       }
     });
-  })
+  }
+
+  var reviewModalQuery = document.getElementById('reviewModalQuery');
+  if (reviewModalQuery) {
+    reviewModalQuery.addEventListener('click', function() {
+      var reviewIdField = document.getElementById('reviewModalreviewID');
+      var review_id = reviewIdField ? reviewIdField.value : '';
+      var url = "{% url 'api:query_review' 'xxxxxx' %}".replace('xxxxxx', review_id);
+      
+      ajaxPostJson({
+        url: url,
+        success: function (data) {
+          if (!data.success) {
+            alert('Failed to query review info by ID (' + review_id + ').\n' + data.error);
+          } else {
+            var titleField = document.getElementById('reviewModalTitle');
+            var pubYearField = document.getElementById('reviewModalPubYear');
+            var journalField = document.getElementById('reviewModalJournal');
+            
+            if (titleField) titleField.value = data.results.title || '';
+            if (pubYearField) pubYearField.value = data.results.pub_year || '';
+            if (journalField) journalField.value = data.results.journal || '';
+          }
+        }
+      });
+    });
+  }
 
   function ajax_add_review() {
+    var usernameField = document.getElementById('reviewModalUsername');
+    var createTimeField = document.getElementById('reviewModalCreateTime');
+    var reviewIdField = document.getElementById('reviewModalreviewID');
+    var titleField = document.getElementById('reviewModalTitle');
+    var pubYearField = document.getElementById('reviewModalPubYear');
+    var journalField = document.getElementById('reviewModalJournal');
+    var commentField = document.getElementById('reviewModalComment');
+    
     ajaxPostJson({
       url: "{% url 'api:add_review' %}",
       data: {
         group_name: '{{ group.name }}',
-        username: $('#reviewModalUsername').val(),
-        create_time: $('#reviewModalCreateTime').val(),
-        review_id: $('#reviewModalreviewID').val(),
-        title: $('#reviewModalTitle').val(),
-        pub_year: $('#reviewModalPubYear').val(),
-        journal: $('#reviewModalJournal').val(),
-        comment: $('#reviewModalComment').val()
+        username: usernameField ? usernameField.value : '',
+        create_time: createTimeField ? createTimeField.value : '',
+        review_id: reviewIdField ? reviewIdField.value : '',
+        title: titleField ? titleField.value : '',
+        pub_year: pubYearField ? pubYearField.value : '',
+        journal: journalField ? journalField.value : '',
+        comment: commentField ? commentField.value : ''
       },
       success: function (data) {
         if (!data.success) {
@@ -480,15 +684,22 @@ $(() => {
   }
 
   function ajax_edit_review() {
+    var pkField = document.getElementById('reviewModalPk');
+    var reviewIdField = document.getElementById('reviewModalreviewID');
+    var titleField = document.getElementById('reviewModalTitle');
+    var pubYearField = document.getElementById('reviewModalPubYear');
+    var journalField = document.getElementById('reviewModalJournal');
+    var commentField = document.getElementById('reviewModalComment');
+    
     ajaxPostJson({
       url: "{% url 'api:edit_review' %}",
       data: {
-        id: $('#reviewModalPk').val(),
-        review_id: $('#reviewModalreviewID').val(),
-        title: $('#reviewModalTitle').val(),
-        pub_year: $('#reviewModalPubYear').val(),
-        journal: $('#reviewModalJournal').val(),
-        comment: $('#reviewModalComment').val()
+        id: pkField ? pkField.value : '',
+        review_id: reviewIdField ? reviewIdField.value : '',
+        title: titleField ? titleField.value : '',
+        pub_year: pubYearField ? pubYearField.value : '',
+        journal: journalField ? journalField.value : '',
+        comment: commentField ? commentField.value : ''
       },
       success: function (data) {
         if (!data.success) {
@@ -500,14 +711,18 @@ $(() => {
     });
   }
 
-  $('#reviewModalSave').click(function () {
-    if ($('#reviewModalLabel').text() == 'Add review') {
-      ajax_add_review();
-    } else {
-      ajax_edit_review();
-    }
-  })
-})
+  var reviewModalSave = document.getElementById('reviewModalSave');
+  if (reviewModalSave) {
+    reviewModalSave.addEventListener('click', function() {
+      var label = document.getElementById('reviewModalLabel');
+      if (label && label.textContent == 'Add review') {
+        ajax_add_review();
+      } else {
+        ajax_edit_review();
+      }
+    });
+  }
+});
 
 function delete_review(id) {
   if (confirm('Are you sure to delete the item?')) {

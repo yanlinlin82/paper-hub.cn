@@ -178,31 +178,80 @@
             <div class="col-3">
               <input class="form-control" type="text" id="checkInModalUser" name="user" value="{{ user.username }}">
               <script>
-                $(function() {
-                  $("#checkInModalUser").autocomplete({
-                    source: function(request, response) {
-                      console.log('autocomplete:', request.term);
-                      $.ajax({
-                        url: "{% url 'api:username_autocomplete' %}",
-                        dataType: "json",
-                        data: {
-                          term: request.term
-                        },
-                        success: function(data) {
-                          console.log('autocomplete return:', data);
-                          response(data);
+                document.addEventListener('DOMContentLoaded', function() {
+                  var userInput = document.getElementById('checkInModalUser');
+                  if (!userInput) return;
+                  
+                  var autocompleteList = null;
+                  var currentRequest = null;
+                  
+                  userInput.addEventListener('input', function() {
+                    var term = this.value;
+                    if (term.length < 1) {
+                      hideAutocomplete();
+                      return;
+                    }
+                    
+                    // Cancel previous request
+                    if (currentRequest) {
+                      currentRequest.abort();
+                    }
+                    
+                    // Create new request
+                    currentRequest = new XMLHttpRequest();
+                    currentRequest.open('GET', "{% url 'api:username_autocomplete' %}?term=" + encodeURIComponent(term), true);
+                    currentRequest.onreadystatechange = function() {
+                      if (currentRequest.readyState === 4 && currentRequest.status === 200) {
+                        try {
+                          var data = JSON.parse(currentRequest.responseText);
+                          showAutocomplete(data);
+                        } catch (e) {
+                          console.error('Error parsing autocomplete response:', e);
                         }
+                      }
+                    };
+                    currentRequest.send();
+                  });
+                  
+                  function showAutocomplete(items) {
+                    hideAutocomplete();
+                    
+                    autocompleteList = document.createElement('ul');
+                    autocompleteList.className = 'autocomplete-list';
+                    autocompleteList.style.cssText = 'position: absolute; z-index: 2050; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; width: 100%; list-style: none; padding: 0; margin: 0;';
+                    
+                    items.forEach(function(item) {
+                      var li = document.createElement('li');
+                      li.textContent = item.value || item;
+                      li.style.cssText = 'padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee;';
+                      li.addEventListener('click', function() {
+                        userInput.value = item.value || item;
+                        hideAutocomplete();
                       });
-                    },
-                    minLength: 1,
-                    select: function(event, ui) {
-                      $('#checkInModalUser').val(ui.item.value);
-                      return false;
-                    },
-                    open: function() {
-                      // 设置 z-index 为高于 modal 的值
-                      console.log('autocomplete open');
-                      $('.ui-autocomplete').css('z-index', 2050); // Bootstrap modal 的 z-index 通常为 1040 或 1050
+                      li.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#f5f5f5';
+                      });
+                      li.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = 'white';
+                      });
+                      autocompleteList.appendChild(li);
+                    });
+                    
+                    userInput.parentNode.style.position = 'relative';
+                    userInput.parentNode.appendChild(autocompleteList);
+                  }
+                  
+                  function hideAutocomplete() {
+                    if (autocompleteList) {
+                      autocompleteList.remove();
+                      autocompleteList = null;
+                    }
+                  }
+                  
+                  // Hide autocomplete when clicking outside
+                  document.addEventListener('click', function(e) {
+                    if (!userInput.contains(e.target) && (!autocompleteList || !autocompleteList.contains(e.target))) {
+                      hideAutocomplete();
                     }
                   });
                 });
@@ -235,250 +284,391 @@
 </div>
 
 <script>
-  $(() => {
-    $('#buttonCheckIn').on('click', function() {
-      checkIn();
-    });
+  document.addEventListener('DOMContentLoaded', function() {
+    var buttonCheckIn = document.getElementById('buttonCheckIn');
+    if (buttonCheckIn) {
+      buttonCheckIn.addEventListener('click', function() {
+        checkIn();
+      });
+    }
 
-    $('#switchCheckInByAdmin').change(function() {
-      if ($(this).prop('checked')) {
-        $('#checkInModalCreatorAndTime').removeClass('d-none');
-      } else {
-        $('#checkInModalCreatorAndTime').addClass('d-none');
+    var switchCheckInByAdmin = document.getElementById('switchCheckInByAdmin');
+    if (switchCheckInByAdmin) {
+      switchCheckInByAdmin.addEventListener('change', function() {
+        var creatorAndTime = document.getElementById('checkInModalCreatorAndTime');
+        if (creatorAndTime) {
+          if (this.checked) {
+            creatorAndTime.classList.remove('d-none');
+          } else {
+            creatorAndTime.classList.add('d-none');
+          }
+        }
+      });
+    }
+
+    var checkInModalInput = document.getElementById('checkInModalInput');
+    if (checkInModalInput) {
+      checkInModalInput.addEventListener('click', function() {
+        var paperInfoInput = document.getElementById('checkInModalPaperInfoInput');
+        if (paperInfoInput) {
+          if (paperInfoInput.classList.contains('d-none')) {
+            paperInfoInput.classList.add('d-block');
+            paperInfoInput.classList.remove('d-none');
+          } else {
+            paperInfoInput.classList.add('d-none');
+            paperInfoInput.classList.remove('d-block');
+          }
+        }
+      });
+    }
+
+    var checkInModalInputMore = document.getElementById('checkInModalInputMore');
+    if (checkInModalInputMore) {
+      checkInModalInputMore.addEventListener('click', function() {
+        var paperInfoInputDetail = document.getElementById('checkInModalPaperInfoInputDetail');
+        if (paperInfoInputDetail) {
+          if (paperInfoInputDetail.classList.contains('d-none')) {
+            this.textContent = '收起更多';
+            paperInfoInputDetail.classList.add('d-block');
+            paperInfoInputDetail.classList.remove('d-none');
+          } else {
+            this.textContent = '显示更多';
+            paperInfoInputDetail.classList.add('d-none');
+            paperInfoInputDetail.classList.remove('d-block');
+          }
+        }
+      });
+    }
+
+    function refreshPaperInfoDisplay() {
+      var paperInfo = document.getElementById('checkInModalPaperInfo');
+      var message = document.getElementById('checkInModalMessage');
+      
+      if (paperInfo && paperInfo.classList.contains('d-none')) {
+        if (message) {
+          message.classList.add('d-none');
+          message.classList.remove('d-block');
+        }
+        paperInfo.classList.add('d-block');
+        paperInfo.classList.remove('d-none');
       }
-    })
+      
+      var journal = document.getElementById('checkInModalJournal');
+      var pubDate = document.getElementById('checkInModalPubDate');
+      var title = document.getElementById('checkInModalTitle');
+      
+      var journalValue = journal ? journal.value : '';
+      var pubDateValue = pubDate ? pubDate.value : '';
+      var titleValue = title ? title.value : '';
+      
+      var html = '<div>';
+      if (journalValue) {
+        html += '<i>' + journalValue + '</i>, ';
+      }
+      if (pubDateValue) {
+        html += pubDateValue + '. ';
+      }
+      html += '</div>';
+      html += '<div><b>' + titleValue + '</b></div>';
+      
+      if (paperInfo) {
+        paperInfo.innerHTML = html;
+      }
+    }
+
+    var journalInput = document.getElementById('checkInModalJournal');
+    var pubDateInput = document.getElementById('checkInModalPubDate');
+    var titleInput = document.getElementById('checkInModalTitle');
+    
+    if (journalInput) {
+      journalInput.addEventListener('input', refreshPaperInfoDisplay);
+    }
+    if (pubDateInput) {
+      pubDateInput.addEventListener('input', refreshPaperInfoDisplay);
+    }
+    if (titleInput) {
+      titleInput.addEventListener('input', refreshPaperInfoDisplay);
+    }
+
+    var checkInModalQuery = document.getElementById('checkInModalQuery');
+    if (checkInModalQuery) {
+      checkInModalQuery.addEventListener('click', function() {
+        show_loading_modal('正在查询文献信息……',
+            true, '取消',
+            function() { hide_loading_modal(); });
+        var identifierInput = document.getElementById('checkInModalPaperID');
+        var identifier = identifierInput ? identifierInput.value : '';
+        
+        ajaxPostJson({
+          url: "{% url 'api:query_paper_info' %}",
+          data: { 'identifier': identifier },
+          success: function (data) {
+            hide_loading_modal();
+            if (!data.success) {
+              alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
+            } else {
+              console.log(data.results);
+              var titleField = document.getElementById('checkInModalTitle');
+              var journalField = document.getElementById('checkInModalJournal');
+              var pubDateField = document.getElementById('checkInModalPubDate');
+              var authorsField = document.getElementById('checkInModalAuthors');
+              var affiliationsField = document.getElementById('checkInModalAffiliations');
+              var abstractField = document.getElementById('checkInModalAbstract');
+              var keywordsField = document.getElementById('checkInModalKeywords');
+              var urlsField = document.getElementById('checkInModalURLs');
+              var doiField = document.getElementById('checkInModalDOI');
+              var pmidField = document.getElementById('checkInModalPMID');
+              var arxivField = document.getElementById('checkInModalArXivID');
+              var pmcidField = document.getElementById('checkInModalPMCID');
+              var cnkiField = document.getElementById('checkInModalCNKIID');
+              var languageField = document.getElementById('checkInModalLanguage');
+              
+              if (titleField) titleField.value = data.results.title || '';
+              if (journalField) journalField.value = data.results.journal || '';
+              if (pubDateField) pubDateField.value = data.results.pub_date || '';
+              if (authorsField) authorsField.value = data.results.authors ? data.results.authors.join('\n') : '';
+              if (affiliationsField) affiliationsField.value = data.results.affiliations ? data.results.affiliations.join('\n') : '';
+              if (abstractField) abstractField.value = data.results.abstract || '';
+              if (keywordsField) keywordsField.value = data.results.keywords ? data.results.keywords.join('\n') : '';
+              if (urlsField) urlsField.value = data.results.urls ? data.results.urls.join('\n') : '';
+              if (doiField) doiField.value = data.results.doi || '';
+              if (pmidField) pmidField.value = data.results.pmid || '';
+              if (arxivField) arxivField.value = data.results.arxiv_id || '';
+              if (pmcidField) pmcidField.value = data.results.pmcid || '';
+              if (cnkiField) cnkiField.value = data.results.cnki_id || '';
+              if (languageField) languageField.value = data.results.language || '';
+              
+              refreshPaperInfoDisplay();
+            }
+          },
+          always: function() {
+            console.log('Querying paper info by ID (' + identifier + ') done.');
+            hide_loading_modal();
+          }
+        });
+      });
+    }
   });
 
   function setPaperInfoValue(field, value) {
-    $('#' + field).text(value);
+    var element = document.getElementById(field);
+    if (element) {
+      element.textContent = value;
+    }
   }
-
-  $('#checkInModalInput').on('click', function() {
-    if ($('#checkInModalPaperInfoInput').hasClass('d-none')) {
-      $('#checkInModalPaperInfoInput').addClass('d-block');
-      $('#checkInModalPaperInfoInput').removeClass('d-none');
-    } else {
-      $('#checkInModalPaperInfoInput').addClass('d-none');
-      $('#checkInModalPaperInfoInput').removeClass('d-block');
-    }
-  });
-
-  $('#checkInModalInputMore').on('click', function() {
-    if ($('#checkInModalPaperInfoInputDetail').hasClass('d-none')) {
-      $('#checkInModalInputMore').text('收起更多');
-      $('#checkInModalPaperInfoInputDetail').addClass('d-block');
-      $('#checkInModalPaperInfoInputDetail').removeClass('d-none');
-    } else {
-      $('#checkInModalInputMore').text('显示更多');
-      $('#checkInModalPaperInfoInputDetail').addClass('d-none');
-      $('#checkInModalPaperInfoInputDetail').removeClass('d-block');
-    }
-  });
-
-  function refreshPaperInfoDisplay() {
-    if ($('#checkInModalPaperInfo').hasClass('d-none')) {
-      $('#checkInModalMessage').addClass('d-none');
-      $('#checkInModalMessage').removeClass('d-block');
-      $('#checkInModalPaperInfo').addClass('d-block');
-      $('#checkInModalPaperInfo').removeClass('d-none');
-    }
-    var journal = $('#checkInModalJournal').val();
-    var pub_date = $('#checkInModalPubDate').val();
-    var title = $('#checkInModalTitle').val();
-    var html = '<div>';
-    if (journal) {
-      html += '<i>' + journal + '</i>, ';
-    }
-    if (pub_date) {
-      html += pub_date + '. ';
-    }
-    html += '</div>';
-    html += '<div><b>' + title + '</b></div>';
-    + pub_date + '. ';
-    $('#checkInModalPaperInfo').html(html);
-  }
-
-  $('#checkInModalJournal, #checkInModalPubDate, #checkInModalTitle').on('input', function() {
-    refreshPaperInfoDisplay();
-  });
-
-  $('#checkInModalQuery').on('click', function() {
-    show_loading_modal('正在查询文献信息……',
-        allowCancel = true, cancerButtonText = '取消',
-        cancelButtonCallback = function() { hide_loading_modal(); });
-    var identifier = $('#checkInModalPaperID').val();
-    ajaxPostJson({
-      url: "{% url 'api:query_paper_info' %}",
-      data: { 'identifier': identifier },
-      success: function (data) {
-        hide_loading_modal();
-        if (!data.success) {
-          alert('Failed to query paper info by ID (' + identifier + ').\n' + data.error);
-        } else {
-          console.log(data.results);
-          $('#checkInModalTitle').val(data.results.title);
-          $('#checkInModalJournal').val(data.results.journal);
-          $('#checkInModalPubDate').val(data.results.pub_date);
-          $('#checkInModalAuthors').val(data.results.authors.join('\n'));
-          $('#checkInModalAffiliations').val(data.results.affiliations.join('\n'));
-          $('#checkInModalAbstract').val(data.results.abstract);
-          $('#checkInModalKeywords').val(data.results.keywords.join('\n'));
-          $('#checkInModalURLs').val(data.results.urls.join('\n'));
-          $('#checkInModalDOI').val(data.results.doi);
-          $('#checkInModalPMID').val(data.results.pmid);
-          $('#checkInModalArXivID').val(data.results.arxiv_id);
-          $('#checkInModalPMCID').val(data.results.pmcid);
-          $('#checkInModalCNKIID').val(data.results.cnki_id);
-          $('#checkInModalLanguage').val(data.results.language);
-          refreshPaperInfoDisplay();
-        }
-      },
-      always: function() {
-        console.log('Querying paper info by ID (' + identifier + ') done.');
-        hide_loading_modal();
-      }
-    });
-  });
 
   function confirmPaperInputed() {
-    var title = $('#checkInModalTitle').val();
-    var journal = $('#checkInModalJournal').val();
-    var pub_date = $('#checkInModalPubDate').val();
+    var titleField = document.getElementById('checkInModalTitle');
+    var journalField = document.getElementById('checkInModalJournal');
+    var pubDateField = document.getElementById('checkInModalPubDate');
+    
+    var title = titleField ? titleField.value : '';
+    var journal = journalField ? journalField.value : '';
+    var pub_date = pubDateField ? pubDateField.value : '';
+    
     if (!title || !journal || !pub_date) {
       alert('请先通过ID查询文献信息，或手工填写必要的文献信息！');
-      $('#checkInModalPaperID').focus();
+      var paperIDField = document.getElementById('checkInModalPaperID');
+      if (paperIDField) {
+        paperIDField.focus();
+      }
       return false;
     }
 
-    var comment = $('#checkInModalComment').val();
+    var commentField = document.getElementById('checkInModalComment');
+    var comment = commentField ? commentField.value : '';
     if (!comment) {
       alert('请填写评论！');
-      $('#checkInModalComment').focus();
+      if (commentField) {
+        commentField.focus();
+      }
       return false;
     }
     return true;
   }
 
   function confirmUserAndDate() {
-    var user = $('#checkInModalUser').val();
+    var userField = document.getElementById('checkInModalUser');
+    var user = userField ? userField.value : '';
     if (!user) {
       alert('请填写打卡人！');
-      $('#checkInModalUser').focus();
+      if (userField) {
+        userField.focus();
+      }
       return false;
     }
-    var date = $('#checkInModalDate').val();
+    var dateField = document.getElementById('checkInModalDate');
+    var date = dateField ? dateField.value : '';
     if (!date) {
       alert('请填写打卡时间！');
-      $('#checkInModalDate').focus();
+      if (dateField) {
+        dateField.focus();
+      }
       return false;
     }
     return true;
   }
 
   function cleanUpCheckInModal() {
-    $('#checkInModalPaperID').val('');
-    $('#checkInModalTitle').val('');
-    $('#checkInModalJournal').val('');
-    $('#checkInModalPubDate').val('');
-    $('#checkInModalAuthors').val('');
-    $('#checkInModalAffiliations').val('');
-    $('#checkInModalAbstract').val('');
-    $('#checkInModalKeywords').val('');
-    $('#checkInModalURLs').val('');
-    $('#checkInModalDOI').val('');
-    $('#checkInModalPMID').val('');
-    $('#checkInModalArXivID').val('');
-    $('#checkInModalPMCID').val('');
-    $('#checkInModalCNKIID').val('');
-    $('#checkInModalLanguage').val('');
-    $('#checkInModalComment').val('');
+    var fields = [
+      'checkInModalPaperID', 'checkInModalTitle', 'checkInModalJournal', 'checkInModalPubDate',
+      'checkInModalAuthors', 'checkInModalAffiliations', 'checkInModalAbstract', 'checkInModalKeywords',
+      'checkInModalURLs', 'checkInModalDOI', 'checkInModalPMID', 'checkInModalArXivID',
+      'checkInModalPMCID', 'checkInModalCNKIID', 'checkInModalLanguage', 'checkInModalComment'
+    ];
+    
+    fields.forEach(function(fieldId) {
+      var field = document.getElementById(fieldId);
+      if (field) {
+        field.value = '';
+      }
+    });
 
-    $('#checkInModalMessage').addClass('d-block');
-    $('#checkInModalMessage').removeClass('d-none');
-    $('#checkInModalPaperInfo').addClass('d-none');
-    $('#checkInModalPaperInfo').removeClass('row');
-    $('#checkInModalPaperInfoInput').addClass('d-none');
-    $('#checkInModalPaperInfoInput').removeClass('row');
-    $('#checkInModalPaperInfoInputDetail').addClass('d-none');
-    $('#checkInModalPaperInfoInputDetail').removeClass('row');
+    var message = document.getElementById('checkInModalMessage');
+    var paperInfo = document.getElementById('checkInModalPaperInfo');
+    var paperInfoInput = document.getElementById('checkInModalPaperInfoInput');
+    var paperInfoInputDetail = document.getElementById('checkInModalPaperInfoInputDetail');
+    
+    if (message) {
+      message.classList.add('d-block');
+      message.classList.remove('d-none');
+    }
+    if (paperInfo) {
+      paperInfo.classList.add('d-none');
+      paperInfo.classList.remove('row');
+    }
+    if (paperInfoInput) {
+      paperInfoInput.classList.add('d-none');
+      paperInfoInput.classList.remove('row');
+    }
+    if (paperInfoInputDetail) {
+      paperInfoInputDetail.classList.add('d-none');
+      paperInfoInputDetail.classList.remove('row');
+    }
   }
 
   function checkIn() {
-    $('#checkInModalDialogTitle').text('文献分享打卡');
+    var dialogTitle = document.getElementById('checkInModalDialogTitle');
+    if (dialogTitle) {
+      dialogTitle.textContent = '文献分享打卡';
+    }
     cleanUpCheckInModal();
-    $('#checkInModal').modal('show');
-    $('#checkInModalOK').on('click', function() {
-      if (!confirmPaperInputed()) {
-        return;
-      }
-      {% if user.is_superuser %}
-      if ($('#switchCheckInByAdmin').prop('checked')) {
-        if (!confirmUserAndDate()) {
+    
+    var checkInModal = document.getElementById('checkInModal');
+    if (checkInModal) {
+      var modal = new bootstrap.Modal(checkInModal);
+      modal.show();
+    }
+    
+    var checkInModalOK = document.getElementById('checkInModalOK');
+    if (checkInModalOK) {
+      // Remove existing click listeners and add new one
+      checkInModalOK.replaceWith(checkInModalOK.cloneNode(true));
+      checkInModalOK = document.getElementById('checkInModalOK');
+      
+      checkInModalOK.addEventListener('click', function() {
+        if (!confirmPaperInputed()) {
           return;
         }
-      }
-      {% endif %}
-      var data = {
-        "paper": {
-          "title": $('#checkInModalTitle').val(),
-          "journal": $('#checkInModalJournal').val(),
-          "pub_date": $('#checkInModalPubDate').val(),
-          "authors": $('#checkInModalAuthors').val(),
-          "affiliations": $('#checkInModalAffiliations').val(),
-          "abstract": $('#checkInModalAbstract').val(),
-          "keywords": $('#checkInModalKeywords').val(),
-          "urls": $('#checkInModalURLs').val(),
-          "doi": $('#checkInModalDOI').val(),
-          "pmid": $('#checkInModalPMID').val(),
-          "arxiv_id": $('#checkInModalArXivID').val(),
-          "pmcid": $('#checkInModalPMCID').val(),
-          "cnki_id": $('#checkInModalCNKIID').val(),
-          "language": $('#checkInModalLanguage').val()
-        },
-        "comment": $('#checkInModalComment').val()
-      };
-      {% if user.is_superuser %}
-      if ($('#switchCheckInByAdmin').prop('checked')) {
-        data.user = $('#checkInModalUser').val();
-        data.check_in_time = $('#checkInModalDate').val() + ' ' + $('#checkInModalTime').val();
-        url = "{% url 'api:check_in_by_admin' %}";
-      } else {
-        url = "{% url 'api:check_in' %}";
-      }
-      {% else %}
-      url = "{% url 'api:check_in' %}";
-      {% endif %}
-      ajaxPostJson({
-        url: url,
-        data: data,
-        success: function(data) {
-          if (!data.success) {
-            if (data.error.startsWith("User not found:")) {
-              username = $('#checkInModalUser').val();
-              if (confirm('User not found: ' + username + '\nDo you want to create a new user?')) {
-                ajaxPostJson({
-                  url: '{% url 'api:create_user' %}',
-                  data: { 'username': username },
-                  success: function(data) {
-                    if (!data.success) {
-                      alert('Failed to create user.\n' + data.error);
-                    } else {
-                      alert('User created successfully. Please checkin again.');
-                    }
-                  }
-                })
-              }
-            } else {
-              alert('Failed to checkin.\n' + data.error);
-            }
-          } else {
-            console.log(data.results);
-            $('#checkInModal').modal('hide');
-            location.reload();
+        {% if user.is_superuser %}
+        var switchCheckInByAdmin = document.getElementById('switchCheckInByAdmin');
+        if (switchCheckInByAdmin && switchCheckInByAdmin.checked) {
+          if (!confirmUserAndDate()) {
+            return;
           }
         }
+        {% endif %}
+        
+        var titleField = document.getElementById('checkInModalTitle');
+        var journalField = document.getElementById('checkInModalJournal');
+        var pubDateField = document.getElementById('checkInModalPubDate');
+        var authorsField = document.getElementById('checkInModalAuthors');
+        var affiliationsField = document.getElementById('checkInModalAffiliations');
+        var abstractField = document.getElementById('checkInModalAbstract');
+        var keywordsField = document.getElementById('checkInModalKeywords');
+        var urlsField = document.getElementById('checkInModalURLs');
+        var doiField = document.getElementById('checkInModalDOI');
+        var pmidField = document.getElementById('checkInModalPMID');
+        var arxivField = document.getElementById('checkInModalArXivID');
+        var pmcidField = document.getElementById('checkInModalPMCID');
+        var cnkiField = document.getElementById('checkInModalCNKIID');
+        var languageField = document.getElementById('checkInModalLanguage');
+        var commentField = document.getElementById('checkInModalComment');
+        
+        var data = {
+          "paper": {
+            "title": titleField ? titleField.value : '',
+            "journal": journalField ? journalField.value : '',
+            "pub_date": pubDateField ? pubDateField.value : '',
+            "authors": authorsField ? authorsField.value : '',
+            "affiliations": affiliationsField ? affiliationsField.value : '',
+            "abstract": abstractField ? abstractField.value : '',
+            "keywords": keywordsField ? keywordsField.value : '',
+            "urls": urlsField ? urlsField.value : '',
+            "doi": doiField ? doiField.value : '',
+            "pmid": pmidField ? pmidField.value : '',
+            "arxiv_id": arxivField ? arxivField.value : '',
+            "pmcid": pmcidField ? pmcidField.value : '',
+            "cnki_id": cnkiField ? cnkiField.value : '',
+            "language": languageField ? languageField.value : ''
+          },
+          "comment": commentField ? commentField.value : ''
+        };
+        
+        {% if user.is_superuser %}
+        var switchCheckInByAdmin = document.getElementById('switchCheckInByAdmin');
+        if (switchCheckInByAdmin && switchCheckInByAdmin.checked) {
+          var userField = document.getElementById('checkInModalUser');
+          var dateField = document.getElementById('checkInModalDate');
+          var timeField = document.getElementById('checkInModalTime');
+          data.user = userField ? userField.value : '';
+          data.check_in_time = (dateField ? dateField.value : '') + ' ' + (timeField ? timeField.value : '');
+          var url = "{% url 'api:check_in_by_admin' %}";
+        } else {
+          var url = "{% url 'api:check_in' %}";
+        }
+        {% else %}
+        var url = "{% url 'api:check_in' %}";
+        {% endif %}
+        
+        ajaxPostJson({
+          url: url,
+          data: data,
+          success: function(data) {
+            if (!data.success) {
+              if (data.error.startsWith("User not found:")) {
+                var userField = document.getElementById('checkInModalUser');
+                var username = userField ? userField.value : '';
+                if (confirm('User not found: ' + username + '\nDo you want to create a new user?')) {
+                  ajaxPostJson({
+                    url: '{% url 'api:create_user' %}',
+                    data: { 'username': username },
+                    success: function(data) {
+                      if (!data.success) {
+                        alert('Failed to create user.\n' + data.error);
+                      } else {
+                        alert('User created successfully. Please checkin again.');
+                      }
+                    }
+                  });
+                }
+              } else {
+                alert('Failed to checkin.\n' + data.error);
+              }
+            } else {
+              console.log(data.results);
+              if (checkInModal) {
+                var modal = bootstrap.Modal.getInstance(checkInModal);
+                if (modal) {
+                  modal.hide();
+                }
+              }
+              location.reload();
+            }
+          }
+        });
       });
-    });
+    }
   }
 </script>
 {% endif %}

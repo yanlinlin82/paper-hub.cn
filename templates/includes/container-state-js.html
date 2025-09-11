@@ -1,24 +1,35 @@
 <script>
 function setContainerState(fluid) {
-  if (fluid) {
-    $('#navbarContainer').removeClass('container-xl').addClass('container-fluid');
-    $('#mainContainer').removeClass('container-xl').addClass('container-fluid');
-  } else {
-    $('#navbarContainer').removeClass('container-fluid').addClass('container-xl');
-    $('#mainContainer').removeClass('container-fluid').addClass('container-xl');
+  var navbarContainer = document.getElementById('navbarContainer');
+  var mainContainer = document.getElementById('mainContainer');
+  
+  if (navbarContainer && mainContainer) {
+    if (fluid) {
+      navbarContainer.classList.remove('container-xl');
+      navbarContainer.classList.add('container-fluid');
+      mainContainer.classList.remove('container-xl');
+      mainContainer.classList.add('container-fluid');
+    } else {
+      navbarContainer.classList.remove('container-fluid');
+      navbarContainer.classList.add('container-xl');
+      mainContainer.classList.remove('container-fluid');
+      mainContainer.classList.add('container-xl');
+    }
   }
 }
 
-(() => {
-  state = (localStorage.getItem('containerState') === 'fluid');
+document.addEventListener('DOMContentLoaded', function() {
+  var state = (localStorage.getItem('containerState') === 'fluid');
   setContainerState(state);
-  $('#toggleContainer').prop('checked', state);
-})();
-
-$(() => {
-  $('#toggleContainer').on('change', function() {
-    setContainerState(this.checked);
-    localStorage.setItem('containerState', this.checked ? 'fluid' : 'fixed');
-  });
+  
+  var toggleContainer = document.getElementById('toggleContainer');
+  if (toggleContainer) {
+    toggleContainer.checked = state;
+    
+    toggleContainer.addEventListener('change', function() {
+      setContainerState(this.checked);
+      localStorage.setItem('containerState', this.checked ? 'fluid' : 'fixed');
+    });
+  }
 });
 </script>

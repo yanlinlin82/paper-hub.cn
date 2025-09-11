@@ -26,12 +26,14 @@
       <div class="text-danger">{{ error_message }}</div>
       {% endif %}
       <script>
-        $('document').ready(function() {
-          t = $('#q');
-          t.focus()
-          l = t.val().length;
-          t[0].setSelectionRange(0, l);
-        })
+        document.addEventListener('DOMContentLoaded', function() {
+          var t = document.getElementById('q');
+          if (t) {
+            t.focus();
+            var l = t.value.length;
+            t.setSelectionRange(0, l);
+          }
+        });
       </script>
     </form>
   </div>
@@ -113,39 +115,86 @@
   
   {% include "view/includes/paper-js.html" %}
   <script>
-  $(() => {
-    $('#shareModal').on('shown.bs.modal', () => {
-      $('#shareModalPaperID').focus();
-    })
-    $('#commentModal').on('shown.bs.modal', () => {
-      $('#comment').focus();
-    })
-  })
-  
-  function add_search_result(id) {
-    $('#dlg_info').html($('#info_' + id).html());
-    $('#dlg_title').html($('#title_' + id + '_text').html());
-    $('#comment').val('');
-    $('#commentModal').modal('show');
-  
-    $('#submitComment').off('click').on('click', function() {
-      const comment = $('#comment').val();
-      $('#commentModal').modal('hide');
-      ajaxPostJson({
-        url: "{% url 'api:add_search_result' %}",
-        data: {paper_id: id, comment: comment},
-        success: function (data) {
-          if (!data.success) {
-            alert('添加推荐失败！\n' + data.error);
-          } else {
-            $('#card_' + id).remove();
-            if ($('.card').length === 0) {
-              location.reload();
-            }
-          }
+  document.addEventListener('DOMContentLoaded', function() {
+    var shareModal = document.getElementById('shareModal');
+    var commentModal = document.getElementById('commentModal');
+    
+    if (shareModal) {
+      shareModal.addEventListener('shown.bs.modal', function() {
+        var shareModalPaperID = document.getElementById('shareModalPaperID');
+        if (shareModalPaperID) {
+          shareModalPaperID.focus();
         }
       });
-    });
+    }
+    
+    if (commentModal) {
+      commentModal.addEventListener('shown.bs.modal', function() {
+        var comment = document.getElementById('comment');
+        if (comment) {
+          comment.focus();
+        }
+      });
+    }
+  });
+  
+  function add_search_result(id) {
+    var dlgInfo = document.getElementById('dlg_info');
+    var dlgTitle = document.getElementById('dlg_title');
+    var comment = document.getElementById('comment');
+    var commentModal = document.getElementById('commentModal');
+    var infoElement = document.getElementById('info_' + id);
+    var titleElement = document.getElementById('title_' + id + '_text');
+    
+    if (dlgInfo && infoElement) {
+      dlgInfo.innerHTML = infoElement.innerHTML;
+    }
+    if (dlgTitle && titleElement) {
+      dlgTitle.innerHTML = titleElement.innerHTML;
+    }
+    if (comment) {
+      comment.value = '';
+    }
+    
+    if (commentModal) {
+      var modal = new bootstrap.Modal(commentModal);
+      modal.show();
+    }
+  
+    var submitComment = document.getElementById('submitComment');
+    if (submitComment) {
+      // Remove existing click listeners and add new one
+      submitComment.replaceWith(submitComment.cloneNode(true));
+      submitComment = document.getElementById('submitComment');
+      
+      submitComment.addEventListener('click', function() {
+        const commentValue = comment ? comment.value : '';
+        if (commentModal) {
+          var modal = bootstrap.Modal.getInstance(commentModal);
+          if (modal) {
+            modal.hide();
+          }
+        }
+        ajaxPostJson({
+          url: "{% url 'api:add_search_result' %}",
+          data: {paper_id: id, comment: commentValue},
+          success: function (data) {
+            if (!data.success) {
+              alert('添加推荐失败！\n' + data.error);
+            } else {
+              var card = document.getElementById('card_' + id);
+              if (card) {
+                card.remove();
+              }
+              var cards = document.querySelectorAll('.card');
+              if (cards.length === 0) {
+                location.reload();
+              }
+            }
+          }
+        });
+      });
+    }
   }
   </script>
   {% endif %}

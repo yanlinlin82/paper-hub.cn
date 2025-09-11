@@ -9,23 +9,42 @@
   bottom: 20px;
   right: 20px;
   display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 </style>
 <script>
-  $(document).ready(function () {
-    // Handle scroll event for #content
-    $('#content').on('scroll', function () {
-      if ($(this).scrollTop() > 20) {
-        $('.scroll-to-top').fadeIn();
-      } else {
-        $('.scroll-to-top').fadeOut();
-      }
-    });
+  document.addEventListener('DOMContentLoaded', function () {
+    var content = document.getElementById('content');
+    var scrollToTop = document.querySelector('.scroll-to-top');
+    
+    if (content && scrollToTop) {
+      // Handle scroll event for #content
+      content.addEventListener('scroll', function () {
+        if (this.scrollTop > 20) {
+          scrollToTop.style.display = 'block';
+          scrollToTop.style.opacity = '1';
+        } else {
+          scrollToTop.style.opacity = '0';
+          setTimeout(function() {
+            if (scrollToTop.style.opacity === '0') {
+              scrollToTop.style.display = 'none';
+            }
+          }, 300);
+        }
+      });
 
-    // Add smooth scrolling to all links with the "#top" anchor
-    $('a[href="#top"]').on('click', function (event) {
-      event.preventDefault();
-      $('#content').animate({ scrollTop: 0 }, 'slow');
-    });
+      // Add smooth scrolling to all links with the "#top" anchor
+      var topLinks = document.querySelectorAll('a[href="#top"]');
+      topLinks.forEach(function(link) {
+        link.addEventListener('click', function (event) {
+          event.preventDefault();
+          content.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        });
+      });
+    }
   });
 </script>

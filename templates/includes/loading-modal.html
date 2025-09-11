@@ -15,26 +15,47 @@
 </div>
 <script>
 function show_loading_modal(message, allowCancel=false, cancerButtonText='Cancel', cancelButtonCallback=null) {
-  if (allowCancel) {
-    $('#loadingModalCancel').show();
-    $('#loadingModalCancel').text(cancerButtonText);
-    $('#loadingModalCancel').click(cancelButtonCallback);
-  } else {
-    $('#loadingModalCancel').hide();
+  var loadingModal = document.getElementById('loadingModal');
+  var loadingModalCancel = document.getElementById('loadingModalCancel');
+  var loadingModalText = document.getElementById('loadingModalText');
+  
+  if (loadingModalCancel) {
+    if (allowCancel) {
+      loadingModalCancel.style.display = 'block';
+      loadingModalCancel.textContent = cancerButtonText;
+      // Remove existing click listeners and add new one
+      loadingModalCancel.replaceWith(loadingModalCancel.cloneNode(true));
+      loadingModalCancel = document.getElementById('loadingModalCancel');
+      if (cancelButtonCallback) {
+        loadingModalCancel.addEventListener('click', cancelButtonCallback);
+      }
+    } else {
+      loadingModalCancel.style.display = 'none';
+    }
   }
-  if (message) {
-    $('#loadingModalText').text(message);
-  } else {
-    $('#loadingModalText').text('请稍候……');
+  
+  if (loadingModalText) {
+    if (message) {
+      loadingModalText.textContent = message;
+    } else {
+      loadingModalText.textContent = '请稍候……';
+    }
   }
-  $('#loadingModal').modal('show');
+  
+  if (loadingModal) {
+    var modal = new bootstrap.Modal(loadingModal);
+    modal.show();
+  }
 }
 
 function hide_loading_modal() {
   console.log('hide_loading_modal');
-  $('#loadingModal').modal('hide');
-  $('#loadingModal').on('shown.bs.modal', function (e) {
-    $('#loadingModal').modal('hide');
-  });
+  var loadingModal = document.getElementById('loadingModal');
+  if (loadingModal) {
+    var modal = bootstrap.Modal.getInstance(loadingModal);
+    if (modal) {
+      modal.hide();
+    }
+  }
 }
 </script>

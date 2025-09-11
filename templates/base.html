@@ -11,10 +11,7 @@
   <meta name="google-site-verification" content="CJeulU9yTowOBo-3EpJYEAhlHcG1NAHauYkG4LiIVQY">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-  <link href="{% static 'jquery-ui-1.14.1/jquery-ui.min.css' %}" rel="stylesheet">
   <link href="{% static 'bootstrap-5.3.3-dist/css/bootstrap.min.css' %}" rel="stylesheet">
-  <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-  <script src="{% static 'jquery-ui-1.14.1/jquery-ui.min.js' %}"></script>
   <script src="{% static 'bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'js/marked.min.js' %}"></script>
   <style>
@@ -39,12 +36,12 @@
   {% block custom_style %}{% endblock %}
   <script>
   function ajaxPostJson(options) {
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-    var settings = $.extend(true, {
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    var settings = Object.assign({
       type: 'POST',
       contentType: 'application/json',
       headers: { 'X-CSRFToken': csrfToken },
-      'error': function (xhr, status, error) {
+      error: function (xhr, status, error) {
         console.log("XHR:", xhr);
         console.log("Status:", status);
         console.log("Error:", error);
@@ -56,10 +53,46 @@
         }
       }
     }, options);
-    if (settings.data) {
-      settings.data = JSON.stringify(settings.data);
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open(settings.type, settings.url, true);
+    xhr.setRequestHeader('Content-Type', settings.contentType);
+    
+    // Set custom headers
+    if (settings.headers) {
+      Object.keys(settings.headers).forEach(function(key) {
+        xhr.setRequestHeader(key, settings.headers[key]);
+      });
     }
-    $.ajax(settings);
+    
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          if (settings.success) {
+            var response;
+            try {
+              response = JSON.parse(xhr.responseText);
+            } catch (e) {
+              response = xhr.responseText;
+            }
+            settings.success(response, xhr.statusText, xhr);
+          }
+        } else {
+          if (settings.error) {
+            settings.error(xhr, xhr.statusText, xhr.status);
+          }
+        }
+        if (settings.always) {
+          settings.always(xhr, xhr.statusText);
+        }
+      }
+    };
+    
+    var data = settings.data;
+    if (data && typeof data === 'object') {
+      data = JSON.stringify(data);
+    }
+    xhr.send(data);
   }
   </script>
   {% block customize_script %}{% endblock customize_script %}
@@ -174,18 +207,24 @@
 {% include "includes/cookie-js.html" %}
 
 <script>
-$(() => {
-  $('#q').focus(function() {
-    var inputWidth = $(this).outerWidth();
-    $('#hint').css({
-        display: 'block',
-        top: $(this).position().top + $(this).outerHeight() + 5,
-        left: $(this).position().left,
-        width: inputWidth
+document.addEventListener('DOMContentLoaded', function() {
+  var searchInput = document.getElementById('q');
+  var hint = document.getElementById('hint');
+  
+  if (searchInput && hint) {
+    searchInput.addEventListener('focus', function() {
+      var inputWidth = this.offsetWidth;
+      var rect = this.getBoundingClientRect();
+      hint.style.display = 'block';
+      hint.style.top = (rect.top + this.offsetHeight + 5) + 'px';
+      hint.style.left = rect.left + 'px';
+      hint.style.width = inputWidth + 'px';
     });
-  }).blur(function() {
-    $('#hint').css('display', 'none');
-  });
+    
+    searchInput.addEventListener('blur', function() {
+      hint.style.display = 'none';
+    });
+  }
 });
 </script>
 {% include "includes/bootstrap-theme.html" %}

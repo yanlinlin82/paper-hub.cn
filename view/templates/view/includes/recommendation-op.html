@@ -25,56 +25,115 @@
   </div>
 </div>
 <script>
-$(document).ready(function(){
-  $('#addToLibraryModal').on('shown.bs.modal', function () {
-      $('#addToLibraryModalComment').focus();
-  });
+document.addEventListener('DOMContentLoaded', function(){
+  var addToLibraryModal = document.getElementById('addToLibraryModal');
+  if (addToLibraryModal) {
+    addToLibraryModal.addEventListener('shown.bs.modal', function () {
+      var addToLibraryModalComment = document.getElementById('addToLibraryModalComment');
+      if (addToLibraryModalComment) {
+        addToLibraryModalComment.focus();
+      }
+    });
+  }
 });
 
 function expand_recommendations(paper_id) {
-  $('#historical_recommendations_' + paper_id).addClass('d-block');
-  $('#historical_recommendations_' + paper_id).removeClass('d-none');
-  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-none');
-  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-block');
-  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-block');
-  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-none');
+  var historicalRecommendations = document.getElementById('historical_recommendations_' + paper_id);
+  var expandButton = document.getElementById('button_expand_historical_recommendations_' + paper_id);
+  var collapseButton = document.getElementById('button_collapse_historical_recommendations_' + paper_id);
+  
+  if (historicalRecommendations) {
+    historicalRecommendations.classList.add('d-block');
+    historicalRecommendations.classList.remove('d-none');
+  }
+  if (expandButton) {
+    expandButton.classList.add('d-none');
+    expandButton.classList.remove('d-block');
+  }
+  if (collapseButton) {
+    collapseButton.classList.add('d-block');
+    collapseButton.classList.remove('d-none');
+  }
 }
 
 function collapse_recommendations(paper_id) {
-  $('#historical_recommendations_' + paper_id).addClass('d-none');
-  $('#historical_recommendations_' + paper_id).removeClass('d-block');
-  $('#button_expand_historical_recommendations_' + paper_id).addClass('d-block');
-  $('#button_expand_historical_recommendations_' + paper_id).removeClass('d-none');
-  $('#button_collapse_historical_recommendations_' + paper_id).addClass('d-none');
-  $('#button_collapse_historical_recommendations_' + paper_id).removeClass('d-block');
+  var historicalRecommendations = document.getElementById('historical_recommendations_' + paper_id);
+  var expandButton = document.getElementById('button_expand_historical_recommendations_' + paper_id);
+  var collapseButton = document.getElementById('button_collapse_historical_recommendations_' + paper_id);
+  
+  if (historicalRecommendations) {
+    historicalRecommendations.classList.add('d-none');
+    historicalRecommendations.classList.remove('d-block');
+  }
+  if (expandButton) {
+    expandButton.classList.add('d-block');
+    expandButton.classList.remove('d-none');
+  }
+  if (collapseButton) {
+    collapseButton.classList.add('d-none');
+    collapseButton.classList.remove('d-block');
+  }
 }
 
 function addToLibrary(id) {
-  $('#addToLibraryModalInfo').html($('#info_' + id).html());
-  $('#addToLibraryModalTitle').html($('#title_' + id + '_text').html());
-  $('#addToLibraryModalComment').val('');
-  $('#addToLibraryModal').modal('show');
+  var addToLibraryModalInfo = document.getElementById('addToLibraryModalInfo');
+  var addToLibraryModalTitle = document.getElementById('addToLibraryModalTitle');
+  var addToLibraryModalComment = document.getElementById('addToLibraryModalComment');
+  var addToLibraryModal = document.getElementById('addToLibraryModal');
+  var infoElement = document.getElementById('info_' + id);
+  var titleElement = document.getElementById('title_' + id + '_text');
+  
+  if (addToLibraryModalInfo && infoElement) {
+    addToLibraryModalInfo.innerHTML = infoElement.innerHTML;
+  }
+  if (addToLibraryModalTitle && titleElement) {
+    addToLibraryModalTitle.innerHTML = titleElement.innerHTML;
+  }
+  if (addToLibraryModalComment) {
+    addToLibraryModalComment.value = '';
+  }
+  
+  if (addToLibraryModal) {
+    var modal = new bootstrap.Modal(addToLibraryModal);
+    modal.show();
+  }
 
-  $('#addToLibraryModalOK').off('click').on('click', function() {
-    const comment = $('#addToLibraryModalComment').val();
-    $('#addToLibraryModal').modal('hide');
-    ajaxPostJson({
-      url: "{% url 'api:add_recommendation' %}",
-      data: { paper_id: id, comment: comment },
-      success: function (data) {
-        console.log(data)
-        if (!data.success) {
-          alert('添加推荐失败！\n' + data.error);
-        } else {
-          $('#card_' + id).remove();
-          if ($('.card').length === 0) {
-            show_loading_modal('正在刷新页面，请稍候……');
-            location.reload();
-          }
+  var addToLibraryModalOK = document.getElementById('addToLibraryModalOK');
+  if (addToLibraryModalOK) {
+    // Remove existing click listeners and add new one
+    addToLibraryModalOK.replaceWith(addToLibraryModalOK.cloneNode(true));
+    addToLibraryModalOK = document.getElementById('addToLibraryModalOK');
+    
+    addToLibraryModalOK.addEventListener('click', function() {
+      const comment = addToLibraryModalComment ? addToLibraryModalComment.value : '';
+      if (addToLibraryModal) {
+        var modal = bootstrap.Modal.getInstance(addToLibraryModal);
+        if (modal) {
+          modal.hide();
         }
       }
+      ajaxPostJson({
+        url: "{% url 'api:add_recommendation' %}",
+        data: { paper_id: id, comment: comment },
+        success: function (data) {
+          console.log(data)
+          if (!data.success) {
+            alert('添加推荐失败！\n' + data.error);
+          } else {
+            var card = document.getElementById('card_' + id);
+            if (card) {
+              card.remove();
+            }
+            var cards = document.querySelectorAll('.card');
+            if (cards.length === 0) {
+              show_loading_modal('正在刷新页面，请稍候……');
+              location.reload();
+            }
+          }
+        }
+      });
     });
-  });
+  }
 }
 
 function mark_read_recommendation(id) {
@@ -85,8 +144,12 @@ function mark_read_recommendation(id) {
       if (!data.success) {
         alert('mark_read_recommendation failed!\n' + data.error);
       } else {
-        $('#card_' + id).remove();
-        if ($('.card').length === 0) {
+        var card = document.getElementById('card_' + id);
+        if (card) {
+          card.remove();
+        }
+        var cards = document.querySelectorAll('.card');
+        if (cards.length === 0) {
           show_loading_modal('正在刷新页面，请稍候……');
           location.reload();
         }
@@ -103,8 +166,12 @@ function restore_recommendation(id) {
       if (!data.success) {
         alert('Restore recommendation failed!\n' + data.error);
       } else {
-        $('#card_' + id).remove();
-        if ($('.card').length === 0) {
+        var card = document.getElementById('card_' + id);
+        if (card) {
+          card.remove();
+        }
+        var cards = document.querySelectorAll('.card');
+        if (cards.length === 0) {
           show_loading_modal('正在刷新页面，请稍候……');
           location.reload();
         }

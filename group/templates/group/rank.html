@@ -95,26 +95,43 @@
 </div>
 {% if rank_type == "monthly" %}
 <script>
-$(() => {
-  $('#yearSelect, #monthSelect').change(function() {
-      var year = $('#yearSelect').val();
-      var month = $('#monthSelect').val();
+document.addEventListener('DOMContentLoaded', function() {
+  var yearSelect = document.getElementById('yearSelect');
+  var monthSelect = document.getElementById('monthSelect');
+  
+  if (yearSelect && monthSelect) {
+    yearSelect.addEventListener('change', function() {
+      var year = yearSelect.value;
+      var month = monthSelect.value;
       if (year && month) {
-          window.location.href = `?year=${year}&month=${month}`;
+        window.location.href = `?year=${year}&month=${month}`;
       }
-  });
+    });
+    
+    monthSelect.addEventListener('change', function() {
+      var year = yearSelect.value;
+      var month = monthSelect.value;
+      if (year && month) {
+        window.location.href = `?year=${year}&month=${month}`;
+      }
+    });
+  }
 });
 </script>
 {% endif %}
 {% if rank_type == "yearly" %}
 <script>
-$(() => {
-  $('#yearSelect').change(function() {
-      var year = $('#yearSelect').val();
+document.addEventListener('DOMContentLoaded', function() {
+  var yearSelect = document.getElementById('yearSelect');
+  
+  if (yearSelect) {
+    yearSelect.addEventListener('change', function() {
+      var year = yearSelect.value;
       if (year) {
-          window.location.href = `?year=${year}`;
+        window.location.href = `?year=${year}`;
       }
-  });
+    });
+  }
 });
 </script>
 {% endif %}

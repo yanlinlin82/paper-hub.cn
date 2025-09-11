@@ -37,38 +37,51 @@
   </div>
 </div>
 <script>
-$(() => {
-  $('#loginModal').on('shown.bs.modal', () => {
-    $('#username').focus();
-  })
+document.addEventListener('DOMContentLoaded', function() {
+  var loginModal = document.getElementById('loginModal');
+  var username = document.getElementById('username');
+  var password = document.getElementById('password');
+  var loginButton = document.getElementById('loginButton');
+  
+  if (loginModal) {
+    loginModal.addEventListener('shown.bs.modal', function() {
+      if (username) {
+        username.focus();
+      }
+    });
 
-  $('#loginModal').on('keypress', function (event) {
-    var keycode = (event.keyCode ? event.keyCode : event.which);
-    if (keycode == '13'){
-      $('#loginButton').click();   
-    }
-  });
-
-  $('#loginButton').click(function () {
-    ajaxPostJson({
-      url: "{% url 'api:login' %}",
-      data: {
-        username: $('#username').val(),
-        password: $('#password').val()
-      },
-      success: function (data) {
-        if (!data.success) {
-          alert('Login failed. Please check your credentials.');
-        } else {
-          const cookieConsent = getCookie('cookies_accepted');
-          if (cookieConsent === 'true') {
-            setCookie('token', data.token, 1);
-          }
-          location.reload(false);
+    loginModal.addEventListener('keypress', function (event) {
+      var keycode = (event.keyCode ? event.keyCode : event.which);
+      if (keycode == 13) {
+        if (loginButton) {
+          loginButton.click();   
         }
       }
     });
-  });
+  }
+
+  if (loginButton) {
+    loginButton.addEventListener('click', function () {
+      ajaxPostJson({
+        url: "{% url 'api:login' %}",
+        data: {
+          username: username ? username.value : '',
+          password: password ? password.value : ''
+        },
+        success: function (data) {
+          if (!data.success) {
+            alert('Login failed. Please check your credentials.');
+          } else {
+            const cookieConsent = getCookie('cookies_accepted');
+            if (cookieConsent === 'true') {
+              setCookie('token', data.token, 1);
+            }
+            location.reload(false);
+          }
+        }
+      });
+    });
+  }
 });
 
 function logout() {

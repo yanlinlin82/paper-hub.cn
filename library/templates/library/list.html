@@ -121,10 +121,13 @@
 </div>
 
 <script>
-$(() => {
-  $('.star').click(function() {
-      $(this).toggleClass('checked');
-      $(this).html($(this).hasClass('checked') ? '&#9733;' : '&#9734;');
+document.addEventListener('DOMContentLoaded', function() {
+  var stars = document.querySelectorAll('.star');
+  stars.forEach(function(star) {
+    star.addEventListener('click', function() {
+      this.classList.toggle('checked');
+      this.innerHTML = this.classList.contains('checked') ? '&#9733;' : '&#9734;';
+    });
   });
 });
 
@@ -134,8 +137,12 @@ function removePaper(paperId) {
     data: {paper_id: paperId},
     success: function(data) {
       if (data.success) {
-        $('#card_' + paperId).remove();
-        if ($('.card').length == 0) {
+        var card = document.getElementById('card_' + paperId);
+        if (card) {
+          card.remove();
+        }
+        var cards = document.querySelectorAll('.card');
+        if (cards.length == 0) {
           window.location.reload();
         }
       } else {
@@ -151,8 +158,12 @@ function restorePaper(paperId) {
     data: {paper_id: paperId},
     success: function(data) {
       if (data.success) {
-        $('#card_' + paperId).remove();
-        if ($('.card').length == 0) {
+        var card = document.getElementById('card_' + paperId);
+        if (card) {
+          card.remove();
+        }
+        var cards = document.querySelectorAll('.card');
+        if (cards.length == 0) {
           window.location.reload();
         }
       } else {
@@ -168,8 +179,12 @@ function removePaperPermanently(paperId) {
     data: {paper_id: paperId},
     success: function(data) {
       if (data.success) {
-        $('#card_' + paperId).remove();
-        if ($('.card').length == 0) {
+        var card = document.getElementById('card_' + paperId);
+        if (card) {
+          card.remove();
+        }
+        var cards = document.querySelectorAll('.card');
+        if (cards.length == 0) {
           window.location.reload();
         }
       } else {
@@ -180,28 +195,53 @@ function removePaperPermanently(paperId) {
 }
 
 function editReview(paperId, reviewId) {
-  var review = $('#card_' + paperId + '_review_' + reviewId);
-  $('#editReviewComment').val($('#comment_' + reviewId).text());
-  $('#editReviewModal').modal('show');
-  $('#editReviewModalOK').off('click').on('click', function() {
-    ajaxPostJson({
-      url: "{% url 'api:new_edit_review' %}",
-      data: {
-        paper_id: paperId,
-        review_id: reviewId,
-        comment: $('#editReviewComment').val(),
-      },
-      success: function(data) {
-        console.log('editReview: ', data);
-        if (data.success) {
-          $('#comment_' + reviewId).text($('#editReviewComment').val());
-          $('#editReviewModal').modal('hide');
-        } else {
-          alert(data.message);
+  var review = document.getElementById('card_' + paperId + '_review_' + reviewId);
+  var editReviewComment = document.getElementById('editReviewComment');
+  var commentElement = document.getElementById('comment_' + reviewId);
+  var editReviewModal = document.getElementById('editReviewModal');
+  
+  if (editReviewComment && commentElement) {
+    editReviewComment.value = commentElement.textContent;
+  }
+  
+  if (editReviewModal) {
+    var modal = new bootstrap.Modal(editReviewModal);
+    modal.show();
+  }
+  
+  var editReviewModalOK = document.getElementById('editReviewModalOK');
+  if (editReviewModalOK) {
+    // Remove existing click listeners and add new one
+    editReviewModalOK.replaceWith(editReviewModalOK.cloneNode(true));
+    editReviewModalOK = document.getElementById('editReviewModalOK');
+    
+    editReviewModalOK.addEventListener('click', function() {
+      ajaxPostJson({
+        url: "{% url 'api:new_edit_review' %}",
+        data: {
+          paper_id: paperId,
+          review_id: reviewId,
+          comment: editReviewComment ? editReviewComment.value : '',
+        },
+        success: function(data) {
+          console.log('editReview: ', data);
+          if (data.success) {
+            if (commentElement && editReviewComment) {
+              commentElement.textContent = editReviewComment.value;
+            }
+            if (editReviewModal) {
+              var modal = bootstrap.Modal.getInstance(editReviewModal);
+              if (modal) {
+                modal.hide();
+              }
+            }
+          } else {
+            alert(data.message);
+          }
         }
-      }
+      });
     });
-  });
+  }
 }
 
 function removeReview(paperId, reviewId) {
@@ -210,11 +250,19 @@ function removeReview(paperId, reviewId) {
     data: {paper_id: paperId, review_id: reviewId},
     success: function(data) {
       if (data.success) {
-        $('#card_' + paperId + '_review_' + reviewId).remove();
-        if ($('#card_' + paperId + ' .list-group-item').length == 0) {
-          $('#card_' + paperId).remove();
-          if ($('.card').length == 0) {
-            window.location.reload();
+        var reviewCard = document.getElementById('card_' + paperId + '_review_' + reviewId);
+        if (reviewCard) {
+          reviewCard.remove();
+        }
+        var paperCard = document.getElementById('card_' + paperId);
+        if (paperCard) {
+          var listItems = paperCard.querySelectorAll('.list-group-item');
+          if (listItems.length == 0) {
+            paperCard.remove();
+            var cards = document.querySelectorAll('.card');
+            if (cards.length == 0) {
+              window.location.reload();
+            }
           }
         }
       } else {
@@ -230,11 +278,19 @@ function restoreReview(paperId, reviewId) {
     data: {paper_id: paperId, review_id: reviewId},
     success: function(data) {
       if (data.success) {
-        $('#card_' + paperId + '_review_' + reviewId).remove();
-        if ($('#card_' + paperId + ' .list-group-item').length == 0) {
-          $('#card_' + paperId).remove();
-          if ($('.card').length == 0) {
-            window.location.reload();
+        var reviewCard = document.getElementById('card_' + paperId + '_review_' + reviewId);
+        if (reviewCard) {
+          reviewCard.remove();
+        }
+        var paperCard = document.getElementById('card_' + paperId);
+        if (paperCard) {
+          var listItems = paperCard.querySelectorAll('.list-group-item');
+          if (listItems.length == 0) {
+            paperCard.remove();
+            var cards = document.querySelectorAll('.card');
+            if (cards.length == 0) {
+              window.location.reload();
+            }
           }
         }
       } else {
@@ -250,11 +306,19 @@ function removeReviewPermanently(paperId, reviewId) {
     data: {paper_id: paperId, review_id: reviewId},
     success: function(data) {
       if (data.success) {
-        $('#card_' + paperId + '_review_' + reviewId).remove();
-        if ($('#card_' + paperId + ' .list-group-item').length == 0) {
-          $('#card_' + paperId).remove();
-          if ($('.card').length == 0) {
-            window.location.reload();
+        var reviewCard = document.getElementById('card_' + paperId + '_review_' + reviewId);
+        if (reviewCard) {
+          reviewCard.remove();
+        }
+        var paperCard = document.getElementById('card_' + paperId);
+        if (paperCard) {
+          var listItems = paperCard.querySelectorAll('.list-group-item');
+          if (listItems.length == 0) {
+            paperCard.remove();
+            var cards = document.querySelectorAll('.card');
+            if (cards.length == 0) {
+              window.location.reload();
+            }
           }
         }
       } else {

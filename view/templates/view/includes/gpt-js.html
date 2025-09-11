@@ -2,23 +2,36 @@
 <script>
 function summarize_by_gpt(paper_id) {
   console.log('summarize_by_gpt', paper_id);
-  ask_button = $('#gpt-ask-' + paper_id);
-  ask_button.prop('disabled', true);
-  answer_div = $('#gpt-answer-' + paper_id);
-  answer_div.addClass('d-block');
-  answer_div.removeClass('d-none');
-  answer_div.html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>');
+  var ask_button = document.getElementById('gpt-ask-' + paper_id);
+  var answer_div = document.getElementById('gpt-answer-' + paper_id);
+  
+  if (ask_button) {
+    ask_button.disabled = true;
+  }
+  
+  if (answer_div) {
+    answer_div.classList.add('d-block');
+    answer_div.classList.remove('d-none');
+    answer_div.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+  }
+  
   ajaxPostJson({
     url: '/api/summarize_by_gpt',
     data: { paper_id: paper_id },
     success: function(data) {
       console.log('summarize_by_gpt return:\n', data);
       if (data.success) {
-        htmlContent = marked.parse(data.answer);
-        answer_div.html(htmlContent);
+        var htmlContent = marked.parse(data.answer);
+        if (answer_div) {
+          answer_div.innerHTML = htmlContent;
+        }
       } else {
-        answer_div.html('<div class="danger">' + data.error + '</div>');
-        ask_button.prop('disabled', false);
+        if (answer_div) {
+          answer_div.innerHTML = '<div class="danger">' + data.error + '</div>';
+        }
+        if (ask_button) {
+          ask_button.disabled = false;
+        }
       }
     }
   });
