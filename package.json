@@ -4,7 +4,8 @@
   "description": "An easy way to read and share papers for scientific research",
   "main": "index.js",
   "scripts": {
-    "build": "node scripts/build-static.js",
+    "build": "vite build",
+    "dev": "vite build --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,6 +21,10 @@
   },
   "homepage": "https://github.com/yanlinlin82/paper-hub.cn#readme",
   "dependencies": {
-    "bootstrap": "^5.3.8"
+    "bootstrap": "^5.3.8",
+    "marked": "^16.2.1"
+  },
+  "devDependencies": {
+    "vite": "^7.1.5"
   }
 }
