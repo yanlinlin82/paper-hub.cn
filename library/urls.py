@@ -1,6 +1,6 @@
 from django.urls import path
 from django.http import HttpResponseRedirect
-from mysite import settings
+from config import settings
 
 from . import views
 

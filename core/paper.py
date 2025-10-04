@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.db.models import Count
 from django.db.models.aggregates import Min
 from core.models import CustomCheckInInterval, Paper
-from mysite import settings
+from config import settings
 import requests
 from lxml import etree
 import pandas as pd

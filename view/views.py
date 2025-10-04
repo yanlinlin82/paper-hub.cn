@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.db.models import Subquery, OuterRef, Q, Max, Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from mysite import settings
+from config import settings
 from core.paper import get_paper_info, guess_identifier_type, prepare_single_paper
 from core.models import Paper, Review, Recommendation, PaperTracking, Label, UserProfile
 

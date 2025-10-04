@@ -18,7 +18,7 @@ from django.middleware.csrf import get_token
 from django.db.models import Q
 from django.contrib.auth.models import User
 import openai
-from mysite import settings
+from config import settings
 from core.models import UserProfile, UserAlias, UserSession
 from core.models import Review, CustomCheckInInterval
 from core.models import GroupProfile, Recommendation
@@ -142,7 +142,7 @@ def do_login(request):
         return JsonResponse({'success': False, 'error': 'Invalid username or password'}, status=400)
 
     user = authenticate(request, username=username, password=password)
-    if user is None or user.core_user_profile.pk != 1:
+    if user is None:
         return JsonResponse({'success': False, 'error': 'Login failed. Please check your credentials.'})
 
     UserSession.objects.filter(user=user.core_user_profile, client_type='website').delete()
@@ -900,8 +900,6 @@ def weixin_callback(request):
     profiles = UserProfile.objects.filter(
         Q(wx_unionid=unionid) | Q(wx_openid=openid)
     )
-    if profiles.count() == 0 or profiles[0].pk != 1:
-        return JsonResponse({'success': False, 'error': 'Login failed. Please check your credentials.'})
     if profiles.count() == 0:
         def generate_random_username():
             letters = string.ascii_letters

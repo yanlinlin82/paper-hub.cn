@@ -84,7 +84,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Root URL configuration
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-ROOT_URLCONF
-ROOT_URLCONF = 'mysite.urls'
+ROOT_URLCONF = 'config.urls'
 
 
 # Templates
@@ -101,7 +101,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'mysite.context_processors.my_configures',
+                'config.context_processors.my_configures',
             ],
         },
     },
@@ -110,7 +110,7 @@ TEMPLATES = [
 
 # WSGI application
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#wsgi-application
-WSGI_APPLICATION = 'mysite.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database

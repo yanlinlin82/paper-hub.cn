@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import uuid
 from datetime import timedelta
-from mysite import settings
+from config import settings
 from django.db import models
 from django.utils import timezone
 

@@ -7,7 +7,7 @@ from lxml import etree
 import django
 
 sys.path.append('.')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 from core.models import Paper, Journal, PaperReference, PaperTracking, Recommendation, Label
