@@ -22,9 +22,9 @@
   "homepage": "https://github.com/yanlinlin82/paper-hub.cn#readme",
   "dependencies": {
     "bootstrap": "^5.3.8",
-    "marked": "^16.2.1"
+    "marked": "^16.3.0"
   },
   "devDependencies": {
-    "vite": "^7.1.5"
+    "vite": "^7.1.9"
   }
 }
