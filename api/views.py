@@ -871,7 +871,7 @@ def summarize_by_gpt(request):
 def get_weixin_qr(request):
     appid = os.getenv('WEB_APP_ID')
     web_domain = os.getenv('WEB_DOMAIN')
-    redirect_uri = quote(f'https://{web_domain}/api/weixin_callback/')
+    redirect_uri = quote(f'https://{web_domain}/api/weixin-callback/')
     current_url = request.GET.get('current_url', f'https://{web_domain}/')
     state = quote(current_url)
     url = f"https://open.weixin.qq.com/connect/qrconnect?appid={appid}&redirect_uri={redirect_uri}&response_type=code&scope=snsapi_login&state={state}#wechat_redirect"
