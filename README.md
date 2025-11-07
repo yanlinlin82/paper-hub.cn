@@ -4,41 +4,39 @@ An easy way to read and share papers for scientific research
 
 ## Quick Start
 
-1. Install node packages and build:
+1. Setup environment (install dependencies and node packages):
 
     ```sh
+    ./scripts/setup.sh
+    ```
+
+    Or manually:
+
+    ```sh
+    uv sync --no-install-project
     npm install
     npm run build
     ```
 
-2. Prepare virtual environment (venv):
+2. Prepare static files:
 
     ```sh
-    python -m venv .venv
-    . .venv/bin/activate
-    pip install -U pip
-    pip install -U pip-tools
-    pip-compile requirements.in -o requirements.txt
-    pip install -r requirements.txt
+    uv run python manage.py collectstatic
     ```
 
-3. Prepare static files:
+3. Establish database:
 
     ```sh
-    python manage.py collectstatic
+    uv run python manage.py migrate
     ```
 
-4. Establish database
+4. Run Server:
 
     ```sh
-    python manage.py migrate
+    uv run python manage.py runserver
     ```
 
-5. Run Server
-
-    ```sh
-    python manage.py runserver
-    ```
+    Note: Using `uv run` automatically uses the virtual environment, no need to activate it manually. Alternatively, you can activate the environment with `source .venv/bin/activate` and use `python` directly.
 
 ## Run on Apache HTTP Server
 
@@ -108,8 +106,7 @@ An easy way to read and share papers for scientific research
 
     ```sh
     # run this command in a separated terminal
-    . .venv/bin/activate
-    python manage.py runserver
+    uv run python manage.py runserver
     ```
 
 2. Use SSH start to reverse tunnel (take 'paper-hub.cn' as an example).
@@ -147,25 +144,39 @@ An easy way to read and share papers for scientific research
 
 4. After all these, port 8443 on the remote server could be accessed as <https://paper-hub.cn:8443/>, which could be set as a safe domain in Mini Program development.
 
-
 ## FAQ
 
-1. **Q:** How do I configure a SOCKS5 proxy server when installing packages with pip?
+1. **Q:** How do I configure a SOCKS5 proxy server when installing packages with uv?
 
-    **A:** Before calling pip install, define the environment variable ALL_PROXY:
+    **A:** Before calling `uv sync`, define the environment variable ALL_PROXY:
 
     ```sh
     export ALL_PROXY=socks5://xxx.xxx.xxx.xxx:1090
+    uv sync
     ```
 
-2. **Q:** What should I do if I encounter the following error during installation:
+2. **Q:** How do I upgrade dependencies to the latest versions?
 
-    ```txt
-    ERROR: Could not install packages due to an OSError: Missing dependencies for SOCKS support.
-    ```
-
-    **A:** You need to remove the proxy configuration first, install the PySocks package, and then use the proxy again:
+    **A:** Use `uv lock --upgrade` to update the lock file, then `uv sync`:
 
     ```sh
-    pip install PySocks
+    uv lock --upgrade
+    uv sync
     ```
+
+    Or upgrade a specific package:
+
+    ```sh
+    uv lock --upgrade-package <package>
+    uv sync
+    ```
+
+3. **Q:** How do I generate or update the lock file?
+
+    **A:** Use `uv lock` command:
+
+    ```sh
+    uv lock
+    ```
+
+    This will resolve dependencies from `pyproject.toml` and generate/update `uv.lock` file.
