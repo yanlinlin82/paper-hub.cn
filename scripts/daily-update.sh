@@ -16,7 +16,6 @@ PUBMED_XML_GZ=$(find pubmed/updatefiles/ -type f -name '*.xml.gz' | sort | tail 
 echo ">>> Latest PubMed XML file: $PUBMED_XML_GZ"
 
 SOURCE=$(basename $PUBMED_XML_GZ .xml.gz)
-SOURCE=${SOURCE#pubmed25n}
 echo ">>> Got source: $SOURCE"
 
 mkdir -pv log/pubmed

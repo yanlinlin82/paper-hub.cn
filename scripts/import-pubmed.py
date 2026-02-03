@@ -57,11 +57,13 @@ class PubMedXMLFile:
         self.pmids_to_remove = set()
 
     def load(self, pubmed_dir, source):
-        pubmed_part = 'baseline' if source < 1225 else 'updatefiles'
-        self.pubmed_xml_gz = os.path.join(pubmed_dir, pubmed_part, f'pubmed25n{source}.xml.gz')
-        if not os.path.exists(self.pubmed_xml_gz):
-            print(f"File not found: {self.pubmed_xml_gz}")
-            return False
+        pubmed_xml_gz = os.path.join(pubmed_dir, "baseline", f"{source}.xml.gz")
+        if not os.path.exists(pubmed_xml_gz):
+            pubmed_xml_gz = os.path.join(pubmed_dir, "updatefiles", f"{source}.xml.gz")
+            if not os.path.exists(pubmed_xml_gz):
+                print(f"File not found: {pubmed_xml_gz}")
+                return False
+        self.pubmed_xml_gz = pubmed_xml_gz
 
         print(f"Loading '{self.pubmed_xml_gz}'...")
         self.source = source
@@ -394,8 +396,8 @@ class PubMedXMLFile:
             self.scan_rules_for_single_paper(index, paper_info, mode, rules, run, verbose, cnt)
 
     def generate_source_text(self):
-        # eg. 'pubmed25n1453.20240628'
-        return f'pubmed25n{self.source}.' + get_file_modification_time(self.pubmed_xml_gz)
+        # eg. 'pubmed25n1453.20240628', 'pubmed26n1338.20260203'
+        return self.source + '.' + get_file_modification_time(self.pubmed_xml_gz)
 
     def match_keyword(self, paper_info, keyword):
         pattern = r'\b{}\b'.format(re.escape(keyword))
@@ -482,7 +484,7 @@ class PubMedXMLFile:
 def main():
     parser = argparse.ArgumentParser(description='Import PubMed data.')
     parser.add_argument('pubmed_dir', type=str, help='Directory containing PubMed data')
-    parser.add_argument('source', type=int, help='Source of the data')
+    parser.add_argument('source', type=str, help='Source of the data, e.g. "pubmed26n1337"')
     parser.add_argument('index', type=str, nargs='?', default=None, help='Optional index value or range, eg. 2 or 3-5')
     parser.add_argument('-r', '--run', action='store_true', help='Run the import process, otherwise just test without writing anything to database')
     parser.add_argument('-m', '--mode', type=str, choices=['default', 'update-index', 'update-info'], default='default',
@@ -498,11 +500,6 @@ def main():
         print(f"ERROR: Directory not found: {args.pubmed_dir}\n")
         parser.print_help()
         return 2
-
-    if args.source <= 0:
-        print("ERROR: Source must be a positive integer\n")
-        parser.print_help()
-        return 1
 
     pubmed = PubMedXMLFile()
     if not pubmed.load(args.pubmed_dir, args.source):
