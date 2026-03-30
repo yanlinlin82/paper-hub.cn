@@ -52,7 +52,7 @@
             <!-- 标题 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">标题</div>
-              <div class="col-5"><input type="text" class="form-control" id="editReviewModalTitle" name="title" required></div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalTitle" name="title"></div>
               <div class="col-1 text-center">
                 <button type="button" id="editReviewModalTitleConfirm" class="btn btn-outline-primary btn-sm" onclick="fill_input('Title')">&lt;</button>
               </div>
@@ -61,7 +61,7 @@
             <!-- 杂志 -->
             <div class="row align-items-center p-2">
               <div class="col-2 text-end">杂志</div>
-              <div class="col-5"><input type="text" class="form-control" id="editReviewModalJournal" name="journal" required></div>
+              <div class="col-5"><input type="text" class="form-control" id="editReviewModalJournal" name="journal"></div>
               <div class="col-1 text-center">
                 <button type="button" id="editReviewModalJournalConfirm" class="btn btn-outline-primary btn-sm" onclick="fill_input('Journal')">&lt;</button>
               </div>
@@ -187,6 +187,8 @@
 </div>
 <script>
 function edit_review_new(review_id, paper_id) {
+  disable_edit_paper();
+
   var reviewIdField = document.getElementById('editReviewModalReviewId');
   var paperIdField = document.getElementById('editReviewModalPaperId');
   var labelField = document.getElementById('editReviewModalLabel');
@@ -210,7 +212,7 @@ function edit_review_new(review_id, paper_id) {
   
   var commentElement = document.getElementById('review_comment_' + review_id);
   if (commentField && commentElement) {
-    commentField.textContent = commentElement.textContent;
+    commentField.value = commentElement.textContent;
   }
   
   var titleElement = document.getElementById('title_' + paper_id + '_text');
@@ -391,7 +393,7 @@ function submit_review(event) {
     comment: commentField ? commentField.value : ''
   };
   
-  var editPaperInfo = editPaperInfoField ? editPaperInfoField.value : '';
+  var editPaperInfo = editPaperInfoField ? editPaperInfoField.value === 'true' : false;
   if (editPaperInfo) {
     data.paper = {};
     
