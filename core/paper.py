@@ -268,7 +268,7 @@ class PaperInfo:
                 for item in self.xml_node.xpath('PubmedData/ReferenceList/Reference'):
                     ref = {}
                     ref['ref_type'] = 'Reference'
-                    ref['citation'] = item.xpath('Citation/text()' or [None])[0]
+                    ref['citation'] = (item.xpath('Citation/text()') or [None])[0]
                     ref['doi'] = (item.xpath('ArticleIdList/ArticleId[@IdType="doi"]/text()') or [None])[0]
                     ref['pmid'] = (item.xpath('ArticleIdList/ArticleId[@IdType="pubmed"]/text()') or [None])[0]
                     ref['pmcid'] = (item.xpath('ArticleIdList/ArticleId[@IdType="pmcid"]/text()') or [None])[0]
