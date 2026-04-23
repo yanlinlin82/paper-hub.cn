@@ -23,12 +23,6 @@
           {{ abstract }}
         </div>
       {% endif %}
-      <a class="ms-2 text-nowrap" href="javascript:translate_abstract({{ paper.pk }})">翻译</a>
-      <div id="abstract_cn_{{ paper.pk }}" class="mt-1 d-none">
-        {% if paper.translation and paper.translation.abstract_cn %}
-        {{ paper.translation.abstract_cn }}
-        {% endif %}
-      </div>
     {% else %}
       <i>No abstract available.</i>
     {% endif %}

@@ -17,12 +17,6 @@
         {{ title }}
       {% endif %}
     </div>
-    <a class="ms-2 text-nowrap" href="javascript:translate_title({{ paper.pk }})">翻译</a>
-  </div>
-  <div id="title_cn_{{ paper.pk }}" class="mt-1 d-none">
-  {% if paper.translation and paper.translation.title_cn %}
-  {{ paper.translation.title_cn }}
-  {% endif %}
   </div>
   {% endwith %}
 </div>

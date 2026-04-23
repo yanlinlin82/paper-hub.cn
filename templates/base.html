@@ -11,8 +11,8 @@
   <meta name="google-site-verification" content="CJeulU9yTowOBo-3EpJYEAhlHcG1NAHauYkG4LiIVQY">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-  <link href="{% static 'assets/main.css' %}" rel="stylesheet">
-  <script src="{% static 'assets/js/main.js' %}"></script>
+  <link href="{% static 'assets/js/main.css' %}" rel="stylesheet">
+  <script src="{% static 'assets/main.js' %}"></script>
   <script>
     // Export Bootstrap to global scope
     if (typeof window !== 'undefined') {
@@ -118,7 +118,7 @@
 <nav class="navbar navbar-expand bg-body-tertiary border-bottom border-body">
   <div id="navbarContainer" class="container-xl">
     <div style="min-width:200px;">
-      <a class="navbar-brand" href="{% url 'index' %}"><img id="logo" class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
+      <a class="navbar-brand" href="{% url 'group:index' %}"><img id="logo" class="img-fluid" src="{% static 'images/banner-b.png' %}" width="150" height="40" alt="Paper-Hub"></a>
     </div>
 
     <div class="row" style="width:100%;">
@@ -142,17 +142,16 @@
         <ul class="navbar-nav nav justify-content-end ms-3">
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'index' %}">首页</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'library:index' %}">文献库</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="{% url 'group:index' %}">社群</a>
           </li>
+          {% if user.is_superuser %}
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/">管理后台</a>
+          </li>
+          {% endif %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              {{ user.core_user_profile.nickname }}
+              {{ user.username }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="javascript:logout();">退出登录</a></li>

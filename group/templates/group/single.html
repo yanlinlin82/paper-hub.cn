@@ -28,21 +28,21 @@
       {% if paper.author_list|length > 10 %}
       <div id="author_{{ paper.pk }}_short" class="d-inline">
         {% for author in paper.author_list|slice:":10" %}
-        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ author|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ author }}</a>,
+        <span>{{ author }}</span>,
         {% endfor %}
         ...
         <a href="javascript:expand_authors({{ paper.pk }})">&gt;&gt;&gt;</a>
       </div>
       <div id="author_{{ paper.pk }}_long" class="d-none">
         {% for author in paper.author_list %}
-        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ author|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+        <span>{{ author }}</span>{% if not forloop.last %},{% endif %}
         {% endfor %}
         <a href="javascript:collapse_authors({{ paper.pk }})">&lt;&lt;&lt;</a>
       </div>
       {% else %}
       <div class="d-inline">
         {% for author in paper.author_list %}
-        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ author|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ author }}</a>{% if not forloop.last %},{% endif %}
+        <span>{{ author }}</span>{% if not forloop.last %},{% endif %}
         {% endfor %}
       </div>
       {% endif %}
@@ -54,7 +54,7 @@
       <b>Keywords:</b>
       <div class="d-inline">
         {% for keyword in paper.keyword_list %}
-        <a href="{% if user.is_authenticated %}{% url 'search' %}?q={{ keyword|urlencode }}{% else %}javascript:void(0);{% endif %}">{{ keyword }}</a>{% if not forloop.last %},{% endif %}
+        <span>{{ keyword }}</span>{% if not forloop.last %},{% endif %}
         {% endfor %}
       </div>
     </div>
@@ -73,11 +73,8 @@
     </div>
     {% endif %}
   </div>
-  {% include "view/includes/gpt-div.html" %}
   {% endwith %}
 </div>
 
-{% include "group/includes/review-info-js.html" %}
 {% include "view/includes/paper-js.html" %}
-{% include "view/includes/gpt-js.html" %}
 {% endblock content %}

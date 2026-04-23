@@ -2,6 +2,40 @@
 
 An easy way to read and share papers for scientific research
 
+## Project Split (2026)
+
+This repository is being simplified to keep only:
+
+- community display pages (`/group/...`)
+- admin login and content editing (`/admin/...`)
+
+Non-community features are being moved to a sibling repository:
+
+- `../paper-tracker`
+
+Planned migration targets include literature tracking, recommendation workflows, and search/import pipelines.
+
+## Data Migration to paper-tracker
+
+To migrate data for moved features (tracking/recommendation/search-related data), run:
+
+```sh
+./scripts/export-paper-tracker-data.sh
+```
+
+This writes a timestamped package under `../paper-tracker/data-migration/<timestamp>/` with:
+
+- `paper_tracker_data.json` (Django fixture)
+- `counts.json` (row counts)
+- `paper_tracker_data.sha256` (checksum)
+- `README.md` (import instructions)
+
+In `paper-tracker`, import with:
+
+```sh
+uv run python manage.py loaddata data-migration/<timestamp>/paper_tracker_data.json
+```
+
 ## Quick Start
 
 1. Setup environment (install dependencies and node packages):

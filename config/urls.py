@@ -17,6 +17,7 @@ import os
 from django.contrib import admin
 from django.urls import include, path
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from config import settings
 
 def baidu_verify_codeva(request):
@@ -24,11 +25,14 @@ def baidu_verify_codeva(request):
     with open(filename, 'r') as f:
         return HttpResponse(f.read())
 
+
+def index(request):
+    return redirect('group:index')
+
 urlpatterns = [
     path('baidu_verify_codeva-NJa4iPMlSa.html', baidu_verify_codeva), # for baidu search engine verification
+    path('', index, name='index'),
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
     path('group/', include('group.urls')),
-    path('library/', include('library.urls')),
-    path('', include('view.urls')), # for global function pages, such as search, recommendations, trackings
 ]
