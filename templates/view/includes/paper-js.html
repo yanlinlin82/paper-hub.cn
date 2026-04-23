@@ -1,0 +1,33 @@
+<script>
+function toggleElementDisplay(id, show) {
+  var elem = document.getElementById(id);
+  if (!elem) {
+    return;
+  }
+  if (show) {
+    elem.classList.remove('d-none');
+  } else {
+    elem.classList.add('d-none');
+  }
+}
+
+function expand_authors(paperId) {
+  toggleElementDisplay('author_' + paperId + '_short', false);
+  toggleElementDisplay('author_' + paperId + '_long', true);
+}
+
+function collapse_authors(paperId) {
+  toggleElementDisplay('author_' + paperId + '_short', true);
+  toggleElementDisplay('author_' + paperId + '_long', false);
+}
+
+function expand_abstract(paperId) {
+  toggleElementDisplay('abstract_' + paperId + '_short', false);
+  toggleElementDisplay('abstract_' + paperId + '_long', true);
+}
+
+function collapse_abstract(paperId) {
+  toggleElementDisplay('abstract_' + paperId + '_short', true);
+  toggleElementDisplay('abstract_' + paperId + '_long', false);
+}
+</script>

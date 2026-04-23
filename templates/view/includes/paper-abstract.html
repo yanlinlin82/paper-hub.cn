@@ -1,0 +1,11 @@
+{% if paper.abstract %}
+<div class="mt-2">
+  <b>Abstract:</b>
+  {% if allow_collapse and paper.abstract|length > 600 %}
+  <div id="abstract_{{ paper.pk }}_short" class="d-inline">{{ paper.abstract|truncatechars:600|safe }} <a href="javascript:expand_abstract({{ paper.pk }})">&gt;&gt;&gt;</a></div>
+  <div id="abstract_{{ paper.pk }}_long" class="d-none">{{ paper.abstract|linebreaksbr|safe }} <a href="javascript:collapse_abstract({{ paper.pk }})">&lt;&lt;&lt;</a></div>
+  {% else %}
+  <div class="d-inline">{{ paper.abstract|linebreaksbr|safe }}</div>
+  {% endif %}
+</div>
+{% endif %}
