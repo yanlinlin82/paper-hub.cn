@@ -13,28 +13,29 @@ Non-community features are being moved to a sibling repository:
 
 - `../paper-tracker`
 
-Planned migration targets include literature tracking, recommendation workflows, and search/import pipelines.
+Literature tracking/recommendation/chat data models have been removed from this repository to keep only community workflows.
 
-## Data Migration to paper-tracker
+## Community Data Maintenance
 
-To migrate data for moved features (tracking/recommendation/search-related data), run:
+This repository keeps only community check-in data.
 
-```sh
-./scripts/export-paper-tracker-data.sh
-```
-
-This writes a timestamped package under `../paper-tracker/data-migration/<timestamp>/` with:
-
-- `paper_tracker_data.json` (Django fixture)
-- `counts.json` (row counts)
-- `paper_tracker_data.sha256` (checksum)
-- `README.md` (import instructions)
-
-In `paper-tracker`, import with:
+Use the unified script below to inspect cleanup impact, export a deterministic JSON snapshot, or import one back:
 
 ```sh
-uv run python manage.py loaddata data-migration/<timestamp>/paper_tracker_data.json
+uv run python scripts/community-data.py cleanup
+uv run python scripts/community-data.py cleanup --run
+
+uv run python scripts/community-data.py export ./community-data.json
+
+uv run python scripts/community-data.py import ./community-data.json
+uv run python scripts/community-data.py import ./community-data.json --run
 ```
+
+Notes:
+
+- `cleanup` deletes personal literature data that is not linked to any group review.
+- `cleanup` and `import` default to dry-run mode. Add `--run` to write changes.
+- `export` writes pretty JSON with sorted keys so identical data exports to identical file content.
 
 ## Quick Start
 

@@ -113,14 +113,6 @@ class PaperTranslation(models.Model):
     title_cn = models.CharField(max_length=4096, blank=True, default='')
     abstract_cn = models.CharField(max_length=65536, blank=True, default='')
 
-class PaperChat(models.Model):
-    paper = models.OneToOneField(Paper, on_delete=models.CASCADE, related_name='chat_summary')
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    request_time = models.DateTimeField(default=timezone.now)
-    chat_request = models.CharField(max_length=1024*1024, blank=True, default='')
-    response_time = models.DateTimeField(default=timezone.now, null=True, blank=True)
-    chat_response = models.CharField(max_length=1024*1024, blank=True, default='')
-
 class PaperReference(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE, related_name='references')
     type = models.CharField(max_length=128, default='Reference') # ReferenceList, CommentsCorrectionsList
@@ -142,21 +134,6 @@ class Label(models.Model): # every user has his own labels
     name = models.CharField(max_length=128, default='')
     color = models.CharField(max_length=7, default='#B6CFF5') # light blue
     desc = models.CharField(max_length=2000, default='')
-
-class PaperTracking(models.Model): # every user has his own paper tracking rules
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    type = models.CharField(max_length=20, default='read') # keyword, author, affiliation, journal, cite
-    value = models.CharField(max_length=100, blank=True, default='')
-    label = models.ForeignKey(Label, on_delete=models.CASCADE)
-    memo = models.CharField(max_length=2000, blank=True, default='')
-
-class Recommendation(models.Model): # recommended by system (daily automatically)
-    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    read_time = models.DateTimeField(null=True, blank=True, db_index=True) # None means unread
-    source = models.CharField(max_length=100, default='') # eg. 'pubmed24n1453.20240628'
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, db_index=True)
-    paper = models.ForeignKey(Paper, on_delete=models.CASCADE, db_index=True)
-    labels = models.ManyToManyField(Label, blank=True, related_name='recommendations')
 
 class Review(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)

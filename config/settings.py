@@ -50,8 +50,6 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'core.apps.CoreConfig',
-    'view.apps.ViewConfig',
-    'library.apps.LibraryConfig',
     'group.apps.GroupConfig',
     'django.contrib.admin',
     'django.contrib.auth',

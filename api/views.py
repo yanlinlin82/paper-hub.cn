@@ -2,7 +2,6 @@ import os
 import requests
 import json
 import zoneinfo
-import httpx
 import random
 import string
 import datetime
@@ -17,12 +16,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 from django.db.models import Q
 from django.contrib.auth.models import User
-import openai
 from config import settings
 from core.models import UserProfile, UserAlias, UserSession
 from core.models import Review, CustomCheckInInterval
-from core.models import GroupProfile, Recommendation
-from core.models import Paper, PaperTranslation, PaperChat
+from core.models import GroupProfile
+from core.models import Paper, PaperTranslation
 from core.paper import guess_identifier_type, get_paper_info, convert_string_to_datetime
 from core.paper import get_stat_all, get_stat_this_month, get_stat_last_month, get_stat_journal
 from core.paper import convert_paper_info
@@ -544,72 +542,6 @@ def add_search_result(request):
     return JsonResponse({'success': True})
 
 @json_post_handler
-@require_login
-def add_recommendation(request):
-    data = request.json_data
-    paper_id = data.get('paper_id')
-    comment = data.get('comment') or ''
-
-    user = request.user.core_user_profile
-    paper = Paper.objects.get(pk=paper_id)
-    if paper is None:
-        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
-
-    review_list = Review.objects.filter(creator=user, paper=paper)
-    if review_list.count() > 0:
-        review = review_list[0]
-        if review.comment != comment:
-            review.comment = comment
-            review.update_time = timezone.now()
-            review.save()
-    else:
-        review = Review(paper=paper, creator=user, comment=comment)
-        review.save()
-
-    for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=True):
-        for label in recommendation.labels.all():
-            if label not in review.labels.all():
-                review.labels.add(label)
-        recommendation.read_time = timezone.now()
-        recommendation.save()
-
-    return JsonResponse({'success': True})
-
-@json_post_handler
-@require_login
-def mark_read_recommendation(request):
-    data = request.json_data
-    paper_id = data.get('paper_id')
-
-    user = request.user.core_user_profile
-    paper = Paper.objects.get(pk=paper_id)
-    if paper is None:
-        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
-
-    for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=True):
-        recommendation.read_time = timezone.now()
-        recommendation.save()
-
-    return JsonResponse({'success': True})
-
-@json_post_handler
-@require_login
-def restore_recommendation(request):
-    data = request.json_data
-    paper_id = data.get('paper_id')
-
-    user = request.user.core_user_profile
-    paper = Paper.objects.get(pk=paper_id)
-    if paper is None:
-        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
-
-    for recommendation in Recommendation.objects.filter(user=user, paper=paper, read_time__isnull=False):
-        recommendation.read_time = None
-        recommendation.save()
-
-    return JsonResponse({'success': True})
-
-@json_post_handler
 def fetch_rank_full_list(request):
     data = request.json_data
     token = data.get('token')
@@ -805,68 +737,6 @@ def submit_comment(request):
     group.save()
 
     return JsonResponse({'success': True})
-
-@json_post_handler
-@require_login
-def summarize_by_gpt(request):
-    data = request.json_data
-    paper_id = data.get('paper_id')
-    if paper_id is None:
-        return JsonResponse({'success': False, 'error': 'Invalid request!'})
-    paper = Paper.objects.get(pk=paper_id)
-    if paper is None:
-        return JsonResponse({'success': False, 'error': f"Paper not found: {paper_id}"})
-    if paper.title is None or paper.title == '':
-        return JsonResponse({'success': False, 'error': f"Paper title is empty: {paper_id}"})
-
-    chat_list = PaperChat.objects.filter(paper=paper, user=request.user.core_user_profile)
-    if chat_list.count() > 0:
-        chat = chat_list[0]
-        if chat.chat_response is not None and chat.chat_response != '':
-            return JsonResponse({'success': True, 'answer': chat.chat_response})
-
-    chat = PaperChat(paper=paper, user=request.user.core_user_profile)
-    chat.chat_request = 'Please summarize and comment on the following literature in Chinese:\n\n'
-    chat.chat_request += f"Title: {paper.title}\n\n"
-    if paper.abstract is not None and paper.abstract != '':
-        chat.chat_request += f"Abstract:\n{paper.abstract}\n\n"
-    chat.chat_request += "Please summarize the core ideas and major innovations of the article. Also, please identify any shortcomings or areas for improvement. If it is a study on medicine or biology, please specify key information such as research subjects, types of diseases, research methods used, and sample types. If it involves computational biology, bioinformatics, or high-throughput omics, also mention whether the corresponding data and code are publicly available."
-
-    in_msg = [
-        {
-            "role": "system",
-            "content": "This is a scientific literature reading assistance chatbot. It mainly uses Chinese to communicate with the user."
-        },
-        {
-            "role": "system",
-            "content": "You can ask questions about the literature or request a summary of the literature."
-        },
-        {
-            "role": "user",
-            "content": chat.chat_request
-        },
-    ]
-    try:
-        proxy_url = os.environ.get("OPENAI_PROXY_URL")
-        if proxy_url is None or proxy_url == "":
-            client = openai.OpenAI()
-        else:
-            client = openai.OpenAI(http_client=httpx.Client(proxy=proxy_url))
-        completion = client.chat.completions.create(
-            model = os.environ.get("OPENAI_MODEL"),
-            messages = in_msg,
-        )
-        out_msg = completion.choices[0].message.content.strip()
-        if out_msg == '':
-            return JsonResponse({'success': False, 'error': 'Failed to summarize the paper!'})
-    except Exception as e:
-        print("Failed to connect to OpenAI server! " + str(e))
-        return JsonResponse({'success': False, 'error': 'Failed to connect to OpenAI server! ' + str(e)})
-
-    chat.response_time = timezone.now()
-    chat.chat_response = out_msg
-    chat.save()
-    return JsonResponse({'success': True, 'answer': chat.chat_response})
 
 def get_weixin_qr(request):
     appid = os.getenv('WEB_APP_ID')

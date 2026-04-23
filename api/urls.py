@@ -30,11 +30,8 @@ urlpatterns = [
     path('new-restore-review', views.new_restore_review, name='new_restore_review'),
     path('new-remove-review-permanently', views.new_remove_review_permanently, name='new_remove_review_permanently'),
 
-    # new api (request from web '/view/...')
+    # legacy api for direct paper->review add flow
     path('add-search-result', views.add_search_result, name='add_search_result'),
-    path('add-recommendation', views.add_recommendation, name='add_recommendation'),
-    path('mark-read-recommendation', views.mark_read_recommendation, name='mark_read_recommendation'),
-    path('restore-recommendation', views.restore_recommendation, name='restore_recommendation'),
 
     # fetch data for weixin mini program
     path('query/user/<str:user>', views.query_user, name='query_user'),
@@ -52,7 +49,6 @@ urlpatterns = [
     path('fetch-review-info', views.fetch_review_info, name='fetch_review_info'),
 
     path('submit-comment', views.submit_comment, name='submit_comment'),
-    path('summarize-by-gpt', views.summarize_by_gpt, name='summarize_by_gpt'),
     path('query-paper-info', views.query_paper_info, name='query_paper_info'),
 
     path('username-autocomplete', views.username_autocomplete, name='username_autocomplete'),

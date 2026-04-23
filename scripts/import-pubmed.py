@@ -10,7 +10,7 @@ sys.path.append('.')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from core.models import Paper, Journal, PaperReference, PaperTracking, Recommendation, Label
+from core.models import Paper, Journal, PaperReference
 from core.paper import PaperInfo
 
 def match_journal(name):
@@ -298,35 +298,8 @@ class PubMedXMLFile:
         return paper, new, (updated and (any_change or any_ref_changed_1 or any_ref_changed_2))
 
     def scan_rules_for_single_paper(self, index, paper_info, mode, rules, run, verbose, cnt):
-        labels = []
-        if mode == 'default':
-            for rule_item in rules:
-                matched = False
-                if rule_item['type'] == 'keyword':
-                    if self.match_keyword(paper_info, rule_item['value']):
-                        matched = True
-                elif rule_item['type'] == 'author':
-                    if self.match_author(paper_info, rule_item['value']):
-                        matched = True
-                elif rule_item['type'] == 'affiliation':
-                    if self.match_affiliation(paper_info, rule_item['value']):
-                        matched = True
-                elif rule_item['type'] == 'journal':
-                    if self.match_journal(paper_info, rule_item['value']):
-                        matched = True
-                elif rule_item['type'] == 'cite':
-                    if self.match_cite(paper_info, rule_item['value']):
-                        matched = True
-                if matched:
-                    labels.append(rule_item['label'])
-
-            if not labels:
-                if verbose:
-                    print(f"Skip paper [{index}]({paper_info}), since no any rule matched.")
-                return
-
-            print(f"Found matched paper [{index}]({paper_info})")
-            print(f"  [{index}]matched labels:", ', '.join([i.name for i in labels]))
+        if mode == 'default' and verbose:
+            print(f"Process paper [{index}]({paper_info}) in default mode")
 
         if mode == 'update-info':
             if verbose:
@@ -340,33 +313,6 @@ class PubMedXMLFile:
             cnt['paper']['new'] += 1
         if updated:
             cnt['paper']['updated'] += 1
-
-        if mode == 'default':
-            cnt['recommendation']['total'] += 1
-            r_list = Recommendation.objects.filter(paper=paper, source=self.generate_source_text(), user=rule_item['user'])
-            if r_list.exists():
-                if verbose:
-                    print(f"  Recommendation already exists for paper [{index}]({paper.pk})")
-                recommendation = r_list[0]
-            else:
-                cnt['recommendation']['new'] += 1
-                recommendation = Recommendation(
-                    paper=paper,
-                    source=self.generate_source_text(),
-                    user=rule_item['user'],
-                )
-                if run:
-                    recommendation.save()
-                print(f"  Added recommendation ({recommendation.pk}) for paper [{index}]({paper.pk})")
-            any_changed = False
-            for label in labels:
-                if label not in recommendation.labels.all():
-                    any_changed = True
-                    print(f"    Add label '{label.name}' to recommendation ({recommendation.pk})")
-                    if run:
-                        recommendation.labels.add(label)
-            if any_changed and r_list.exists():
-                cnt['recommendation']['updated'] += 1
 
     def scan_rules(self, mode, rules, run, verbose, cnt, start=None, end=None):
         if start is None and end is None:
@@ -506,22 +452,11 @@ def main():
         return 1
 
     rules = []
-    if args.mode == 'default':
-        for rule_item in PaperTracking.objects.all():
-            rules.append({
-                'user': rule_item.user,
-                'type': rule_item.type,
-                'value': rule_item.value,
-                'label': rule_item.label
-                })
-        print(f"Total {len(rules)} tracking rules")
-    else:
-        if args.verbose:
-            print(f"Skip loading rules, since running in '{args.mode}' mode")
+    if args.verbose:
+        print(f"Skip loading tracking rules, since tracking/recommendation was moved out")
 
     cnt = {
         'paper': {'total': 0, 'matched': 0, 'new': 0, 'updated': 0},
-        'recommendation': {'total': 0, 'new': 0, 'updated': 0},
     }
     if args.index is not None:
         m = re.match('^([0-9]+)-([0-9]+)$', args.index)
@@ -552,9 +487,6 @@ def main():
 
     print("Total scanned {} papers ({} matched, {} new, {} updated)".format(
         cnt['paper']['total'], cnt['paper']['matched'], cnt['paper']['new'], cnt['paper']['updated']
-    ))
-    print("   and pushed {} recommendations ({} new, {} updated)".format(
-        cnt['recommendation']['total'], cnt['recommendation']['new'], cnt['recommendation']['updated']
     ))
     return 0
 
