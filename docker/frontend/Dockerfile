@@ -6,7 +6,7 @@ WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json* ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --registry=https://registry.npmmirror.com/
 
 # Copy source files
 COPY frontend/ .
