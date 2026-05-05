@@ -19,9 +19,20 @@ function ScrollToTop() {
 
   return (
     <button
-      className="scroll-to-top"
+      className="btn btn-light border shadow-sm rounded-circle position-fixed"
       onClick={scrollToTop}
       aria-label="返回顶部"
+      style={{
+        bottom: "24px",
+        right: "24px",
+        zIndex: 999,
+        width: "38px",
+        height: "38px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: 0.85,
+      }}
     >
       ↑
     </button>

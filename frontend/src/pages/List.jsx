@@ -73,8 +73,13 @@ function List({ type }) {
         </div>
       ) : (
         <>
-          <div className="section-header my-3">
-            <span className="count-badge">{total_count} 篇</span>
+          <div
+            className="d-flex align-items-center gap-2 mb-2 text-body-secondary"
+            style={{ fontSize: "0.88rem" }}
+          >
+            <span className="badge bg-light text-primary fw-semibold">
+              {total_count} 篇
+            </span>
             <span>共找到 {total_count} 篇文献分享</span>
             {paginator.num_pages > 1 && (
               <span className="text-muted">

@@ -5,7 +5,10 @@ function PaperInfo({ paper, groupName }) {
   if (!paper) return null;
 
   return (
-    <div className="paper-info-line">
+    <div
+      className="text-body-secondary"
+      style={{ fontSize: "0.82rem", lineHeight: 1.8 }}
+    >
       {paper.journal_impact_factor && paper.journal_impact_factor_quartile && (
         <>
           <span className="journal-if">IF:{paper.journal_impact_factor}</span>

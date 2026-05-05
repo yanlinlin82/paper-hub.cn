@@ -47,7 +47,7 @@ function Home() {
   }
 
   return (
-    <div className="p-3 home-section">
+    <div className="p-3" style={{ maxWidth: "800px" }}>
       <h2 className="mb-3">响马读paper</h2>
 
       <h3>简介</h3>
@@ -118,7 +118,7 @@ function Home() {
 
       <h3>线上分享活动</h3>
       <p>社群已举办过多次线上分享活动，除特殊情况外，均有录屏视频供回放。</p>
-      <ul className="share-event">
+      <ul className="list-unstyled">
         <li>
           2024-07-12（第10期）：李翛然：全球首次真实量子计算的药物设计过程分享
           <span className="text-success">
@@ -229,7 +229,7 @@ function Home() {
       </p>
       <p className="text-center">
         <img
-          className="img-fluid wechat-qr"
+          className="img-fluid rounded"
           src="/static/images/wechat-qrcode.png"
           width="120"
           height="120"

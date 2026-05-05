@@ -70,7 +70,7 @@ function Rank({ type: defaultType }) {
 
   return (
     <div>
-      <ul className="nav rank-tabs">
+      <ul className="nav nav-tabs">
         {tabs.map((tab) => (
           <li key={tab.type} className="nav-item">
             <Link
@@ -83,7 +83,7 @@ function Rank({ type: defaultType }) {
         ))}
       </ul>
 
-      <div className="rank-content">
+      <div className="border rounded-bottom p-3 bg-body">
         {(rankType === "monthly" || rankType === "yearly") && (
           <form className="mt-3 mx-auto col-12 col-md-6 col-lg-4 col-xl-3">
             <div className="input-group w-auto mb-3">
@@ -130,12 +130,14 @@ function Rank({ type: defaultType }) {
         )}
 
         {data?.ranks && data.ranks.length > 0 ? (
-          <table className="rank-table text-center">
+          <table className="table table-bordered table-striped text-center mb-0">
             <thead>
               <tr>
-                <th>排名</th>
-                <th>{rankType === "journal" ? "杂志" : "分享者"}</th>
-                <th>分享数</th>
+                <th style={{ width: "10%" }}>排名</th>
+                <th style={{ width: "40%" }}>
+                  {rankType === "journal" ? "杂志" : "分享者"}
+                </th>
+                <th style={{ width: "15%" }}>分享数</th>
                 <th>最早分享时间</th>
               </tr>
             </thead>
@@ -153,7 +155,7 @@ function Rank({ type: defaultType }) {
                 return (
                   <tr key={row.display_index}>
                     <td>{getRankBadge(row.display_index)}</td>
-                    <td>
+                    <td className="text-break" style={{ maxWidth: 0 }}>
                       {rankType === "journal" ? (
                         <Link
                           to={`/group/${groupName}/journal/${encodeURIComponent(row.name)}`}

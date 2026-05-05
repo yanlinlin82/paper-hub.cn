@@ -2,10 +2,13 @@ import React from "react";
 
 function Footer() {
   return (
-    <footer className="text-center py-3">
-      <div className="py-2">
+    <footer
+      className="text-center py-3 bg-body-tertiary border-top text-body-secondary"
+      style={{ fontSize: "0.88rem" }}
+    >
+      <div className="py-1">
         <a
-          className="link-light external-link"
+          className="text-reset"
           href="https://yanlinlin.cn/"
           target="_blank"
           rel="noreferrer"
@@ -14,7 +17,7 @@ function Footer() {
         </a>{" "}
         |{" "}
         <a
-          className="link-light external-link"
+          className="text-reset"
           href="http://beian.miit.gov.cn/"
           target="_blank"
           rel="noreferrer"
@@ -23,7 +26,7 @@ function Footer() {
         </a>{" "}
         |{" "}
         <a
-          className="link-light external-link"
+          className="text-reset"
           href="https://github.com/yanlinlin82/paper-hub.cn/"
           target="_blank"
           rel="noreferrer"
@@ -34,7 +37,7 @@ function Footer() {
       <div className="py-1">
         基于{" "}
         <a
-          className="link-light external-link"
+          className="text-reset"
           href="https://www.djangoproject.com/"
           target="_blank"
           rel="noreferrer"
@@ -43,7 +46,7 @@ function Footer() {
         </a>{" "}
         和{" "}
         <a
-          className="link-light external-link"
+          className="text-reset"
           href="https://getbootstrap.com/"
           target="_blank"
           rel="noreferrer"
@@ -52,7 +55,7 @@ function Footer() {
         </a>{" "}
         和{" "}
         <a
-          className="link-light external-link"
+          className="text-reset"
           href="https://react.dev/"
           target="_blank"
           rel="noreferrer"

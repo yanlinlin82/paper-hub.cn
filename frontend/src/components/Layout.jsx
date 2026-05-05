@@ -12,20 +12,29 @@ function Layout({ children }) {
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar groupName={groupName} />
-      <div id="mainContainer" className="flex-fill">
-        <div className="container-xl d-flex flex-row layout-body">
-          {/* Sidebar — sticky on scroll */}
-          <aside className="layout-sidebar">
-            <div className="sidebar-sticky">
-              <Sidebar groupName={groupName} />
-            </div>
-          </aside>
+      <div className="flex-fill">
+        <div className="container-xl d-flex flex-column">
+          <div className="d-flex flex-row align-items-start pt-4">
+            {/* Sidebar */}
+            <aside
+              style={{ width: "200px", flex: "0 0 200px" }}
+              className="pe-3"
+            >
+              <div className="sidebar-sticky">
+                <Sidebar groupName={groupName} />
+              </div>
+            </aside>
 
-          {/* Main content — single scroll with page */}
-          <main className="layout-content">
-            <article className="fade-in">{children}</article>
-            <Footer />
-          </main>
+            {/* Main content */}
+            <main className="flex-fill pb-4" style={{ minWidth: 0 }}>
+              <article className="fade-in" style={{ minHeight: "60vh" }}>
+                {children}
+              </article>
+            </main>
+          </div>
+
+          {/* Footer — full container width, below the flex row */}
+          <Footer />
         </div>
       </div>
       <LoginModal />

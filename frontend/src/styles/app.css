@@ -1,114 +1,8 @@
 /* ================================================================
-   Paper-Hub.cn — Academic Refined Theme
-   Inspired by Nature, Semantic Scholar, PubMed, Google Scholar
+   Minimal custom styles — everything else is Bootstrap 5.3 defaults.
+   Bootstrap's data-bs-theme handles light/dark mode natively.
    ================================================================ */
 
-/* ----- CSS Custom Properties ----- */
-:root,
-[data-theme="dark"] {
-    /* Core — refined academic palette */
-    --ph-primary: #93c5fd;
-    --ph-primary-light: #60a5fa;
-    --ph-primary-lighter: #1e3a5f;
-    --ph-primary-dark: #3b82f6;
-    --ph-primary-bg: #172554;
-
-    /* Accent — fresh, scholarly */
-    --ph-accent: #34d399;
-    --ph-accent-light: #064e3b;
-    --ph-accent-dark: #10b981;
-
-    --ph-accent-warm: #fbbf24;
-    --ph-accent-warm-light: #78350f;
-
-    /* Semantic */
-    --ph-success: #34d399;
-    --ph-success-bg: #064e3b;
-    --ph-danger: #f87171;
-    --ph-danger-bg: #7f1d1d;
-    --ph-warning: #fbbf24;
-    --ph-warning-bg: #78350f;
-
-    /* Neutrals */
-    --ph-bg: #0b1120;
-    --ph-surface: #131c31;
-    --ph-sidebar-bg: transparent;
-    --ph-sidebar-text: #94a3b8;
-    --ph-sidebar-active-bg: rgba(255, 255, 255, 0.06);
-    --ph-sidebar-active-color: #93c5fd;
-    --ph-navbar-bg: rgba(11, 17, 32, 0.97);
-    --ph-text-primary: #e2e8f0;
-    --ph-text-secondary: #94a3b8;
-    --ph-text-muted: #64748b;
-    --ph-border: #1e293b;
-    --ph-border-light: #1a2332;
-
-    --ph-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
-    --ph-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --ph-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.25);
-
-    /* Radius */
-    --ph-radius-sm: 4px;
-    --ph-radius-md: 8px;
-    --ph-radius-lg: 12px;
-
-    --ph-font-sans:
-        "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC",
-        "Microsoft YaHei", sans-serif;
-    --ph-font-serif: "Georgia", "Noto Serif SC", "Source Han Serif SC", serif;
-    --ph-font-mono:
-        "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, Consolas,
-        monospace;
-
-    --ph-transition: 0.15s ease;
-}
-
-/* ----- Light Mode Overrides ----- */
-[data-theme="light"] {
-    --ph-primary: #1a365d;
-    --ph-primary-light: #2563eb;
-    --ph-primary-lighter: #dbeafe;
-    --ph-primary-dark: #0f2640;
-    --ph-primary-bg: #f0f4f8;
-
-    --ph-accent: #059669;
-    --ph-accent-light: #d1fae5;
-    --ph-accent-dark: #047857;
-
-    --ph-accent-warm: #d97706;
-    --ph-accent-warm-light: #fef3c7;
-
-    --ph-success: #059669;
-    --ph-success-bg: #ecfdf5;
-    --ph-danger: #dc2626;
-    --ph-danger-bg: #fef2f2;
-    --ph-warning: #d97706;
-    --ph-warning-bg: #fffbeb;
-
-    --ph-bg: #fafafa;
-    --ph-surface: #ffffff;
-    --ph-sidebar-bg: transparent;
-    --ph-sidebar-text: #475569;
-    --ph-sidebar-active-bg: #f0f4f8;
-    --ph-sidebar-active-color: #1a365d;
-    --ph-navbar-bg: rgba(255, 255, 255, 0.97);
-    --ph-text-primary: #0f172a;
-    --ph-text-secondary: #475569;
-    --ph-text-muted: #94a3b8;
-    --ph-border: #e2e8f0;
-    --ph-border-light: #f1f5f9;
-
-    --ph-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
-    --ph-shadow-md:
-        0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --ph-shadow-lg:
-        0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
-}
-
-/* ================================================================
-   BASE STYLES — clean, readable, academic
-   ================================================================ */
 html {
     scroll-padding-top: 64px;
     -webkit-font-smoothing: antialiased;
@@ -116,382 +10,64 @@ html {
 }
 
 body {
-    font-family: var(--ph-font-sans);
-    background-color: var(--ph-bg);
-    color: var(--ph-text-primary);
-    font-size: 15px;
-    line-height: 1.7;
     overflow-x: hidden;
 }
 
-/* Links — clean academic style */
-a {
-    color: var(--ph-primary-light);
-    text-decoration: none;
-    transition: color var(--ph-transition);
-}
-
-a:hover {
-    color: var(--ph-primary);
-    text-decoration: underline;
-}
-
+/* External link indicator */
 .external-link::after {
-    content: "";
+    content: " ↗";
+    font-size: 0.75em;
 }
 
-/* Typography — academic hierarchy */
-h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-    color: var(--ph-primary);
-}
-
-h2 {
-    font-size: 1.35rem;
-    font-weight: 600;
-    line-height: 1.4;
-    color: var(--ph-primary);
-    border-bottom: 1px solid var(--ph-border);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.25rem;
-}
-
-h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-top: 1.8rem;
-    margin-bottom: 0.6rem;
-    color: var(--ph-text-primary);
-}
-
-/* ================================================================
-   NAVBAR — clean, minimal, like PubMed/Google Scholar
-   ================================================================ */
-.navbar {
-    background: var(--ph-navbar-bg) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--ph-border) !important;
-    padding: 0 0;
-    min-height: 56px;
-}
-
-.navbar .navbar-brand {
-    display: flex;
-    align-items: center;
-    font-weight: 700;
-    font-size: 1.15rem;
-    color: var(--ph-primary) !important;
-    padding: 0.5rem 0;
-}
-
-.navbar .navbar-brand img {
-    height: 32px;
-    width: auto;
-}
-
-/* Logo visibility based on theme */
-[data-theme="dark"] .logo-light {
-    display: none;
-}
-
-[data-theme="dark"] .logo-dark {
-    display: inline-block;
-}
-
-[data-theme="light"] .logo-light {
-    display: inline-block;
-}
-
-[data-theme="light"] .logo-dark {
-    display: none;
-}
-
-/* Default (before React hydrates): show light logo */
-.logo-dark {
-    display: none;
-}
-
-.navbar .nav-link {
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: var(--ph-text-secondary) !important;
-    padding: 0.4rem 0.75rem !important;
-    border-radius: var(--ph-radius-sm);
-    transition: all var(--ph-transition);
-    white-space: nowrap;
-}
-
-.navbar-right {
-    flex-direction: row;
-    align-items: center;
-    gap: 0.1rem;
-    flex-shrink: 0;
-}
-
-.navbar .nav-link:hover {
-    color: var(--ph-primary) !important;
-    background: var(--ph-primary-bg) !important;
-}
-
-/* Search box — clean, minimal */
-.navbar .input-group {
-    border-radius: var(--ph-radius-md);
-    overflow: hidden;
-}
-
-.navbar .input-group .form-control {
-    border: 1.5px solid var(--ph-border);
-    border-right: none;
-    background: var(--ph-bg);
-    color: var(--ph-text-primary);
-    font-size: 0.88rem;
-    padding: 0.4rem 0.9rem;
-    border-radius: var(--ph-radius-md) 0 0 var(--ph-radius-md) !important;
-    transition: border-color var(--ph-transition);
-}
-
-.navbar .input-group .form-control:focus {
-    border-color: var(--ph-primary-light);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-    background: var(--ph-surface);
-}
-
-.navbar .input-group .btn {
-    border: 1.5px solid var(--ph-border);
-    border-left: none;
-    background: var(--ph-bg);
-    color: var(--ph-text-secondary);
-    font-weight: 500;
-    font-size: 0.88rem;
-    padding: 0.4rem 1rem;
-    transition: all var(--ph-transition);
-    border-radius: 0 var(--ph-radius-md) var(--ph-radius-md) 0 !important;
-}
-
-.navbar .input-group .btn:hover {
-    background: var(--ph-primary);
-    color: #fff;
-    border-color: var(--ph-primary);
-}
-
-/* Search hint */
+/* Search hint tooltip */
 .search-hint {
     position: absolute;
     z-index: 1050;
     top: 100%;
     left: 0;
     width: 100%;
-    background: var(--ph-surface);
-    border: 1px solid var(--ph-border);
-    border-top: 2px solid var(--ph-primary);
-    border-radius: 0 0 var(--ph-radius-sm) var(--ph-radius-sm);
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-top: 2px solid var(--bs-primary);
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
     padding: 0.8rem 1rem;
     margin-top: 2px;
-    box-shadow: var(--ph-shadow-lg);
-    color: var(--ph-text-secondary);
+    box-shadow: var(--bs-box-shadow-lg);
+    color: var(--bs-secondary-color);
     font-size: 0.82rem;
     line-height: 1.5;
 }
 
-/* ================================================================
-   LAYOUT — clean, spacious
-   ================================================================ */
-#mainContainer {
-    transition: max-width 0.3s ease;
-}
-
-.layout-body {
-    gap: 0;
-    padding-top: 1.5rem;
-    align-items: flex-start;
-}
-
-.layout-sidebar {
-    width: 200px;
-    flex: 0 0 200px;
-    padding-right: 1.5rem;
-}
-
-.sidebar-sticky {
-    position: sticky;
-    top: 1.5rem;
-}
-
-.layout-content {
-    flex: 1;
-    min-width: 0;
-    padding-bottom: 2rem;
-}
-
-.layout-content > article {
-    min-height: 60vh;
-}
-
-/* ================================================================
-   SIDEBAR — light, clean, like Google Scholar
-   ================================================================ */
+/* Sidebar list group inside a sticky sidebar container */
 .sidebar {
     padding: 0;
 }
 
-.sidebar .list-group {
-    border-radius: var(--ph-radius-md);
-    overflow: hidden;
-    border: 1px solid var(--ph-border);
-    background: var(--ph-surface);
-}
-
-.sidebar .list-group-item {
-    border: none;
-    border-bottom: 1px solid var(--ph-border-light);
-    background: transparent;
-    color: var(--ph-sidebar-text);
-    font-size: 0.88rem;
-    font-weight: 500;
-    padding: 0.6rem 1rem;
-    transition: all var(--ph-transition);
-    border-left: 3px solid transparent;
-}
-
-.sidebar .list-group-item:last-child {
-    border-bottom: none;
-}
-
-.sidebar .list-group-item:hover {
-    background: var(--ph-sidebar-active-bg);
-    color: var(--ph-sidebar-active-color);
-    border-left-color: var(--ph-primary-light);
-}
-
-.sidebar .list-group-item.active {
-    background: var(--ph-sidebar-active-bg);
-    color: var(--ph-sidebar-active-color);
-    border-left-color: var(--ph-primary);
-    font-weight: 600;
-}
-
-.sidebar .list-group-item-dark {
-    background: var(--ph-primary) !important;
-    color: #fff !important;
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 0.75rem 1rem !important;
-    border-bottom: none !important;
-    border-left: none !important;
-}
-
-/* ================================================================
-   CHECK-IN BUTTON — prominent but academic
-   ================================================================ */
-.check-in-btn {
-    background: var(--ph-primary);
-    border: none;
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.9rem;
-    padding: 0.65rem 1.5rem;
-    border-radius: var(--ph-radius-sm);
-    width: 100%;
-    transition: all var(--ph-transition);
-    cursor: pointer;
-    letter-spacing: 0.01em;
-}
-
-.check-in-btn:hover {
-    background: var(--ph-primary-dark);
-    box-shadow: var(--ph-shadow-md);
-}
-
-.check-in-btn:active {
-    transform: translateY(0);
-}
-
-/* ================================================================
-   REVIEW CARDS — clean, like Semantic Scholar
-   ================================================================ */
-.review-card {
-    background: var(--ph-surface);
-    border: 1px solid var(--ph-border);
-    border-radius: var(--ph-radius-md);
-    padding: 1rem 1.25rem;
-    margin-bottom: 1rem;
-    transition: all var(--ph-transition);
-}
-
-.review-card:hover {
-    border-color: var(--ph-primary-lighter);
-    box-shadow: var(--ph-shadow-md);
-}
-
-.review-card .review-index {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--ph-text-muted);
-    min-width: 2rem;
-    text-align: center;
-    padding-top: 0.15rem;
-    flex-shrink: 0;
-}
-
-.review-card .review-meta {
-    font-size: 0.85rem;
-    color: var(--ph-text-muted);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    flex-wrap: wrap;
-}
-
-.review-card .review-meta a {
-    font-weight: 600;
-    color: var(--ph-primary-light);
-    font-size: 0.88rem;
-}
-
-.review-card .review-comment {
-    margin: 0.6rem 0;
-    line-height: 1.75;
-    color: var(--ph-text-primary);
-    font-size: 0.92rem;
-}
-
-.review-card .review-comment:empty {
+/* Logo visibility: show light logo in light mode, dark in dark */
+.logo-dark {
     display: none;
 }
+[data-bs-theme="dark"] .logo-light {
+    display: none;
+}
+[data-bs-theme="dark"] .logo-dark {
+    display: inline-block;
+}
 
-/* Paper info card — nested, subtle */
+/* Review card — inner nested paper info card */
 .paper-info-card {
-    background: var(--ph-bg);
-    border: 1px solid var(--ph-border-light);
-    border-radius: var(--ph-radius-sm);
+    background: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
     padding: 0.8rem 1rem;
     margin: 0.5rem 0 0 1.25rem;
 }
 
-.paper-info-card .paper-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin-bottom: 0.3rem;
-}
-
-.paper-info-card .paper-title a {
-    color: var(--ph-text-primary);
-}
-
-.paper-info-card .paper-title a:hover {
-    color: var(--ph-primary-light);
-}
-
-/* Journal IF badges — small, clean */
+/* Impact factor badges */
 .journal-if {
     display: inline-flex;
     align-items: center;
-    background: var(--ph-primary);
+    background: var(--bs-primary);
     color: #fff;
     font-size: 0.7rem;
     font-weight: 600;
@@ -499,7 +75,6 @@ h3 {
     border-radius: 2px;
     margin-right: 0.3rem;
 }
-
 .journal-q1 {
     background: #059669;
     color: #fff;
@@ -537,229 +112,6 @@ h3 {
     margin-right: 0.3rem;
 }
 
-/* Paper info line */
-.paper-info-line {
-    font-size: 0.82rem;
-    color: var(--ph-text-secondary);
-    line-height: 1.8;
-}
-
-.paper-info-line a {
-    color: var(--ph-text-secondary);
-    font-weight: 400;
-}
-
-.paper-info-line a:hover {
-    color: var(--ph-primary-light);
-}
-
-/* Author list */
-.author-list {
-    font-size: 0.85rem;
-    color: var(--ph-text-secondary);
-    line-height: 1.6;
-    margin-top: 0.2rem;
-}
-
-.author-list .expand-link {
-    color: var(--ph-primary-light);
-    font-weight: 500;
-    font-size: 0.82rem;
-}
-
-/* Abstract toggle */
-.abstract-toggle {
-    font-size: 0.82rem;
-    color: var(--ph-primary-light);
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    transition: color var(--ph-transition);
-    background: none;
-    border: none;
-    padding: 0.15rem 0;
-}
-
-.abstract-toggle:hover {
-    color: var(--ph-primary);
-    text-decoration: underline;
-}
-
-.abstract-content {
-    font-size: 0.88rem;
-    color: var(--ph-text-secondary);
-    line-height: 1.7;
-    margin-top: 0.4rem;
-    padding: 0.75rem;
-    background: var(--ph-surface);
-    border-radius: var(--ph-radius-sm);
-    border: 1px solid var(--ph-border-light);
-}
-
-/* Keywords */
-.keywords-label {
-    font-weight: 500;
-    font-size: 0.82rem;
-    color: var(--ph-text-secondary);
-    margin-top: 0.3rem;
-}
-
-.keyword-tag {
-    display: inline-block;
-    background: var(--ph-primary-bg);
-    color: var(--ph-primary);
-    font-size: 0.75rem;
-    padding: 0.12rem 0.5rem;
-    border-radius: 10px;
-    margin: 0.1rem 0.15rem;
-    transition: all var(--ph-transition);
-}
-
-.keyword-tag:hover {
-    background: var(--ph-primary-lighter);
-}
-
-/* URLs */
-.url-list {
-    font-size: 0.8rem;
-    margin-top: 0.4rem;
-    padding-top: 0.4rem;
-    border-top: 1px solid var(--ph-border-light);
-}
-
-.url-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0.2rem 0 0 0;
-}
-
-.url-list li {
-    padding: 0.1rem 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Admin actions */
-.admin-actions {
-    display: flex;
-    gap: 0.35rem;
-    flex-shrink: 0;
-}
-
-.admin-actions .btn {
-    font-size: 0.75rem;
-    padding: 0.15rem 0.45rem;
-    border-radius: var(--ph-radius-sm);
-}
-
-/* ================================================================
-   PAGINATION — simple, clean
-   ================================================================ */
-.pagination {
-    gap: 0.15rem;
-}
-
-.pagination .page-item .page-link {
-    border: 1px solid var(--ph-border);
-    background: var(--ph-surface);
-    color: var(--ph-text-secondary);
-    font-size: 0.82rem;
-    font-weight: 500;
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--ph-radius-sm) !important;
-    transition: all var(--ph-transition);
-}
-
-.pagination .page-item .page-link:hover {
-    background: var(--ph-primary-bg);
-    color: var(--ph-primary);
-    border-color: var(--ph-primary-lighter);
-}
-
-.pagination .page-item.active .page-link {
-    background: var(--ph-primary);
-    border-color: var(--ph-primary);
-    color: #fff;
-}
-
-.pagination .page-item.disabled .page-link {
-    background: var(--ph-bg);
-    color: var(--ph-text-muted);
-    border-color: var(--ph-border-light);
-}
-
-/* ================================================================
-   RANK PAGE — clean tables
-   ================================================================ */
-.rank-tabs {
-    border-bottom: 1px solid var(--ph-border);
-    margin-bottom: 0;
-}
-
-.rank-tabs .nav-link {
-    border: none;
-    color: var(--ph-text-secondary);
-    font-weight: 500;
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
-    margin-bottom: -1px;
-    border-bottom: 2px solid transparent;
-    transition: all var(--ph-transition);
-    background: transparent;
-}
-
-.rank-tabs .nav-link:hover {
-    color: var(--ph-primary);
-    background: var(--ph-primary-bg);
-}
-
-.rank-tabs .nav-link.active {
-    color: var(--ph-primary);
-    border-bottom-color: var(--ph-primary);
-    font-weight: 600;
-}
-
-.rank-content {
-    background: var(--ph-surface);
-    border: 1px solid var(--ph-border);
-    border-top: none;
-    border-radius: 0 0 var(--ph-radius-sm) var(--ph-radius-sm);
-    padding: 1.25rem;
-}
-
-.rank-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.rank-table thead th {
-    background: var(--ph-primary-bg);
-    color: var(--ph-text-primary);
-    font-weight: 600;
-    font-size: 0.82rem;
-    padding: 0.6rem 1rem;
-    text-align: center;
-    border-bottom: 2px solid var(--ph-border);
-}
-
-.rank-table tbody td {
-    padding: 0.55rem 1rem;
-    font-size: 0.85rem;
-    border-bottom: 1px solid var(--ph-border-light);
-    text-align: center;
-}
-
-.rank-table tbody tr:hover {
-    background: var(--ph-primary-bg);
-}
-
-.rank-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
 /* Rank badges */
 .rank-badge {
     display: inline-flex;
@@ -771,463 +123,45 @@ h3 {
     font-weight: 700;
     font-size: 0.78rem;
 }
-
 .rank-badge.gold {
     background: #d97706;
     color: #fff;
 }
-
 .rank-badge.silver {
     background: #64748b;
     color: #fff;
 }
-
 .rank-badge.bronze {
     background: #92400e;
     color: #fff;
 }
 
-/* ================================================================
-   FOOTER — clean, like academic journals
-   ================================================================ */
-footer {
-    background: var(--ph-primary) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 0.82rem;
-    padding: 1rem 0;
-    margin-top: 2rem;
+/* Sticky sidebar */
+.sidebar-sticky {
+    position: sticky;
+    top: 1.5rem;
 }
 
-footer a {
-    color: rgba(255, 255, 255, 0.65) !important;
-    transition: color var(--ph-transition);
-}
-
-footer a:hover {
-    color: #fff !important;
-}
-
-/* ================================================================
-   LOADING
-   ================================================================ */
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    gap: 1rem;
-}
-
-.loading-spinner {
-    width: 36px;
-    height: 36px;
-    border: 2px solid var(--ph-border);
-    border-top-color: var(--ph-primary);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: 0.88rem;
-    color: var(--ph-text-muted);
-}
-
-/* ================================================================
-   SCROLL TO TOP
-   ================================================================ */
-.scroll-to-top {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 999;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--ph-surface);
-    color: var(--ph-text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    opacity: 0;
-    box-shadow: var(--ph-shadow-md);
-    transition: all var(--ph-transition);
-    border: 1px solid var(--ph-border);
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.scroll-to-top:hover {
-    opacity: 1 !important;
-    color: var(--ph-primary);
-    border-color: var(--ph-primary-lighter);
-}
-
-/* ================================================================
-   MODALS
-   ================================================================ */
-.modal-content {
-    border: none;
-    border-radius: var(--ph-radius-md);
-    box-shadow: var(--ph-shadow-lg);
-    overflow: hidden;
-}
-
-.modal-header {
-    background: var(--ph-primary);
-    color: #fff;
-    border-bottom: none;
-    padding: 1rem 1.25rem;
-}
-
-.modal-header .modal-title {
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.modal-header .btn-close {
-    filter: brightness(0) invert(1);
-    opacity: 0.6;
-    font-size: 0.8rem;
-}
-
-.modal-body {
-    padding: 1.25rem;
-}
-
-.modal-footer {
-    border-top: 1px solid var(--ph-border);
-    padding: 0.75rem 1.25rem;
-}
-
-/* Check-in modal */
-.checkin-modal .modal-header {
-    background: var(--ph-accent);
-}
-
-.checkin-modal .identifier-input {
-    display: flex;
-    gap: 0.5rem;
-    align-items: flex-start;
-}
-
-.checkin-modal .identifier-input .form-control {
-    border: 1.5px solid var(--ph-border);
-    border-radius: var(--ph-radius-sm);
-    padding: 0.45rem 0.8rem;
-    font-size: 0.88rem;
-}
-
-/* ================================================================
-   HOME PAGE
-   ================================================================ */
-.home-section {
-    max-width: 800px;
-}
-
-.home-section h2 {
-    border-bottom-color: var(--ph-accent);
-}
-
-.home-section h3 {
-    margin-top: 1.8rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--ph-border-light);
-}
-
-.home-section ol {
-    padding-left: 1.2rem;
-}
-
-.home-section ol > li {
-    margin-bottom: 1rem;
-    font-weight: 600;
-    color: var(--ph-primary);
-    font-size: 0.95rem;
-}
-
-.home-section ol > li ul {
-    margin-top: 0.3rem;
-}
-
-.home-section ol > li ul li {
-    font-weight: 400;
-    color: var(--ph-text-primary);
-    margin-bottom: 0.25rem;
-    font-size: 0.9rem;
-}
-
-.home-section .share-event {
-    list-style: none;
-    padding-left: 0;
-}
-
-.home-section .share-event li {
-    padding: 0.4rem 0;
-    border-bottom: 1px solid var(--ph-border-light);
-    font-size: 0.88rem;
-    line-height: 1.5;
-}
-
-.home-section .share-event li:last-child {
-    border-bottom: none;
-}
-
-/* ================================================================
-   UTILITIES
-   ================================================================ */
-
-/* Alerts */
-.alert {
-    border: none;
-    border-radius: var(--ph-radius-sm);
-    font-size: 0.88rem;
-    padding: 0.65rem 1rem;
-}
-
-.alert-warning {
-    background: var(--ph-warning-bg);
-    color: #92400e;
-    border-left: 3px solid var(--ph-warning);
-}
-
-.alert-danger {
-    background: var(--ph-danger-bg);
-    color: #991b1b;
-    border-left: 3px solid var(--ph-danger);
-}
-
-.alert-success {
-    background: var(--ph-success-bg);
-    color: #065f46;
-    border-left: 3px solid var(--ph-success);
-}
-
-/* Dropdowns */
-.nav-item.dropdown {
-    position: relative !important;
-    overflow: visible;
-}
-
+/* Navbar dropdowns: Bootstrap defaults to position:static for
+   navbar-nav .dropdown-menu. Since we toggle via React state
+   (not Bootstrap JS), we need absolute positioning. */
 .navbar-nav .dropdown-menu {
-    position: absolute !important;
-}
-
-.navbar-nav .dropdown-menu.show {
-    display: block;
-}
-
-.dropdown-menu {
     position: absolute !important;
     top: 100% !important;
     right: 0 !important;
     left: auto !important;
-    border: 1px solid var(--ph-border);
-    border-radius: var(--ph-radius-sm);
-    box-shadow: var(--ph-shadow-lg);
-    padding: 0.35rem;
-    background: var(--ph-surface);
-    min-width: 140px;
-    z-index: 1050;
-    margin-top: 0.25rem;
+    margin-top: 0.125rem;
 }
 
-.dropdown-menu .dropdown-item {
-    border-radius: var(--ph-radius-sm);
-    font-size: 0.85rem;
-    padding: 0.35rem 0.75rem;
-    color: var(--ph-text-secondary);
-    transition: all var(--ph-transition);
-}
-
-.dropdown-menu .dropdown-item:hover {
-    background: var(--ph-primary-bg);
-    color: var(--ph-primary);
-}
-
-/* Form controls */
-.form-check-input:checked {
-    background-color: var(--ph-primary);
-    border-color: var(--ph-primary);
-}
-
-.form-select {
-    border: 1.5px solid var(--ph-border);
-    border-radius: var(--ph-radius-sm);
-    font-size: 0.85rem;
-    padding: 0.35rem 2rem 0.35rem 0.75rem;
-    background-color: var(--ph-surface);
-    color: var(--ph-text-primary);
-}
-
-.form-select:focus {
-    border-color: var(--ph-primary-light);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-}
-
-/* Buttons */
-.btn-primary {
-    background: var(--ph-primary);
-    border-color: var(--ph-primary);
-    border-radius: var(--ph-radius-sm);
-    font-weight: 500;
-    font-size: 0.85rem;
-    padding: 0.35rem 1rem;
-    transition: all var(--ph-transition);
-}
-
-.btn-primary:hover {
-    background: var(--ph-primary-dark);
-    border-color: var(--ph-primary-dark);
-}
-
-.btn-secondary {
-    border-radius: var(--ph-radius-sm);
-    font-size: 0.85rem;
-    padding: 0.35rem 1rem;
-}
-
-/* Card */
-.card {
-    background: var(--ph-surface);
-    border: 1px solid var(--ph-border);
-    border-radius: var(--ph-radius-sm);
-}
-
-/* Count badge */
-.count-badge {
-    background: var(--ph-primary-bg);
-    color: var(--ph-primary);
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-/* Section header */
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.88rem;
-    color: var(--ph-text-secondary);
-}
-
-/* Page transitions */
+/* Fade-in page transition */
 .fade-in {
     animation: fadeIn 0.25s ease;
 }
-
 @keyframes fadeIn {
     from {
         opacity: 0;
     }
     to {
         opacity: 1;
-    }
-}
-
-/* WeChat QR */
-.wechat-qr {
-    border-radius: var(--ph-radius-sm);
-    transition: transform var(--ph-transition);
-}
-
-.wechat-qr:hover {
-    transform: scale(1.05);
-}
-
-/* Video sharing */
-.video-item {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    padding: 0.35rem 0;
-    border-bottom: 1px solid var(--ph-border-light);
-}
-
-.video-item .video-date {
-    font-family: var(--ph-font-mono);
-    font-size: 0.8rem;
-    color: var(--ph-text-muted);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.video-item .video-title {
-    font-size: 0.88rem;
-}
-
-/* ================================================================
-   RESPONSIVE
-   ================================================================ */
-@media (max-width: 991.98px) {
-    .layout-body {
-        flex-direction: column;
-        padding-top: 0.5rem;
-    }
-
-    .layout-sidebar {
-        width: 100%;
-        flex: none;
-        padding-right: 0;
-        margin-bottom: 1rem;
-    }
-
-    .sidebar-sticky {
-        position: static;
-    }
-
-    .sidebar .list-group {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.25rem;
-        border: none;
-        background: transparent;
-    }
-
-    .sidebar .list-group-item-dark {
-        display: none;
-    }
-
-    .sidebar .list-group-item {
-        border: 1px solid var(--ph-border) !important;
-        border-radius: var(--ph-radius-sm) !important;
-        font-size: 0.82rem;
-        padding: 0.3rem 0.7rem;
-        border-left: none !important;
-    }
-
-    .sidebar .list-group-item.active {
-        background: var(--ph-primary);
-        color: #fff;
-    }
-
-    .sidebar .list-group-item:last-child {
-        border-bottom: 1px solid var(--ph-border) !important;
-    }
-
-    .review-card {
-        padding: 0.8rem;
-    }
-
-    .paper-info-card {
-        margin-left: 0;
-    }
-
-    .rank-table thead th,
-    .rank-table tbody td {
-        padding: 0.4rem 0.5rem;
-        font-size: 0.78rem;
     }
 }

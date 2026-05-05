@@ -24,7 +24,7 @@ function getSystemTheme() {
 }
 
 function applyTheme(resolved) {
-  document.documentElement.setAttribute("data-theme", resolved);
+  document.documentElement.setAttribute("data-bs-theme", resolved);
 }
 
 export function ThemeProvider({ children }) {
@@ -46,15 +46,12 @@ export function ThemeProvider({ children }) {
     applyTheme(r);
   };
 
-  // Apply on mount
   useEffect(() => {
     applyTheme(resolved);
   }, []);
 
-  // Listen for system theme changes
   useEffect(() => {
     if (mode !== "system") return;
-
     const mq = window.matchMedia("(prefers-color-scheme: light)");
     const handler = (e) => {
       const r = e.matches ? "light" : "dark";

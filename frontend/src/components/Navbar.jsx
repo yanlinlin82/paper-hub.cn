@@ -172,8 +172,7 @@ function Navbar({ groupName }) {
           </div>
         </form>
 
-        {/* Right section — keep on one line */}
-        <ul className="navbar-nav flex-shrink-0 navbar-right">
+        <ul className="navbar-nav flex-shrink-0 ms-auto flex-row align-items-center gap-2">
           {loading ? (
             <li className="nav-item">
               <span className="nav-link">加载中...</span>

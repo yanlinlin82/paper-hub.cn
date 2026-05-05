@@ -43,7 +43,7 @@ function JournalReviews() {
 
   return (
     <section>
-      <div className="section-header my-3">
+      <div className="d-flex align-items-center gap-2 mb-2 text-body-secondary">
         来自杂志{" "}
         <Link
           to={`/group/${groupName}/journal/${encodeURIComponent(journalName)}`}
@@ -65,8 +65,8 @@ function JournalReviews() {
         </div>
       ) : (
         <>
-          <div className="section-header my-3">
-            <span className="count-badge">{data.total_count} 篇</span>
+          <div className="d-flex align-items-center gap-2 mb-2 text-body-secondary">
+            <span className="badge bg-light text-primary fw-semibold">{data.total_count} 篇</span>
             <span>共找到 {data.total_count} 篇文献分享</span>
             {data.paginator?.num_pages > 1 && (
               <span className="text-muted">

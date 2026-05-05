@@ -39,7 +39,7 @@ function UserReviews() {
 
   return (
     <section>
-      <div className="section-header my-3">
+      <div className="d-flex align-items-center gap-2 mb-2 text-body-secondary">
         来自用户{" "}
         <Link to={`/group/${groupName}/user/${data.user_info?.id || userId}`}>
           {data.user_info?.nickname || "用户"}
@@ -59,8 +59,8 @@ function UserReviews() {
         </div>
       ) : (
         <>
-          <div className="section-header my-3">
-            <span className="count-badge">{data.total_count} 篇</span>
+          <div className="d-flex align-items-center gap-2 mb-2 text-body-secondary">
+            <span className="badge bg-light text-primary fw-semibold">{data.total_count} 篇</span>
             <span>共找到 {data.total_count} 篇文献分享</span>
             {data.paginator?.num_pages > 1 && (
               <span className="text-muted">
