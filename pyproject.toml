@@ -21,6 +21,8 @@ dependencies = [
     "PySocks>=1.7.1",
     "bleach>=6.3.0",
     "httpx>=0.28.1",
+    "django-cors-headers>=4.4.0",
+    "gunicorn>=23.0.0",
 ]
 
 [tool.uv]

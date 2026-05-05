@@ -10,3 +10,5 @@ secret_key.txt
 node_modules/
 static/assets/
 .db.sqlite3.*
+frontend/node_modules/
+frontend/dist/

@@ -1,0 +1,44 @@
+/* ===== Custom styles adapted from Django templates ===== */
+
+html {
+  scroll-padding-top: 40px;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* External link indicator (↗) */
+.external-link::after {
+  content: ' \2197';
+  font-size: 0.8em;
+  margin-left: 0.2em;
+  display: inline-block;
+}
+
+/* Fixed scrolling container for sidebar and content areas */
+.fixed-div {
+  width: 100%;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+/* Search hint tooltip */
+#hint {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  padding: 10px;
+  border-radius: 5px;
+  width: 200px;
+}
+
+/* Ensure body takes full viewport */
+body {
+  width: 100vw;
+  height: 100vh;
+}

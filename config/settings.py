@@ -5,34 +5,35 @@
 import os
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Load environment variables from .env file
-env_file = BASE_DIR / '.env'
+env_file = BASE_DIR / ".env"
 if env_file.exists():
     import dotenv
+
     dotenv.load_dotenv(env_file)
 
 
 # Generate secret key if not exists
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-SECRET_KEY
-secret_key_file = BASE_DIR / 'secret_key.txt'
+secret_key_file = BASE_DIR / "secret_key.txt"
 if not secret_key_file.exists():
     import secrets
+
     SECRET_KEY = secrets.token_urlsafe(50)
-    with open(secret_key_file, 'w') as f:
+    with open(secret_key_file, "w") as f:
         f.write(SECRET_KEY)
 else:
-    with open(secret_key_file, 'r') as f:
+    with open(secret_key_file, "r") as f:
         SECRET_KEY = f.read()
 
 
 # Debug mode
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-DEBUG
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 
 # Allowed hosts
@@ -41,65 +42,73 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "[::1]",
-    "paper-hub.cn"
+    "paper-hub.cn",
+    "backend",
+    "nginx",
 ]
+
+# Also parse from environment variable (for docker)
+if os.getenv("DJANGO_ALLOWED_HOSTS"):
+    ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
 
 
 # Application definition
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-INSTALLED_APPS
 INSTALLED_APPS = [
-    'api.apps.ApiConfig',
-    'core.apps.CoreConfig',
-    'group.apps.GroupConfig',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "api.apps.ApiConfig",
+    "core.apps.CoreConfig",
+    "group.apps.GroupConfig",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "corsheaders",
 ]
 
 
 # Middleware
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-MIDDLEWARE
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 
 # CSRF trusted origins
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-CSRF_TRUSTED_ORIGINS
 CSRF_TRUSTED_ORIGINS = [
-    'https://servicewechat.com',
+    "https://servicewechat.com",
 ]
 
 
 # Root URL configuration
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-ROOT_URLCONF
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 
 # Templates
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-TEMPLATES
-TEMPLATES_DIR = BASE_DIR / 'templates'
+TEMPLATES_DIR = BASE_DIR / "templates"
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATES_DIR],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'config.context_processors.my_configures',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [TEMPLATES_DIR],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "config.context_processors.my_configures",
             ],
         },
     },
@@ -108,19 +117,19 @@ TEMPLATES = [
 
 # WSGI application
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#wsgi-application
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'DATE_FORMAT': 'Y-m-d',
-        'DATETIME_FORMAT': 'Y-m-d H:i:s',
-        'DATE_INPUT_FORMATS': '%Y-%m-%d',
-        'DATETIME_INPUT_FORMATS': '%Y-%m-%d %H:%M:%S',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+        "DATE_FORMAT": "Y-m-d",
+        "DATETIME_FORMAT": "Y-m-d H:i:s",
+        "DATE_INPUT_FORMATS": "%Y-%m-%d",
+        "DATETIME_INPUT_FORMATS": "%Y-%m-%d %H:%M:%S",
     }
 }
 
@@ -129,16 +138,16 @@ DATABASES = {
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -146,9 +155,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-LANGUAGE_CODE
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
@@ -157,17 +166,32 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#static-files
-STATIC_ROOT = BASE_DIR / 'static_root'
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+STATIC_ROOT = BASE_DIR / "static_root"
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
 # Default primary key field type
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+# CORS configuration
+# ref: https://github.com/adamchainz/django-cors-headers
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev server
+    "http://localhost:8000",
+    "http://localhost",
+    "http://127.0.0.1",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# CSRF trusted origins (for same-site from frontend)
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "http://localhost",
+]
 
 # Custom settings
 
