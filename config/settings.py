@@ -51,6 +51,10 @@ ALLOWED_HOSTS = [
 if os.getenv("DJANGO_ALLOWED_HOSTS"):
     ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(",")
 
+# If ALLOWED_HOSTS contains "*", allow all hosts (convenient for dev)
+if "*" in ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["*"]
+
 
 # Application definition
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-INSTALLED_APPS
@@ -170,6 +174,16 @@ STATIC_ROOT = BASE_DIR / "static_root"
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+# In production, static files are served directly by nginx/apache.
+# Django's STATIC_ROOT is used ONLY for the collectstatic command:
+#   uv run python manage.py collectstatic --noinput --clear
+# The web server then serves /static/ from STATIC_ROOT directly.
+#
+# If you use WhiteNoise in production (instead of nginx/apache),
+# uncomment the following:
+#   STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# and add "whitenoise.middleware.WhiteNoiseMiddleware" to MIDDLEWARE.
+
 
 # Default primary key field type
 # ref: https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -179,19 +193,39 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS configuration
 # ref: https://github.com/adamchainz/django-cors-headers
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite dev server
-    "http://localhost:8000",
+    "http://localhost:5173",  # Vite dev server (direct access)
     "http://localhost",
     "http://127.0.0.1",
 ]
+
+# Auto-detect PORT from env (used by single-port docker-compose)
+_port = os.getenv("DEV_PORT", "8000")
+if _port not in ("80", "443"):
+    _origin = f"http://localhost:{_port}"
+    if _origin not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(_origin)
+
+# Override from env var (comma-separated, takes precedence)
+if os.getenv("CORS_ALLOWED_ORIGINS"):
+    CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
+
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF trusted origins (for same-site from frontend)
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
-    "http://localhost:8000",
     "http://localhost",
 ]
+
+# Auto-detect PORT from env (same logic as CORS)
+if _port not in ("80", "443"):
+    _origin = f"http://localhost:{_port}"
+    if _origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_origin)
+
+# Override from env var (comma-separated, takes precedence)
+if os.getenv("CSRF_TRUSTED_ORIGINS"):
+    CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS").split(",")
 
 # Custom settings
 

@@ -18,9 +18,10 @@ import os
 
 from django.contrib import admin
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from django.urls import include, path, re_path
+from django.shortcuts import redirect
+from django.urls import include, path
 
+from api.urls import urlpatterns as api_urlpatterns
 from config import settings
 
 
@@ -36,18 +37,26 @@ def spa_index(request):
     """Serve the React SPA entry point for all unmatched routes."""
     # In development, redirect to the Vite dev server
     # In production, serve the built index.html
+    # In production, Apache serves the built SPA files directly
+    # via DocumentRoot → frontend/dist with FallbackResource.
+    # This view is a fallback for when WSGIScriptAlias / is used.
     return redirect("/group/xiangma/")
-
-
-def serve_spa(request):
-    """Catch-all view that redirects unknown routes to the SPA."""
-    return redirect("/")
 
 
 urlpatterns = [
     path("baidu_verify_codeva-NJa4iPMlSa.html", baidu_verify_codeva),
     path("", spa_index, name="index"),
     path("admin/", admin.site.urls),
-    path("api/", include("api.urls")),
+    # api.urls is included TWICE to support two deployment modes:
+    #
+    # 1. path("api/", ...)  — nginx ProxyPass /api/, Django matches /api/...
+    # 2. path("", ...)       — Apache WSGIScriptAlias /api strips /api from
+    #    PATH_INFO, so Django sees /groups/... without the prefix.
+    #    SCRIPT_NAME=/api is set by mod_wsgi, so URL reversing is correct.
+    #
+    # The first include registers the "api" namespace; the second uses the
+    # raw pattern list (no namespace), avoiding Django's urls.W005 warning.
+    path("api/", include((api_urlpatterns, "api"))),
+    path("", include(api_urlpatterns)),
     path("group/", include("group.urls")),
 ]
