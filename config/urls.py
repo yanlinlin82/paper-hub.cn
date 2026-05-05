@@ -13,26 +13,41 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 import os
+
 from django.contrib import admin
-from django.urls import include, path
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
+from django.urls import include, path, re_path
+
 from config import settings
 
+
 def baidu_verify_codeva(request):
-    filename = os.path.join(settings.BASE_DIR, 'static', 'baidu_verify_codeva-NJa4iPMlSa.html')
-    with open(filename, 'r') as f:
+    filename = os.path.join(
+        settings.BASE_DIR, "static", "baidu_verify_codeva-NJa4iPMlSa.html"
+    )
+    with open(filename, "r") as f:
         return HttpResponse(f.read())
 
 
-def index(request):
-    return redirect('group:index')
+def spa_index(request):
+    """Serve the React SPA entry point for all unmatched routes."""
+    # In development, redirect to the Vite dev server
+    # In production, serve the built index.html
+    return redirect("/group/xiangma/")
+
+
+def serve_spa(request):
+    """Catch-all view that redirects unknown routes to the SPA."""
+    return redirect("/")
+
 
 urlpatterns = [
-    path('baidu_verify_codeva-NJa4iPMlSa.html', baidu_verify_codeva), # for baidu search engine verification
-    path('', index, name='index'),
-    path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
-    path('group/', include('group.urls')),
+    path("baidu_verify_codeva-NJa4iPMlSa.html", baidu_verify_codeva),
+    path("", spa_index, name="index"),
+    path("admin/", admin.site.urls),
+    path("api/", include("api.urls")),
+    path("group/", include("group.urls")),
 ]

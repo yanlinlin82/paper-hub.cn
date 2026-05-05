@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
-import api from '../api/client';
-import ReviewCard from '../components/ReviewCard';
-import Pagination from '../components/Pagination';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { useAuth } from '../context/AuthContext';
+import React, { useEffect, useState } from "react";
+import { useParams, useSearchParams, Link } from "react-router-dom";
+import api from "../api/client";
+import ReviewCard from "../components/ReviewCard";
+import Pagination from "../components/Pagination";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useAuth } from "../context/AuthContext";
 
 function List({ type }) {
   const { groupName } = useParams();
@@ -14,17 +14,17 @@ function List({ type }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const page = searchParams.get('page') || '1';
-  const query = searchParams.get('q') || '';
+  const page = searchParams.get("page") || "1";
+  const query = searchParams.get("q") || "";
 
   // Type labels mapping
   const typeLabels = {
-    all: '所有分享',
-    my_sharing: '我的分享',
-    recent: '本周分享',
-    this_month: '本月分享',
-    last_month: '上月分享',
-    trash: '回收站',
+    all: "所有分享",
+    my_sharing: "我的分享",
+    recent: "本周分享",
+    this_month: "本月分享",
+    last_month: "上月分享",
+    trash: "回收站",
   };
 
   useEffect(() => {
@@ -34,7 +34,10 @@ function List({ type }) {
       try {
         const params = { page };
         if (query) params.q = query;
-        const result = await api.getGroupReviews(groupName, { ...params, type });
+        const result = await api.getGroupReviews(groupName, {
+          ...params,
+          type,
+        });
         setData(result);
       } catch (err) {
         setError(err.message);
@@ -46,7 +49,7 @@ function List({ type }) {
   }, [groupName, type, page, query]);
 
   // Check access for my_sharing and trash
-  if ((type === 'my_sharing' || type === 'trash') && !user) {
+  if ((type === "my_sharing" || type === "trash") && !user) {
     return <div className="alert alert-warning">请先登录</div>;
   }
 
@@ -65,14 +68,19 @@ function List({ type }) {
       )}
 
       {!reviews || reviews.length === 0 ? (
-        <div className="my-5 text-center" style={{ minHeight: '200px' }}>
+        <div className="my-5 text-center" style={{ minHeight: "200px" }}>
           暂无任何内容。
         </div>
       ) : (
         <>
-          <div className="my-3">
-            当前共找到 {total_count} 篇文献分享
-            {paginator.num_pages > 1 && `，本页显示第 ${data.start_index} - ${data.end_index} 篇`}
+          <div className="section-header my-3">
+            <span className="count-badge">{total_count} 篇</span>
+            <span>共找到 {total_count} 篇文献分享</span>
+            {paginator.num_pages > 1 && (
+              <span className="text-muted">
+                （本页显示第 {data.start_index} - {data.end_index} 篇）
+              </span>
+            )}
           </div>
 
           <Pagination paginator={paginator} />
@@ -81,9 +89,13 @@ function List({ type }) {
             <ReviewCard
               key={review.id}
               review={review}
-              index={data.indices ? data.indices[idx] : (paginator.start_index || 1) + idx}
+              index={
+                data.indices
+                  ? data.indices[idx]
+                  : (paginator.start_index || 1) + idx
+              }
               groupName={groupName}
-              isTrash={type === 'trash'}
+              isTrash={type === "trash"}
             />
           ))}
 

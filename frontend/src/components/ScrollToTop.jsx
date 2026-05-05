@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 function ScrollToTop() {
   const [visible, setVisible] = useState(false);
@@ -7,42 +7,24 @@ function ScrollToTop() {
     const handleScroll = () => {
       setVisible(window.scrollY > 300);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (!visible) return null;
 
   return (
-    <a
-      href="#top"
-      onClick={(e) => {
-        e.preventDefault();
-        scrollToTop();
-      }}
-      style={{
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
-        zIndex: 999,
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        backgroundColor: '#6c757d',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textDecoration: 'none',
-        opacity: 0.8,
-      }}
+    <button
+      className="scroll-to-top"
+      onClick={scrollToTop}
+      aria-label="返回顶部"
     >
       ↑
-    </a>
+    </button>
   );
 }
 

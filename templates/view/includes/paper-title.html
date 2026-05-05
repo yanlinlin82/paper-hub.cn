@@ -1,9 +1,0 @@
-<div class="mt-2 mb-2" id="title_{{ paper.pk }}">
-  {% if title_link and review %}
-  <a id="title_{{ paper.pk }}_text" href="{% url 'group:review' group_name=group.name id=review.pk %}">
-    {{ paper.title|safe }}
-  </a>
-  {% else %}
-  <span id="title_{{ paper.pk }}_text">{{ paper.title|safe }}</span>
-  {% endif %}
-</div>

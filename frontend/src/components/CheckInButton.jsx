@@ -187,7 +187,7 @@ function CheckInModal({ groupName, onClose }) {
   return (
     <div
       ref={modalRef}
-      className="modal fade"
+      className="modal fade checkin-modal"
       id="checkInModal"
       data-bs-backdrop="static"
       tabIndex="-1"
@@ -610,12 +610,8 @@ function CheckInButton({ groupName }) {
   return (
     <>
       <div className="text-center my-3">
-        <button
-          className="btn btn-success btn-lg"
-          onClick={handleClick}
-          style={{ width: "160px" }}
-        >
-          分享打卡
+        <button className="check-in-btn" onClick={handleClick}>
+          + 分享打卡
         </button>
       </div>
       {showModal && (

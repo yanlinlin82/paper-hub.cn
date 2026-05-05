@@ -1,16 +1,16 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import CheckInButton from './CheckInButton';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import CheckInButton from "./CheckInButton";
 
 function Sidebar({ groupName }) {
   const { user } = useAuth();
 
   const linkClass = ({ isActive }) =>
-    `list-group-item list-group-item-action ${isActive ? 'active' : ''}`;
+    `list-group-item list-group-item-action ${isActive ? "active" : ""}`;
 
   return (
-    <div>
+    <div className="sidebar">
       {user && <CheckInButton groupName={groupName} />}
       <div className="list-group text-center my-3">
         <div className="list-group-item list-group-item-dark">响马读paper</div>

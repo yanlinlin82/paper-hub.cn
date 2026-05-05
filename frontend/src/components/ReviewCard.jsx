@@ -1,28 +1,28 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import PaperInfo from './PaperInfo';
+import React from "react";
+import { Link } from "react-router-dom";
+import PaperInfo from "./PaperInfo";
 
 function formatDate(dateStr) {
-  if (!dateStr) return '';
+  if (!dateStr) return "";
   const d = new Date(dateStr);
-  const pad = (n) => String(n).padStart(2, '0');
+  const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function processXmlTags(text) {
-  if (!text) return '';
+  if (!text) return "";
   return text
-    .replace(/\n/g, '<br>')
-    .replace(/\s+/g, ' ')
-    .replace(/<\/?jats:bold>/g, '<b>')
-    .replace(/<\/?jats:italic>/g, '<i>')
-    .replace(/<\/?jats:[^>]+>/g, '');
+    .replace(/\n/g, "<br>")
+    .replace(/\s+/g, " ")
+    .replace(/<\/?jats:bold>/g, "<b>")
+    .replace(/<\/?jats:italic>/g, "<i>")
+    .replace(/<\/?jats:[^>]+>/g, "");
 }
 
 function AuthorList({ authors }) {
   if (!authors) return null;
 
-  const authorList = authors.split('\n').filter(Boolean);
+  const authorList = authors.split("\n").filter(Boolean);
 
   if (authorList.length === 0) return null;
 
@@ -32,7 +32,10 @@ function AuthorList({ authors }) {
     return (
       <div>
         {authorList.map((author, i) => (
-          <span key={i}>{author}{i < authorList.length - 1 ? ', ' : ''}</span>
+          <span key={i}>
+            {author}
+            {i < authorList.length - 1 ? ", " : ""}
+          </span>
         ))}
       </div>
     );
@@ -46,38 +49,66 @@ function AuthorList({ authors }) {
             <span key={i}>{author}, </span>
           ))}
           ...
-          <a href="#" onClick={(e) => { e.preventDefault(); setExpanded(true); }}>&gt;&gt;&gt;</a>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setExpanded(true);
+            }}
+          >
+            &gt;&gt;&gt;
+          </a>
         </>
       ) : (
         <>
           {authorList.map((author, i) => (
-            <span key={i}>{author}{i < authorList.length - 1 ? ', ' : ''}</span>
+            <span key={i}>
+              {author}
+              {i < authorList.length - 1 ? ", " : ""}
+            </span>
           ))}
-          <a href="#" onClick={(e) => { e.preventDefault(); setExpanded(false); }}>&lt;&lt;&lt;</a>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setExpanded(false);
+            }}
+          >
+            &lt;&lt;&lt;
+          </a>
         </>
       )}
     </div>
   );
 }
 
-function ReviewCard({ review, index, groupName, showReviewLink = true, isTrash = false }) {
+function ReviewCard({
+  review,
+  index,
+  groupName,
+  showReviewLink = true,
+  isTrash = false,
+}) {
   const paper = review.paper || {};
   const [showAbstract, setShowAbstract] = React.useState(false);
 
   return (
-    <div id={`card_review_${review.id}`} className="card p-2 my-3 d-flex flex-row">
-      <div className="p-2 text-start">{index}.</div>
+    <div
+      id={`card_review_${review.id}`}
+      className="review-card d-flex flex-row"
+    >
+      <div className="review-index p-2">{index}.</div>
       <div className="p-2 text-start flex-fill">
         {/* Review info */}
         <div className="d-flex flex-row">
-          <div className="text-start flex-fill">
+          <div className="review-meta text-start flex-fill">
             <Link to={`/group/${groupName}/user/${review.creator_id}`}>
               {review.creator_name}
             </Link>
             ({formatDate(review.create_time)}):
           </div>
           {review.is_superuser && (
-            <div className="text-end align-self-start">
+            <div className="admin-actions text-end align-self-start">
               <a
                 className="btn btn-outline-primary btn-sm text-nowrap ms-2"
                 href={`/admin/core/review/${review.id}/change/`}
@@ -100,42 +131,60 @@ function ReviewCard({ review, index, groupName, showReviewLink = true, isTrash =
 
         {/* Comment */}
         {review.comment && (
-          <div className="my-3" dangerouslySetInnerHTML={{ __html: review.comment }} />
+          <div
+            className="review-comment"
+            dangerouslySetInnerHTML={{ __html: review.comment }}
+          />
         )}
 
         {/* Paper card */}
-        <div className="card p-2 ms-4">
+        <div className="paper-info-card">
           <PaperInfo paper={paper} groupName={groupName} />
 
           {/* Paper title */}
           {paper.title && (
-            <div className="mt-2">
+            <div className="paper-title mt-2">
               {showReviewLink ? (
                 <Link to={`/group/${groupName}/review/${review.id}`}>
-                  <span dangerouslySetInnerHTML={{ __html: processXmlTags(paper.title) }} />
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: processXmlTags(paper.title),
+                    }}
+                  />
                 </Link>
               ) : (
-                <span dangerouslySetInnerHTML={{ __html: processXmlTags(paper.title) }} />
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: processXmlTags(paper.title),
+                  }}
+                />
               )}
             </div>
           )}
 
           {/* Authors */}
-          <AuthorList authors={paper.authors} />
+          <div className="author-list">
+            <AuthorList authors={paper.authors} />
+          </div>
 
           {/* Abstract */}
           {paper.abstract && (
             <div className="mt-2">
-              <a
-                href="#"
-                onClick={(e) => { e.preventDefault(); setShowAbstract(!showAbstract); }}
+              <button
+                className="abstract-toggle"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowAbstract(!showAbstract);
+                }}
               >
-                {showAbstract ? '收起摘要' : '展开摘要'}
-              </a>
+                {showAbstract ? "▾ 收起摘要" : "▸ 展开摘要"}
+              </button>
               {showAbstract && (
                 <div
-                  className="mt-1"
-                  dangerouslySetInnerHTML={{ __html: processXmlTags(paper.abstract) }}
+                  className="abstract-content"
+                  dangerouslySetInnerHTML={{
+                    __html: processXmlTags(paper.abstract),
+                  }}
                 />
               )}
             </div>
@@ -143,27 +192,40 @@ function ReviewCard({ review, index, groupName, showReviewLink = true, isTrash =
 
           {/* Keywords */}
           {paper.keywords && (
-            <div className="mt-2">
-              <b>Keywords:</b>{' '}
-              {paper.keywords.split('\n').filter(Boolean).map((kw, i, arr) => (
-                <span key={i}>{kw}{i < arr.length - 1 ? ', ' : ''}</span>
-              ))}
+            <div className="keywords-label mt-2">
+              <b>Keywords:</b>{" "}
+              {paper.keywords
+                .split("\n")
+                .filter(Boolean)
+                .map((kw, i, arr) => (
+                  <span key={i} className="keyword-tag">
+                    {kw}
+                  </span>
+                ))}
             </div>
           )}
 
           {/* URLs */}
           {paper.urls && (
-            <div className="mt-3">
-              <div className="url-label"><b>Related Links:</b></div>
-              <div className="url-item">
-                <ul>
-                  {paper.urls.split('\n').filter(Boolean).map((url, i) => (
+            <div className="url-list">
+              <b>Related Links:</b>
+              <ul>
+                {paper.urls
+                  .split("\n")
+                  .filter(Boolean)
+                  .map((url, i) => (
                     <li key={i}>
-                      <a href={url} target="_blank" rel="noreferrer" className="external-link">{url}</a>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="external-link"
+                      >
+                        {url}
+                      </a>
                     </li>
                   ))}
-                </ul>
-              </div>
+              </ul>
             </div>
           )}
         </div>

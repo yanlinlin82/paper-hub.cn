@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
-import api from '../api/client';
-import ReviewCard from '../components/ReviewCard';
-import Pagination from '../components/Pagination';
-import LoadingSpinner from '../components/LoadingSpinner';
+import React, { useEffect, useState } from "react";
+import { useParams, useSearchParams, Link } from "react-router-dom";
+import api from "../api/client";
+import ReviewCard from "../components/ReviewCard";
+import Pagination from "../components/Pagination";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function JournalReviews() {
   const { groupName, journalName } = useParams();
@@ -12,8 +12,8 @@ function JournalReviews() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const page = searchParams.get('page') || '1';
-  const query = searchParams.get('q') || '';
+  const page = searchParams.get("page") || "1";
+  const query = searchParams.get("q") || "";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,7 +22,11 @@ function JournalReviews() {
       try {
         const params = { page };
         if (query) params.q = query;
-        const result = await api.getJournalReviews(groupName, journalName, params);
+        const result = await api.getJournalReviews(
+          groupName,
+          journalName,
+          params,
+        );
         setData(result);
       } catch (err) {
         setError(err.message);
@@ -39,12 +43,14 @@ function JournalReviews() {
 
   return (
     <section>
-      <div className="my-3">
-        来自杂志{' '}
-        <Link to={`/group/${groupName}/journal/${encodeURIComponent(journalName)}`}>
+      <div className="section-header my-3">
+        来自杂志{" "}
+        <Link
+          to={`/group/${groupName}/journal/${encodeURIComponent(journalName)}`}
+        >
           <i>{decodeURIComponent(journalName)}</i>
-        </Link>{' '}
-        的文献。
+        </Link>{" "}
+        的文献分享
       </div>
 
       {query && (
@@ -54,16 +60,19 @@ function JournalReviews() {
       )}
 
       {!data.reviews || data.reviews.length === 0 ? (
-        <div className="my-5 text-center" style={{ minHeight: '200px' }}>
+        <div className="my-5 text-center" style={{ minHeight: "200px" }}>
           暂无任何内容。
         </div>
       ) : (
         <>
-          <div className="my-3">
-            当前共找到 {data.total_count} 篇文献分享
-            {data.paginator?.num_pages > 1 &&
-              `，本页显示第 ${data.start_index} - ${data.end_index} 篇`
-            }
+          <div className="section-header my-3">
+            <span className="count-badge">{data.total_count} 篇</span>
+            <span>共找到 {data.total_count} 篇文献分享</span>
+            {data.paginator?.num_pages > 1 && (
+              <span className="text-muted">
+                （本页显示第 {data.start_index} - {data.end_index} 篇）
+              </span>
+            )}
           </div>
           <Pagination paginator={data.paginator} />
           {data.reviews.map((review, idx) => (

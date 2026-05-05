@@ -2,29 +2,17 @@
   "name": "paper-hub.cn",
   "version": "1.0.0",
   "description": "An easy way to read and share papers for scientific research",
-  "main": "index.js",
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite build --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yanlinlin82/paper-hub.cn.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/yanlinlin82/paper-hub.cn/issues"
-  },
-  "homepage": "https://github.com/yanlinlin82/paper-hub.cn#readme",
-  "dependencies": {
-    "bootstrap": "^5.3.8",
-    "marked": "^17.0.3"
-  },
-  "devDependencies": {
-    "vite": "^7.3.2"
-  }
+  "keywords": [
+    "academic",
+    "papers",
+    "community",
+    "sharing"
+  ],
+  "author": "颜林林",
+  "license": "ISC"
 }
