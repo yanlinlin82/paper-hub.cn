@@ -4,79 +4,16 @@
    ================================================================ */
 
 /* ----- CSS Custom Properties ----- */
-:root {
+:root,
+[data-theme="dark"] {
     /* Core — refined academic palette */
-    --ph-primary: #1a365d;
-    --ph-primary-light: #2563eb;
-    --ph-primary-lighter: #dbeafe;
-    --ph-primary-dark: #0f2640;
-    --ph-primary-bg: #f0f4f8;
-
-    /* Accent — fresh, scholarly */
-    --ph-accent: #059669;
-    --ph-accent-light: #d1fae5;
-    --ph-accent-dark: #047857;
-
-    /* Accent warm — for select CTAs */
-    --ph-accent-warm: #d97706;
-    --ph-accent-warm-light: #fef3c7;
-
-    /* Semantic */
-    --ph-success: #059669;
-    --ph-success-bg: #ecfdf5;
-    --ph-danger: #dc2626;
-    --ph-danger-bg: #fef2f2;
-    --ph-warning: #d97706;
-    --ph-warning-bg: #fffbeb;
-
-    /* Neutrals — clean, spacious */
-    --ph-bg: #fafafa;
-    --ph-surface: #ffffff;
-    --ph-sidebar-bg: transparent;
-    --ph-sidebar-text: #475569;
-    --ph-sidebar-active-bg: #f0f4f8;
-    --ph-sidebar-active-color: #1a365d;
-    --ph-navbar-bg: rgba(255, 255, 255, 0.97);
-    --ph-text-primary: #0f172a;
-    --ph-text-secondary: #475569;
-    --ph-text-muted: #94a3b8;
-    --ph-border: #e2e8f0;
-    --ph-border-light: #f1f5f9;
-
-    /* Shadows — subtle, elevated */
-    --ph-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
-    --ph-shadow-md:
-        0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --ph-shadow-lg:
-        0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
-
-    /* Radius — refined, modest */
-    --ph-radius-sm: 4px;
-    --ph-radius-md: 8px;
-    --ph-radius-lg: 12px;
-
-    /* Font */
-    --ph-font-sans:
-        "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC",
-        "Microsoft YaHei", sans-serif;
-    --ph-font-serif: "Georgia", "Noto Serif SC", "Source Han Serif SC", serif;
-    --ph-font-mono:
-        "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, Consolas,
-        monospace;
-
-    /* Transitions */
-    --ph-transition: 0.15s ease;
-}
-
-/* ----- Dark Mode Overrides ----- */
-[data-bs-theme="dark"] {
     --ph-primary: #93c5fd;
     --ph-primary-light: #60a5fa;
     --ph-primary-lighter: #1e3a5f;
     --ph-primary-dark: #3b82f6;
     --ph-primary-bg: #172554;
 
+    /* Accent — fresh, scholarly */
     --ph-accent: #34d399;
     --ph-accent-light: #064e3b;
     --ph-accent-dark: #10b981;
@@ -84,6 +21,7 @@
     --ph-accent-warm: #fbbf24;
     --ph-accent-warm-light: #78350f;
 
+    /* Semantic */
     --ph-success: #34d399;
     --ph-success-bg: #064e3b;
     --ph-danger: #f87171;
@@ -91,6 +29,7 @@
     --ph-warning: #fbbf24;
     --ph-warning-bg: #78350f;
 
+    /* Neutrals */
     --ph-bg: #0b1120;
     --ph-surface: #131c31;
     --ph-sidebar-bg: transparent;
@@ -107,6 +46,64 @@
     --ph-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
     --ph-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
     --ph-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.25);
+
+    /* Radius */
+    --ph-radius-sm: 4px;
+    --ph-radius-md: 8px;
+    --ph-radius-lg: 12px;
+
+    --ph-font-sans:
+        "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+    --ph-font-serif: "Georgia", "Noto Serif SC", "Source Han Serif SC", serif;
+    --ph-font-mono:
+        "JetBrains Mono", "Fira Code", "SF Mono", Menlo, Monaco, Consolas,
+        monospace;
+
+    --ph-transition: 0.15s ease;
+}
+
+/* ----- Light Mode Overrides ----- */
+[data-theme="light"] {
+    --ph-primary: #1a365d;
+    --ph-primary-light: #2563eb;
+    --ph-primary-lighter: #dbeafe;
+    --ph-primary-dark: #0f2640;
+    --ph-primary-bg: #f0f4f8;
+
+    --ph-accent: #059669;
+    --ph-accent-light: #d1fae5;
+    --ph-accent-dark: #047857;
+
+    --ph-accent-warm: #d97706;
+    --ph-accent-warm-light: #fef3c7;
+
+    --ph-success: #059669;
+    --ph-success-bg: #ecfdf5;
+    --ph-danger: #dc2626;
+    --ph-danger-bg: #fef2f2;
+    --ph-warning: #d97706;
+    --ph-warning-bg: #fffbeb;
+
+    --ph-bg: #fafafa;
+    --ph-surface: #ffffff;
+    --ph-sidebar-bg: transparent;
+    --ph-sidebar-text: #475569;
+    --ph-sidebar-active-bg: #f0f4f8;
+    --ph-sidebar-active-color: #1a365d;
+    --ph-navbar-bg: rgba(255, 255, 255, 0.97);
+    --ph-text-primary: #0f172a;
+    --ph-text-secondary: #475569;
+    --ph-text-muted: #94a3b8;
+    --ph-border: #e2e8f0;
+    --ph-border-light: #f1f5f9;
+
+    --ph-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+    --ph-shadow-md:
+        0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --ph-shadow-lg:
+        0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
 /* ================================================================
@@ -196,6 +193,28 @@ h3 {
     width: auto;
 }
 
+/* Logo visibility based on theme */
+[data-theme="dark"] .logo-light {
+    display: none;
+}
+
+[data-theme="dark"] .logo-dark {
+    display: inline-block;
+}
+
+[data-theme="light"] .logo-light {
+    display: inline-block;
+}
+
+[data-theme="light"] .logo-dark {
+    display: none;
+}
+
+/* Default (before React hydrates): show light logo */
+.logo-dark {
+    display: none;
+}
+
 .navbar .nav-link {
     font-size: 0.88rem;
     font-weight: 500;
@@ -203,6 +222,14 @@ h3 {
     padding: 0.4rem 0.75rem !important;
     border-radius: var(--ph-radius-sm);
     transition: all var(--ph-transition);
+    white-space: nowrap;
+}
+
+.navbar-right {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.1rem;
+    flex-shrink: 0;
 }
 
 .navbar .nav-link:hover {
@@ -984,12 +1011,32 @@ footer a:hover {
 }
 
 /* Dropdowns */
+.nav-item.dropdown {
+    position: relative !important;
+    overflow: visible;
+}
+
+.navbar-nav .dropdown-menu {
+    position: absolute !important;
+}
+
+.navbar-nav .dropdown-menu.show {
+    display: block;
+}
+
 .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
     border: 1px solid var(--ph-border);
     border-radius: var(--ph-radius-sm);
     box-shadow: var(--ph-shadow-lg);
     padding: 0.35rem;
     background: var(--ph-surface);
+    min-width: 140px;
+    z-index: 1050;
+    margin-top: 0.25rem;
 }
 
 .dropdown-menu .dropdown-item {

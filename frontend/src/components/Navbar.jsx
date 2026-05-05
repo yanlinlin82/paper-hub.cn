@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 function Navbar({ groupName }) {
   const { user, loading, logout } = useAuth();
+  const { mode, setMode } = useTheme();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [appearanceDropdownOpen, setAppearanceDropdownOpen] = useState(false);
+  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const userDropdownRef = useRef(null);
-  const appearanceDropdownRef = useRef(null);
+  const themeDropdownRef = useRef(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -24,35 +25,16 @@ function Navbar({ groupName }) {
         setUserDropdownOpen(false);
       }
       if (
-        appearanceDropdownOpen &&
-        appearanceDropdownRef.current &&
-        !appearanceDropdownRef.current.contains(e.target)
+        themeDropdownOpen &&
+        themeDropdownRef.current &&
+        !themeDropdownRef.current.contains(e.target)
       ) {
-        setAppearanceDropdownOpen(false);
+        setThemeDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [userDropdownOpen, appearanceDropdownOpen]);
-
-  // Load dark mode preference
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode") === "true";
-    setDarkMode(savedDarkMode);
-    if (savedDarkMode) {
-      document.documentElement.setAttribute("data-bs-theme", "dark");
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    const newVal = !darkMode;
-    setDarkMode(newVal);
-    localStorage.setItem("darkMode", newVal);
-    document.documentElement.setAttribute(
-      "data-bs-theme",
-      newVal ? "dark" : "light",
-    );
-  };
+  }, [userDropdownOpen, themeDropdownOpen]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -66,13 +48,69 @@ function Navbar({ groupName }) {
     navigate(`/group/${groupName}`);
   };
 
+  const themeOptions = [
+    {
+      key: "light",
+      label: "浅色",
+      icon: (
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+          <circle cx="10" cy="10" r="4" />
+          <path
+            d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.42 1.42M13.65 13.65l1.42 1.42M4.93 15.07l1.42-1.42M13.65 6.35l1.42-1.42"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+          />
+        </svg>
+      ),
+    },
+    {
+      key: "dark",
+      label: "深色",
+      icon: (
+        <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor">
+          <path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8.001 8.001 0 1 0 10.586 10.586Z" />
+        </svg>
+      ),
+    },
+    {
+      key: "system",
+      label: "跟随系统",
+      icon: (
+        <svg
+          viewBox="0 0 20 20"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="1" y="2" width="18" height="12" rx="2" />
+          <path d="M7 16l-1 3h8l-1-3" />
+          <path d="M10 15v1" />
+        </svg>
+      ),
+    },
+  ];
+
   return (
     <nav className="navbar">
       <div className="container-xl d-flex align-items-center gap-3">
         {/* Brand */}
         <Link className="navbar-brand flex-shrink-0" to={`/group/${groupName}`}>
           <img
+            className="logo-light"
             src="/static/images/banner-b.png"
+            width="150"
+            height="40"
+            alt="Paper-Hub"
+          />
+          <img
+            className="logo-dark"
+            src="/static/images/banner-w.png"
             width="150"
             height="40"
             alt="Paper-Hub"
@@ -134,8 +172,8 @@ function Navbar({ groupName }) {
           </div>
         </form>
 
-        {/* Right section */}
-        <ul className="navbar-nav flex-shrink-0">
+        {/* Right section — keep on one line */}
+        <ul className="navbar-nav flex-shrink-0 navbar-right">
           {loading ? (
             <li className="nav-item">
               <span className="nav-link">加载中...</span>
@@ -193,9 +231,11 @@ function Navbar({ groupName }) {
               </a>
             </li>
           )}
+
+          {/* Theme toggle dropdown */}
           <li
-            ref={appearanceDropdownRef}
-            className={`nav-item dropdown${appearanceDropdownOpen ? " show" : ""}`}
+            ref={themeDropdownRef}
+            className={`nav-item dropdown${themeDropdownOpen ? " show" : ""}`}
           >
             <a
               className="nav-link dropdown-toggle"
@@ -203,30 +243,32 @@ function Navbar({ groupName }) {
               role="button"
               onClick={(e) => {
                 e.preventDefault();
-                setAppearanceDropdownOpen(!appearanceDropdownOpen);
+                setThemeDropdownOpen(!themeDropdownOpen);
               }}
-              aria-expanded={appearanceDropdownOpen}
+              aria-expanded={themeDropdownOpen}
             >
               主题
             </a>
             <ul
-              className={`dropdown-menu dropdown-menu-end${appearanceDropdownOpen ? " show" : ""}`}
+              className={`dropdown-menu dropdown-menu-end${themeDropdownOpen ? " show" : ""}`}
             >
-              <li className="p-3">
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    role="switch"
-                    id="toggleTheme"
-                    checked={darkMode}
-                    onChange={toggleDarkMode}
-                  />
-                  <label className="form-check-label" htmlFor="toggleTheme">
-                    深色模式
-                  </label>
-                </div>
-              </li>
+              {themeOptions.map((opt) => (
+                <li key={opt.key}>
+                  <button
+                    className={`dropdown-item d-flex align-items-center gap-2 ${mode === opt.key ? "active" : ""}`}
+                    onClick={() => {
+                      setMode(opt.key);
+                      setThemeDropdownOpen(false);
+                    }}
+                  >
+                    <span>{opt.icon}</span>
+                    <span>{opt.label}</span>
+                    {mode === opt.key && (
+                      <span className="ms-auto text-primary">✓</span>
+                    )}
+                  </button>
+                </li>
+              ))}
             </ul>
           </li>
         </ul>
