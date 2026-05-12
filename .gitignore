@@ -1,14 +1,23 @@
 __pycache__
-db.sqlite3*
+
+# Backend
+backend/db.sqlite3*
+backend/cache/
+backend/static_root/
+backend/.venv/
+backend/*.log
+backend/pubmed/
+backend/secret_key.txt
+backend/static/assets/
+backend/.db.sqlite3.*
+
+# Root-level Docker/venv artifacts (root-owned, can't relocate)
+.venv/
 cache/
 static_root/
-.env
-.venv/
-*.log
-pubmed
-secret_key.txt
+
+# Shared
 node_modules/
-static/assets/
-.db.sqlite3.*
+.env
 frontend/node_modules/
 frontend/dist/

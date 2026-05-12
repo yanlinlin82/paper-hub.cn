@@ -17,10 +17,9 @@ services:
       dockerfile: docker/backend/Dockerfile
     container_name: paperhub-backend
     volumes:
-      - .:/app
+      - ./backend:/app
       - backend-static:/app/static_root
       - backend-media:/app/media
-      - backend-db:/app/db
     env_file:
       - .env.docker
     environment:
@@ -77,4 +76,3 @@ networks:
 volumes:
   backend-static:
   backend-media:
-  backend-db:

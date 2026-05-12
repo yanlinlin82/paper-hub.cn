@@ -15,13 +15,46 @@ Non-community features are being moved to a sibling repository:
 
 Literature tracking/recommendation/chat data models have been removed from this repository to keep only community workflows.
 
+## Project Structure
+
+```
+paper-hub.cn/
+├── backend/              # Django / Python backend
+│   ├── api/              #   REST API app
+│   ├── config/           #   Django project settings & URL routing
+│   ├── core/             #   Core data models
+│   ├── group/            #   Group pages (redirects to SPA)
+│   ├── scripts/          #   Utility scripts
+│   ├── static/           #   Static file sources
+│   ├── static_root/      #   Collected static files (collectstatic)
+│   ├── media/            #   User-uploaded media
+│   ├── logs/             #   Application logs
+│   ├── cache/            #   API response cache
+│   ├── logo/             #   Brand assets
+│   ├── db.sqlite3        #   SQLite database
+│   ├── pyproject.toml    #   Python dependencies
+│   ├── uv.lock           #   Lock file for uv
+│   └── manage.py         #   Django management script
+├── frontend/             # React SPA (Vite)
+│   ├── src/              #   Source code
+│   ├── public/           #   Static assets
+│   └── dist/             #   Build output
+├── docker/               # Docker / Nginx configs
+│   ├── backend/
+│   ├── frontend/
+│   └── nginx/
+├── docker-compose.yml    # Dev environment (single-port)
+└── README.md
+```
+
 ## Community Data Maintenance
 
 This repository keeps only community check-in data.
 
-Use the unified script below to inspect cleanup impact, export a deterministic JSON snapshot, or import one back:
+Use the unified script below to inspect cleanup impact, export a deterministic JSON snapshot, or import one back (run from `backend/`):
 
 ```sh
+cd backend
 uv run python scripts/community-data.py cleanup
 uv run python scripts/community-data.py cleanup --run
 
@@ -39,7 +72,13 @@ Notes:
 
 ## Quick Start
 
-1. Setup environment (install dependencies and node packages):
+All backend commands below must be run from the `backend/` directory:
+
+```sh
+cd backend
+```
+
+1. Setup environment (install Python dependencies and node packages):
 
     ```sh
     ./scripts/setup.sh
@@ -48,9 +87,11 @@ Notes:
     Or manually:
 
     ```sh
-    uv sync --no-install-project
+    uv sync
+    cd ../frontend
     npm install
     npm run build
+    cd ../backend
     ```
 
 2. Prepare static files:
@@ -65,31 +106,40 @@ Notes:
     uv run python manage.py migrate
     ```
 
-4. Run Server:
+4. Run development server:
 
     ```sh
     uv run python manage.py runserver
     ```
 
-    Note: Using `uv run` automatically uses the virtual environment, no need to activate it manually. Alternatively, you can activate the environment with `source .venv/bin/activate` and use `python` directly.
+    Note: Using `uv run` automatically uses the virtual environment, no need to activate it manually. Alternatively, you can activate the environment with `source .venv/bin/activate` (after creating it with `uv sync` in the `backend/` directory) and use `python` directly.
+
+### Docker (alternative)
+
+Run the whole stack (backend + frontend + nginx) with a single command:
+
+```sh
+docker compose up -d
+# Visit http://localhost:8000
+```
 
 ## Run on Apache HTTP Server
 
-1. Configure Apache (take '/var/www/paper-hub.cn/' as example):
+1. Configure Apache (take '/var/www/paper-hub.cn/' as example, note the `backend/` prefix in paths):
 
     ```txt
     WSGIApplicationGroup %{GLOBAL}
-    WSGIDaemonProcess paperhub python-home=/var/www/paper-hub.cn/.venv python-path=/var/www/paper-hub.cn
+    WSGIDaemonProcess paperhub python-home=/var/www/paper-hub.cn/backend/.venv python-path=/var/www/paper-hub.cn/backend
     WSGIProcessGroup paperhub
-    WSGIScriptAlias / /var/www/paper-hub.cn/config/wsgi.py
+    WSGIScriptAlias / /var/www/paper-hub.cn/backend/config/wsgi.py
     WSGIPassAuthorization On
-    <Directory /var/www/paper-hub.cn/config/>
+    <Directory /var/www/paper-hub.cn/backend/config/>
         <Files wsgi.py>
             Require all granted
         </Files>
     </Directory>
-    Alias /static /var/www/paper-hub.cn/static_root
-    <Directory /var/www/paper-hub.cn/static_root/>
+    Alias /static /var/www/paper-hub.cn/backend/static_root
+    <Directory /var/www/paper-hub.cn/backend/static_root/>
         Options -Indexes
         Require all granted
     </Directory>
@@ -137,9 +187,10 @@ Notes:
 
 ## How to setup a development environment (Optional)
 
-1. Start Django application locally.
+1. Start Django application locally (from `backend/` directory).
 
     ```sh
+    cd backend
     # run this command in a separated terminal
     uv run python manage.py runserver
     ```
@@ -183,18 +234,20 @@ Notes:
 
 1. **Q:** How do I configure a SOCKS5 proxy server when installing packages with uv?
 
-    **A:** Before calling `uv sync`, define the environment variable ALL_PROXY:
+    **A:** Before calling `uv sync`, define the environment variable ALL_PROXY. Run all `uv` commands from the `backend/` directory:
 
     ```sh
+    cd backend
     export ALL_PROXY=socks5://xxx.xxx.xxx.xxx:1090
     uv sync
     ```
 
 2. **Q:** How do I upgrade dependencies to the latest versions?
 
-    **A:** Use `uv lock --upgrade` to update the lock file, then `uv sync`:
+    **A:** Use `uv lock --upgrade` to update the lock file, then `uv sync` (run from `backend/`):
 
     ```sh
+    cd backend
     uv lock --upgrade
     uv sync
     ```
@@ -202,16 +255,18 @@ Notes:
     Or upgrade a specific package:
 
     ```sh
+    cd backend
     uv lock --upgrade-package <package>
     uv sync
     ```
 
 3. **Q:** How do I generate or update the lock file?
 
-    **A:** Use `uv lock` command:
+    **A:** Use `uv lock` command (run from `backend/`):
 
     ```sh
+    cd backend
     uv lock
     ```
 
-    This will resolve dependencies from `pyproject.toml` and generate/update `uv.lock` file.
+    This will resolve dependencies from `pyproject.toml` and generate/update `uv.lock` in the `backend/` directory.

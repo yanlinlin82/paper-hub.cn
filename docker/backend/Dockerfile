@@ -18,13 +18,13 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 
 # Copy dependency files
-COPY pyproject.toml uv.lock* ./
+COPY backend/pyproject.toml backend/uv.lock* ./
 
 # Install Python dependencies
 RUN uv sync --no-install-project --frozen
 
 # Copy project files
-COPY . .
+COPY backend/ .
 
 # Collect static files
 RUN mkdir -p static_root && \

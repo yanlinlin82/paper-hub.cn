@@ -1,0 +1,8 @@
+INFO 2025-10-05 09:06:03,078 autoreload 93996 140620319363200 Watching for file changes with StatReloader
+INFO 2025-10-05 09:06:03,526 utils 93996 140620319363200 Note: NumExpr detected 20 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+INFO 2025-10-05 09:06:03,527 utils 93996 140620319363200 NumExpr defaulting to 16 threads.
+INFO 2025-10-05 09:06:28,640 autoreload 93996 140620319363200 /work/Projects/Others/paper-hub.cn/config/settings.py changed, reloading.
+INFO 2025-10-05 09:06:28,945 autoreload 94316 126626419699840 Watching for file changes with StatReloader
+INFO 2025-10-05 09:06:29,375 utils 94316 126626419699840 Note: NumExpr detected 20 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 16.
+INFO 2025-10-05 09:06:29,376 utils 94316 126626419699840 NumExpr defaulting to 16 threads.
+INFO 2025-10-05 09:06:49,436 autoreload 94316 126626419699840 /work/Projects/Others/paper-hub.cn/config/settings.py changed, reloading.
