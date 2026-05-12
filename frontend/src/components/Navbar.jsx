@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
-function Navbar({ groupName }) {
+function Navbar({ groupName, onShowLogin }) {
   const { user, loading, logout } = useAuth();
   const { mode, setMode } = useTheme();
   const navigate = useNavigate();
@@ -223,8 +223,10 @@ function Navbar({ groupName }) {
               <a
                 className="nav-link"
                 href="#"
-                data-bs-toggle="modal"
-                data-bs-target="#loginModal"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onShowLogin();
+                }}
               >
                 登录
               </a>

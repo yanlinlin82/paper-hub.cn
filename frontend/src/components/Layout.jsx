@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
@@ -8,10 +8,11 @@ import Footer from "./Footer";
 
 function Layout({ children }) {
   const { groupName } = useParams();
+  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navbar groupName={groupName} />
+      <Navbar groupName={groupName} onShowLogin={() => setShowLogin(true)} />
       <div className="flex-fill">
         <div className="container-xl d-flex flex-column">
           <div className="d-flex flex-row align-items-start pt-4">
@@ -37,7 +38,7 @@ function Layout({ children }) {
           <Footer />
         </div>
       </div>
-      <LoginModal />
+      <LoginModal show={showLogin} onClose={() => setShowLogin(false)} />
       <ScrollToTop />
     </div>
   );

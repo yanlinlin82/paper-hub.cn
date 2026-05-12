@@ -1,28 +1,23 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Modal } from "bootstrap";
+import React, { useState, useEffect } from "react";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import { useAuth } from "../context/AuthContext";
 
-function LoginModal() {
+function LoginModal({ show, onClose }) {
   const { login } = useAuth();
-  const modalRef = useRef(null);
-  const bsModalRef = useRef(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Initialize Bootstrap Modal instance once
-    if (modalRef.current && !bsModalRef.current) {
-      bsModalRef.current = new Modal(modalRef.current);
+    if (show) {
+      setUsername("");
+      setPassword("");
+      setError("");
+      setSubmitting(false);
     }
-  }, []);
-
-  const closeModal = () => {
-    if (bsModalRef.current) {
-      bsModalRef.current.hide();
-    }
-  };
+  }, [show]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,9 +26,7 @@ function LoginModal() {
     try {
       const result = await login(username, password);
       if (result.success) {
-        closeModal();
-        setUsername("");
-        setPassword("");
+        onClose();
       } else {
         setError(result.error || "登录失败");
       }
@@ -45,78 +38,51 @@ function LoginModal() {
   };
 
   return (
-    <div
-      ref={modalRef}
-      className="modal fade"
-      id="loginModal"
-      tabIndex="-1"
-      aria-labelledby="loginModalLabel"
-      aria-hidden="true"
-    >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title" id="loginModalLabel">
-              登录
-            </h5>
-            <button
-              type="button"
-              className="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+    <Modal show={show} onHide={onClose} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>登录</Modal.Title>
+      </Modal.Header>
+      <form onSubmit={handleSubmit}>
+        <Modal.Body>
+          {error && <div className="alert alert-danger py-2 mb-3">{error}</div>}
+          <div className="mb-3">
+            <label htmlFor="loginUsername" className="form-label">
+              用户名
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="loginUsername"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoFocus
+            />
           </div>
-          <form onSubmit={handleSubmit}>
-            <div className="modal-body">
-              {error && <div className="alert alert-danger py-2">{error}</div>}
-              <div className="mb-3">
-                <label htmlFor="loginUsername" className="form-label">
-                  用户名
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="loginUsername"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                  autoFocus
-                />
-              </div>
-              <div className="mb-3">
-                <label htmlFor="loginPassword" className="form-label">
-                  密码
-                </label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="loginPassword"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                取消
-              </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={submitting}
-              >
-                {submitting ? "登录中..." : "登录"}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <div className="mb-3">
+            <label htmlFor="loginPassword" className="form-label">
+              密码
+            </label>
+            <input
+              type="password"
+              className="form-control"
+              id="loginPassword"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={onClose}>
+            取消
+          </Button>
+          <Button variant="primary" type="submit" disabled={submitting}>
+            {submitting ? "登录中..." : "登录"}
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   );
 }
 
