@@ -57,6 +57,7 @@ urlpatterns = [
     path("fetch-review-info", views.fetch_review_info, name="fetch_review_info"),
     path("submit-comment", views.submit_comment, name="submit_comment"),
     path("query-paper-info", views.query_paper_info, name="query_paper_info"),
+    path("search-users", views.search_users, name="search_users"),
     path(
         "username-autocomplete",
         views.username_autocomplete,

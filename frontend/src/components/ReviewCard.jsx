@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import PaperInfo from "./PaperInfo";
+import api from "../api/client";
 
 function formatDate(dateStr) {
   if (!dateStr) return "";
@@ -89,7 +92,13 @@ function ReviewCard({
   isTrash = false,
 }) {
   const paper = review.paper || {};
-  const [showAbstract, setShowAbstract] = React.useState(false);
+  const [showAbstract, setShowAbstract] = useState(false);
+  const [editingComment, setEditingComment] = useState(false);
+  const [editCommentText, setEditCommentText] = useState(review.comment || "");
+  const [editingPaper, setEditingPaper] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   return (
     <div className="card mb-3">
@@ -117,33 +126,88 @@ function ReviewCard({
             </div>
             {review.is_superuser && (
               <div className="d-flex gap-1 flex-shrink-0">
-                <a
+                <button
                   className="btn btn-outline-primary btn-sm"
-                  href={`/admin/core/review/${review.id}/change/`}
-                  target="_blank"
-                  rel="noreferrer"
+                  onClick={() => {
+                    setEditCommentText(review.comment || "");
+                    setEditingComment(!editingComment);
+                    setEditingPaper(false);
+                    setError("");
+                  }}
                 >
                   编辑分享
-                </a>
-                <a
-                  className="btn btn-outline-secondary btn-sm"
-                  href={`/admin/core/paper/${paper.id}/change/`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  编辑文献
-                </a>
+                </button>
+                {!isTrash && (
+                  <>
+                    <button
+                      className="btn btn-outline-secondary btn-sm"
+                      onClick={() => {
+                        setEditingPaper(!editingPaper);
+                        setEditingComment(false);
+                        setError("");
+                      }}
+                    >
+                      编辑文献
+                    </button>
+                    <button
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => setConfirmDelete(true)}
+                    >
+                      删除文献
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
 
           {/* Comment */}
-          {review.comment && (
+          {review.comment && !editingComment && (
             <div
               className="my-2"
               style={{ fontSize: "0.92rem", lineHeight: 1.75 }}
               dangerouslySetInnerHTML={{ __html: review.comment }}
             />
+          )}
+
+          {/* Inline comment editor */}
+          {editingComment && (
+            <div className="my-2">
+              <textarea
+                className="form-control form-control-sm"
+                rows="3"
+                value={editCommentText}
+                onChange={(e) => setEditCommentText(e.target.value)}
+              />
+              {error && <div className="text-danger mt-1 small">{error}</div>}
+              <div className="mt-1 d-flex gap-2">
+                <button
+                  className="btn btn-primary btn-sm"
+                  disabled={saving}
+                  onClick={async () => {
+                    setSaving(true);
+                    setError("");
+                    try {
+                      await api.editReview(review.id, editCommentText);
+                      review.comment = editCommentText;
+                      setEditingComment(false);
+                    } catch (err) {
+                      setError(err.message || "保存失败");
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                >
+                  {saving ? "保存中..." : "保存"}
+                </button>
+                <button
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => setEditingComment(false)}
+                >
+                  取消
+                </button>
+              </div>
+            </div>
           )}
 
           {/* Paper card */}
@@ -246,6 +310,138 @@ function ReviewCard({
               </div>
             )}
           </div>
+
+          {/* Inline paper editor */}
+          {editingPaper && (
+            <div className="mt-3 p-3 border rounded">
+              <h6 className="mb-3">编辑文献信息</h6>
+              <div className="mb-2">
+                <label className="form-label small mb-1">标题</label>
+                <input
+                  className="form-control form-control-sm"
+                  type="text"
+                  defaultValue={paper.title}
+                  id={`paper-title-${review.id}`}
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label small mb-1">期刊</label>
+                <input
+                  className="form-control form-control-sm"
+                  type="text"
+                  defaultValue={paper.journal}
+                  id={`paper-journal-${review.id}`}
+                />
+              </div>
+              <div className="mb-2">
+                <label className="form-label small mb-1">作者</label>
+                <textarea
+                  className="form-control form-control-sm"
+                  rows="2"
+                  defaultValue={paper.authors}
+                  id={`paper-authors-${review.id}`}
+                />
+              </div>
+              {error && <div className="text-danger mt-1 small">{error}</div>}
+              <div className="d-flex gap-2 mt-2">
+                <button
+                  className="btn btn-primary btn-sm"
+                  disabled={saving}
+                  onClick={async () => {
+                    setSaving(true);
+                    setError("");
+                    try {
+                      const titleInput = document.getElementById(
+                        `paper-title-${review.id}`,
+                      );
+                      const journalInput = document.getElementById(
+                        `paper-journal-${review.id}`,
+                      );
+                      const authorsInput = document.getElementById(
+                        `paper-authors-${review.id}`,
+                      );
+                      await api.editPaper(review.id, paper.id, {
+                        paper: {
+                          title: titleInput.value,
+                          journal: journalInput.value,
+                          authors: authorsInput.value,
+                        },
+                      });
+                      paper.title = titleInput.value;
+                      paper.journal = journalInput.value;
+                      paper.authors = authorsInput.value;
+                      setEditingPaper(false);
+                    } catch (err) {
+                      setError(err.message || "保存失败");
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                >
+                  {saving ? "保存中..." : "保存"}
+                </button>
+                <button
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => setEditingPaper(false)}
+                >
+                  取消
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Delete confirmation modal */}
+          <Modal
+            show={confirmDelete}
+            onHide={() => {
+              setConfirmDelete(false);
+              setError("");
+            }}
+            centered
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>删除打卡记录</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>确认删除该文献的打卡记录？</p>
+              <p className="small text-body-secondary mb-0">
+                仅删除你的打卡记录，不影响其他用户的打卡。
+              </p>
+              {error && <div className="text-danger mt-2 small">{error}</div>}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setConfirmDelete(false);
+                  setError("");
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                disabled={saving}
+                onClick={async () => {
+                  setSaving(true);
+                  setError("");
+                  try {
+                    await api.removePaper(paper.id);
+                    setConfirmDelete(false);
+                    window.location.reload();
+                  } catch (err) {
+                    setError(err.message || "删除失败");
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              >
+                {saving ? "删除中..." : "确认删除"}
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
       </div>
     </div>

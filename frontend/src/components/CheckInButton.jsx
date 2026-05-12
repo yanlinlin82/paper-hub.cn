@@ -63,7 +63,7 @@ function CheckInModal({ groupName, onClose }) {
         setPmcid(data.paper.pmcid || "");
         setCnkiId(data.paper.cnki_id || "");
         setLanguage(data.paper.language || "eng");
-        setMessage(data.paper.title || "");
+        setMessage("");
         setShowManualInput(true);
       } else {
         setMessage("未找到该文献信息，请手动输入。");
@@ -140,9 +140,10 @@ function CheckInModal({ groupName, onClose }) {
         payload.admin_time = adminTime;
       }
 
-      const result = await api.post("/create-checkin", payload);
+      const result = await api.post("/check-in", payload);
       if (result.success) {
         onClose();
+        window.location.reload();
       } else {
         setMessage(result.error || "提交失败");
       }
@@ -445,36 +446,9 @@ function CheckInModal({ groupName, onClose }) {
                 placeholder="用户名"
               />
               {showAutocomplete && autocompleteItems.length > 0 && (
-                <ul
-                  style={{
-                    position: "absolute",
-                    zIndex: 2050,
-                    background: "white",
-                    border: "1px solid #ccc",
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                    width: "100%",
-                    listStyle: "none",
-                    padding: 0,
-                    margin: 0,
-                  }}
-                >
+                <ul className="autocomplete-dropdown">
                   {autocompleteItems.map((item, i) => (
-                    <li
-                      key={i}
-                      style={{
-                        padding: "8px 12px",
-                        cursor: "pointer",
-                        borderBottom: "1px solid #eee",
-                      }}
-                      onMouseDown={() => selectAutocomplete(item)}
-                      onMouseEnter={(e) =>
-                        (e.target.style.background = "#f5f5f5")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.target.style.background = "white")
-                      }
-                    >
+                    <li key={i} onMouseDown={() => selectAutocomplete(item)}>
                       {item}
                     </li>
                   ))}
