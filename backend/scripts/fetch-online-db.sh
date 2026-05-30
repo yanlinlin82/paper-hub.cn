@@ -1,3 +1,5 @@
 #!/bin/bash
 
-rsync -avP yanlinlin.cn:/var/www/paper-hub.cn/db.sqlite3 ./db.sqlite3
+PROJECT_DIR=$(cd $(dirname $0)/../..; pwd)
+
+rsync -avP yanlinlin.cn:/var/www/paper-hub.cn/backend/db.sqlite3 $PROJECT_DIR/backend/db.sqlite3
