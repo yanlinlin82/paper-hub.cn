@@ -1,10 +1,17 @@
 {
+  // Python 语言服务器 (Pyright) 配置
   "lsp": {
     "pyright": {
       "settings": {
         "python": {
-          "venvPath": "backend/.venv",
+          // 指定虚拟环境中 Python 解释器路径
+          "pythonPath": "backend/.venv/bin/python3",
         },
+        // 类型检查模式: basic (默认) / standard / strict
+        // "basic" 足够捕获真正的问题，避免 Django 动态特性导致的误报
+        "typeCheckingMode": "basic",
+        // 关闭与 Django Model __str__ 返回类型不兼容的误报
+        "reportIncompatibleMethodOverride": false,
       },
     },
   },
