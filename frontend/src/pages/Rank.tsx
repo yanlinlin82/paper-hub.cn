@@ -181,7 +181,11 @@ function Rank({ type: defaultType }: RankProps) {
                       )}
                     </td>
                     <td>{row.count}</td>
-                    <td>{new Date(row.create_time).toLocaleString("zh-CN")}</td>
+                    <td>
+                      {row.checkin_at
+                        ? new Date(row.checkin_at).toLocaleString("zh-CN")
+                        : ""}
+                    </td>
                   </tr>
                 );
               })}

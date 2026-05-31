@@ -68,7 +68,7 @@ export interface RankEntry {
   display_index: number;
   name: string;
   count: number;
-  create_time: string;
+  checkin_at: string;
   id?: number;
 }
 
