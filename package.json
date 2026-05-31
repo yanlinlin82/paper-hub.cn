@@ -1,19 +1,21 @@
 {
   "name": "paper-hub.cn",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "An easy way to read and share papers for scientific research",
   "private": true,
   "scripts": {
-    "setup": "cd backend && uv sync --frozen && cd ../frontend && npm install",
+    "setup": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd backend && uv sync",
+    "setup:frontend": "cd frontend && npm install",
     "dev": "docker compose up",
-    "dev:up": "docker compose up -d",
-    "dev:down": "docker compose down",
-    "dev:build": "docker compose build",
-    "dev:logs": "docker compose logs -f",
-    "dev:ps": "docker compose ps",
-    "check": "cd backend && uv run python manage.py check && echo '---' && cd ../frontend && npm run lint",
-    "test": "cd backend && uv run python manage.py test",
-    "build": "cd frontend && npm run build && cd ../backend && uv run python manage.py collectstatic --noinput --clear"
+    "check": "npm run check:backend && npm run check:frontend",
+    "check:backend": "cd backend && uv run python manage.py check",
+    "check:frontend": "cd frontend && npm run lint",
+    "test": "npm run test:backend",
+    "test:backend": "cd backend && uv run python manage.py test",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && uv run python manage.py collectstatic --noinput --clear",
+    "build:frontend": "cd frontend && npm run build"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,6 @@
     "community",
     "sharing"
   ],
-  "author": "颜林林",
-  "license": "ISC"
+  "author": "Linlin Yan",
+  "license": "MIT"
 }
