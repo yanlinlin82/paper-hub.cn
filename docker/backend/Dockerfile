@@ -1,3 +1,12 @@
+# Thin base image for paper-hub backend.
+#
+# Python dependencies are NOT installed here — uv sync runs
+# on the host (cd backend && uv sync), and the resulting
+# backend/.venv is bind-mounted into the container at /app/.venv.
+#
+# For production deployment, build a derivative image or CI
+# step that runs uv sync before bundling.
+
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -13,30 +22,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv (with Aliyun mirror for pip/PyPI)
+# Install uv runtime (needed for uv run in CMD / compose command)
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 
-# Copy dependency files
-COPY backend/pyproject.toml backend/uv.lock* ./
-
-# Install Python dependencies
-RUN uv sync --no-install-project --frozen
-
-# Copy project files
+# Copy project source (overridden in dev by ./backend:/app bind mount)
 COPY backend/ .
 
-# Collect static files
-RUN mkdir -p static_root && \
-    uv run python manage.py collectstatic --noinput --clear
+# Ensure default media directory exists
+RUN mkdir -p media && chmod 755 /app
 
-# Ensure static/media dirs are writable by the runtime user
-RUN mkdir -p media && \
-    chmod -R 755 static_root media && \
-    chmod 755 /app
-
-# Expose port
 EXPOSE 8000
 
-# Run with gunicorn
+# Default command (only works when .venv is present at /app/.venv,
+# e.g. via bind mount from host's backend/.venv).
 CMD ["uv", "run", "gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]

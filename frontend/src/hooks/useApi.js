@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 /**
  * Custom hook for making API calls with loading/error state management.
@@ -7,27 +7,32 @@ export function useApi(apiFunc, immediate = false, ...params) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
 
-  const execute = useCallback(async (...args) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await apiFunc(...args);
-      setData(result);
-      return result;
-    } catch (err) {
-      setError(err.message || 'An error occurred');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [apiFunc]);
+  const execute = useCallback(
+    async (...args) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await apiFunc(...args);
+        setData(result);
+        return result;
+      } catch (err) {
+        setError(err.message || "An error occurred");
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [apiFunc],
+  );
 
   useEffect(() => {
     if (immediate) {
-      execute(...params);
+      execute(...paramsRef.current);
     }
-  }, [immediate, execute, ...params]);
+  }, [immediate, execute]);
 
   return { data, loading, error, execute, setData };
 }

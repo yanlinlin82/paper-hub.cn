@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext(null);
@@ -48,7 +50,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     applyTheme(resolved);
-  }, []);
+  }, [resolved]);
 
   useEffect(() => {
     if (mode !== "system") return;

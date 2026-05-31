@@ -1,250 +1,198 @@
 # Paper-Hub
 
-An easy way to read and share papers for scientific research
-
-## Project Split (2026)
-
-This repository is being simplified to keep only:
-
-- community display pages (`/group/...`)
-- admin login and content editing (`/admin/...`)
-
-Non-community features are being moved to a sibling repository:
-
-- `../paper-tracker`
-
-Literature tracking/recommendation/chat data models have been removed from this repository to keep only community workflows.
-
-## Project Structure
-
-```
-paper-hub.cn/
-├── backend/              # Django / Python backend
-│   ├── api/              #   REST API app
-│   ├── config/           #   Django project settings & URL routing
-│   ├── core/             #   Core data models
-│   ├── group/            #   Group pages (redirects to SPA)
-│   ├── scripts/          #   Utility scripts
-│   ├── static/           #   Static file sources
-│   ├── static_root/      #   Collected static files (collectstatic)
-│   ├── media/            #   User-uploaded media
-│   ├── logs/             #   Application logs
-│   ├── cache/            #   API response cache
-│   ├── logo/             #   Brand assets
-│   ├── db.sqlite3        #   SQLite database
-│   ├── pyproject.toml    #   Python dependencies
-│   ├── uv.lock           #   Lock file for uv
-│   └── manage.py         #   Django management script
-├── frontend/             # React SPA (Vite)
-│   ├── src/              #   Source code
-│   ├── public/           #   Static assets
-│   └── dist/             #   Build output
-├── docker/               # Docker / Nginx configs
-│   ├── backend/
-│   ├── frontend/
-│   └── nginx/
-├── docker-compose.yml    # Dev environment (single-port)
-└── README.md
-```
-
+An easy way to read and share papers for scientific research.
 
 ## Quick Start
 
-All backend commands below must be run from the `backend/` directory:
+The entire stack (backend + frontend + nginx) runs via Docker Compose.
+Only the nginx reverse proxy port is exposed — all services communicate
+over an internal Docker network.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+- `node` (v18+) — only needed to run the npm script wrapper, not for the services themselves
+
+### Start the services
+
+```sh
+npm run dev
+```
+
+Or equivalently:
+
+```sh
+docker compose up
+```
+
+Visit **http://localhost:8000**.
+
+### Custom port
+
+Override the exposed port via `DEV_PORT`:
+
+```sh
+DEV_PORT=8001 npm run dev
+# or
+DEV_PORT=8001 docker compose up
+```
+
+## Scripts reference
+
+All commands run from the project root.
+
+### Development
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start all services (foreground) |
+| `npm run dev:up` | Start all services (background) |
+| `npm run dev:down` | Stop all containers |
+| `npm run dev:build` | Rebuild Docker images |
+| `npm run dev:logs` | Tail logs from all services |
+| `npm run dev:ps` | List running containers |
+
+### Lifecycle
+
+| Command | Description |
+|---|---|
+| `npm run setup` | Initialize environment — install Python deps (`uv sync`) and npm packages |
+| `npm run check` | Run code checks — Django system check (`manage.py check`) and frontend lint (`eslint`) |
+| `npm run test` | Run backend tests (`manage.py test`) |
+| `npm run build` | Build for deployment — build SPA (`frontend/dist/`) and collect static files (`backend/static_root/`) |
+
+The `setup` script must be run before `check`, `test`, or `build`, and `build` must be run before deploying the artifacts to another server.
+
+### Python venv
+
+The Python virtual environment lives at `backend/.venv` and is shared
+between your host machine and the backend container via a bind mount.
+This lets you run Django management commands both on the host and
+inside the container using the same environment.
+
+`uv sync` is only ever run on the **host** — the Docker image and
+container never install Python dependencies.
+
+**First time setup (required before starting containers):**
 
 ```sh
 cd backend
+uv sync
 ```
 
-1. Setup environment (install Python dependencies and node packages):
+This creates `backend/.venv` with all Python dependencies installed.
+When you later run `npm run dev`, the bind mount `./backend:/app` shares
+this `.venv` into the container at `/app/.venv`, and `uv run` inside the
+container picks it up automatically.
 
-    ```sh
-    ./scripts/setup.sh
-    ```
+> ⚠️ If you start the containers without a host `backend/.venv`, the
+> backend container will fail to start because `uv run` cannot find the
+> required dependencies.
 
-    Or manually:
-
-    ```sh
-    uv sync
-    cd ../frontend
-    npm install
-    npm run build
-    cd ../backend
-    ```
-
-2. Prepare static files:
-
-    ```sh
-    uv run python manage.py collectstatic
-    ```
-
-3. Establish database:
-
-    ```sh
-    uv run python manage.py migrate
-    ```
-
-4. Run development server:
-
-    ```sh
-    uv run python manage.py runserver
-    ```
-
-    Note: Using `uv run` automatically uses the virtual environment, no need to activate it manually. Alternatively, you can activate the environment with `source .venv/bin/activate` (after creating it with `uv sync` in the `backend/` directory) and use `python` directly.
-
-### Docker (alternative)
-
-Run the whole stack (backend + frontend + nginx) with a single command:
+**Common host-side commands:**
 
 ```sh
-docker compose up -d
-# Visit http://localhost:8000
+cd backend
+uv run python manage.py makemigrations    # create DB migrations
+uv run python manage.py migrate            # apply migrations
+uv run python manage.py collectstatic      # collect static files
+uv run python manage.py createsuperuser    # create an admin user
+uv add <package>                           # add a new dependency
+uv lock --upgrade                          # upgrade all dependencies
 ```
 
-## Run on Apache HTTP Server
+### Environment (docker)
 
-1. Configure Apache (take '/var/www/paper-hub.cn/' as example, note the `backend/` prefix in paths):
+Create a `.env.docker` file in the project root with any overrides needed.
+A template is created automatically on first startup if it doesn't exist.
 
-    ```txt
-    WSGIApplicationGroup %{GLOBAL}
-    WSGIDaemonProcess paperhub python-home=/var/www/paper-hub.cn/backend/.venv python-path=/var/www/paper-hub.cn/backend
-    WSGIProcessGroup paperhub
-    WSGIScriptAlias / /var/www/paper-hub.cn/backend/config/wsgi.py
-    WSGIPassAuthorization On
-    <Directory /var/www/paper-hub.cn/backend/config/>
-        <Files wsgi.py>
-            Require all granted
-        </Files>
-    </Directory>
-    Alias /static /var/www/paper-hub.cn/backend/static_root
-    <Directory /var/www/paper-hub.cn/backend/static_root/>
-        Options -Indexes
-        Require all granted
-    </Directory>
-    ```
+Common environment variables include `OPENAI_API_KEY`, `WEIXIN_APP_ID`, etc.
 
-2. Configure server side for mini program
+## Architecture
 
-    ```sh
-    $ cat .env
-    OPENAI_API_KEY=sk-xxxxxx
-    OPENAI_PROXY_URL=xxxxxx
+```
+                       ┌──────────────┐
+                       │   Browser     │
+                       │ :8000         │
+                       └──────┬───────┘
+                              │
+                       ┌──────▼───────┐
+                       │   Nginx      │  ← single entry point
+                       │ (port 80)    │
+                       └──┬───────┬───┘
+                          │       │
+                ┌─────────▼─┐  ┌──▼──────────┐
+                │  Backend   │  │  Frontend    │
+                │  Django    │  │  Vite dev    │
+                │  :8000     │  │  :5173       │
+                └────────────┘  └──────────────┘
+```
 
-    WX_APP_ID=wxxxxx
-    WX_SECRET=xxxxxx
-    WX_DEBUG=False
-
-    WEB_APP_ID=wxxxxx
-    WEB_APP_SECRET=xxxxxx
-    WEB_DOMAIN=paper-hub.cn
-
-    AZURE_KEY=xxxxxx
-    AZURE_ENDPOINT=https://api.cognitive.microsofttranslator.com
-    AZURE_LOCATION=eastus
-    AZURE_PATH=/translate
-
-    PUBMED_DIR=/path/to/pubmed/
-
-    DB_NAME=xxxx
-    DB_USER=xxxx
-    DB_PASSWORD=xxxx
-    DB_HOST=xxxx
-
-    DEV_DB_NAME=xxxx
-    DEV_DB_USER=xxxx
-    DEV_DB_PASSWORD=xxxx
-    DEV_DB_HOST=xxxx
-
-    LOCAL_DB_NAME=xxxx
-    LOCAL_DB_USER=xxxx
-    LOCAL_DB_PASSWORD=xxxx
-    LOCAL_DB_HOST=xxxx
-
-    DJANGO_ENV=production # production / development / local / sqlite
-    ```
-
-## How to setup a development environment (Optional)
-
-1. Start Django application locally (from `backend/` directory).
-
-    ```sh
-    cd backend
-    # run this command in a separated terminal
-    uv run python manage.py runserver
-    ```
-
-2. Use SSH start to reverse tunnel (take 'paper-hub.cn' as an example).
-
-    ```sh
-    # run this command in another new terminal
-    ssh -nNT -R *:8000:localhost:8000 paper-hub.cn
-    ```
-
-    This will map 8000 port on remote server to 8000 port on local machine.
-
-    On remote server, `/etc/ssh/sshd_config` should set the option:
-
-    ```txt
-    GatewayPorts yes
-    ```
-
-3. Configure Apache on remote server.
-
-    ```txt
-    <VirtualHost *:8443>
-        ...
-        SSLEngine on
-        SSLCertificateFile /path/to/.../fullchain.pem
-        SSLCertificateKeyFile /path/to/.../privkey.pem
-
-        ProxyPass / http://127.0.0.1:8000/
-        ProxyPassReverse / http://127.0.0.1:8000/
-        ...
-    </VirtualHost>
-    </IfModule>
-    ```
-
-    This will open 8443 port as https server, and map the request/response to 8000 on remote server.
-
-4. After all these, port 8443 on the remote server could be accessed as <https://paper-hub.cn:8443/>, which could be set as a safe domain in Mini Program development.
+- `/admin/`, `/api/`, `/static/`, `/media/` → proxied to the Django backend
+- Everything else (`/`, `/group/...`, etc.) → proxied to the Vite dev server (SPA with HMR)
 
 ## FAQ
 
-1. **Q:** How do I configure a SOCKS5 proxy server when installing packages with uv?
+**1. Q:** How do I run a Django management command inside the backend container?
 
-    **A:** Before calling `uv sync`, define the environment variable ALL_PROXY. Run all `uv` commands from the `backend/` directory:
+**A:**
 
-    ```sh
-    cd backend
-    export ALL_PROXY=socks5://xxx.xxx.xxx.xxx:1090
-    uv sync
-    ```
+```sh
+docker compose exec backend uv run python manage.py <command>
+```
 
-2. **Q:** How do I upgrade dependencies to the latest versions?
+For example, to create a superuser:
 
-    **A:** Use `uv lock --upgrade` to update the lock file, then `uv sync` (run from `backend/`):
+```sh
+docker compose exec backend uv run python manage.py createsuperuser
+```
 
-    ```sh
-    cd backend
-    uv lock --upgrade
-    uv sync
-    ```
+**2. Q:** How do I install a new npm package?
 
-    Or upgrade a specific package:
+**A:** The frontend container uses a bind mount, so changes to `package.json` are
+picked up. Run:
 
-    ```sh
-    cd backend
-    uv lock --upgrade-package <package>
-    uv sync
-    ```
+```sh
+docker compose exec frontend npm install <package>
+```
 
-3. **Q:** How do I generate or update the lock file?
+Then restart the container to reinstall from the updated lock file:
 
-    **A:** Use `uv lock` command (run from `backend/`):
+```sh
+docker compose restart frontend
+```
 
-    ```sh
-    cd backend
-    uv lock
-    ```
+**3. Q:** How do I configure a SOCKS5 proxy for pip/uv inside the container?
 
-    This will resolve dependencies from `pyproject.toml` and generate/update `uv.lock` in the `backend/` directory.
+**A:** Set `ALL_PROXY` in `.env.docker`:
+
+```
+ALL_PROXY=socks5://xxx.xxx.xxx.xxx:1090
+```
+
+**4. Q:** How do I upgrade Python dependencies?
+
+**A:** Edit `backend/pyproject.toml`, then from the backend container:
+
+```sh
+docker compose exec backend uv lock --upgrade
+docker compose exec backend uv sync
+```
+
+**5. Q:** How do I set up a reverse SSH tunnel for WeChat Mini Program development?
+
+**A:** Start the stack, then tunnel from your remote server:
+
+```sh
+ssh -nNT -R *:8000:localhost:8000 your-server
+```
+
+On the remote server, configure Apache/Nginx to proxy `/` to `127.0.0.1:8000` and enable HTTPS.
+
+**6. Q:** How do I generate or update the uv lock file?
+
+**A:** From inside the backend container:
+
+```sh
+docker compose exec backend uv lock
+```

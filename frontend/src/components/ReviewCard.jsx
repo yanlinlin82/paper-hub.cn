@@ -23,10 +23,10 @@ function processXmlTags(text) {
 }
 
 function AuthorList({ authors }) {
+  const [expanded, setExpanded] = React.useState(false);
   if (!authors) return null;
   const authorList = authors.split("\n").filter(Boolean);
   if (authorList.length === 0) return null;
-  const [expanded, setExpanded] = React.useState(false);
 
   if (authorList.length <= 10) {
     return (

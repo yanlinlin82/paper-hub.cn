@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import api from "../api/client";
 import ReviewCard from "../components/ReviewCard";
 import Pagination from "../components/Pagination";
@@ -16,16 +16,6 @@ function List({ type }) {
 
   const page = searchParams.get("page") || "1";
   const query = searchParams.get("q") || "";
-
-  // Type labels mapping
-  const typeLabels = {
-    all: "所有分享",
-    my_sharing: "我的分享",
-    recent: "本周分享",
-    this_month: "本月分享",
-    last_month: "上月分享",
-    trash: "回收站",
-  };
 
   useEffect(() => {
     const fetchReviews = async () => {

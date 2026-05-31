@@ -2,16 +2,23 @@
 #
 # Usage:
 #   DEV_PORT=8080 docker compose up -d         # uses port 8080
-#   docker compose -f docker-compose.yml up  # same as above
+#   DEV_PORT=8081 npm run dev                  # same via npm wrapper
 #
-# Backend and frontend run as the host user to prevent root-owned
-# files in bind-mounted directories. Defaults to 1000:1000;
-# override via UID/GID environment variables:
-#   UID=$(id -u) GID=$(id -g) docker compose up
-#
-# In development, only one port (Nginx) is exposed.
 # All three services (backend, frontend, nginx) communicate
-# over the internal docker network — no port conflicts.
+# over the internal docker network.  Only the nginx port is
+# exposed to the host — no port conflicts.
+#
+# Python venv (backend/.venv):
+#   The host creates backend/.venv via `cd backend && uv sync`.
+#   The bind mount ./backend:/app shares it into the container
+#   at /app/.venv, so uv run inside the container uses the same
+#   venv as the host.  uv sync is never run inside the container.
+#
+# User namespace:
+#   Backend and frontend containers run as the host user to
+#   prevent root-owned files in bind-mounted directories.
+#   Defaults to 1000:1000; override via UID/GID:
+#     UID=$(id -u) GID=$(id -g) docker compose up
 
 services:
   # Django backend
@@ -32,9 +39,13 @@ services:
       - DEBUG=True
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
     # No ports exposed to host — internal only
+    # uv sync is run on the host (cd backend && uv sync).
+    # The host's backend/.venv is provided via ./backend:/app bind mount.
     command: >
-      sh -c "uv run python manage.py migrate --noinput &&
-             uv run python manage.py runserver 0.0.0.0:8000"
+      sh -c "
+        uv run python manage.py migrate --noinput &&
+        uv run python manage.py runserver 0.0.0.0:8000
+      "
     restart: unless-stopped
     networks:
       - paperhub-network
