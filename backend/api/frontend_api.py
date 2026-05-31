@@ -3,14 +3,17 @@ REST API views for the React frontend.
 These endpoints return JSON data consumed by the frontend SPA.
 """
 
+from datetime import datetime
 from urllib.parse import unquote
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count, F, Min, Q
 from django.http import JsonResponse
+from django.utils import timezone
 
 from core.models import GroupProfile, Review, UserProfile
 from core.paper import (
+    convert_string_to_datetime,
     get_check_in_interval,
     get_last_month,
     get_this_month,
@@ -439,8 +442,23 @@ def get_group_rankings(request, group_name, rank_type):
     # Format checkin_at as ISO string for JSON
     for rank in ranks:
         if "checkin_at" in rank and rank["checkin_at"]:
-            if hasattr(rank["checkin_at"], "isoformat"):
-                rank["checkin_at"] = rank["checkin_at"].isoformat()
+            checkin_at = rank["checkin_at"]
+            if isinstance(checkin_at, str):
+                # SQLite .values() aggregation may return string; parse it
+                dt = convert_string_to_datetime(checkin_at)
+                if dt is None:
+                    try:
+                        dt = datetime.fromisoformat(checkin_at)
+                    except (ValueError, TypeError):
+                        dt = None
+                if dt is not None:
+                    if timezone.is_naive(dt):
+                        dt = timezone.make_aware(dt, timezone.utc)
+                    rank["checkin_at"] = dt.isoformat()
+                else:
+                    rank["checkin_at"] = None
+            elif hasattr(checkin_at, "isoformat"):
+                rank["checkin_at"] = checkin_at.isoformat()
 
     return JsonResponse(
         {
