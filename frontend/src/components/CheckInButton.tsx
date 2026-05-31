@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { useAuth } from "../context/AuthContext";
 import api from "../api/client";
 
 interface CheckInModalProps {
@@ -14,14 +13,11 @@ interface CheckInButtonProps {
 }
 
 function CheckInModal({ groupName, onClose }: CheckInModalProps) {
-  const { user } = useAuth();
-
   // Paper fields
   const [identifier, setIdentifier] = useState<string>("");
   const [querying, setQuerying] = useState<boolean>(false);
   const [showManualInput, setShowManualInput] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
-  const [showAdminFields, setShowAdminFields] = useState<boolean>(false);
   const [message, setMessage] = useState<string>(
     '请在上方输入文献ID，通过点击"提取文献信息"按钮，来自动获取文献信息。或者也可以点击右方的"手动输入"按钮，手动输入文献信息。',
   );
@@ -155,7 +151,7 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
       if (checkinAt) {
         payload.checkin_at = checkinAt;
       }
-      if (showAdminFields && adminUser) {
+      if (adminUser) {
         payload.admin_user = adminUser;
       }
 
@@ -178,21 +174,6 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
     <Modal show={true} onHide={onClose} size="lg" backdrop="static" centered>
       <Modal.Header closeButton>
         <Modal.Title>文献分享打卡</Modal.Title>
-        {user?.is_superuser && <div className="flex-fill"></div>}
-        {user?.is_superuser && (
-          <div className="me-3 form-check form-switch">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              id="switchCheckInByAdmin"
-              checked={showAdminFields}
-              onChange={(e) => setShowAdminFields(e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="switchCheckInByAdmin">
-              管理员补录
-            </label>
-          </div>
-        )}
       </Modal.Header>
       <Modal.Body>
         {/* Identifier input */}
@@ -453,35 +434,31 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
 
         {/* Admin user + check-in time */}
         <div className="row g-3 align-items-center mt-3 mb-2">
-          {showAdminFields && (
-            <>
-              <div className="col-2 text-end">
-                <label className="col-form-label">打卡人：</label>
-              </div>
-              <div className="col-3" style={{ position: "relative" }}>
-                <input
-                  className="form-control"
-                  type="text"
-                  value={adminUser}
-                  onChange={handleAdminUserChange}
-                  placeholder="用户名"
-                />
-                {showAutocomplete && autocompleteItems.length > 0 && (
-                  <ul className="autocomplete-dropdown">
-                    {autocompleteItems.map((item: string, i: number) => (
-                      <li key={i} onMouseDown={() => selectAutocomplete(item)}>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </>
-          )}
+          <div className="col-2 text-end">
+            <label className="col-form-label">打卡人：</label>
+          </div>
+          <div className="col-4" style={{ position: "relative" }}>
+            <input
+              className="form-control"
+              type="text"
+              value={adminUser}
+              onChange={handleAdminUserChange}
+              placeholder="用户名"
+            />
+            {showAutocomplete && autocompleteItems.length > 0 && (
+              <ul className="autocomplete-dropdown">
+                {autocompleteItems.map((item: string, i: number) => (
+                  <li key={i} onMouseDown={() => selectAutocomplete(item)}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="col-2 text-end">
             <label className="col-form-label">打卡时间：</label>
           </div>
-          <div className="col-3">
+          <div className="col-4">
             <input
               type="datetime-local"
               className="form-control"
