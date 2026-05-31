@@ -6,13 +6,23 @@ The SPA at the frontend handles all page rendering.
 from django.http import HttpResponse
 from django.shortcuts import redirect
 
+from config import settings
 from core.models import GroupProfile
+
+_FRONTEND_DEV_URL = "http://localhost:5173"
 
 
 def _get_frontend_url(request, path=""):
-    """Get the frontend SPA URL for redirects."""
+    """Get the frontend SPA URL for redirects.
+
+    In development (DEBUG=True), redirects to the Vite dev server
+    to avoid redirect loops within Django itself.
+    In production, returns a relative path served by Apache/Nginx.
+    """
     if path.startswith("/"):
         path = path[1:]
+    if settings.DEBUG:
+        return f"{_FRONTEND_DEV_URL}/{path}"
     return f"/{path}"
 
 

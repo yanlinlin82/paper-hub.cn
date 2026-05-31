@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // Backend proxy target — override via VITE_BACKEND_URL env var
-const BACKEND_URL = process.env.VITE_BACKEND_URL || "http://backend:8000";
+const BACKEND_URL = process.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default defineConfig({
   plugins: [react()],
