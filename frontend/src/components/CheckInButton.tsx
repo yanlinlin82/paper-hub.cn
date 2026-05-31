@@ -42,9 +42,15 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   const [cnkiId, setCnkiId] = useState<string>("");
   const [language, setLanguage] = useState<string>("eng");
   const [comment, setComment] = useState<string>("");
+  const [checkinAt, setCheckinAt] = useState<string>(
+    new Date().toLocaleDateString("sv-SE") +
+      "T" +
+      new Date().toLocaleTimeString("sv-SE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+  );
   const [adminUser, setAdminUser] = useState<string>("");
-  const [adminDate, setAdminDate] = useState<string>("");
-  const [adminTime, setAdminTime] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [autocompleteItems, setAutocompleteItems] = useState<any[]>([]);
@@ -146,14 +152,11 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
         comment,
       };
 
+      if (checkinAt) {
+        payload.checkin_at = checkinAt;
+      }
       if (showAdminFields && adminUser) {
         payload.admin_user = adminUser;
-      }
-      if (showAdminFields && adminDate) {
-        payload.admin_date = adminDate;
-      }
-      if (showAdminFields && adminTime) {
-        payload.admin_time = adminTime;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -448,51 +451,45 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
           )}
         </div>
 
-        {/* Admin fields */}
-        {showAdminFields && (
-          <div className="row g-3 align-items-center my-3">
-            <div className="col-2 text-end">
-              <label className="col-form-label">打卡人：</label>
-            </div>
-            <div className="col-3" style={{ position: "relative" }}>
-              <input
-                className="form-control"
-                type="text"
-                value={adminUser}
-                onChange={handleAdminUserChange}
-                placeholder="用户名"
-              />
-              {showAutocomplete && autocompleteItems.length > 0 && (
-                <ul className="autocomplete-dropdown">
-                  {autocompleteItems.map((item: string, i: number) => (
-                    <li key={i} onMouseDown={() => selectAutocomplete(item)}>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div className="col-2 text-end">
-              <label className="col-form-label">打卡时间：</label>
-            </div>
-            <div className="col-5">
-              <div className="input-group">
-                <input
-                  type="date"
-                  className="form-control"
-                  value={adminDate}
-                  onChange={(e) => setAdminDate(e.target.value)}
-                />
-                <input
-                  type="time"
-                  className="form-control"
-                  value={adminTime}
-                  onChange={(e) => setAdminTime(e.target.value)}
-                />
+        {/* Admin user + check-in time */}
+        <div className="row g-3 align-items-center mt-3 mb-2">
+          {showAdminFields && (
+            <>
+              <div className="col-2 text-end">
+                <label className="col-form-label">打卡人：</label>
               </div>
-            </div>
+              <div className="col-3" style={{ position: "relative" }}>
+                <input
+                  className="form-control"
+                  type="text"
+                  value={adminUser}
+                  onChange={handleAdminUserChange}
+                  placeholder="用户名"
+                />
+                {showAutocomplete && autocompleteItems.length > 0 && (
+                  <ul className="autocomplete-dropdown">
+                    {autocompleteItems.map((item: string, i: number) => (
+                      <li key={i} onMouseDown={() => selectAutocomplete(item)}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </>
+          )}
+          <div className="col-2 text-end">
+            <label className="col-form-label">打卡时间：</label>
           </div>
-        )}
+          <div className="col-3">
+            <input
+              type="datetime-local"
+              className="form-control"
+              value={checkinAt}
+              onChange={(e) => setCheckinAt(e.target.value)}
+            />
+          </div>
+        </div>
 
         {/* Comment */}
         <div className="row g-3 align-items-center">

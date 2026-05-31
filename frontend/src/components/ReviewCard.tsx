@@ -147,7 +147,7 @@ function ReviewCard({
               >
                 {review.creator_name}
               </Link>
-              ({formatDate(review.create_time)}):
+              ({formatDate(review.checkin_at)}):
             </div>
             {review.is_superuser && (
               <div className="d-flex gap-1 flex-shrink-0">
@@ -155,9 +155,7 @@ function ReviewCard({
                   className="btn btn-outline-primary btn-sm"
                   onClick={() => {
                     setEditCommentText(review.comment || "");
-                    setEditCreateTime(
-                      toLocalDatetimeString(review.create_time),
-                    );
+                    setEditCreateTime(toLocalDatetimeString(review.checkin_at));
                     setEditingComment(!editingComment);
                     setEditingPaper(false);
                     setError("");
@@ -226,15 +224,17 @@ function ReviewCard({
                     setSaving(true);
                     setError("");
                     try {
-                      await api.editReview(
-                        review.id,
-                        editCommentText,
-                        editCreateTime || undefined,
-                      );
+                      const res = await api.editReview<{
+                        success: boolean;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      }>(review.id, editCommentText, editCreateTime);
+                      if (!res.success) {
+                        throw new Error("保存失败");
+                      }
                       review.comment = editCommentText;
-                      review.create_time = editCreateTime
-                        ? editCreateTime.replace("T", " ") + ":00"
-                        : review.create_time;
+                      review.checkin_at = editCreateTime
+                        ? new Date(editCreateTime).toISOString()
+                        : review.checkin_at;
                       setEditingComment(false);
                     } catch (err) {
                       setError((err as Error).message || "保存失败");

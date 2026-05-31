@@ -173,12 +173,12 @@ const api = {
   editReview: <T = unknown>(
     reviewId: number,
     comment: string,
-    createTime?: string,
+    checkinAt: string,
   ) =>
     request<T>("POST", "/new-edit-review", {
       review_id: reviewId,
       comment,
-      ...(createTime ? { create_time: createTime } : {}),
+      checkin_at: checkinAt,
     }),
   editPaper: <T = unknown>(
     reviewId: number,

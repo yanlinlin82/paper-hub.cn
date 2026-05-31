@@ -449,21 +449,21 @@ def add_review(request):
             user = UserProfile(nickname=s)
             user.save()
 
-        if "create_time" in request.POST:
-            s = request.POST["create_time"]
-            create_time = convert_string_to_datetime(s)
-            if create_time is None:
+        if "checkin_at" in request.POST:
+            s = request.POST["checkin_at"]
+            checkin_at = convert_string_to_datetime(s)
+            if checkin_at is None:
                 return JsonResponse(
                     {
                         "success": False,
-                        "error": f"Invalid format of 'create_time': '{s}'!",
+                        "error": f"Invalid format of 'checkin_at': '{s}'!",
                     }
                 )
-            create_time = timezone.make_aware(
-                create_time, timezone.get_current_timezone()
+            checkin_at = timezone.make_aware(
+                checkin_at, timezone.get_current_timezone()
             )
         else:
-            create_time = timezone.now()
+            checkin_at = timezone.now()
 
         paper = Paper(
             journal=request.POST["journal"],
@@ -485,8 +485,8 @@ def add_review(request):
         review = Review(
             paper=paper,
             creator=user,
-            create_time=create_time,
-            update_time=create_time,
+            checkin_at=checkin_at,
+            update_time=checkin_at,
             comment=request.POST["comment"],
         )
         review.save()
@@ -564,7 +564,7 @@ def delete_review(request):
                     "error": f"Review {review_id} is not created by user {request.user.core_user_profile} (expected {review.creator})",
                 }
             )
-        if review.create_time < get_latest_deadline():
+        if review.checkin_at < get_latest_deadline():
             return JsonResponse(
                 {"success": False, "error": f"Review {review_id} is too old to delete!"}
             )
@@ -723,8 +723,8 @@ def fetch_review_list(request):
         pass
     elif mode == 1:  # this month
         reviews = reviews.filter(
-            create_time__year=timezone.now().year,
-            create_time__month=timezone.now().month,
+            checkin_at__year=timezone.now().year,
+            checkin_at__month=timezone.now().month,
         )
     elif mode == 2:  # last month
         year = timezone.now().year
@@ -734,7 +734,7 @@ def fetch_review_list(request):
             month = 12
         else:
             month -= 1
-        reviews = reviews.filter(create_time__year=year, create_time__month=month)
+        reviews = reviews.filter(checkin_at__year=year, checkin_at__month=month)
     elif mode == 3:  # user own
         token = data.get("token")
         user = UserSession.objects.get(token=token).user
@@ -743,7 +743,7 @@ def fetch_review_list(request):
     else:
         return JsonResponse({"success": False, "error": f"Invalid mode: {mode}"})
 
-    reviews = reviews.order_by("-create_time", "-pk")
+    reviews = reviews.order_by("-checkin_at", "-pk")
 
     index = data.get("index", 0)
     end_index = index + 10
@@ -754,8 +754,8 @@ def fetch_review_list(request):
                 {
                     "id": p.pk,
                     "creator": p.creator.nickname,
-                    "create_time": timezone.localtime(
-                        p.create_time, timezone=zoneinfo.ZoneInfo(settings.TIME_ZONE)
+                    "checkin_at": timezone.localtime(
+                        p.checkin_at, timezone=zoneinfo.ZoneInfo(settings.TIME_ZONE)
                     ).strftime("%Y-%m-%d %H:%M"),
                     "pub_year": p.pub_year,
                     "title": p.title,
@@ -827,7 +827,7 @@ def submit_comment(request):
     now = timezone.now()
     review = Review(
         creator=user,
-        create_time=now,
+        checkin_at=now,
         update_time=now,
         title=title or review_info["title"],
         pub_year=pub_year or review_info["pub_year"],
@@ -1147,7 +1147,26 @@ def check_in(request):
     else:
         creator = request.user.core_user_profile
 
-    review = Review(paper=paper, creator=creator, comment=data.get("comment"))
+    checkin_at_str = data.get("checkin_at")
+    if checkin_at_str:
+        try:
+            dt = datetime.datetime.fromisoformat(checkin_at_str)
+            if timezone.is_naive(dt):
+                checkin_at = timezone.make_aware(dt, timezone.get_current_timezone())
+            else:
+                checkin_at = dt
+        except (ValueError, TypeError):
+            checkin_at = timezone.now()
+    else:
+        checkin_at = timezone.now()
+
+    review = Review(
+        paper=paper,
+        creator=creator,
+        comment=data.get("comment"),
+        checkin_at=checkin_at,
+        update_time=timezone.now(),
+    )
     review.save()
 
     group_name = data.get("group_name")
@@ -1190,24 +1209,24 @@ def check_in_by_admin(request):
         return JsonResponse(
             {"success": False, "error": f"User not found: {data.get('user')}"}
         )
-    check_in_time = data.get("check_in_time")
-    if not check_in_time:
+    checkin_at = data.get("checkin_at")
+    if not checkin_at:
         return JsonResponse(
-            {"success": False, "error": f"Invalid check_in_time: {check_in_time}"}
+            {"success": False, "error": f"Invalid checkin_at: {checkin_at}"}
         )
-    check_in_time = convert_string_to_datetime(check_in_time)
-    if not check_in_time:
+    checkin_at = convert_string_to_datetime(checkin_at)
+    if not checkin_at:
         return JsonResponse(
-            {"success": False, "error": f"Invalid check_in_time: {check_in_time}"}
+            {"success": False, "error": f"Invalid checkin_at: {checkin_at}"}
         )
-    check_in_time = timezone.make_aware(check_in_time, timezone.get_current_timezone())
+    checkin_at = timezone.make_aware(checkin_at, timezone.get_current_timezone())
 
     review = Review(
         paper=paper,
         creator=user,
         comment=data.get("comment"),
-        create_time=check_in_time,
-        update_time=check_in_time,
+        checkin_at=checkin_at,
+        update_time=checkin_at,
     )
     review.save()
 
@@ -1311,7 +1330,7 @@ def new_edit_review(request):
         )
 
     user = request.user.core_user_profile
-    if review.creator != user:
+    if not request.user.is_superuser and review.creator != user:
         return JsonResponse(
             {
                 "success": False,
@@ -1322,13 +1341,16 @@ def new_edit_review(request):
     review.comment = comment
     review.update_time = timezone.now()
 
-    create_time = data.get("create_time")
-    if create_time:
-        dt = convert_string_to_datetime(create_time)
-        if dt:
-            review.create_time = timezone.make_aware(
-                dt, timezone.get_current_timezone()
-            )
+    checkin_at_str = data.get("checkin_at")
+    if checkin_at_str:
+        try:
+            dt = datetime.datetime.fromisoformat(checkin_at_str)
+            if timezone.is_naive(dt):
+                review.checkin_at = timezone.make_aware(
+                    dt, timezone.get_current_timezone()
+                )
+        except (ValueError, TypeError):
+            pass
 
     review.save()
 

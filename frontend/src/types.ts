@@ -22,7 +22,7 @@ export interface Review {
   id: number;
   creator_id: number;
   creator_name: string;
-  create_time: string;
+  checkin_at: string;
   comment: string;
   paper?: Paper;
   is_superuser?: boolean;

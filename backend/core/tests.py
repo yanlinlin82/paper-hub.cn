@@ -198,7 +198,7 @@ class ReviewModelTest(TestCase):
 
     def test_review_default_timestamps(self):
         review = Review.objects.create(paper=self.paper, creator=self.creator)
-        self.assertIsNotNone(review.create_time)
+        self.assertIsNotNone(review.checkin_at)
         self.assertIsNotNone(review.update_time)
         self.assertIsNone(review.delete_time)
 

@@ -184,7 +184,7 @@ class Review(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
 
     creator = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    create_time = models.DateTimeField(
+    checkin_at = models.DateTimeField(
         default=timezone.now
     )  # not using 'auto_now_add' because we need to update it, when admin adding reviews for users
     update_time = models.DateTimeField(default=timezone.now)  # same as above

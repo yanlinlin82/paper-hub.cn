@@ -60,7 +60,7 @@ def serialize_review(review, group_name, request=None):
         "id": review.pk,
         "creator_id": review.creator.pk,
         "creator_name": str(review.creator),
-        "create_time": review.create_time.isoformat(),
+        "checkin_at": review.checkin_at.isoformat(),
         "update_time": review.update_time.isoformat(),
         "delete_time": review.delete_time.isoformat() if review.delete_time else None,
         "comment": review.comment,
@@ -71,7 +71,7 @@ def serialize_review(review, group_name, request=None):
                 "id": r.pk,
                 "creator_id": r.creator.pk,
                 "creator_name": str(r.creator),
-                "create_time": r.create_time.isoformat(),
+                "checkin_at": r.checkin_at.isoformat(),
             }
             for r in review.other_reviews.all()
         ]
@@ -170,33 +170,33 @@ def get_group_reviews(request, group_name):
         except UserProfile.DoesNotExist:
             return JsonResponse({"error": "User profile not found"}, status=404)
         reviews = group.reviews.filter(creator=user, delete_time__isnull=True)
-        reviews = reviews.order_by("-create_time", "-pk")
+        reviews = reviews.order_by("-checkin_at", "-pk")
     elif review_type == "recent":
         start_time = get_this_week_start_time()
         reviews = group.reviews.filter(
-            create_time__gte=start_time, delete_time__isnull=True
+            checkin_at__gte=start_time, delete_time__isnull=True
         )
-        reviews = reviews.order_by("-create_time", "-pk")
+        reviews = reviews.order_by("-checkin_at", "-pk")
     elif review_type == "this_month":
         year, month = get_this_month()
         start_time, end_time = get_check_in_interval(year, month)
         reviews = group.reviews.filter(
-            create_time__gte=start_time, delete_time__isnull=True
+            checkin_at__gte=start_time, delete_time__isnull=True
         )
-        reviews = reviews.order_by("-create_time", "-pk")
+        reviews = reviews.order_by("-checkin_at", "-pk")
     elif review_type == "last_month":
         year, month = get_this_month()
         year, month = get_last_month(year, month)
         start_time, end_time = get_check_in_interval(year, month)
         reviews = group.reviews.filter(
-            create_time__gte=start_time,
-            create_time__lt=end_time,
+            checkin_at__gte=start_time,
+            checkin_at__lt=end_time,
             delete_time__isnull=True,
         )
-        reviews = reviews.order_by("-create_time", "-pk")
+        reviews = reviews.order_by("-checkin_at", "-pk")
     else:  # 'all'
         reviews = group.reviews.filter(delete_time__isnull=True)
-        reviews = reviews.order_by("-create_time", "-pk")
+        reviews = reviews.order_by("-checkin_at", "-pk")
 
     # Apply search query
     reviews = filter_reviews_by_query(reviews, query)
@@ -274,7 +274,7 @@ def get_user_reviews(request, group_name, user_id):
 
     reviews = group.reviews.filter(creator=user, delete_time__isnull=True)
     reviews = filter_reviews_by_query(reviews, query)
-    reviews = reviews.order_by("-create_time", "-pk")
+    reviews = reviews.order_by("-checkin_at", "-pk")
 
     page, paginator, indices = paginate_reviews(reviews, page_number)
 
@@ -326,7 +326,7 @@ def get_journal_reviews(request, group_name, journal_name):
         paper__journal=journal_name, delete_time__isnull=True
     )
     reviews = filter_reviews_by_query(reviews, query)
-    reviews = reviews.order_by("-create_time", "-pk")
+    reviews = reviews.order_by("-checkin_at", "-pk")
 
     page, paginator, indices = paginate_reviews(reviews, page_number)
 
@@ -384,9 +384,9 @@ def get_group_rankings(request, group_name, rank_type):
             .annotate(
                 count=Count("paper__journal"),
                 name=F("paper__journal"),
-                create_time=Min("create_time"),
+                checkin_at=Min("checkin_at"),
             )
-            .order_by("-count", "create_time")
+            .order_by("-count", "checkin_at")
         )
         ranks = list(journal_ranks)
     else:
@@ -394,26 +394,26 @@ def get_group_rankings(request, group_name, rank_type):
         if rank_type == "this_month":
             year, month = current_year, current_month
             start_time, end_time = get_check_in_interval(year, month)
-            reviews = reviews.filter(create_time__gte=start_time)
+            reviews = reviews.filter(checkin_at__gte=start_time)
         elif rank_type == "last_month":
             year, month = get_last_month(current_year, current_month)
             start_time, end_time = get_check_in_interval(year, month)
             reviews = reviews.filter(
-                create_time__gte=start_time, create_time__lt=end_time
+                checkin_at__gte=start_time, checkin_at__lt=end_time
             )
         elif rank_type == "monthly":
             year = int(request.GET.get("year", current_year))
             month = int(request.GET.get("month", current_month))
             start_time, end_time = get_check_in_interval(year, month)
             reviews = reviews.filter(
-                create_time__gte=start_time, create_time__lt=end_time
+                checkin_at__gte=start_time, checkin_at__lt=end_time
             )
         elif rank_type == "yearly":
             year = int(request.GET.get("year", current_year))
             start_time, _ = get_check_in_interval(year, 1)
             _, end_time = get_check_in_interval(year, 12)
             reviews = reviews.filter(
-                create_time__gte=start_time, create_time__lt=end_time
+                checkin_at__gte=start_time, checkin_at__lt=end_time
             )
         elif rank_type == "all":
             pass
@@ -426,9 +426,9 @@ def get_group_rankings(request, group_name, rank_type):
                 count=Count("creator"),
                 id=F("creator__pk"),
                 name=F("creator__nickname"),
-                create_time=Min("create_time"),
+                checkin_at=Min("checkin_at"),
             )
-            .order_by("-count", "create_time")
+            .order_by("-count", "checkin_at")
         )
         ranks = list(user_ranks)
 
@@ -436,11 +436,11 @@ def get_group_rankings(request, group_name, rank_type):
     for index, rank in enumerate(ranks):
         rank["display_index"] = index + 1
 
-    # Format create_time as ISO string for JSON
+    # Format checkin_at as ISO string for JSON
     for rank in ranks:
-        if "create_time" in rank and rank["create_time"]:
-            if hasattr(rank["create_time"], "isoformat"):
-                rank["create_time"] = rank["create_time"].isoformat()
+        if "checkin_at" in rank and rank["checkin_at"]:
+            if hasattr(rank["checkin_at"], "isoformat"):
+                rank["checkin_at"] = rank["checkin_at"].isoformat()
 
     return JsonResponse(
         {
