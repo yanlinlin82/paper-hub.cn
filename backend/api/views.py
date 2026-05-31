@@ -1445,6 +1445,89 @@ def search_users(request):
     return JsonResponse({"users": []})
 
 
+@require_admin
+def list_custom_checkin_intervals(request):
+    """GET /api/custom-checkin-intervals/ — list all intervals"""
+    intervals = CustomCheckInInterval.objects.all().order_by("-year", "-month")
+    data = [
+        {
+            "id": i.id,
+            "year": i.year,
+            "month": i.month,
+            "deadline": i.deadline.isoformat(),
+        }
+        for i in intervals
+    ]
+    return JsonResponse({"intervals": data})
+
+
+@require_admin
+@json_post_handler
+def create_custom_checkin_interval(request):
+    """POST /api/custom-checkin-intervals/ — create a new interval"""
+    data = request.json_data
+    year = data.get("year")
+    month = data.get("month")
+    deadline = data.get("deadline")
+    if not all([year, month, deadline]):
+        return JsonResponse(
+            {"error": "year, month, and deadline are required"}, status=400
+        )
+    try:
+        interval = CustomCheckInInterval.objects.create(
+            year=int(year),
+            month=int(month),
+            deadline=datetime.datetime.fromisoformat(deadline),
+        )
+        return JsonResponse(
+            {
+                "id": interval.id,
+                "year": interval.year,
+                "month": interval.month,
+                "deadline": interval.deadline.isoformat(),
+            }
+        )
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+@require_admin
+@json_post_handler
+def update_custom_checkin_interval(request, interval_id):
+    """PUT /api/custom-checkin-intervals/<id>/ — update an interval"""
+    try:
+        interval = CustomCheckInInterval.objects.get(id=interval_id)
+    except CustomCheckInInterval.DoesNotExist:
+        return JsonResponse({"error": "Interval not found"}, status=404)
+    data = request.json_data
+    if "year" in data:
+        interval.year = int(data["year"])
+    if "month" in data:
+        interval.month = int(data["month"])
+    if "deadline" in data:
+        interval.deadline = datetime.datetime.fromisoformat(data["deadline"])
+    interval.save()
+    return JsonResponse(
+        {
+            "id": interval.id,
+            "year": interval.year,
+            "month": interval.month,
+            "deadline": interval.deadline.isoformat(),
+        }
+    )
+
+
+@require_admin
+def delete_custom_checkin_interval(request, interval_id):
+    """DELETE /api/custom-checkin-intervals/<id>/ — delete an interval"""
+    try:
+        interval = CustomCheckInInterval.objects.get(id=interval_id)
+    except CustomCheckInInterval.DoesNotExist:
+        return JsonResponse({"error": "Interval not found"}, status=404)
+    interval.delete()
+    return JsonResponse({"success": True})
+
+
 @require_login
 def username_autocomplete(request):
     if "term" in request.GET:

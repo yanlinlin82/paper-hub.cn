@@ -111,3 +111,10 @@ export interface RequestOptions {
   headers?: Record<string, string>;
   [key: string]: unknown;
 }
+
+export interface CustomCheckInInterval {
+  id: number;
+  year: number;
+  month: number;
+  deadline: string;
+}

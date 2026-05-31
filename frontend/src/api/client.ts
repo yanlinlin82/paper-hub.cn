@@ -201,6 +201,18 @@ const api = {
       paper_id: paperId,
       abstract,
     }),
+
+  // Custom check-in intervals
+  listCustomCheckinIntervals: <T = unknown>() =>
+    request<T>("GET", "/custom-checkin-intervals/"),
+  createCustomCheckinInterval: <T = unknown>(data: Record<string, unknown>) =>
+    request<T>("POST", "/custom-checkin-intervals/create/", data),
+  updateCustomCheckinInterval: <T = unknown>(
+    intervalId: number,
+    data: Record<string, unknown>,
+  ) => request<T>("POST", `/custom-checkin-intervals/${intervalId}/`, data),
+  deleteCustomCheckinInterval: <T = unknown>(intervalId: number) =>
+    request<T>("POST", `/custom-checkin-intervals/${intervalId}/delete/`),
 };
 
 export default api;

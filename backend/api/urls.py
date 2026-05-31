@@ -63,6 +63,27 @@ urlpatterns = [
         views.username_autocomplete,
         name="username_autocomplete",
     ),
+    # Custom check-in interval CRUD
+    path(
+        "custom-checkin-intervals/",
+        views.list_custom_checkin_intervals,
+        name="list_custom_checkin_intervals",
+    ),
+    path(
+        "custom-checkin-intervals/create/",
+        views.create_custom_checkin_interval,
+        name="create_custom_checkin_interval",
+    ),
+    path(
+        "custom-checkin-intervals/<int:interval_id>/",
+        views.update_custom_checkin_interval,
+        name="update_custom_checkin_interval",
+    ),
+    path(
+        "custom-checkin-intervals/<int:interval_id>/delete/",
+        views.delete_custom_checkin_interval,
+        name="delete_custom_checkin_interval",
+    ),
     # Frontend SPA API endpoints
     path("me/", frontend_api.get_current_user, name="get_current_user"),
     path(

@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import List from "./pages/List";
 import SingleReview from "./pages/SingleReview";
 import Rank from "./pages/Rank";
+import CustomCheckInIntervalConfig from "./pages/CustomCheckInIntervalConfig";
 import UserReviews from "./pages/UserReviews";
 import JournalReviews from "./pages/JournalReviews";
 
@@ -104,6 +105,14 @@ function App() {
         element={
           <Layout>
             <Rank />
+          </Layout>
+        }
+      />
+      <Route
+        path="/group/:groupName/custom-checkin-interval-config"
+        element={
+          <Layout>
+            <CustomCheckInIntervalConfig />
           </Layout>
         }
       />

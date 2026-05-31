@@ -42,6 +42,14 @@ function Sidebar({ groupName }: SidebarProps) {
             回收站
           </NavLink>
         )}
+        {user?.is_superuser && (
+          <NavLink
+            to={`/group/${groupName}/custom-checkin-interval-config`}
+            className={linkClass}
+          >
+            打卡时间配置
+          </NavLink>
+        )}
       </div>
     </div>
   );
