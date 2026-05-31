@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -5,6 +6,12 @@ import react from "@vitejs/plugin-react";
 const BACKEND_URL = process.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default defineConfig({
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.js",
+    css: true,
+  },
   plugins: [react()],
   server: {
     host: "0.0.0.0",

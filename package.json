@@ -10,9 +10,10 @@
     "dev": "docker compose up",
     "check": "npm run check:backend && npm run check:frontend",
     "check:backend": "cd backend && uv run python manage.py check",
-    "check:frontend": "cd frontend && npm run lint",
-    "test": "npm run test:backend",
+    "check:frontend": "cd frontend && npm run check",
+    "test": "npm run test:backend && npm run test:frontend",
     "test:backend": "cd backend && uv run python manage.py test",
+    "test:frontend": "cd frontend && npm run test",
     "build": "npm run build:backend && npm run build:frontend",
     "build:backend": "cd backend && uv run python manage.py collectstatic --noinput --clear",
     "build:frontend": "cd frontend && npm run build"
