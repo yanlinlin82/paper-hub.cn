@@ -1,6 +1,6 @@
 import { render, screen, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import ScrollToTop from "../components/ScrollToTop";
+import ScrollToTop from "../src/components/ScrollToTop";
 
 describe("ScrollToTop", () => {
   beforeEach(() => {

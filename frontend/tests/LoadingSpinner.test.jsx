@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "../src/components/LoadingSpinner";
 
 describe("LoadingSpinner", () => {
   it("renders with default text", () => {

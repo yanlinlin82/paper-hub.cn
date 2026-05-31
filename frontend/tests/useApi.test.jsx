@@ -1,6 +1,6 @@
 import { render, screen, act, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { useApi } from "../hooks/useApi";
+import { useApi } from "../src/hooks/useApi";
 
 function TestComponent({ apiFunc, immediate = false }) {
   const { data, loading, error, execute } = useApi(apiFunc, immediate);
