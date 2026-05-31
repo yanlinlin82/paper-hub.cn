@@ -224,10 +224,11 @@ function ReviewCard({
                     setSaving(true);
                     setError("");
                     try {
-                      const res = await api.editReview<{
-                        success: boolean;
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      }>(review.id, editCommentText, editCreateTime);
+                      const res = await api.editReview<{ success: boolean }>(
+                        review.id,
+                        editCommentText,
+                        editCreateTime,
+                      );
                       if (!res.success) {
                         throw new Error("保存失败");
                       }
