@@ -14,7 +14,6 @@ backend/static_root/
 backend/db.sqlite3*
 backend/*.sqlite3
 backend/cache/
-backend/logs/
 backend/*.log
 backend/secret_key.txt
 backend/pubmed/
