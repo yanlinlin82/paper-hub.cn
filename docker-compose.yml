@@ -9,10 +9,9 @@
 # exposed to the host — no port conflicts.
 #
 # Python venv (backend/.venv):
-#   The host creates backend/.venv via `cd backend && uv sync`.
-#   The bind mount ./backend:/app shares it into the container
-#   at /app/.venv, so uv run inside the container uses the same
-#   venv as the host.  uv sync is never run inside the container.
+#   The host's backend/.venv is isolated from the container via an
+#   anonymous volume at /app/.venv, so the two don't interfere.
+#   The container creates its own venv on first startup via uv run.
 #
 # User namespace:
 #   Backend and frontend containers run as the host user to
@@ -30,6 +29,7 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./backend:/app
+      - /app/.venv # isolate container's venv from host's
       - backend-static:/app/static_root
       - backend-media:/app/media
     env_file:
@@ -39,10 +39,10 @@ services:
       - DEBUG=True
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
     # No ports exposed to host — internal only
-    # uv sync is run on the host (cd backend && uv sync).
-    # The host's backend/.venv is provided via ./backend:/app bind mount.
+    # uv sync runs inside the container on first startup (isolated venv).
     command: >
       sh -c "
+        uv sync &&
         uv run python manage.py migrate --noinput &&
         uv run python manage.py runserver 0.0.0.0:8000
       "
