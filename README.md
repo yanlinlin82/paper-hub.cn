@@ -47,28 +47,6 @@ paper-hub.cn/
 └── README.md
 ```
 
-## Community Data Maintenance
-
-This repository keeps only community check-in data.
-
-Use the unified script below to inspect cleanup impact, export a deterministic JSON snapshot, or import one back (run from `backend/`):
-
-```sh
-cd backend
-uv run python scripts/community-data.py cleanup
-uv run python scripts/community-data.py cleanup --run
-
-uv run python scripts/community-data.py export ./community-data.json
-
-uv run python scripts/community-data.py import ./community-data.json
-uv run python scripts/community-data.py import ./community-data.json --run
-```
-
-Notes:
-
-- `cleanup` deletes personal literature data that is not linked to any group review.
-- `cleanup` and `import` default to dry-run mode. Add `--run` to write changes.
-- `export` writes pretty JSON with sorted keys so identical data exports to identical file content.
 
 ## Quick Start
 
