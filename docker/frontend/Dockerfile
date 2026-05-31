@@ -6,10 +6,14 @@ WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json* ./
 
 # Install dependencies
-RUN npm install --registry=https://registry.npmmirror.com/
+RUN npm install --registry=https://registry.npmmirror.com/ && \
+    chmod -R a+w node_modules
 
 # Copy source files
 COPY frontend/ .
+
+# Ensure /app is writable by the runtime user
+RUN chmod 755 /app
 
 # Expose Vite dev server port
 EXPOSE 5173

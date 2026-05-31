@@ -30,6 +30,11 @@ COPY backend/ .
 RUN mkdir -p static_root && \
     uv run python manage.py collectstatic --noinput --clear
 
+# Ensure static/media dirs are writable by the runtime user
+RUN mkdir -p media && \
+    chmod -R 755 static_root media && \
+    chmod 755 /app
+
 # Expose port
 EXPOSE 8000
 

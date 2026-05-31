@@ -1,9 +1,13 @@
 # Docker Compose for paper-hub.cn
 #
 # Usage:
-#   docker compose up -d                       # uses default port 8000
 #   DEV_PORT=8080 docker compose up -d         # uses port 8080
 #   docker compose -f docker-compose.yml up  # same as above
+#
+# Backend and frontend run as the host user to prevent root-owned
+# files in bind-mounted directories. Defaults to 1000:1000;
+# override via UID/GID environment variables:
+#   UID=$(id -u) GID=$(id -g) docker compose up
 #
 # In development, only one port (Nginx) is exposed.
 # All three services (backend, frontend, nginx) communicate
@@ -16,6 +20,7 @@ services:
       context: .
       dockerfile: docker/backend/Dockerfile
     container_name: paperhub-backend
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./backend:/app
       - backend-static:/app/static_root
@@ -40,6 +45,7 @@ services:
       context: .
       dockerfile: docker/frontend/Dockerfile
     container_name: paperhub-frontend
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./frontend:/app
       - /app/node_modules
