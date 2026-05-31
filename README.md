@@ -128,7 +128,7 @@ Common environment variables include `OPENAI_API_KEY`, `WEIXIN_APP_ID`, etc.
                 └────────────┘  └──────────────┘
 ```
 
-- `/admin/`, `/api/`, `/static/`, `/media/` → proxied to the Django backend
+- `/admin/`, `/api/`, `/static/` → proxied to the Django backend
 - Everything else (`/`, `/group/...`, etc.) → proxied to the Vite dev server (SPA with HMR)
 
 ## FAQ

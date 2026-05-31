@@ -31,7 +31,6 @@ services:
       - ./backend:/app
       - /app/.venv # isolate container's venv from host's
       - backend-static:/app/static_root
-      - backend-media:/app/media
     env_file:
       - .env.docker
     environment:
@@ -92,4 +91,3 @@ networks:
 
 volumes:
   backend-static:
-  backend-media:

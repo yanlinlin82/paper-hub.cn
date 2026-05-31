@@ -29,9 +29,6 @@ ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 # Copy project source (overridden in dev by ./backend:/app bind mount)
 COPY backend/ .
 
-# Ensure default media directory exists
-RUN mkdir -p media && chmod 755 /app
-
 EXPOSE 8000
 
 # Default command (only works when .venv is present at /app/.venv,

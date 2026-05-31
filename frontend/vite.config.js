@@ -25,10 +25,6 @@ export default defineConfig({
         target: BACKEND_URL,
         changeOrigin: true,
       },
-      "/media": {
-        target: BACKEND_URL,
-        changeOrigin: true,
-      },
     },
     watch: {
       usePolling: true,
