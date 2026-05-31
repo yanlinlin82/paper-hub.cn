@@ -75,10 +75,9 @@ function List({ type }: ListProps) {
             <span className="badge bg-light text-primary fw-semibold">
               {total_count} 篇
             </span>
-            <span>共找到 {total_count} 篇文献分享</span>
             {paginator.num_pages > 1 && (
               <span className="text-muted">
-                （本页显示第 {data.start_index} - {data.end_index} 篇）
+                本页显示第 {data.start_index} - {data.end_index} 篇
               </span>
             )}
           </div>

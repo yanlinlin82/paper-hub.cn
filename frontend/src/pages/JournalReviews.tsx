@@ -73,10 +73,9 @@ function JournalReviews() {
             <span className="badge bg-light text-primary fw-semibold">
               {data.total_count} 篇
             </span>
-            <span>共找到 {data.total_count} 篇文献分享</span>
             {data.paginator?.num_pages > 1 && (
               <span className="text-muted">
-                （本页显示第 {data.start_index} - {data.end_index} 篇）
+                本页显示第 {data.start_index} - {data.end_index} 篇
               </span>
             )}
           </div>
