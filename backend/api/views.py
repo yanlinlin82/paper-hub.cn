@@ -1321,6 +1321,15 @@ def new_edit_review(request):
 
     review.comment = comment
     review.update_time = timezone.now()
+
+    create_time = data.get("create_time")
+    if create_time:
+        dt = convert_string_to_datetime(create_time)
+        if dt:
+            review.create_time = timezone.make_aware(
+                dt, timezone.get_current_timezone()
+            )
+
     review.save()
 
     return JsonResponse({"success": True})

@@ -13,6 +13,15 @@ function formatDate(dateStr: string | null | undefined): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/** Convert a UTC ISO string to local YYYY-MM-DDTHH:mm for datetime-local inputs. */
+function toLocalDatetimeString(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function processXmlTags(text: string | null | undefined): string {
   if (!text) return "";
   return text
@@ -110,6 +119,7 @@ function ReviewCard({
   const [editCommentText, setEditCommentText] = useState<string>(
     review.comment || "",
   );
+  const [editCreateTime, setEditCreateTime] = useState<string>("");
   const [editingPaper, setEditingPaper] = useState<boolean>(false);
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
@@ -145,6 +155,9 @@ function ReviewCard({
                   className="btn btn-outline-primary btn-sm"
                   onClick={() => {
                     setEditCommentText(review.comment || "");
+                    setEditCreateTime(
+                      toLocalDatetimeString(review.create_time),
+                    );
                     setEditingComment(!editingComment);
                     setEditingPaper(false);
                     setError("");
@@ -194,6 +207,16 @@ function ReviewCard({
                 value={editCommentText}
                 onChange={(e) => setEditCommentText(e.target.value)}
               />
+              <div className="mt-2">
+                <label className="form-label small mb-1">打卡时间：</label>
+                <input
+                  type="datetime-local"
+                  className="form-control form-control-sm"
+                  style={{ maxWidth: "260px" }}
+                  value={editCreateTime}
+                  onChange={(e) => setEditCreateTime(e.target.value)}
+                />
+              </div>
               {error && <div className="text-danger mt-1 small">{error}</div>}
               <div className="mt-1 d-flex gap-2">
                 <button
@@ -203,8 +226,15 @@ function ReviewCard({
                     setSaving(true);
                     setError("");
                     try {
-                      await api.editReview(review.id, editCommentText);
+                      await api.editReview(
+                        review.id,
+                        editCommentText,
+                        editCreateTime || undefined,
+                      );
                       review.comment = editCommentText;
+                      review.create_time = editCreateTime
+                        ? editCreateTime.replace("T", " ") + ":00"
+                        : review.create_time;
                       setEditingComment(false);
                     } catch (err) {
                       setError((err as Error).message || "保存失败");

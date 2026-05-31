@@ -170,10 +170,15 @@ const api = {
     request<T>("POST", "/check-in", { group_name: groupName, ...data }),
 
   // Edit & delete
-  editReview: <T = unknown>(reviewId: number, comment: string) =>
+  editReview: <T = unknown>(
+    reviewId: number,
+    comment: string,
+    createTime?: string,
+  ) =>
     request<T>("POST", "/new-edit-review", {
       review_id: reviewId,
       comment,
+      ...(createTime ? { create_time: createTime } : {}),
     }),
   editPaper: <T = unknown>(
     reviewId: number,
