@@ -388,20 +388,24 @@ def submit_review(request):
         if review.paper.pub_year != paper_info.get("pub_year"):
             review.paper.pub_year = paper_info.get("pub_year")
             any_change = True
-        if review.paper.authors != paper_info.get("authors"):
-            review.paper.authors = paper_info.get("authors")
+        authors = _normalize_field(paper_info.get("authors"))
+        if review.paper.authors != authors:
+            review.paper.authors = authors
             any_change = True
-        if review.paper.affiliations != paper_info.get("affiliations"):
-            review.paper.affiliations = paper_info.get("affiliations")
+        affiliations = _normalize_field(paper_info.get("affiliations"))
+        if review.paper.affiliations != affiliations:
+            review.paper.affiliations = affiliations
             any_change = True
         if review.paper.abstract != paper_info.get("abstract"):
             review.paper.abstract = paper_info.get("abstract")
             any_change = True
-        if review.paper.keywords != paper_info.get("keywords"):
-            review.paper.keywords = paper_info.get("keywords")
+        keywords = _normalize_field(paper_info.get("keywords"))
+        if review.paper.keywords != keywords:
+            review.paper.keywords = keywords
             any_change = True
-        if review.paper.urls != paper_info.get("urls"):
-            review.paper.urls = paper_info.get("urls")
+        urls = _normalize_field(paper_info.get("urls"))
+        if review.paper.urls != urls:
+            review.paper.urls = urls
             any_change = True
         if review.paper.doi != paper_info.get("doi"):
             review.paper.doi = paper_info.get("doi")
@@ -1054,14 +1058,20 @@ def parse_pub_year(pub_date):
     return None
 
 
+def _normalize_field(value):
+    if isinstance(value, list):
+        return "\n".join(value)
+    return value
+
+
 def update_paper_by_json_data(paper, paper_data):
     pub_date = paper_data.get("pub_date")
     pub_year = parse_pub_year(pub_date)
-    authors = paper_data.get("authors")
-    affiliations = paper_data.get("affiliations")
+    authors = _normalize_field(paper_data.get("authors"))
+    affiliations = _normalize_field(paper_data.get("affiliations"))
     abstract = paper_data.get("abstract")
-    keywords = paper_data.get("keywords")
-    urls = paper_data.get("urls")
+    keywords = _normalize_field(paper_data.get("keywords"))
+    urls = _normalize_field(paper_data.get("urls"))
     doi = paper_data.get("doi")
     pmid = paper_data.get("pmid")
     arxiv_id = paper_data.get("arxiv_id")

@@ -5,6 +5,7 @@ import Button from "react-bootstrap/Button";
 import PaperInfo from "./PaperInfo";
 import api from "../api/client";
 import type { Review, Paper } from "../types";
+import { parseAuthorList } from "../utils/author";
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "";
@@ -39,8 +40,7 @@ interface AuthorListProps {
 
 function AuthorList({ authors }: AuthorListProps) {
   const [expanded, setExpanded] = React.useState(false);
-  if (!authors) return null;
-  const authorList = authors.split("\n").filter(Boolean);
+  const authorList = parseAuthorList(authors);
   if (authorList.length === 0) return null;
 
   if (authorList.length <= 10) {
@@ -385,7 +385,7 @@ function ReviewCard({
                 <textarea
                   className="form-control form-control-sm"
                   rows={2}
-                  defaultValue={paper.authors}
+                  defaultValue={parseAuthorList(paper.authors).join("\n")}
                   id={`paper-authors-${review.id}`}
                 />
               </div>

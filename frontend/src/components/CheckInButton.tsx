@@ -12,6 +12,13 @@ interface CheckInButtonProps {
   groupName: string | undefined;
 }
 
+function normalizeField(value: string | string[] | null | undefined): string {
+  if (Array.isArray(value)) {
+    return value.join("\n");
+  }
+  return value || "";
+}
+
 function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   // Paper fields
   const [identifier, setIdentifier] = useState<string>("");
@@ -65,11 +72,11 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
         setTitle(data.paper.title || "");
         setJournal(data.paper.journal || "");
         setPubDate(data.paper.pub_date || "");
-        setAuthors(data.paper.authors || "");
-        setAffiliations(data.paper.affiliations || "");
+        setAuthors(normalizeField(data.paper.authors));
+        setAffiliations(normalizeField(data.paper.affiliations));
         setAbstract(data.paper.abstract || "");
-        setKeywords(data.paper.keywords || "");
-        setUrls(data.paper.urls || "");
+        setKeywords(normalizeField(data.paper.keywords));
+        setUrls(normalizeField(data.paper.urls));
         setDoi(data.paper.doi || "");
         setPmid(data.paper.pmid || "");
         setArxivId(data.paper.arxiv_id || "");
