@@ -47,7 +47,7 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   const [comment, setComment] = useState<string>("");
   const [checkinAt, setCheckinAt] = useState<string>(
     new Date().toLocaleDateString("sv-SE") +
-      "T" +
+      " " +
       new Date().toLocaleTimeString("sv-SE", {
         hour: "2-digit",
         minute: "2-digit",
@@ -58,6 +58,7 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [autocompleteItems, setAutocompleteItems] = useState<any[]>([]);
   const [showAutocomplete, setShowAutocomplete] = useState<boolean>(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleQuery = async () => {
     if (!identifier.trim()) return;
@@ -108,6 +109,7 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   ) => {
     const value = e.target.value;
     setAdminUser(value);
+    setFieldErrors((prev) => ({ ...prev, adminUser: "" }));
     if (value.trim().length >= 1) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -128,10 +130,16 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   const selectAutocomplete = (item: any) => {
     setAdminUser(item);
     setShowAutocomplete(false);
+    setFieldErrors((prev) => ({ ...prev, adminUser: "" }));
   };
 
   const handleSubmit = async () => {
-    setSubmitting(true);
+    if (!adminUser.trim()) {
+      setFieldErrors({ adminUser: "请输入打卡人" });
+      setSubmitting(false);
+      return;
+    }
+    setFieldErrors({});
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: Record<string, any> = {
@@ -216,7 +224,18 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
         <div className="border p-3">
           <div className="row g-3 align-items-center mb-3">
             <div className="col-10 pt-3">
-              {message && <div className="text-danger">{message}</div>}
+              {message && (
+                <div
+                  className="text-danger"
+                  style={{
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {message}
+                </div>
+              )}
               {title && (
                 <div className="text-start">
                   {journal && (
@@ -444,14 +463,19 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
           <div className="col-2 text-end">
             <label className="col-form-label">打卡人：</label>
           </div>
-          <div className="col-4" style={{ position: "relative" }}>
+          <div className="col-3" style={{ position: "relative" }}>
             <input
-              className="form-control"
+              className={`form-control${fieldErrors.adminUser ? " is-invalid" : ""}`}
               type="text"
               value={adminUser}
               onChange={handleAdminUserChange}
               placeholder="用户名"
             />
+            {fieldErrors.adminUser && (
+              <div className="invalid-feedback d-block">
+                {fieldErrors.adminUser}
+              </div>
+            )}
             {showAutocomplete && autocompleteItems.length > 0 && (
               <ul className="autocomplete-dropdown">
                 {autocompleteItems.map((item: string, i: number) => (
@@ -465,13 +489,27 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
           <div className="col-2 text-end">
             <label className="col-form-label">打卡时间：</label>
           </div>
-          <div className="col-4">
-            <input
-              type="datetime-local"
-              className="form-control"
-              value={checkinAt}
-              onChange={(e) => setCheckinAt(e.target.value)}
-            />
+          <div className="col-5">
+            <div className="d-flex gap-2">
+              <input
+                type="date"
+                className="form-control"
+                style={{ minWidth: 0, width: "140px", flex: "0 0 auto" }}
+                value={checkinAt.slice(0, 10)}
+                onChange={(e) =>
+                  setCheckinAt(e.target.value + " " + checkinAt.slice(11, 16))
+                }
+              />
+              <input
+                type="time"
+                className="form-control"
+                style={{ minWidth: 0, width: "130px", flex: "0 0 auto" }}
+                value={checkinAt.slice(11, 16)}
+                onChange={(e) =>
+                  setCheckinAt(checkinAt.slice(0, 10) + " " + e.target.value)
+                }
+              />
+            </div>
           </div>
         </div>
 

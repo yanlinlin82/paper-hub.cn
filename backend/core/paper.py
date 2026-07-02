@@ -601,7 +601,14 @@ def get_paper_info_by_arxiv_id(arxiv_id):
             "abstract": obj.get("summary", "") or "",
             "pub_date": pub_date,
             "pub_year": pub_year,
-            "authors": [node.get("name") for node in obj.get("author", [])],
+            "authors": [
+                node.get("name")
+                for node in (
+                    obj["author"]
+                    if isinstance(obj.get("author"), list)
+                    else ([obj["author"]] if obj.get("author") else [])
+                )
+            ],
             "urls": [obj.get("id")],
         }
         return paper_info, data
