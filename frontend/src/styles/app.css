@@ -3,6 +3,24 @@
    Bootstrap's data-bs-theme handles light/dark mode natively.
    ================================================================ */
 
+/* Text selection — ensure good contrast in dark mode */
+::selection {
+    background-color: rgba(13, 110, 253, 0.25);
+    color: inherit;
+}
+::-moz-selection {
+    background-color: rgba(13, 110, 253, 0.25);
+    color: inherit;
+}
+[data-bs-theme="dark"] ::selection {
+    background-color: rgba(99, 102, 241, 0.4);
+    color: inherit;
+}
+[data-bs-theme="dark"] ::-moz-selection {
+    background-color: rgba(99, 102, 241, 0.4);
+    color: inherit;
+}
+
 html {
     scroll-padding-top: 64px;
     -webkit-font-smoothing: antialiased;
