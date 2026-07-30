@@ -215,6 +215,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost",
+    "http://paper-hub.cn",
 ]
 
 # Auto-detect PORT from env (same logic as CORS)

@@ -177,6 +177,7 @@ def update_nickname(request):
 
 
 @json_post_handler
+@csrf_exempt
 def do_login(request):
     data = request.json_data
     username = data.get("username")
