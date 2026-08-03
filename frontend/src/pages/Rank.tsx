@@ -4,7 +4,7 @@ import {
   useSearchParams,
   Link,
   useNavigate,
-} from "react-router-dom";
+} from "react-router";
 import api from "../api/client";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { RankingsResponse } from "../types";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router";
 import api from "../api/client";
 import ReviewCard from "../components/ReviewCard";
 import Pagination from "../components/Pagination";

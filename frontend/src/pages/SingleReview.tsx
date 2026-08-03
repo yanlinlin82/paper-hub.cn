@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import api from "../api/client";
 import ReviewCard from "../components/ReviewCard";
 import LoadingSpinner from "../components/LoadingSpinner";

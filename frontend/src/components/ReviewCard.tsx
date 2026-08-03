@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import PaperInfo from "./PaperInfo";
