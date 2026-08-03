@@ -10,48 +10,46 @@ function Sidebar({ groupName }: SidebarProps) {
   const { user } = useAuth();
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `list-group-item list-group-item-action ${isActive ? "active" : ""}`;
+    `nav-link d-flex align-items-center gap-2${isActive ? " active" : ""}`;
+
+  const links = [
+    { to: `/group/${groupName}`, label: "社群首页", end: true, show: true },
+    { to: `/group/${groupName}/my_sharing`, label: "我的分享", show: !!user },
+    { to: `/group/${groupName}/all`, label: "所有分享", show: true },
+    { to: `/group/${groupName}/this_month`, label: "本月分享", show: true },
+    { to: `/group/${groupName}/last_month`, label: "上月分享", show: true },
+    { to: `/group/${groupName}/rank`, label: "社群榜单", show: true },
+    { to: `/group/${groupName}/trash`, label: "回收站", show: !!user },
+    {
+      to: `/group/${groupName}/custom-checkin-interval-config`,
+      label: "打卡时间配置",
+      show: !!user?.is_superuser,
+    },
+  ];
 
   return (
-    <div className="sidebar">
+    <nav className="d-flex flex-column gap-3">
       {user && <CheckInButton groupName={groupName} />}
-      <div className="list-group text-center my-3">
-        <div className="list-group-item list-group-item-dark">响马读paper</div>
-        <NavLink to={`/group/${groupName}`} end className={linkClass}>
-          社群首页
-        </NavLink>
-        {user && (
-          <NavLink to={`/group/${groupName}/my_sharing`} className={linkClass}>
-            我的分享
-          </NavLink>
-        )}
-        <NavLink to={`/group/${groupName}/all`} className={linkClass}>
-          所有分享
-        </NavLink>
-        <NavLink to={`/group/${groupName}/this_month`} className={linkClass}>
-          本月分享
-        </NavLink>
-        <NavLink to={`/group/${groupName}/last_month`} className={linkClass}>
-          上月分享
-        </NavLink>
-        <NavLink to={`/group/${groupName}/rank`} className={linkClass}>
-          社群榜单
-        </NavLink>
-        {user && (
-          <NavLink to={`/group/${groupName}/trash`} className={linkClass}>
-            回收站
-          </NavLink>
-        )}
-        {user?.is_superuser && (
-          <NavLink
-            to={`/group/${groupName}/custom-checkin-interval-config`}
-            className={linkClass}
-          >
-            打卡时间配置
-          </NavLink>
-        )}
+
+      <div className="card border-0 shadow-sm">
+        <div className="card-body py-3">
+          <h6 className="card-title text-body-secondary text-uppercase small fw-semibold mb-2 px-2">
+            导航
+          </h6>
+          <ul className="nav nav-pills flex-column gap-1">
+            {links
+              .filter((l) => l.show)
+              .map((l) => (
+                <li key={l.to} className="nav-item">
+                  <NavLink to={l.to} end={l.end} className={linkClass}>
+                    {l.label}
+                  </NavLink>
+                </li>
+              ))}
+          </ul>
+        </div>
       </div>
-    </div>
+    </nav>
   );
 }
 

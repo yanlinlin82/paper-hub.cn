@@ -44,6 +44,7 @@ function SingleReview() {
         index=""
         groupName={groupName!}
         showReviewLink={false}
+        truncateComment={false}
       />
     </div>
   );

@@ -11,8 +11,8 @@ function PaperInfo({ paper, groupName }: PaperInfoProps) {
 
   return (
     <div
-      className="text-body-secondary"
-      style={{ fontSize: "0.82rem", lineHeight: 1.8 }}
+      className="text-body-secondary small"
+      style={{ lineHeight: 1.8 }}
     >
       {paper.journal_impact_factor && paper.journal_impact_factor_quartile && (
         <>

@@ -81,8 +81,9 @@ function Rank({ type: defaultType }: RankProps) {
   if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div>
-      <ul className="nav nav-tabs">
+    <div className="d-flex flex-column gap-3">
+      {/* Rank type tabs */}
+      <ul className="nav nav-pills flex-wrap gap-1">
         {tabs.map((tab) => (
           <li key={tab.type} className="nav-item">
             <Link
@@ -95,116 +96,131 @@ function Rank({ type: defaultType }: RankProps) {
         ))}
       </ul>
 
-      <div className="border rounded-bottom p-3 bg-body">
-        {(rankType === "monthly" || rankType === "yearly") && (
-          <form className="mt-3 mx-auto col-12 col-md-6 col-lg-4 col-xl-3">
-            <div className="input-group w-auto mb-3">
+      <div className="card border-0 shadow-sm">
+        <div className="card-body">
+          {(rankType === "monthly" || rankType === "yearly") && (
+            <div className="d-flex flex-wrap justify-content-center gap-2 mb-3">
               <select
                 id="yearSelect"
-                className="form-select form-select-sm"
+                className="form-select form-select-sm w-auto"
                 value={year || data?.year || ""}
                 onChange={handleYearChange}
+                aria-label="选择年份"
               >
                 {data?.year_list?.map((y) => (
                   <option key={y} value={y}>
-                    {y}
+                    {y}年
                   </option>
                 ))}
               </select>
               {rankType === "monthly" && (
-                <>
-                  &nbsp;
-                  <select
-                    className="form-select form-select-sm"
-                    value={month || data?.month || ""}
-                    onChange={handleMonthChange}
-                  >
-                    {data?.month_list?.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
-                </>
+                <select
+                  className="form-select form-select-sm w-auto"
+                  value={month || data?.month || ""}
+                  onChange={handleMonthChange}
+                  aria-label="选择月份"
+                >
+                  {data?.month_list?.map((m) => (
+                    <option key={m} value={m}>
+                      {m}月
+                    </option>
+                  ))}
+                </select>
               )}
             </div>
-          </form>
-        )}
+          )}
 
-        {["this_month", "last_month", "monthly", "yearly"].includes(
-          rankType,
-        ) && (
-          <div className="text-center fw-bold my-3">
-            {rankType === "yearly"
-              ? `${data?.year || year}年榜单`
-              : `${data?.year || year}年${data?.month || month}月榜单`}
-          </div>
-        )}
+          {["this_month", "last_month", "monthly", "yearly"].includes(
+            rankType,
+          ) && (
+            <h5 className="text-center mb-3">
+              {rankType === "yearly"
+                ? `${data?.year || year}年榜单`
+                : `${data?.year || year}年${data?.month || month}月榜单`}
+            </h5>
+          )}
 
-        {data?.ranks && data.ranks.length > 0 ? (
-          <table className="table table-bordered table-striped text-center mb-0">
-            <thead>
-              <tr>
-                <th style={{ width: "10%" }}>排名</th>
-                <th style={{ width: "40%" }}>
-                  {rankType === "journal" ? "杂志" : "分享者"}
-                </th>
-                <th style={{ width: "15%" }}>分享数</th>
-                <th>最早分享时间</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.ranks.map((row) => {
-                const getRankBadge = (rank: number) => {
-                  if (rank === 1)
-                    return <span className="rank-badge gold">{rank}</span>;
-                  if (rank === 2)
-                    return <span className="rank-badge silver">{rank}</span>;
-                  if (rank === 3)
-                    return <span className="rank-badge bronze">{rank}</span>;
-                  return rank;
-                };
-                return (
-                  <tr key={row.display_index}>
-                    <td>{getRankBadge(row.display_index)}</td>
-                    <td className="text-break" style={{ maxWidth: 0 }}>
-                      {rankType === "journal" ? (
-                        <Link
-                          to={`/group/${groupName}/journal/${encodeURIComponent(row.name)}`}
-                        >
-                          {row.name}
-                        </Link>
-                      ) : (
-                        <Link to={`/group/${groupName}/user/${row.id}`}>
-                          {row.name}
-                        </Link>
-                      )}
-                    </td>
-                    <td>{row.count}</td>
-                    <td>
-                      {row.checkin_at
-                        ? (() => {
-                            const d = new Date(row.checkin_at);
-                            return isNaN(d.getTime())
-                              ? ""
-                              : d.toLocaleString("zh-CN", {
-                                  year: "numeric",
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                });
-                          })()
-                        : ""}
-                    </td>
+          {data?.ranks && data.ranks.length > 0 ? (
+            <div className="table-responsive">
+              <table className="table table-hover align-middle text-center mb-0">
+                <thead>
+                  <tr>
+                    <th style={{ width: "10%" }}>排名</th>
+                    <th style={{ width: "40%" }}>
+                      {rankType === "journal" ? "杂志" : "分享者"}
+                    </th>
+                    <th style={{ width: "15%" }}>分享数</th>
+                    <th>最早分享时间</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        ) : (
-          <div className="card-body text-center my-5">暂无数据</div>
-        )}
+                </thead>
+                <tbody>
+                  {data.ranks.map((row) => {
+                    const getRankBadge = (rank: number) => {
+                      if (rank === 1)
+                        return (
+                          <span className="rank-badge gold">{rank}</span>
+                        );
+                      if (rank === 2)
+                        return (
+                          <span className="rank-badge silver">{rank}</span>
+                        );
+                      if (rank === 3)
+                        return (
+                          <span className="rank-badge bronze">{rank}</span>
+                        );
+                      return (
+                        <span className="text-body-secondary">{rank}</span>
+                      );
+                    };
+                    return (
+                      <tr key={row.display_index}>
+                        <td>{getRankBadge(row.display_index)}</td>
+                        <td className="text-break" style={{ maxWidth: 0 }}>
+                          {rankType === "journal" ? (
+                            <Link
+                              to={`/group/${groupName}/journal/${encodeURIComponent(row.name)}`}
+                            >
+                              {row.name}
+                            </Link>
+                          ) : (
+                            <Link to={`/group/${groupName}/user/${row.id}`}>
+                              {row.name}
+                            </Link>
+                          )}
+                        </td>
+                        <td>
+                          <span className="badge text-bg-primary rounded-pill">
+                            {row.count}
+                          </span>
+                        </td>
+                        <td>
+                          {row.checkin_at
+                            ? (() => {
+                                const d = new Date(row.checkin_at);
+                                return isNaN(d.getTime())
+                                  ? ""
+                                  : d.toLocaleString("zh-CN", {
+                                      year: "numeric",
+                                      month: "2-digit",
+                                      day: "2-digit",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    });
+                              })()
+                            : ""}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center text-body-secondary py-5">
+              暂无数据
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

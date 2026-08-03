@@ -1,8 +1,7 @@
 function Footer() {
   return (
     <footer
-      className="text-center py-3 bg-body-tertiary border-top text-body-secondary"
-      style={{ fontSize: "0.88rem" }}
+      className="text-center py-3 bg-body-tertiary border-top text-body-secondary small"
     >
       <div className="py-1">
         <a

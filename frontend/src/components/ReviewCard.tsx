@@ -45,7 +45,7 @@ function AuthorList({ authors }: AuthorListProps) {
 
   if (authorList.length <= 10) {
     return (
-      <div className="text-body-secondary" style={{ fontSize: "0.85rem" }}>
+      <div className="text-body-secondary small">
         {authorList.map((author, i) => (
           <span key={i}>
             {author}
@@ -57,7 +57,7 @@ function AuthorList({ authors }: AuthorListProps) {
   }
 
   return (
-    <div className="text-body-secondary" style={{ fontSize: "0.85rem" }}>
+    <div className="text-body-secondary small">
       {!expanded ? (
         <>
           {authorList.slice(0, 10).map((author, i) => (
@@ -105,6 +105,7 @@ interface ReviewCardProps {
   groupName: string | undefined;
   showReviewLink?: boolean;
   isTrash?: boolean;
+  truncateComment?: boolean;
 }
 
 function ReviewCard({
@@ -113,9 +114,11 @@ function ReviewCard({
   groupName,
   showReviewLink = true,
   isTrash = false,
+  truncateComment = true,
 }: ReviewCardProps) {
   const paper = (review.paper || {}) as Paper;
   const [showAbstract, setShowAbstract] = useState<boolean>(false);
+  const [commentExpanded, setCommentExpanded] = useState<boolean>(false);
   const [editingComment, setEditingComment] = useState<boolean>(false);
   const [editCommentText, setEditCommentText] = useState<string>(
     review.comment || "",
@@ -125,23 +128,22 @@ function ReviewCard({
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const commentLong =
+    truncateComment && (review.comment?.length ?? 0) > 120;
 
   return (
-    <div className="card mb-3">
+    <div className="card mb-3 shadow-sm">
       <div className="card-body d-flex">
         <div
-          className="text-body-tertiary fw-semibold pe-2 text-center"
-          style={{ minWidth: "2rem", fontSize: "0.85rem" }}
+          className="text-body-tertiary fw-semibold pe-2 text-center small"
+          style={{ minWidth: "2rem" }}
         >
           {index}.
         </div>
         <div className="flex-fill">
           {/* Review meta */}
           <div className="d-flex flex-row">
-            <div
-              className="text-body-tertiary flex-fill"
-              style={{ fontSize: "0.85rem" }}
-            >
+            <div className="text-body-tertiary flex-fill small">
               <Link
                 to={`/group/${groupName}/user/${review.creator_id}`}
                 className="fw-semibold"
@@ -190,11 +192,22 @@ function ReviewCard({
 
           {/* Comment */}
           {review.comment && !editingComment && (
-            <div
-              className="my-2"
-              style={{ fontSize: "0.92rem", lineHeight: 1.75 }}
-              dangerouslySetInnerHTML={{ __html: review.comment }}
-            />
+            <div className="my-2">
+              <div
+                className={`review-comment${commentLong && !commentExpanded ? " review-comment-collapsed" : ""}`}
+                style={{ lineHeight: 1.75 }}
+                dangerouslySetInnerHTML={{ __html: review.comment }}
+              />
+              {commentLong && (
+                <button
+                  type="button"
+                  className="btn btn-link btn-sm p-0 mt-1 text-primary"
+                  onClick={() => setCommentExpanded(!commentExpanded)}
+                >
+                  {commentExpanded ? "收起 ▴" : "展开全文 ▾"}
+                </button>
+              )}
+            </div>
           )}
 
           {/* Inline comment editor */}
@@ -265,7 +278,7 @@ function ReviewCard({
             {paper.title && (
               <div
                 className="fw-semibold mt-2"
-                style={{ fontSize: "0.95rem", lineHeight: 1.5 }}
+                style={{ lineHeight: 1.5 }}
               >
                 {showReviewLink ? (
                   <Link to={`/group/${groupName}/review/${review.id}`}>
@@ -294,14 +307,13 @@ function ReviewCard({
                 <button
                   className="btn btn-sm btn-outline-primary py-0 px-1"
                   onClick={() => setShowAbstract(!showAbstract)}
-                  style={{ fontSize: "0.82rem" }}
                 >
                   {showAbstract ? "▾ 收起摘要" : "▸ 展开摘要"}
                 </button>
                 {showAbstract && (
                   <div
-                    className="border rounded p-2 mt-1 text-body-secondary"
-                    style={{ fontSize: "0.88rem", lineHeight: 1.7 }}
+                    className="border rounded p-2 mt-1 text-body-secondary small"
+                    style={{ lineHeight: 1.7 }}
                     dangerouslySetInnerHTML={{
                       __html: processXmlTags(paper.abstract),
                     }}
@@ -312,7 +324,7 @@ function ReviewCard({
 
             {/* Keywords */}
             {paper.keywords && (
-              <div className="mt-2" style={{ fontSize: "0.82rem" }}>
+              <div className="mt-2 small">
                 <span className="fw-medium text-body-secondary">
                   Keywords:{" "}
                 </span>
@@ -322,7 +334,7 @@ function ReviewCard({
                   .map((kw, i) => (
                     <span
                       key={i}
-                      className="badge bg-light text-primary fw-normal me-1"
+                      className="badge bg-body-tertiary text-primary border fw-normal me-1"
                     >
                       {kw}
                     </span>
@@ -333,8 +345,7 @@ function ReviewCard({
             {/* URLs */}
             {paper.urls && (
               <div
-                className="mt-2 pt-2 border-top"
-                style={{ fontSize: "0.8rem" }}
+                className="mt-2 pt-2 border-top small"
               >
                 <span className="fw-medium">Related Links:</span>
                 <ul className="list-unstyled mb-0 mt-1">

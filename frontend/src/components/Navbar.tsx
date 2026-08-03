@@ -1,5 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import Navbar from "react-bootstrap/Navbar";
+import Nav from "react-bootstrap/Nav";
+import NavDropdown from "react-bootstrap/NavDropdown";
+import Form from "react-bootstrap/Form";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { ThemeMode } from "../types";
@@ -7,6 +11,7 @@ import { ThemeMode } from "../types";
 interface NavbarProps {
   groupName: string | undefined;
   onShowLogin: () => void;
+  onToggleSidebar: () => void;
 }
 
 interface ThemeOption {
@@ -15,38 +20,12 @@ interface ThemeOption {
   icon: React.ReactNode;
 }
 
-function Navbar({ groupName, onShowLogin }: NavbarProps) {
+function SiteNavbar({ groupName, onShowLogin, onToggleSidebar }: NavbarProps) {
   const { user, loading, logout } = useAuth();
   const { mode, setMode } = useTheme();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [showHint, setShowHint] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
-  const userDropdownRef = useRef<HTMLLIElement | null>(null);
-  const themeDropdownRef = useRef<HTMLLIElement | null>(null);
-
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        userDropdownOpen &&
-        userDropdownRef.current &&
-        !userDropdownRef.current.contains(e.target as Node)
-      ) {
-        setUserDropdownOpen(false);
-      }
-      if (
-        themeDropdownOpen &&
-        themeDropdownRef.current &&
-        !themeDropdownRef.current.contains(e.target as Node)
-      ) {
-        setThemeDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [userDropdownOpen, themeDropdownOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,10 +88,10 @@ function Navbar({ groupName, onShowLogin }: NavbarProps) {
   ];
 
   return (
-    <nav className="navbar">
-      <div className="container-xl d-flex align-items-center gap-3">
+    <Navbar sticky="top" bg="body-tertiary" className="border-bottom shadow-sm">
+      <div className="container-xl d-flex flex-wrap align-items-center gap-2 gap-lg-3">
         {/* Brand */}
-        <Link className="navbar-brand flex-shrink-0" to={`/group/${groupName}`}>
+        <Navbar.Brand as={Link} to={`/group/${groupName}`} className="flex-shrink-0 me-0">
           <img
             className="logo-light"
             src="/static/images/banner-b.png"
@@ -127,10 +106,23 @@ function Navbar({ groupName, onShowLogin }: NavbarProps) {
             height="40"
             alt="Paper-Hub"
           />
-        </Link>
+        </Navbar.Brand>
+
+        {/* Mobile sidebar toggle */}
+        <button
+          className="navbar-toggler d-lg-none ms-auto"
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label="打开导航菜单"
+        >
+          <span className="navbar-toggler-icon" />
+        </button>
 
         {/* Search */}
-        <form className="flex-grow-1" onSubmit={handleSearch}>
+        <Form
+          className="flex-grow-1 order-3 order-lg-2 mx-lg-3 my-2 my-lg-0"
+          onSubmit={handleSearch}
+        >
           <div className="input-group" style={{ maxWidth: "480px" }}>
             <input
               className="form-control"
@@ -140,9 +132,9 @@ function Navbar({ groupName, onShowLogin }: NavbarProps) {
               onFocus={() => setShowHint(true)}
               onBlur={() => setTimeout(() => setShowHint(false), 200)}
               placeholder="搜索文献标题、作者、杂志..."
-              aria-label="Search"
+              aria-label="搜索"
             />
-            <button className="btn" type="submit">
+            <button className="btn btn-primary" type="submit">
               搜索
             </button>
             {showHint && (
@@ -182,112 +174,57 @@ function Navbar({ groupName, onShowLogin }: NavbarProps) {
               </div>
             )}
           </div>
-        </form>
+        </Form>
 
-        <ul className="navbar-nav flex-shrink-0 ms-auto flex-row align-items-center gap-2">
+        {/* Right-side actions */}
+        <Nav className="order-2 order-lg-3 ms-auto flex-row align-items-center gap-1 gap-lg-2">
           {loading ? (
-            <li className="nav-item">
-              <span className="nav-link">加载中...</span>
-            </li>
+            <Nav.Item>
+              <Nav.Link disabled>加载中...</Nav.Link>
+            </Nav.Item>
           ) : user ? (
             <>
-              <li className="nav-item">
-                <Link className="nav-link" to={`/group/${groupName}`}>
+              <Nav.Item>
+                <Nav.Link as={Link} to={`/group/${groupName}`}>
                   社群
-                </Link>
-              </li>
+                </Nav.Link>
+              </Nav.Item>
               {user.is_superuser && (
-                <li className="nav-item">
-                  <a className="nav-link" href="/admin/">
-                    管理后台
-                  </a>
-                </li>
+                <Nav.Item>
+                  <Nav.Link href="/admin/">管理后台</Nav.Link>
+                </Nav.Item>
               )}
-              <li
-                ref={userDropdownRef}
-                className={`nav-item dropdown${userDropdownOpen ? " show" : ""}`}
-              >
-                <a
-                  className="nav-link dropdown-toggle"
-                  href="#"
-                  role="button"
-                  onClick={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    setUserDropdownOpen(!userDropdownOpen);
-                  }}
-                  aria-expanded={userDropdownOpen}
-                >
-                  {user.username}
-                </a>
-                <ul
-                  className={`dropdown-menu dropdown-menu-end${userDropdownOpen ? " show" : ""}`}
-                >
-                  <li>
-                    <button className="dropdown-item" onClick={handleLogout}>
-                      退出登录
-                    </button>
-                  </li>
-                </ul>
-              </li>
+              <NavDropdown title={user.username} align="end">
+                <NavDropdown.Item as="button" onClick={handleLogout}>
+                  退出登录
+                </NavDropdown.Item>
+              </NavDropdown>
             </>
           ) : (
-            <li className="nav-item">
-              <a
-                className="nav-link"
-                href="#"
-                onClick={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  onShowLogin();
-                }}
-              >
-                登录
-              </a>
-            </li>
+            <Nav.Item>
+              <Nav.Link onClick={onShowLogin}>登录</Nav.Link>
+            </Nav.Item>
           )}
 
           {/* Theme toggle dropdown */}
-          <li
-            ref={themeDropdownRef}
-            className={`nav-item dropdown${themeDropdownOpen ? " show" : ""}`}
-          >
-            <a
-              className="nav-link dropdown-toggle"
-              href="#"
-              role="button"
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                setThemeDropdownOpen(!themeDropdownOpen);
-              }}
-              aria-expanded={themeDropdownOpen}
-            >
-              主题
-            </a>
-            <ul
-              className={`dropdown-menu dropdown-menu-end${themeDropdownOpen ? " show" : ""}`}
-            >
-              {themeOptions.map((opt) => (
-                <li key={opt.key}>
-                  <button
-                    className={`dropdown-item d-flex align-items-center gap-2 ${mode === opt.key ? "active" : ""}`}
-                    onClick={() => {
-                      setMode(opt.key);
-                      setThemeDropdownOpen(false);
-                    }}
-                  >
-                    <span>{opt.icon}</span>
-                    <span>{opt.label}</span>
-                    {mode === opt.key && (
-                      <span className="ms-auto text-primary">✓</span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </li>
-        </ul>
+          <NavDropdown title="主题" align="end">
+            {themeOptions.map((opt) => (
+              <NavDropdown.Item
+                key={opt.key}
+                as="button"
+                className="d-flex align-items-center gap-2"
+                onClick={() => setMode(opt.key)}
+              >
+                <span>{opt.icon}</span>
+                <span>{opt.label}</span>
+                {mode === opt.key && <span className="ms-auto text-primary">✓</span>}
+              </NavDropdown.Item>
+            ))}
+          </NavDropdown>
+        </Nav>
       </div>
-    </nav>
+    </Navbar>
   );
 }
 
-export default Navbar;
+export default SiteNavbar;

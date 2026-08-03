@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 import api from "../api/client";
 import LoadingSpinner from "../components/LoadingSpinner";
 import type { CustomCheckInInterval } from "../types";
@@ -23,6 +25,12 @@ function CustomCheckInIntervalConfig() {
   const [formDeadline, setFormDeadline] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  // Delete confirmation state
+  const [deleteTarget, setDeleteTarget] = useState<CustomCheckInInterval | null>(
+    null,
+  );
+  const [deleting, setDeleting] = useState(false);
 
   const fetchIntervals = async () => {
     setLoading(true);
@@ -88,13 +96,19 @@ function CustomCheckInIntervalConfig() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("确定要删除该条配置吗？")) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError(null);
     try {
-      await api.deleteCustomCheckinInterval(id);
+      await api.deleteCustomCheckinInterval(deleteTarget.id);
+      setDeleteTarget(null);
       await fetchIntervals();
     } catch (err) {
       setError((err as Error).message || "删除失败");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -116,134 +130,145 @@ function CustomCheckInIntervalConfig() {
     <section>
       <div className="d-flex align-items-center justify-content-between mb-3">
         <h4 className="mb-0">自定义打卡截止时间配置</h4>
-        <button className="btn btn-primary btn-sm" onClick={openCreateModal}>
+        <Button variant="primary" size="sm" onClick={openCreateModal}>
           新增
-        </button>
+        </Button>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
 
       {intervals.length === 0 ? (
-        <div className="my-5 text-center" style={{ minHeight: "200px" }}>
-          暂无配置。点击"新增"按钮添加自定义打卡截止时间。
+        <div className="card border-0 shadow-sm">
+          <div className="card-body text-center text-body-secondary py-5">
+            暂无配置。点击"新增"按钮添加自定义打卡截止时间。
+          </div>
         </div>
       ) : (
-        <table className="table table-bordered table-striped text-center mb-0">
-          <thead>
-            <tr>
-              <th style={{ width: "20%" }}>年份</th>
-              <th style={{ width: "20%" }}>月份</th>
-              <th style={{ width: "40%" }}>截止时间</th>
-              <th style={{ width: "20%" }}>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {intervals.map((item) => (
-              <tr key={item.id}>
-                <td>{item.year}</td>
-                <td>{item.month}</td>
-                <td>{formatDeadline(item.deadline)}</td>
-                <td>
-                  <button
-                    className="btn btn-outline-primary btn-sm me-2"
-                    onClick={() => openEditModal(item)}
-                  >
-                    编辑
-                  </button>
-                  <button
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    删除
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      {/* Modal for create/edit */}
-      {showModal && (
-        <div
-          className="modal-backdrop-blur"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1055,
-          }}
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="bg-body rounded shadow p-4"
-            style={{ width: "420px", maxWidth: "90vw" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h5 className="mb-3">{editingId ? "编辑配置" : "新增配置"}</h5>
-
-            {message && (
-              <div className="alert alert-danger py-2 small">{message}</div>
-            )}
-
-            <div className="mb-3">
-              <label className="form-label">年份：</label>
-              <input
-                type="number"
-                className="form-control"
-                value={formYear}
-                onChange={(e) => setFormYear(e.target.value)}
-                placeholder="例如 2024"
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">月份：</label>
-              <input
-                type="number"
-                className="form-control"
-                value={formMonth}
-                onChange={(e) => setFormMonth(e.target.value)}
-                placeholder="例如 6"
-                min={1}
-                max={12}
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">截止时间：</label>
-              <input
-                type="datetime-local"
-                className="form-control"
-                value={formDeadline}
-                onChange={(e) => setFormDeadline(e.target.value)}
-              />
-            </div>
-
-            <div className="d-flex justify-content-end gap-2">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowModal(false)}
-              >
-                取消
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "保存中..." : "保存"}
-              </button>
+        <div className="card border-0 shadow-sm">
+          <div className="card-body p-0">
+            <div className="table-responsive">
+              <table className="table table-hover align-middle text-center mb-0">
+                <thead>
+                  <tr>
+                    <th style={{ width: "20%" }}>年份</th>
+                    <th style={{ width: "20%" }}>月份</th>
+                    <th style={{ width: "40%" }}>截止时间</th>
+                    <th style={{ width: "20%" }}>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {intervals.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.year}</td>
+                      <td>{item.month}</td>
+                      <td>{formatDeadline(item.deadline)}</td>
+                      <td>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => openEditModal(item)}
+                        >
+                          编辑
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => setDeleteTarget(item)}
+                        >
+                          删除
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       )}
+
+      {/* Modal for create/edit */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>{editingId ? "编辑配置" : "新增配置"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {message && (
+            <div className="alert alert-danger py-2 small">{message}</div>
+          )}
+
+          <div className="mb-3">
+            <label className="form-label">年份</label>
+            <input
+              type="number"
+              className="form-control"
+              value={formYear}
+              onChange={(e) => setFormYear(e.target.value)}
+              placeholder="例如 2026"
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">月份</label>
+            <input
+              type="number"
+              className="form-control"
+              value={formMonth}
+              onChange={(e) => setFormMonth(e.target.value)}
+              placeholder="例如 6"
+              min={1}
+              max={12}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">截止时间</label>
+            <input
+              type="datetime-local"
+              className="form-control"
+              value={formDeadline}
+              onChange={(e) => setFormDeadline(e.target.value)}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            取消
+          </Button>
+          <Button variant="primary" onClick={handleSave} disabled={saving}>
+            {saving ? "保存中..." : "保存"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Delete confirmation modal */}
+      <Modal
+        show={deleteTarget !== null}
+        onHide={() => setDeleteTarget(null)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>删除配置</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-0">
+            确定要删除{" "}
+            <strong>
+              {deleteTarget?.year}年{deleteTarget?.month}月
+            </strong>{" "}
+            的打卡截止时间配置吗？
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+            取消
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+            {deleting ? "删除中..." : "确认删除"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 }

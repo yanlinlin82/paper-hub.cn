@@ -51,36 +51,47 @@ function UserReviews() {
 
   return (
     <section>
-      <div className="d-flex align-items-center gap-2 mb-2 text-body-secondary">
-        来自用户{" "}
-        <Link to={`/group/${groupName}/user/${data.user_info?.id || userId}`}>
-          {data.user_info?.nickname || "用户"}
-        </Link>{" "}
-        的文献分享
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+          <h4 className="mb-0">
+            来自用户{" "}
+            <Link
+              to={`/group/${groupName}/user/${data.user_info?.id || userId}`}
+            >
+              {data.user_info?.nickname || "用户"}
+            </Link>{" "}
+            的分享
+          </h4>
+          <div className="text-body-secondary small">
+            浏览该用户在社群中的全部文献分享
+          </div>
+        </div>
+        {data.total_count > 0 && (
+          <span className="badge text-bg-primary rounded-pill">
+            {data.total_count} 篇
+          </span>
+        )}
       </div>
 
       {query && (
-        <div className="my-3">
-          当前搜索：<span className="text-success">{query}</span>
+        <div className="alert alert-secondary py-2 small mb-3">
+          当前搜索：<span className="text-primary fw-semibold">{query}</span>
         </div>
       )}
 
       {!data.reviews || data.reviews.length === 0 ? (
-        <div className="my-5 text-center" style={{ minHeight: "200px" }}>
-          暂无任何内容。
+        <div className="card border-0 shadow-sm">
+          <div className="card-body text-center text-body-secondary py-5">
+            暂无任何内容。
+          </div>
         </div>
       ) : (
         <>
-          <div className="d-flex align-items-center gap-2 mb-2 text-body-secondary">
-            <span className="badge bg-light text-primary fw-semibold">
-              {data.total_count} 篇
-            </span>
-            {data.paginator?.num_pages > 1 && (
-              <span className="text-muted">
-                本页显示第 {data.start_index} - {data.end_index} 篇
-              </span>
-            )}
-          </div>
+          {data.paginator?.num_pages > 1 && (
+            <div className="text-body-secondary small mb-2">
+              本页显示第 {data.start_index} - {data.end_index} 篇
+            </div>
+          )}
           <Pagination paginator={data.paginator} />
           {data.reviews.map((review, idx) => (
             <ReviewCard

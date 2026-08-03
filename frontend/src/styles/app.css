@@ -22,9 +22,18 @@
 }
 
 html {
-    scroll-padding-top: 64px;
+    scroll-padding-top: 80px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Chinese-friendly system font stack — Bootstrap theming variable override.
+   No webfonts: system fonts load instantly and match the OS UI language. */
+:root {
+    --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
+        "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC",
+        "WenQuanYi Micro Hei", sans-serif;
 }
 
 body {
@@ -56,11 +65,6 @@ body {
     line-height: 1.5;
 }
 
-/* Sidebar list group inside a sticky sidebar container */
-.sidebar {
-    padding: 0;
-}
-
 /* Logo visibility: show light logo in light mode, dark in dark */
 .logo-dark {
     display: none;
@@ -79,6 +83,31 @@ body {
     border-radius: var(--bs-border-radius);
     padding: 0.8rem 1rem;
     margin: 0.5rem 0 0 1.25rem;
+}
+@media (max-width: 575.98px) {
+    .paper-info-card {
+        margin-left: 0;
+    }
+}
+
+/* Review comment — collapse long comments in list views */
+.review-comment {
+    overflow-wrap: break-word;
+}
+.review-comment-collapsed {
+    max-height: 4.4em;
+    overflow: hidden;
+    position: relative;
+}
+.review-comment-collapsed::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1.6em;
+    background: linear-gradient(to bottom, transparent, var(--bs-card-bg));
+    pointer-events: none;
 }
 
 /* Impact factor badges */
@@ -154,21 +183,10 @@ body {
     color: #fff;
 }
 
-/* Sticky sidebar */
+/* Sticky sidebar below the fixed navbar */
 .sidebar-sticky {
     position: sticky;
-    top: 1.5rem;
-}
-
-/* Navbar dropdowns: Bootstrap defaults to position:static for
-   navbar-nav .dropdown-menu. Since we toggle via React state
-   (not Bootstrap JS), we need absolute positioning. */
-.navbar-nav .dropdown-menu {
-    position: absolute !important;
-    top: 100% !important;
-    right: 0 !important;
-    left: auto !important;
-    margin-top: 0.125rem;
+    top: 5.25rem;
 }
 
 /* Autocomplete dropdown for user search — uses CSS variables for dark mode compat */
