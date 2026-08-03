@@ -11,7 +11,7 @@ function Footer() {
           target="_blank"
           rel="noreferrer"
         >
-          &copy; 2022 - 2024
+          &copy; 2022 - 2026
         </a>{" "}
         |{" "}
         <a

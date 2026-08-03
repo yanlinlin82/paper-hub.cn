@@ -5,7 +5,7 @@ import Footer from "../src/components/Footer";
 describe("Footer", () => {
   it("renders copyright link", () => {
     render(<Footer />);
-    const link = screen.getByText(/© 2022 - 2024/i);
+    const link = screen.getByText(/© 2022 - 2026/i);
     expect(link).toBeInTheDocument();
     expect((link.closest("a") as HTMLElement)).toHaveAttribute(
       "href",
