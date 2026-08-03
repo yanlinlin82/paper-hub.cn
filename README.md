@@ -11,7 +11,7 @@ over an internal Docker network.
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
-- `node` (v18+) — only needed to run the npm script wrapper, not for the services themselves
+- `node` (v22.22+, used by the frontend build) — on the host only needed to run the npm script wrapper, not for the services themselves
 
 ### Start the services
 
