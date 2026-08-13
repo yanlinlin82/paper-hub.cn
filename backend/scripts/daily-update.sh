@@ -11,6 +11,8 @@ if [ -e "${BAK_FILE}" ]; then
 	exit 0
 fi
 cp -av db.sqlite3 ${BAK_FILE}
-find -name 'db.sqlite3.bak-*' -mtime +7 -exec rm -fv "{}" \;
+
+# Keep only the 7 most recent backups (filename dates sort lexicographically)
+find . -maxdepth 1 -name 'db.sqlite3.bak-*' -printf '%f\n' | sort | head -n -7 | xargs -r rm -fv
 
 echo ">>> Database backup done for $APP_NAME"
