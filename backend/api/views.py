@@ -1381,7 +1381,7 @@ def new_remove_review(request):
         )
 
     user = request.user.core_user_profile
-    if review.creator != user:
+    if not request.user.is_superuser and review.creator != user:
         return JsonResponse(
             {
                 "success": False,
@@ -1408,7 +1408,7 @@ def new_restore_review(request):
         )
 
     user = request.user.core_user_profile
-    if review.creator != user:
+    if not request.user.is_superuser and review.creator != user:
         return JsonResponse(
             {
                 "success": False,

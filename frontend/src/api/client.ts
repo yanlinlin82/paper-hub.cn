@@ -180,6 +180,10 @@ const api = {
       comment,
       checkin_at: checkinAt,
     }),
+  removeReview: <T = unknown>(reviewId: number) =>
+    request<T>("POST", "/new-remove-review", { review_id: reviewId }),
+  restoreReview: <T = unknown>(reviewId: number) =>
+    request<T>("POST", "/new-restore-review", { review_id: reviewId }),
   editPaper: <T = unknown>(
     reviewId: number,
     paperId: number,

@@ -127,6 +127,7 @@ function ReviewCard({
   const [editingPaper, setEditingPaper] = useState<boolean>(false);
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
+  const [restoring, setRestoring] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const commentLong =
     truncateComment && (review.comment?.length ?? 0) > 120;
@@ -166,7 +167,33 @@ function ReviewCard({
                 >
                   编辑分享
                 </button>
-                {!isTrash && (
+                {isTrash ? (
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm"
+                    disabled={restoring}
+                    onClick={async () => {
+                      setError("");
+                      setRestoring(true);
+                      try {
+                        const res = await api.restoreReview<{
+                          success: boolean;
+                          error?: string;
+                        }>(review.id);
+                        if (!res.success) {
+                          throw new Error(res.error || "恢复失败");
+                        }
+                        window.location.reload();
+                      } catch (err) {
+                        setError((err as Error).message || "恢复失败");
+                      } finally {
+                        setRestoring(false);
+                      }
+                    }}
+                  >
+                    {restoring ? "恢复中..." : "恢复"}
+                  </button>
+                ) : (
                   <>
                     <button
                       className="btn btn-outline-secondary btn-sm"
@@ -189,6 +216,11 @@ function ReviewCard({
               </div>
             )}
           </div>
+
+          {/* Card-level error (e.g. restore failure in the trash view). */}
+          {error && !editingComment && !editingPaper && !confirmDelete && (
+            <div className="text-danger small mt-1">{error}</div>
+          )}
 
           {/* Comment */}
           {review.comment && !editingComment && (
@@ -486,7 +518,7 @@ function ReviewCard({
                   setSaving(true);
                   setError("");
                   try {
-                    await api.removePaper(paper.id!);
+                    await api.removeReview(review.id);
                     setConfirmDelete(false);
                     window.location.reload();
                   } catch (err) {

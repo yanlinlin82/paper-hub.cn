@@ -37,6 +37,10 @@ services:
       - DJANGO_ENV=development
       - DEBUG=True
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      # Tell Django the public host:port (nginx). settings.py auto-detects
+      # the CSRF/CORS trusted origin from DEV_PORT so the SPA origin is
+      # accepted even when a non-default port (e.g. 8001) is used.
+      - DEV_PORT=${DEV_PORT:-8000}
     # No ports exposed to host — internal only
     # uv sync runs inside the container on first startup (isolated venv).
     command: >

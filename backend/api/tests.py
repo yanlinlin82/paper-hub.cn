@@ -1,7 +1,10 @@
 """Tests for API views (both frontend API and legacy API)."""
 
+import json
+
 from django.contrib.auth.models import User
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
+from django.utils import timezone
 
 from core.models import GroupProfile, Paper, Review, UserProfile
 
@@ -188,3 +191,195 @@ class LegacyAPITest(TestCase):
         self.client.login(username="legacyuser", password="pass")
         response = self.client.get("/api/username-autocomplete")
         self.assertEqual(response.status_code, 200)
+
+
+class ReviewDuplicateAndDeleteTest(FrontendAPITestBase):
+    """Tests around duplicate review creation and per-review delete/restore."""
+
+    def _post_json(self, url, data):
+        return self.client.post(
+            url,
+            json.dumps(data),
+            content_type="application/json",
+        )
+
+    def _create_duplicate_reviews(self):
+        """Two identical reviews created by `self.profile` sharing one paper."""
+        paper = Paper.objects.create(
+            title="Duplicate Paper",
+            journal="Science",
+            doi="10.1000/dup",
+        )
+        r1 = Review.objects.create(
+            paper=paper, creator=self.profile, comment="Same comment"
+        )
+        r2 = Review.objects.create(
+            paper=paper, creator=self.profile, comment="Same comment"
+        )
+        self.group.reviews.add(r1, r2)
+        return paper, r1, r2
+
+    def test_check_in_double_submit_creates_duplicate_reviews(self):
+        """Two identical /check-in requests create two reviews on the same paper."""
+        self.client.login(username="testuser", password="password123")
+        payload = {
+            "group_name": "xiangma",
+            "paper": {
+                "title": "Duplicate Paper",
+                "journal": "Science",
+                "doi": "10.1000/dup",
+                "pub_date": "2024-01-15",
+            },
+            "comment": "Same comment",
+        }
+        for _ in range(2):
+            resp = self._post_json("/api/check-in", payload)
+            self.assertTrue(resp.json()["success"])
+
+        reviews = Review.objects.filter(paper__doi="10.1000/dup", creator=self.profile)
+        self.assertEqual(reviews.count(), 2)
+        self.assertEqual(reviews[0].paper.pk, reviews[1].paper.pk)
+
+    def test_remove_review_deletes_only_target_review(self):
+        """Deleting one review must leave the identical sibling review intact."""
+        _, r1, r2 = self._create_duplicate_reviews()
+        self.client.login(username="testuser", password="password123")
+        resp = self._post_json("/api/new-remove-review", {"review_id": r1.pk})
+        self.assertTrue(resp.json()["success"])
+
+        r1.refresh_from_db()
+        r2.refresh_from_db()
+        self.assertIsNotNone(r1.delete_time)
+        self.assertIsNone(r2.delete_time)
+
+    def test_restore_review_clears_delete_time(self):
+        """Restoring a review clears its delete_time (pulls it back out of trash)."""
+        _, r1, _ = self._create_duplicate_reviews()
+        r1.delete_time = timezone.now()
+        r1.save()
+
+        self.client.login(username="testuser", password="password123")
+        resp = self._post_json("/api/new-restore-review", {"review_id": r1.pk})
+        self.assertTrue(resp.json()["success"])
+
+        r1.refresh_from_db()
+        self.assertIsNone(r1.delete_time)
+
+    def test_superuser_can_remove_other_users_review(self):
+        """A superuser (who sees the delete buttons) may delete any review."""
+        review = Review.objects.create(
+            paper=self.paper, creator=self.other_profile, comment="other's review"
+        )
+        self.group.reviews.add(review)
+
+        self.auth_user.is_superuser = True
+        self.auth_user.save()
+        self.client.login(username="testuser", password="password123")
+
+        resp = self._post_json("/api/new-remove-review", {"review_id": review.pk})
+        self.assertTrue(resp.json()["success"])
+
+        review.refresh_from_db()
+        self.assertIsNotNone(review.delete_time)
+
+    def test_restore_removes_review_from_group_trash(self):
+        """After restore, the review no longer appears in the group trash listing."""
+        _, r1, _ = self._create_duplicate_reviews()
+        r1.delete_time = timezone.now()
+        r1.save()
+
+        self.auth_user.is_superuser = True
+        self.auth_user.save()
+        self.client.login(username="testuser", password="password123")
+
+        # Before restore the review is in the trash listing.
+        trash_before = self.client.get("/api/groups/xiangma/reviews/?type=trash")
+        self.assertIn(
+            r1.pk, [review["id"] for review in trash_before.json()["reviews"]]
+        )
+
+        resp = self._post_json("/api/new-restore-review", {"review_id": r1.pk})
+        self.assertTrue(resp.json()["success"])
+
+        # After restore it is no longer listed as trash.
+        trash_after = self.client.get("/api/groups/xiangma/reviews/?type=trash")
+        self.assertNotIn(
+            r1.pk, [review["id"] for review in trash_after.json()["reviews"]]
+        )
+        r1.refresh_from_db()
+        self.assertIsNone(r1.delete_time)
+
+
+# A raw 32-char CSRF secret: Django compares the (possibly unmasked) header
+# token against the cookie secret, and both sides equal this value here.
+CSRF_SECRET = "0" * 32
+
+
+class CsrcTrustedOriginTest(FrontendAPITestBase):
+    """CSRF origin checking for the dev frontend behind nginx on :DEV_PORT.
+
+    The SPA is served behind nginx on http://localhost:<DEV_PORT> and the
+    browser sends that Origin on every POST. Django's CSRF middleware rejects
+    any Origin not in CSRF_TRUSTED_ORIGINS, which is why the trash
+    restore/delete buttons failed with a 403 ("Origin checking failed").
+    """
+
+    def _post_json_with_origin(self, url, data, origin):
+        # nginx forwards Host as `$host` (no port), so Django sees a portless
+        # host while the browser Origin carries the full :DEV_PORT. This is the
+        # exact condition that triggers the CSRF Origin 403 in the report.
+        return self.client.post(
+            url,
+            json.dumps(data),
+            content_type="application/json",
+            HTTP_HOST="localhost",
+            HTTP_ORIGIN=origin,
+            HTTP_X_CSRFTOKEN=CSRF_SECRET,
+        )
+
+    def _enable_csrf(self):
+        # Client() defaults the *handler* to enforce_csrf_checks=False; set the
+        # handler flag so Django actually performs the CSRF origin/token checks.
+        self.client.handler.enforce_csrf_checks = True
+        self.client.cookies["csrftoken"] = CSRF_SECRET
+
+    def test_remove_review_rejects_untrusted_dev_origin(self):
+        """Reproduces the 403: a dev Origin not in CSRF_TRUSTED_ORIGINS is rejected."""
+        review = Review.objects.create(
+            paper=self.paper, creator=self.profile, comment="x"
+        )
+        self.group.reviews.add(review)
+        self.client.login(username="testuser", password="password123")
+        self._enable_csrf()
+
+        resp = self._post_json_with_origin(
+            "/api/new-remove-review",
+            {"review_id": review.pk},
+            "http://localhost:8001",
+        )
+        self.assertEqual(resp.status_code, 403)
+
+    @override_settings(
+        CSRF_TRUSTED_ORIGINS=[
+            "http://localhost:5173",
+            "http://localhost",
+            "http://paper-hub.cn",
+            "http://localhost:8001",
+        ]
+    )
+    def test_remove_review_accepts_trusted_dev_origin(self):
+        """Once the dev Origin is trusted the same request succeeds."""
+        review = Review.objects.create(
+            paper=self.paper, creator=self.profile, comment="x"
+        )
+        self.group.reviews.add(review)
+        self.client.login(username="testuser", password="password123")
+        self._enable_csrf()
+
+        resp = self._post_json_with_origin(
+            "/api/new-remove-review",
+            {"review_id": review.pk},
+            "http://localhost:8001",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json()["success"])

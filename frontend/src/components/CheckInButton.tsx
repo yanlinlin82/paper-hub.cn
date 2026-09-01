@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import api from "../api/client";
@@ -55,6 +55,8 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   );
   const [adminUser, setAdminUser] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
+  // Guards against a double-click landing before the disabled state re-renders.
+  const submittingRef = useRef<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [autocompleteItems, setAutocompleteItems] = useState<any[]>([]);
   const [showAutocomplete, setShowAutocomplete] = useState<boolean>(false);
@@ -134,12 +136,14 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
   };
 
   const handleSubmit = async () => {
+    if (submittingRef.current) return;
     if (!adminUser.trim()) {
       setFieldErrors({ adminUser: "请输入打卡人" });
-      setSubmitting(false);
       return;
     }
     setFieldErrors({});
+    submittingRef.current = true;
+    setSubmitting(true);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: Record<string, any> = {
@@ -181,6 +185,7 @@ function CheckInModal({ groupName, onClose }: CheckInModalProps) {
     } catch (err) {
       setMessage((err as Error).message || "提交失败");
     } finally {
+      submittingRef.current = false;
       setSubmitting(false);
     }
   };
