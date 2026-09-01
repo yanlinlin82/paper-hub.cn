@@ -101,6 +101,14 @@ uv add <package>                           # add a new dependency
 uv lock --upgrade                          # upgrade all dependencies
 ```
 
+### Database backup
+
+`backend/scripts/daily-update.sh` only backs up the database — it no longer
+performs any data updates. It copies `backend/db.sqlite3` to a date-stamped
+file (`db.sqlite3.bak-YYYYMMDD`) and keeps only the 7 most recent backups.
+
+Run it from a crontab on the production server.
+
 ### Environment (docker)
 
 Create a `.env.docker` file in the project root with any overrides needed.
@@ -196,3 +204,17 @@ On the remote server, configure Apache/Nginx to proxy `/` to `127.0.0.1:8000` an
 ```sh
 docker compose exec backend uv lock
 ```
+
+**7. Q:** How do I update the deployed code?
+
+**A:** On the production server:
+
+```sh
+git pull
+npm run build
+touch backend/config/wsgi.py
+```
+
+- `git pull` — fetch the latest source.
+- `npm run build` — rebuild the SPA (`frontend/dist/`) and collect static files (`backend/static_root/`).
+- `touch backend/config/wsgi.py` — bump the file mtime so Apache mod_wsgi reloads the Django app on the next request.
