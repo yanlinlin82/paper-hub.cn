@@ -111,10 +111,11 @@ Run it from a crontab on the production server.
 
 ### Environment (docker)
 
-Create a `.env.docker` file in the project root with any overrides needed.
-A template is created automatically on first startup if it doesn't exist.
+`.env.docker` is required at the project root — `docker-compose.yml` references
+it via `env_file`, and the stack will not start if the file is missing.
+Its default values cover local development only; add any overrides you need.
 
-Common environment variables include `OPENAI_API_KEY`, `WEIXIN_APP_ID`, etc.
+Common environment variables include `OPENAI_API_KEY`, `WEIXIN_APP_ID`, `ALL_PROXY`, etc.
 
 ## Architecture
 
