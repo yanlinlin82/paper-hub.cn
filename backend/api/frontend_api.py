@@ -14,7 +14,7 @@ from django.db.models import Count, F, Min, Q
 from django.http import JsonResponse
 from django.utils import timezone
 
-from core.member_report import read_member_profile
+from core.member_report import read_member_profile, read_topic_reviews
 from core.models import GroupProfile, Review, UserProfile
 from core.paper import (
     convert_string_to_datetime,
@@ -564,3 +564,25 @@ def get_member_profile(request, group_name, user_id):
             {"error": "Member profile not found for user " + str(user_id)}, status=404
         )
     return _no_store(profile)
+
+
+def get_topic_reviews(request, group_name, topic):
+    """
+    GET /api/groups/{group_name}/member-report/topics/{topic}/
+
+    Return every review (across the whole group) associated with a research
+    topic. The topic string is URL-encoded; it is unquoted and matched against
+    the persisted topic -> reviews mapping (exact, not a fuzzy keyword search).
+    """
+    try:
+        GroupProfile.objects.get(name=group_name)
+    except GroupProfile.DoesNotExist:
+        return _no_store({"error": "Group not found"}, status=404)
+
+    topic_name = unquote(topic)
+    reviews = read_topic_reviews(group_name, topic_name)
+    if reviews is None:
+        return _no_store(
+            {"error": "No reviews found for topic " + topic_name}, status=404
+        )
+    return _no_store({"topic": topic_name, "reviews": reviews})

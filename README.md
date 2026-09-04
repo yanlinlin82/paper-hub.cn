@@ -149,6 +149,12 @@ The website index (`/api/groups/<group>/member-report/`) serves the index; the
 full per-member profile is fetched lazily from
 `/api/groups/<group>/member-report/<user_id>/`.
 
+The report also persists a topic → reviews mapping (`<group>_topics.json`), which
+powers the topic list page `/group/<group>/member-report/topic/:topic` (served by
+`/api/groups/<group>/member-report/topics/:topic/`). Clicking a topic tag in the
+member profiles or the profile dialog navigates there and lists every review in
+that research topic (whole group).
+
 ### Database backup
 
 `backend/scripts/daily-update.sh` only backs up the database — it no longer

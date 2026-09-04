@@ -311,6 +311,11 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     padding-right: 0.5rem;
+    text-decoration: none;
+}
+.member-report .report-bar-label:hover {
+    color: var(--report-accent);
+    text-decoration: underline;
 }
 .member-report .report-bar-track {
     flex: 1;
@@ -367,6 +372,7 @@ body {
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
     display: block;
     width: 100%;
+    cursor: pointer;
 }
 .member-report .report-member-btn:hover {
     border-color: var(--report-accent);
@@ -705,6 +711,27 @@ body {
     text-decoration: none;
 }
 .member-report .report-member-meta a:hover {
+    text-decoration: underline;
+}
+
+/* Topic reviews page */
+.member-report .report-topic-review {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.member-report .report-topic-review:last-child {
+    border-bottom: 0;
+}
+.member-report .report-topic-review-meta {
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color);
+    margin-top: 0.2rem;
+}
+.member-report .report-topic-review-meta a {
+    color: var(--report-accent);
+    text-decoration: none;
+}
+.member-report .report-topic-review-meta a:hover {
     text-decoration: underline;
 }
 

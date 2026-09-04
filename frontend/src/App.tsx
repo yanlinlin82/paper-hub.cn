@@ -8,6 +8,7 @@ import CustomCheckInIntervalConfig from "./pages/CustomCheckInIntervalConfig";
 import UserReviews from "./pages/UserReviews";
 import JournalReviews from "./pages/JournalReviews";
 import MemberReport from "./pages/MemberReport";
+import MemberTopicReviews from "./pages/MemberTopicReviews";
 
 function App() {
   return (
@@ -114,6 +115,14 @@ function App() {
         element={
           <Layout>
             <MemberReport />
+          </Layout>
+        }
+      />
+      <Route
+        path="/group/:groupName/member-report/topic/:topic"
+        element={
+          <Layout>
+            <MemberTopicReviews />
           </Layout>
         }
       />

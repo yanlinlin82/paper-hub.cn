@@ -170,6 +170,11 @@ const api = {
     request<T>("GET", `/groups/${groupName}/member-report/`),
   getMemberProfile: <T = unknown>(groupName: string, userId: number) =>
     request<T>("GET", `/groups/${groupName}/member-report/${userId}/`),
+  getTopicReviews: <T = unknown>(groupName: string, topic: string) =>
+    request<T>(
+      "GET",
+      `/groups/${groupName}/member-report/topics/${encodeURIComponent(topic)}/`,
+    ),
 
   // User
   getCurrentUser: <T = unknown>() => request<T>("GET", "/me/"),

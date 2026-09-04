@@ -147,6 +147,7 @@ export interface MemberProfile {
   active_months: number;
   top_journals: Record<string, number>;
   top_topics: string[];
+  topic_links?: { name: string; query: string }[];
   topic_counts: Record<string, number>;
   reader_type: string;
   portrait: string;
@@ -172,6 +173,24 @@ export interface MemberReport {
   };
   aggregate: MemberReportAggregate;
   members: MemberSummary[];
+}
+
+// A single review listed under a research topic (whole-group scope).
+export interface TopicReview {
+  review_id: number;
+  paper_id: number;
+  title: string;
+  journal: string;
+  year: number | null;
+  creator_id: number;
+  creator_name: string;
+  comment_excerpt: string;
+  checkin_at: string;
+}
+
+export interface TopicReviewsResponse {
+  topic: string;
+  reviews: TopicReview[];
 }
 
 // ---- Auth Context Types ----

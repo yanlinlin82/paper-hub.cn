@@ -124,4 +124,9 @@ urlpatterns = [
         frontend_api.get_member_profile,
         name="get_member_profile",
     ),
+    path(
+        "groups/<str:group_name>/member-report/topics/<str:topic>/",
+        frontend_api.get_topic_reviews,
+        name="get_topic_reviews",
+    ),
 ]

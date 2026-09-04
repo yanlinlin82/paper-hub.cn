@@ -29,15 +29,25 @@ function formatDate(iso: string | undefined): string {
   });
 }
 
-function TopicBars({ axes }: { axes: TopicAxis[] }) {
+function TopicBars({
+  axes,
+  groupName,
+}: {
+  axes: TopicAxis[];
+  groupName: string;
+}) {
   const max = Math.max(1, ...axes.map((a) => a.count));
   return (
     <div className="report-bars">
       {axes.map((axis) => (
         <div key={axis.topic} className="report-bar">
-          <span className="report-bar-label" title={axis.topic}>
+          <Link
+            className="report-bar-label"
+            title={axis.topic}
+            to={`/group/${groupName}/member-report/topic/${encodeURIComponent(axis.topic)}`}
+          >
             {axis.topic}
-          </span>
+          </Link>
           <span className="report-bar-track">
             <span
               className="report-bar-fill"
@@ -204,9 +214,13 @@ function MemberProfileModal({
                     <span className="report-label">聚焦方向</span>
                     <div className="d-flex flex-wrap gap-2">
                       {profile.top_topics.map((topic) => (
-                        <span key={topic} className="badge report-topic">
+                        <Link
+                          key={topic}
+                          to={`/group/${groupName}/member-report/topic/${encodeURIComponent(topic)}`}
+                          className="badge report-topic"
+                        >
                           {topic}
-                        </span>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -413,7 +427,7 @@ function MemberReportPage() {
         按论文标题/关键词/摘要命中统计（一条可命中多个主题）。这张表回答"这群人在读什么"。
       </p>
       <div className="report-card mb-4">
-        <TopicBars axes={aggregate.topic_axes} />
+        <TopicBars axes={aggregate.topic_axes} groupName={groupName!} />
       </div>
 
       {/* Common papers */}
@@ -492,9 +506,8 @@ function MemberReportPage() {
       </p>
       <div className="report-grid">
         {members.map((m) => (
-          <button
+          <div
             key={m.user_id}
-            type="button"
             className="report-member-btn"
             onClick={() => openProfile(m)}
           >
@@ -518,13 +531,18 @@ function MemberReportPage() {
             {m.top_topics.length > 0 && (
               <div className="report-member-topics">
                 {m.top_topics.slice(0, 2).map((t) => (
-                  <span key={t} className="report-topic-sm">
+                  <Link
+                    key={t}
+                    to={`/group/${groupName}/member-report/topic/${encodeURIComponent(t)}`}
+                    className="report-topic-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {t}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}
-          </button>
+          </div>
         ))}
       </div>
 

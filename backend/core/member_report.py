@@ -264,6 +264,16 @@ def infer_topics(paper) -> List[str]:
     return topics
 
 
+def topic_search_query(topic: str) -> str:
+    """A representative keyword used to list the reviews under a research topic.
+
+    Uses the first (most representative) keyword from the taxonomy so the topic
+    tag can link to the review list filtered by that keyword.
+    """
+    keywords = TOPIC_TAXONOMY.get(topic, [])
+    return keywords[0] if keywords else topic
+
+
 def word_count(text: str) -> int:
     """Count words in a mixed Chinese/English text.
 
@@ -317,6 +327,9 @@ class MemberProfile:
             "active_months": self.active_months,
             "top_journals": self.top_journals,
             "top_topics": self.top_topics,
+            "topic_links": [
+                {"name": t, "query": topic_search_query(t)} for t in self.top_topics
+            ],
             "topic_counts": self.topic_counts,
             "reader_type": self.reader_type,
             "portrait": self.portrait,
@@ -1029,9 +1042,73 @@ def write_report(
     """
     for profile in profiles:
         write_member_profile(group_name, profile)
+    topic_reviews = build_topic_reviews(group_name)
+    write_topic_reviews(group_name, topic_reviews)
     return write_index(
         group_name, aggregate, [p.summary() for p in profiles], generator=generator
     )
+
+
+def topic_reviews_path(group_name: str) -> Path:
+    """Path of the topic -> reviews mapping file."""
+    return Path(settings.REPORTS_DIR) / f"{group_name}_topics.json"
+
+
+def build_topic_reviews(group_name: str) -> Dict[str, List[Dict]]:
+    """Map each research topic to every review (across the whole group) in it.
+
+    This is the persisted "literature belongs to which topic" information used to
+    list all papers under a topic precisely (instead of a fuzzy keyword search).
+    """
+    from core.models import GroupProfile
+
+    group = GroupProfile.objects.get(name=group_name)
+    reviews = (
+        group.reviews.filter(delete_time__isnull=True)
+        .select_related("creator", "paper")
+        .order_by("-checkin_at")
+    )
+    topic_map: Dict[str, List[Dict]] = defaultdict(list)
+    for review in reviews:
+        paper = review.paper
+        if not paper:
+            continue
+        topics = infer_topics(paper)
+        if not topics:
+            continue
+        item = {
+            "review_id": review.pk,
+            "paper_id": paper.pk,
+            "title": paper.title or "",
+            "journal": _shorten_journal(paper.journal or ""),
+            "year": paper.pub_year,
+            "creator_id": review.creator.pk,
+            "creator_name": _friendly_name(review.creator.nickname),
+            "comment_excerpt": parse_review_body(review.comment)[:300],
+            "checkin_at": review.checkin_at.isoformat(),
+        }
+        for topic in topics:
+            topic_map[topic].append(item)
+    return {topic: items for topic, items in topic_map.items()}
+
+
+def write_topic_reviews(group_name: str, topic_reviews: Dict[str, List[Dict]]) -> Path:
+    """Persist topic -> reviews mapping to a local file."""
+    path = topic_reviews_path(group_name)
+    path.write_text(json.dumps(topic_reviews, ensure_ascii=False, indent=2), "utf-8")
+    return path
+
+
+def read_topic_reviews(group_name: str, topic: str) -> Optional[List[Dict]]:
+    """Return the reviews belonging to a topic, or None if unknown/unindexed."""
+    path = topic_reviews_path(group_name)
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    return data.get(topic)  # topic is the exact key; already parsed by caller
 
 
 def _esc(text) -> str:
