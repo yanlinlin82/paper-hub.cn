@@ -101,6 +101,54 @@ uv add <package>                           # add a new dependency
 uv lock --upgrade                          # upgrade all dependencies
 ```
 
+### Member reading-interest report
+
+Generates per-member reading-interest profiles from the group's paper reviews
+(check-ins) using an LLM (DeepSeek), and exposes them on the website at
+`/group/:groupName/member-report` where each member is clickable.
+
+**Prerequisite** — an API key in `backend/.env` (copy the committed template):
+
+```sh
+cd backend
+cp .env.example .env
+# then set DEEPSEEK_API_KEY=sk-xxxx in backend/.env
+```
+
+**Generate the report:**
+
+```sh
+cd backend
+uv run manage.py generate_member_report --group xiangma
+```
+
+The command requires `DEEPSEEK_API_KEY` to be set and calls `deepseek-v4-flash`
+(the current DeepSeek chat model; override with `LLM_MODEL` if it changes). It
+fails fast if the key is missing or the API is unreachable, instead of quietly
+falling back to template text. Each member profile is generated from up to 30 of
+their own reviews, taking advantage of the model's large context window. It needs
+`max_tokens` budget so the reasoning model does not truncate the answer to empty.
+
+It generates profiles concurrently (`--workers`, default 4) and writes each
+member's file as soon as it succeeds, so a failed member can be re-run on its
+own later with `--user <id>`. It pauses `--delay` seconds between completions
+(default 1.0; `--delay 0` disables) and retries transient failures with backoff
+so it stays under DeepSeek's rate limit. Lower `--workers` (or raise `--delay`)
+if you hit rate-limit errors.
+
+Output is written under `backend/reports/` (gitignored):
+
+- `<group>_member_report.json` — the group index: aggregate stats plus a
+  lightweight member list.
+- `<group>_members/<user_id>.json` — one file per member holding that member's
+  full profile, so a single member can be read or regenerated independently
+  (`--user <id>`).
+- `<group>_member_report.html` — a standalone, shareable HTML report.
+
+The website index (`/api/groups/<group>/member-report/`) serves the index; the
+full per-member profile is fetched lazily from
+`/api/groups/<group>/member-report/<user_id>/`.
+
 ### Database backup
 
 `backend/scripts/daily-update.sh` only backs up the database — it no longer

@@ -12,13 +12,14 @@ it via deterministic templates.
 
 Run manually with::
 
-    uv run python manage.py generate_member_report [--group xiangma] [--no-llm]
+    uv run manage.py generate_member_report [--group xiangma] [--workers 4]
 """
 
 from __future__ import annotations
 
 import json
 import re
+import threading
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -300,6 +301,9 @@ class MemberProfile:
     theme_entry: str
     signature: str = ""
     papers: List[Dict] = field(default_factory=list)
+    # Extended review context for the LLM prompt (leverages the model's large
+    # context window). NOT serialized to the report JSON — display uses `papers`.
+    llm_reviews: List[Dict] = field(default_factory=list)
 
     def to_dict(self) -> Dict:
         return {
@@ -321,6 +325,17 @@ class MemberProfile:
             "theme_entry": self.theme_entry,
             "signature": self.signature,
             "papers": self.papers,
+        }
+
+    def summary(self) -> Dict:
+        """Light-weight row for the group index (the member list card)."""
+        return {
+            "user_id": self.user_id,
+            "name": self.name,
+            "review_count": self.review_count,
+            "word_per_review": self.word_per_review,
+            "reader_type": self.reader_type,
+            "top_topics": self.top_topics,
         }
 
 
@@ -410,6 +425,7 @@ def build_member_profiles(group_name: str, min_count: int = 1) -> List[MemberPro
         topic_counter: Counter = Counter()
         journal_counter: Counter = Counter()
         papers = []
+        llm_reviews = []
         checkins = []
         best_body = ""
         best_paper_title = ""
@@ -428,6 +444,7 @@ def build_member_profiles(group_name: str, min_count: int = 1) -> List[MemberPro
                 if len(body) > len(best_body):
                     best_body = body
                     best_paper_title = paper.title or ""
+                # Display papers (short excerpt) for the website profile view.
                 papers.append(
                     {
                         "id": paper.pk,
@@ -436,6 +453,18 @@ def build_member_profiles(group_name: str, min_count: int = 1) -> List[MemberPro
                         "journal": paper.journal or "",
                         "year": paper.pub_year,
                         "comment_excerpt": body[:400],
+                        "checkin_at": review.checkin_at.isoformat(),
+                    }
+                )
+                # Full review context for the LLM prompt (deepseek-v4-flash
+                # supports a large context, so feed more of the member's own
+                # words for a richer portrait).
+                llm_reviews.append(
+                    {
+                        "title": paper.title or "",
+                        "journal": paper.journal or "",
+                        "year": paper.pub_year,
+                        "comment": body[:800],
                         "checkin_at": review.checkin_at.isoformat(),
                     }
                 )
@@ -484,6 +513,7 @@ def build_member_profiles(group_name: str, min_count: int = 1) -> List[MemberPro
                 theme_entry="",
                 signature=signature,
                 papers=papers[:8],
+                llm_reviews=llm_reviews[:30],
             )
         )
 
@@ -549,112 +579,123 @@ def generate_deterministic_profile(profile: MemberProfile) -> MemberProfile:
 
 
 class LLMBridge:
-    """Thin wrapper around an OpenAI-compatible chat API (e.g. DeepSeek).
+    """Minimal OpenAI-compatible wrapper (DeepSeek) for the member report.
 
-    Enabled only when an API key is available and `use_llm` is True. All calls
-    are wrapped in try/except so a failed or missing API never breaks the report.
-    Errors are captured in `last_error` so the caller can surface the real
-    reason (proxy/network/key) instead of silently reporting "no LLM".
+    DeepSeek is reachable directly, so we always connect without a proxy. To stop
+    the OpenAI SDK from inheriting the shell's global proxy (e.g. a SOCKS proxy
+    for other sites), we pass an httpx client with `trust_env=False`. Each call
+    is wrapped in try/except; failures are recorded in `last_error`.
     """
 
-    def __init__(self, base_url: str, api_key: str, model: str, proxy: Optional[str] = None):
+    def __init__(self, base_url: str, api_key: str, model: str):
         self.base_url = base_url
         self.api_key = api_key
         self.model = model
-        self.proxy = proxy
         self.last_error: Optional[str] = None
+        self._client = None
+        self._lock = threading.Lock()
 
     @classmethod
     def from_settings(cls) -> Optional["LLMBridge"]:
-        key = settings.LLM_API_KEY or settings.DEEPSEEK_API_KEY or getattr(
+        key = settings.DEEPSEEK_API_KEY or settings.LLM_API_KEY or getattr(
             settings, "OPENAI_API_KEY", ""
         )
         if not key:
             return None
-        base_url = getattr(settings, "LLM_BASE_URL", "https://api.deepseek.com")
-        proxy = cls._resolve_proxy()
         return cls(
-            base_url=base_url,
+            base_url=getattr(settings, "LLM_BASE_URL", "https://api.deepseek.com"),
             api_key=key,
-            model=getattr(settings, "LLM_MODEL", "deepseek-chat"),
-            proxy=proxy,
+            model=getattr(settings, "LLM_MODEL", "deepseek-v4-flash"),
         )
 
-    @staticmethod
-    def _resolve_proxy() -> Optional[str]:
-        """Pick a proxy from LLM_PROXY, else the standard proxy env vars.
+    def _openai_client(self):
+        if self._client is None:
+            with self._lock:
+                if self._client is None:
+                    import httpx
+                    from openai import OpenAI
 
-        `LLM_NO_PROXY=1` forces a direct connection (handy when the configured
-        proxy is dead and the API is directly reachable, e.g. DeepSeek in China).
-        """
-        import os
-
-        if os.getenv("LLM_NO_PROXY", "") == "1":
-            return None
-        forced = os.getenv("LLM_PROXY", "")
-        if forced:
-            return forced
-        return os.getenv("HTTPS_PROXY")
-    
-    def _make_client(self):
-        """Build an httpx client with an explicit proxy when configured.
-
-        Returns None when no proxy is set, letting the OpenAI client use its own
-        default (env-based) transport. httpx 0.28 accepts a `proxy` URL, e.g.
-        socks5://localhost:1090 (requires the `socksio` package, already a dep).
-        """
-        import httpx
-
-        if self.proxy:
-            try:
-                return httpx.Client(proxy=self.proxy, timeout=60.0)
-            except Exception:
-                return None
-        return None
+                    self._client = OpenAI(
+                        base_url=self.base_url,
+                        api_key=self.api_key,
+                        # Ignore global HTTP_PROXY/ALL_PROXY so DeepSeek is direct.
+                        http_client=httpx.Client(trust_env=False),
+                    )
+        return self._client
 
     def chat_raw(self, system: str, user: str) -> Optional[str]:
         try:
-            from openai import OpenAI
-        except Exception as exc:
-            self.last_error = f"openai import failed: {exc}"
-            return None
-        try:
-            http_client = self._make_client()
-            kwargs = {"base_url": self.base_url, "api_key": self.api_key}
-            if http_client is not None:
-                kwargs["http_client"] = http_client
-            client = OpenAI(**kwargs)
-            resp = client.chat.completions.create(
+            # deepseek-v4-flash is a reasoning model: the reasoning consumes part
+            # of the token budget. Use a generous max_tokens so the answer is not
+            # truncated to empty (which showed up as an opaque "unknown" error).
+            resp = self._openai_client().chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},
                 ],
                 temperature=0.4,
-                max_tokens=600,
+                max_tokens=2048,
             )
             return resp.choices[0].message.content or ""
         except Exception as exc:
-            self.last_error = str(exc)
+            self.last_error = _format_api_error(exc)
             return None
 
 
-def generate_llm_profile(profile: MemberProfile, llm: Optional[LLMBridge]) -> bool:
-    """Rewrite a single member's narrative with the LLM; fall back to templates.
+def _format_api_error(exc: Exception) -> str:
+    """Render an API/connection error with useful details."""
+    name = type(exc).__name__
+    status = getattr(exc, "status_code", None)
+    message = str(exc) or getattr(exc, "message", "") or "unknown"
+    if status:
+        return f"{name} (HTTP {status}): {message}"
+    return f"{name}: {message}"
 
-    Returns True if the LLM narrative was applied, False if it fell back to
-    deterministic templates (e.g. no bridge, network/API failure). The caller uses
-    this to record an honest `generator.mode`.
+
+def _parse_profile_json(text: str) -> Optional[Dict]:
+    """Extract the four narrative fields from an LLM JSON response."""
+    m = re.search(r"\{.*\}", text, re.DOTALL)
+    if not m:
+        return None
+    try:
+        data = json.loads(m.group(0))
+    except (json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    portrait = data.get("portrait", "") or ""
+    reading_form = data.get("reading_form", "") or ""
+    rating_scale = data.get("rating_scale", "") or ""
+    theme_entry = data.get("theme_entry", "") or ""
+    if all([portrait.strip(), reading_form.strip(), rating_scale.strip(), theme_entry.strip()]):
+        return {
+            "portrait": portrait.strip(),
+            "reading_form": reading_form.strip(),
+            "rating_scale": rating_scale.strip(),
+            "theme_entry": theme_entry.strip(),
+        }
+    return None
+
+
+def generate_llm_profile(profile: MemberProfile, llm: Optional[LLMBridge], retries: int = 1) -> bool:
+    """Write a single member's reading profile using the LLM.
+
+    Returns True if the LLM produced a complete profile. On any failure (no
+    bridge, API/network error, malformed or incomplete JSON) it returns False
+    WITHOUT falling back to templates — the caller decides how to handle it
+    (the management command fails fast).
     """
     if not llm:
-        generate_deterministic_profile(profile)
         return False
 
+    # Feed the model as many of the member's own reviews as the context allows
+    # (deepseek-v4-flash supports a large window) for a richer portrait.
     reviews_txt = []
-    for p in profile.papers:
+    for p in profile.llm_reviews or profile.papers:
         reviews_txt.append(
             f"- 《{p['title']}》({p['journal'] or p['year'] or ''}): "
-            f"{p['comment_excerpt'] or '（无评语）'}"
+            f"{p.get('comment') or p.get('comment_excerpt') or '（无评语）'}"
         )
     paper_list = "\n".join(reviews_txt) if reviews_txt else "（该成员暂无具体论文）"
 
@@ -679,39 +720,22 @@ def generate_llm_profile(profile: MemberProfile, llm: Optional[LLMBridge]) -> bo
         f'"theme_entry":"给出一个适合他/她的下一步阅读主题方向"'
         f"}}"
     )
-    result = llm.chat_raw(system, user)
-    if not result:
-        generate_deterministic_profile(profile)
-        return False
 
-    # Best-effort JSON parse; fall back to templates on failure.
-    try:
-        m = re.search(r"\{.*\}", result, re.DOTALL)
-        data = json.loads(m.group(0)) if m else None
-    except Exception:
-        data = None
-    if not data:
-        generate_deterministic_profile(profile)
-        return False
+    import time
 
-    portrait = data.get("portrait", "")
-    reading_form = data.get("reading_form", "")
-    rating_scale = data.get("rating_scale", "")
-    theme_entry = data.get("theme_entry", "")
-    # Only count as LLM-generated if the model supplied all four core fields.
-    if all([portrait, reading_form, rating_scale, theme_entry]):
-        profile.portrait = portrait
-        profile.reading_form = reading_form
-        profile.rating_scale = rating_scale
-        profile.theme_entry = theme_entry
-        return True
-
-    # Partial/missing fields -> fill with templates; do not claim full LLM output.
-    profile.portrait = portrait
-    profile.reading_form = reading_form
-    profile.rating_scale = rating_scale
-    profile.theme_entry = theme_entry
-    generate_deterministic_profile(profile)
+    for attempt in range(retries + 1):
+        result = llm.chat_raw(system, user)
+        if result:
+            data = _parse_profile_json(result)
+            if data:
+                profile.portrait = data["portrait"]
+                profile.reading_form = data["reading_form"]
+                profile.rating_scale = data["rating_scale"]
+                profile.theme_entry = data["theme_entry"]
+                return True
+        # Back off before a retry so a transient rate limit / 5xx can recover.
+        if attempt < retries:
+            time.sleep(1.0 + attempt)
     return False
 
 
@@ -906,16 +930,72 @@ def build_group_aggregate(group_name: str, profiles: Sequence[MemberProfile]) ->
 # ---------------------------------------------------------------------------
 
 
-def write_report(
+def member_index_dir(group_name: str) -> Path:
+    """Directory holding one JSON file per member (separately updatable)."""
+    d = Path(settings.REPORTS_DIR) / f"{group_name}_members"
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def member_index_path(group_name: str) -> Path:
+    """Path of the group index (aggregate + lightweight member summaries)."""
+    return Path(settings.REPORTS_DIR) / f"{group_name}_member_report.json"
+
+
+def write_member_profile(group_name: str, profile: MemberProfile) -> Path:
+    """Write one member's full profile to its own JSON file."""
+    path = member_index_dir(group_name) / f"{profile.user_id}.json"
+    path.write_text(
+        json.dumps(profile.to_dict(), ensure_ascii=False, indent=2), "utf-8"
+    )
+    return path
+
+
+def read_member_profile(group_name: str, user_id: int) -> Optional[Dict]:
+    """Read one member's profile file, or None if it does not exist."""
+    path = member_index_dir(group_name) / f"{user_id}.json"
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def read_member_summaries(group_name: str) -> List[Dict]:
+    """Summaries of every member profile file present on disk.
+
+    Used to rebuild the group index after a partial/targeted update without
+    regenerating untouched members.
+    """
+    summaries = []
+    member_dir = member_index_dir(group_name)
+    for path in sorted(member_dir.glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        summaries.append(
+            {
+                "user_id": data.get("user_id"),
+                "name": data.get("name", ""),
+                "review_count": data.get("review_count", 0),
+                "word_per_review": data.get("word_per_review", 0),
+                "reader_type": data.get("reader_type", ""),
+                "top_topics": data.get("top_topics", []),
+            }
+        )
+    summaries.sort(key=lambda s: (-s["review_count"], s["name"]))
+    return summaries
+
+
+def write_index(
     group_name: str,
     aggregate: Dict,
-    profiles: List[MemberProfile],
+    summaries: List[Dict],
     generator: Optional[Dict] = None,
 ) -> Path:
-    """Write the JSON report to `backend/reports/` and return its path.
-
-    The file is the single source of truth consumed by the website API endpoint.
-    """
+    """Write the group index (aggregate + member summaries)."""
     from core.models import GroupProfile
 
     group = GroupProfile.objects.get(name=group_name)
@@ -928,13 +1008,30 @@ def write_report(
         "generated_at": datetime.now().astimezone().isoformat(),
         "generator": generator or {"mode": "rule", "provider": "rule", "model": ""},
         "aggregate": aggregate,
-        "members": [p.to_dict() for p in profiles],
+        "members": summaries,
     }
-    out_dir = Path(settings.REPORTS_DIR)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    path = out_dir / f"{group_name}_member_report.json"
+    path = member_index_path(group_name)
     path.write_text(json.dumps(report, ensure_ascii=False, indent=2), "utf-8")
     return path
+
+
+def write_report(
+    group_name: str,
+    aggregate: Dict,
+    profiles: List[MemberProfile],
+    generator: Optional[Dict] = None,
+) -> Path:
+    """Write each member profile to its own file, then the group index.
+
+    Each member's full profile is stored under `<group>_members/<user_id>.json`
+    so a single member can be re-read or updated independently; the index holds
+    only the lightweight summaries used to render the member list.
+    """
+    for profile in profiles:
+        write_member_profile(group_name, profile)
+    return write_index(
+        group_name, aggregate, [p.summary() for p in profiles], generator=generator
+    )
 
 
 def _esc(text) -> str:

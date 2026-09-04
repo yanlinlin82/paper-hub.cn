@@ -327,20 +327,21 @@ class MemberReportTest(TestCase):
         self.assertTrue(profile.rating_scale)
         self.assertTrue(profile.theme_entry)
 
-    def test_generate_llm_profile_without_bridge_falls_back(self):
+    def test_generate_llm_profile_without_bridge_hard_fails(self):
         from core.member_report import (
             build_member_profiles,
             generate_llm_profile,
         )
 
         profile = build_member_profiles("xiangma")[0]
-        # No bridge => deterministic templates, returns False (not LLM-generated).
+        # No bridge => returns False and does NOT fill narrative (no template
+        # fallback); the caller is expected to fail fast.
         used_llm = generate_llm_profile(profile, None)
         self.assertFalse(used_llm)
-        self.assertTrue(profile.portrait)
-        self.assertTrue(profile.reading_form)
+        self.assertFalse(profile.portrait)
+        self.assertFalse(profile.reading_form)
 
-    def test_generate_llm_profile_api_failure_falls_back(self):
+    def test_generate_llm_profile_api_failure_hard_fails(self):
         from unittest.mock import MagicMock
 
         from core.member_report import (
@@ -354,7 +355,8 @@ class MemberReportTest(TestCase):
         llm.chat_raw.return_value = None
         used_llm = generate_llm_profile(profile, llm)
         self.assertFalse(used_llm)
-        self.assertTrue(profile.portrait)
+        self.assertFalse(profile.portrait)
+        self.assertEqual(llm.chat_raw.call_count, 2)  # one retry then give up
 
     def test_generate_llm_profile_success(self):
         from unittest.mock import MagicMock
@@ -403,6 +405,71 @@ class MemberReportTest(TestCase):
                 self.assertEqual(data["group"]["name"], "xiangma")
                 self.assertEqual(len(data["members"]), 2)
 
+    def test_write_report_splits_member_files(self):
+        import tempfile
+
+        from django.test import override_settings
+        from core.member_report import (
+            build_group_aggregate,
+            build_member_profiles,
+            generate_deterministic_profile,
+            read_member_profile,
+            write_report,
+        )
+
+        profiles = build_member_profiles("xiangma")
+        for p in profiles:
+            generate_deterministic_profile(p)
+        aggregate = build_group_aggregate("xiangma", profiles)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with override_settings(REPORTS_DIR=tmp):
+                write_report("xiangma", aggregate, profiles)
+                # Each member has its own file under <group>_members/<id>.json
+                member_dir = __import__("pathlib").Path(tmp) / "xiangma_members"
+                self.assertEqual(len(list(member_dir.glob("*.json"))), len(profiles))
+                # And can be read back individually.
+                first = read_member_profile("xiangma", profiles[0].user_id)
+                self.assertIsNotNone(first)
+                self.assertEqual(first["user_id"], profiles[0].user_id)
+                self.assertEqual(first["name"], profiles[0].name)
+
+    def test_member_profile_endpoint(self):
+        import json
+        import tempfile
+
+        from django.test import Client, override_settings
+        from core.member_report import (
+            build_group_aggregate,
+            build_member_profiles,
+            generate_deterministic_profile,
+            write_report,
+        )
+
+        profiles = build_member_profiles("xiangma")
+        for p in profiles:
+            generate_deterministic_profile(p)
+        aggregate = build_group_aggregate("xiangma", profiles)
+        first = profiles[0]
+
+        c = Client(HTTP_HOST="localhost")
+        with tempfile.TemporaryDirectory() as tmp:
+            with override_settings(REPORTS_DIR=tmp):
+                # Not generated yet -> per-member endpoint 404s.
+                r = c.get(f"/api/groups/xiangma/member-report/{first.user_id}/")
+                self.assertEqual(r.status_code, 404)
+
+                write_report("xiangma", aggregate, profiles)
+                r = c.get(f"/api/groups/xiangma/member-report/{first.user_id}/")
+                self.assertEqual(r.status_code, 200)
+                data = json.loads(r.content)
+                self.assertEqual(data["user_id"], first.user_id)
+                self.assertTrue(data["portrait"])
+
+                # Unknown member -> 404.
+                r = c.get("/api/groups/xiangma/member-report/999999/")
+                self.assertEqual(r.status_code, 404)
+
     def test_member_report_endpoint(self):
         import json
         import tempfile
@@ -432,6 +499,9 @@ class MemberReportTest(TestCase):
                 self.assertEqual(r.status_code, 200)
                 data = json.loads(r.content)
                 self.assertEqual(len(data["members"]), 2)
+                # Index members are lightweight summaries (no full portrait).
+                self.assertEqual(data["members"][0]["user_id"], profiles[0].user_id)
+                self.assertNotIn("portrait", data["members"][0])
 
     def test_member_report_endpoint_group_not_found(self):
         from django.test import Client

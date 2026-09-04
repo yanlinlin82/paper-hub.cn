@@ -51,6 +51,9 @@ async function request<T = unknown>(
       ...options.headers,
     },
     credentials: "same-origin",
+    // Never cache API responses — the member-report data is regenerated
+    // server-side, and stale browser/HTTP caches would show old results.
+    cache: "no-store",
     ...options,
   };
 
@@ -165,6 +168,8 @@ const api = {
   },
   getMemberReport: <T = unknown>(groupName: string) =>
     request<T>("GET", `/groups/${groupName}/member-report/`),
+  getMemberProfile: <T = unknown>(groupName: string, userId: number) =>
+    request<T>("GET", `/groups/${groupName}/member-report/${userId}/`),
 
   // User
   getCurrentUser: <T = unknown>() => request<T>("GET", "/me/"),

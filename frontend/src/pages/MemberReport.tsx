@@ -7,6 +7,7 @@ import {
   CommonPaper,
   MemberProfile,
   MemberReport,
+  MemberSummary,
   TopicAxis,
 } from "../types";
 
@@ -81,10 +82,12 @@ function GeneratorCredit({
 function MemberProfileModal({
   profile,
   groupName,
+  loading,
   onClose,
 }: {
   profile: MemberProfile | null;
   groupName: string;
+  loading: boolean;
   onClose: () => void;
 }) {
   const journals = profile
@@ -92,8 +95,18 @@ function MemberProfileModal({
     : [];
   const maxJournal = Math.max(1, ...journals.map(([, c]) => c));
 
+  // contentClassName carries .member-report onto the modal-content so the
+  // .report-* styles apply (the Bootstrap modal is portaled to <body> and
+  // would otherwise be outside <section className="member-report">).
   return (
-    <Modal show={!!profile} onHide={onClose} size="lg" centered scrollable>
+    <Modal
+      show={loading || !!profile}
+      onHide={onClose}
+      size="lg"
+      centered
+      scrollable
+      contentClassName="member-report"
+    >
       <Modal.Header closeButton>
         <Modal.Title>
           {profile && (
@@ -109,6 +122,12 @@ function MemberProfileModal({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        {loading && (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status" />
+            <div className="text-body-secondary small mt-2">正在加载画像…</div>
+          </div>
+        )}
         {profile && (
           <>
             {/* Hero: stats + intro */}
@@ -277,6 +296,7 @@ function MemberReportPage() {
   const { groupName } = useParams<{ groupName: string }>();
   const [report, setReport] = useState<MemberReport | null>(null);
   const [selected, setSelected] = useState<MemberProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -295,6 +315,24 @@ function MemberReportPage() {
     };
     fetchReport();
   }, [groupName]);
+
+  // Fetch a member's full profile lazily from its own file/endpoint so the page
+  // always shows the latest per-member analysis.
+  const openProfile = async (member: MemberSummary) => {
+    setProfileLoading(true);
+    setSelected(null);
+    try {
+      const profile = await api.getMemberProfile<MemberProfile>(
+        groupName!,
+        member.user_id,
+      );
+      setSelected(profile);
+    } catch {
+      setSelected(null);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   if (loading) return <LoadingSpinner />;
   if (error)
@@ -458,7 +496,7 @@ function MemberReportPage() {
             key={m.user_id}
             type="button"
             className="report-member-btn"
-            onClick={() => setSelected(m)}
+            onClick={() => openProfile(m)}
           >
             <div className="d-flex align-items-center gap-2">
               <span className="report-member-name">{m.name}</span>
@@ -493,6 +531,7 @@ function MemberReportPage() {
       <MemberProfileModal
         profile={selected}
         groupName={groupName!}
+        loading={profileLoading}
         onClose={() => setSelected(null)}
       />
     </section>

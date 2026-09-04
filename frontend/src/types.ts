@@ -125,6 +125,17 @@ export interface MemberPaper {
   checkin_at?: string;
 }
 
+// Lightweight row in the group index member list (loaded from the index; the
+// full profile is fetched lazily from the per-member endpoint).
+export interface MemberSummary {
+  user_id: number;
+  name: string;
+  review_count: number;
+  word_per_review: number;
+  reader_type: string;
+  top_topics: string[];
+}
+
 export interface MemberProfile {
   user_id: number;
   name: string;
@@ -160,7 +171,7 @@ export interface MemberReport {
     generated_at?: string;
   };
   aggregate: MemberReportAggregate;
-  members: MemberProfile[];
+  members: MemberSummary[];
 }
 
 // ---- Auth Context Types ----

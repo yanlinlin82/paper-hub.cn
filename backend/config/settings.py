@@ -239,7 +239,7 @@ LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.deepseek.com")
-LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-chat")
+LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-v4-flash")
 
 # Directory where generated member reports are stored (local file storage).
 # Defaults to <project>/reports, overridable for tests or deployment.

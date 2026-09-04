@@ -477,30 +477,42 @@ body {
     font-size: 0.75rem;
 }
 
-/* Modal grouped sections */
+/* Modal grouped sections — generous spacing between blocks */
 .member-report .report-modal-section {
-    padding: 0.875rem 0;
+    padding: 1.125rem 0;
     border-bottom: 1px solid var(--bs-border-color);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.875rem;
 }
 .member-report .report-modal-section:first-of-type {
-    padding-top: 0.25rem;
+    padding-top: 0.375rem;
 }
 .member-report .report-modal-section:last-of-type {
     border-bottom: 0;
-    padding-bottom: 0.25rem;
+    padding-bottom: 0.375rem;
+    margin-bottom: 0;
 }
+/* Section headings: bold, slightly larger, clearly legible */
 .member-report .report-label {
     display: block;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    color: var(--report-accent);
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-    text-transform: uppercase;
+    font-size: 0.93rem;
+    letter-spacing: 0.02em;
+    color: var(--bs-body-color);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-transform: none;
+}
+.member-report .report-label::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 0.95em;
+    margin-right: 0.45rem;
+    background: var(--report-accent);
+    border-radius: 1px;
+    vertical-align: -0.08em;
 }
 .member-report .report-modal-row {
-    padding: 0.45rem 0;
+    padding: 0.55rem 0;
 }
 .member-report .report-modal-row:first-of-type {
     padding-top: 0;
@@ -509,16 +521,19 @@ body {
     padding-bottom: 0;
 }
 .member-report .report-modal-row .report-label {
-    margin-bottom: 0.2rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
 }
 .member-report .report-value {
     margin: 0;
-    font-size: 0.9rem;
-    line-height: 1.75;
+    font-size: 0.92rem;
+    line-height: 1.8;
     color: var(--bs-body-color);
+    padding-left: 0;
 }
 .member-report .report-modal-block {
-    padding: 0.25rem 0 0.5rem;
+    padding: 0.375rem 0 0.75rem;
 }
 .member-report .report-modal-block:last-of-type {
     padding-bottom: 0;
