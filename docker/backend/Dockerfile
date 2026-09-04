@@ -7,7 +7,7 @@
 # For production deployment, build a derivative image or CI
 # step that runs uv sync before bundling.
 
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv runtime (needed for uv run in CMD / compose command)
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.9 /uv /uvx /bin/
 ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 
 # Copy project source (overridden in dev by ./backend:/app bind mount)
