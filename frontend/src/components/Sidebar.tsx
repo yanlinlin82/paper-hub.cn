@@ -19,6 +19,7 @@ function Sidebar({ groupName }: SidebarProps) {
     { to: `/group/${groupName}/this_month`, label: "本月分享", show: true },
     { to: `/group/${groupName}/last_month`, label: "上月分享", show: true },
     { to: `/group/${groupName}/rank`, label: "社群榜单", show: true },
+    { to: `/group/${groupName}/member-report`, label: "成员画像", show: true },
     { to: `/group/${groupName}/trash`, label: "回收站", show: !!user },
     {
       to: `/group/${groupName}/custom-checkin-interval-config`,

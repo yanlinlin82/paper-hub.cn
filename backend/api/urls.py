@@ -114,4 +114,9 @@ urlpatterns = [
         frontend_api.get_group_rankings,
         name="get_group_rankings",
     ),
+    path(
+        "groups/<str:group_name>/member-report/",
+        frontend_api.get_member_report,
+        name="get_member_report",
+    ),
 ]

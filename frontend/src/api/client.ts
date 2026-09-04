@@ -163,6 +163,8 @@ const api = {
       `/groups/${groupName}/journals/${encodeURIComponent(journalName)}/${query ? "?" + query : ""}`,
     );
   },
+  getMemberReport: <T = unknown>(groupName: string) =>
+    request<T>("GET", `/groups/${groupName}/member-report/`),
 
   // User
   getCurrentUser: <T = unknown>() => request<T>("GET", "/me/"),

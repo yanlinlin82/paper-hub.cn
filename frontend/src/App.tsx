@@ -7,6 +7,7 @@ import Rank from "./pages/Rank";
 import CustomCheckInIntervalConfig from "./pages/CustomCheckInIntervalConfig";
 import UserReviews from "./pages/UserReviews";
 import JournalReviews from "./pages/JournalReviews";
+import MemberReport from "./pages/MemberReport";
 
 function App() {
   return (
@@ -105,6 +106,14 @@ function App() {
         element={
           <Layout>
             <Rank />
+          </Layout>
+        }
+      />
+      <Route
+        path="/group/:groupName/member-report"
+        element={
+          <Layout>
+            <MemberReport />
           </Layout>
         }
       />

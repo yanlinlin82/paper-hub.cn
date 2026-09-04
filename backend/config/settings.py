@@ -232,3 +232,15 @@ if os.getenv("CSRF_TRUSTED_ORIGINS"):
 
 # Session expire hours
 SESSION_EXPIRE_HOURS = 6
+
+# LLM (OpenAI-compatible) settings for report generation
+# Reads from env (see .env / .env.docker). DeepSeek is the default provider.
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.deepseek.com")
+LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-chat")
+
+# Directory where generated member reports are stored (local file storage).
+# Defaults to <project>/reports, overridable for tests or deployment.
+REPORTS_DIR = Path(os.getenv("REPORTS_DIR", BASE_DIR / "reports"))

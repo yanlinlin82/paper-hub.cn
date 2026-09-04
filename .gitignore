@@ -7,6 +7,7 @@ backend/static_root/
 backend/.venv/
 backend/*.log
 backend/pubmed/
+backend/reports/
 backend/secret_key.txt
 backend/static/assets/
 backend/.db.sqlite3.*

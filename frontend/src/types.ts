@@ -85,6 +85,84 @@ export interface UserInfo {
   nickname?: string;
 }
 
+// ---- Member Reading-Interest Report ----
+
+export interface TopicAxis {
+  topic: string;
+  count: number;
+  pct: number;
+}
+
+export interface MemberReportAggregate {
+  total_reviews: number;
+  total_members: number;
+  total_words: number;
+  top_journals: Record<string, number>;
+  topic_axes: TopicAxis[];
+  member_tiers: Record<string, number>;
+  cohort_summary: string;
+  observations: { title: string; text: string }[];
+  common_papers: CommonPaper[];
+}
+
+export interface CommonPaper {
+  paper_id: number;
+  review_id: number | null;
+  title: string;
+  journal: string;
+  year: number | null;
+  reader_count: number;
+  readers: { user_id: number; name: string }[];
+}
+
+export interface MemberPaper {
+  id: number;
+  review_id?: number | null;
+  title?: string;
+  journal?: string;
+  year?: number | null;
+  comment_excerpt?: string;
+  checkin_at?: string;
+}
+
+export interface MemberProfile {
+  user_id: number;
+  name: string;
+  review_count: number;
+  total_words: number;
+  word_per_review: number;
+  first_checkin: string;
+  last_checkin: string;
+  active_months: number;
+  top_journals: Record<string, number>;
+  top_topics: string[];
+  topic_counts: Record<string, number>;
+  reader_type: string;
+  portrait: string;
+  reading_form: string;
+  rating_scale: string;
+  theme_entry: string;
+  signature: string;
+  papers: MemberPaper[];
+}
+
+export interface MemberReport {
+  group: {
+    name: string;
+    display_name: string;
+    desc?: string;
+  };
+  generated_at: string;
+  generator: {
+    mode: string;
+    provider: string;
+    model: string;
+    generated_at?: string;
+  };
+  aggregate: MemberReportAggregate;
+  members: MemberProfile[];
+}
+
 // ---- Auth Context Types ----
 
 export interface AuthContextValue {

@@ -244,3 +244,198 @@ class CustomCheckInIntervalModelTest(TestCase):
         )
         self.assertEqual(interval.year, 2024)
         self.assertEqual(interval.month, 6)
+
+
+class MemberReportTest(TestCase):
+    """Tests for the member reading-interest report generation."""
+
+    def setUp(self):
+        self.group = GroupProfile.objects.create(
+            name="xiangma", display_name="响马读paper", desc="a group"
+        )
+        self.user_a = UserProfile.objects.create(nickname="Alpha")
+        self.user_b = UserProfile.objects.create(nickname="Beta")
+        self.paper1 = Paper.objects.create(
+            title="Deep learning for cancer detection",
+            journal="Nature",
+            keywords="cancer\ndeep learning\nimaging",
+        )
+        self.paper2 = Paper.objects.create(
+            title="Whole-genome sequencing study",
+            journal="Nature Genetics",
+            keywords="genome\nsequencing",
+        )
+        r1 = Review.objects.create(
+            paper=self.paper1,
+            creator=self.user_a,
+            comment="#paper doi:10.1/x Deep learning for cancer detection. "
+            "这篇综述非常清晰地梳理了深度学习在癌症检测中的应用。",
+        )
+        r2 = Review.objects.create(
+            paper=self.paper2,
+            creator=self.user_a,
+            comment="#paper doi:10.2/y Whole-genome sequencing study. "
+            "测序方法学部分值得细读。",
+        )
+        r3 = Review.objects.create(
+            paper=self.paper1,
+            creator=self.user_b,
+            comment="#paper doi:10.3/z Deep learning for cancer detection. "
+            "影像组学与深度学习结合是亮点。",
+        )
+        self.group.reviews.add(r1, r2, r3)
+
+    def test_infer_topics(self):
+        from core.member_report import infer_topics
+
+        topics = infer_topics(self.paper1)
+        self.assertIn("机器学习 · 深度学习", topics)
+        self.assertIn("癌症 · 肿瘤", topics)
+
+    def test_strip_comment_header(self):
+        from core.member_report import parse_review_body
+
+        body = parse_review_body(
+            "#paper doi:10.1/x Deep learning for cancer detection. 这篇综述非常清晰。"
+        )
+        self.assertIn("这篇综述非常清晰", body)
+        self.assertNotIn("doi:", body)
+        self.assertNotIn("Deep learning for cancer detection.", body)
+
+    def test_build_member_profiles(self):
+        from core.member_report import build_member_profiles
+
+        profiles = build_member_profiles("xiangma")
+        by_name = {p.name: p for p in profiles}
+        self.assertIn("Alpha", by_name)
+        self.assertIn("Beta", by_name)
+        alpha = by_name["Alpha"]
+        self.assertEqual(alpha.review_count, 2)
+        self.assertGreater(alpha.total_words, 0)
+        self.assertIn("机器学习 · 深度学习", alpha.top_topics)
+
+    def test_deterministic_profile_fills_narrative(self):
+        from core.member_report import (
+            build_member_profiles,
+            generate_deterministic_profile,
+        )
+
+        profile = build_member_profiles("xiangma")[0]
+        generate_deterministic_profile(profile)
+        self.assertTrue(profile.portrait)
+        self.assertTrue(profile.reading_form)
+        self.assertTrue(profile.rating_scale)
+        self.assertTrue(profile.theme_entry)
+
+    def test_generate_llm_profile_without_bridge_falls_back(self):
+        from core.member_report import (
+            build_member_profiles,
+            generate_llm_profile,
+        )
+
+        profile = build_member_profiles("xiangma")[0]
+        # No bridge => deterministic templates, returns False (not LLM-generated).
+        used_llm = generate_llm_profile(profile, None)
+        self.assertFalse(used_llm)
+        self.assertTrue(profile.portrait)
+        self.assertTrue(profile.reading_form)
+
+    def test_generate_llm_profile_api_failure_falls_back(self):
+        from unittest.mock import MagicMock
+
+        from core.member_report import (
+            build_member_profiles,
+            generate_llm_profile,
+        )
+
+        profile = build_member_profiles("xiangma")[0]
+        llm = MagicMock()
+        # Simulate an API/network failure (chat_raw returns None).
+        llm.chat_raw.return_value = None
+        used_llm = generate_llm_profile(profile, llm)
+        self.assertFalse(used_llm)
+        self.assertTrue(profile.portrait)
+
+    def test_generate_llm_profile_success(self):
+        from unittest.mock import MagicMock
+
+        from core.member_report import (
+            build_member_profiles,
+            generate_llm_profile,
+        )
+
+        profile = build_member_profiles("xiangma")[0]
+        llm = MagicMock()
+        llm.chat_raw.return_value = (
+            '{"portrait":"专注方法学的长期思考者",'
+            '"reading_form":"以方法学为主的系统型读者",'
+            '"rating_scale":"评论细致，偏重方法与证据",'
+            '"theme_entry":"可深入方法学新进展"}'
+        )
+        used_llm = generate_llm_profile(profile, llm)
+        self.assertTrue(used_llm)
+        self.assertEqual(profile.portrait, "专注方法学的长期思考者")
+        self.assertEqual(profile.reading_form, "以方法学为主的系统型读者")
+
+    def test_write_report_creates_json(self):
+        import json
+        import tempfile
+
+        from django.test import override_settings
+        from core.member_report import (
+            build_group_aggregate,
+            build_member_profiles,
+            generate_deterministic_profile,
+            write_report,
+        )
+
+        profiles = build_member_profiles("xiangma")
+        for p in profiles:
+            generate_deterministic_profile(p)
+        aggregate = build_group_aggregate("xiangma", profiles)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with override_settings(REPORTS_DIR=tmp):
+                path = write_report("xiangma", aggregate, profiles)
+                self.assertTrue(path.exists())
+                self.assertIn("xiangma_member_report.json", path.name)
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self.assertEqual(data["group"]["name"], "xiangma")
+                self.assertEqual(len(data["members"]), 2)
+
+    def test_member_report_endpoint(self):
+        import json
+        import tempfile
+
+        from django.test import Client, override_settings
+        from core.member_report import (
+            build_group_aggregate,
+            build_member_profiles,
+            generate_deterministic_profile,
+            write_report,
+        )
+
+        profiles = build_member_profiles("xiangma")
+        for p in profiles:
+            generate_deterministic_profile(p)
+        aggregate = build_group_aggregate("xiangma", profiles)
+
+        c = Client(HTTP_HOST="localhost")
+        # Before generation, the endpoint returns 404.
+        with tempfile.TemporaryDirectory() as tmp:
+            with override_settings(REPORTS_DIR=tmp):
+                r = c.get("/api/groups/xiangma/member-report/")
+                self.assertEqual(r.status_code, 404)
+
+                write_report("xiangma", aggregate, profiles)
+                r = c.get("/api/groups/xiangma/member-report/")
+                self.assertEqual(r.status_code, 200)
+                data = json.loads(r.content)
+                self.assertEqual(len(data["members"]), 2)
+
+    def test_member_report_endpoint_group_not_found(self):
+        from django.test import Client
+
+        c = Client(HTTP_HOST="localhost")
+        r = c.get("/api/groups/nonexistent-group/member-report/")
+        self.assertEqual(r.status_code, 404)

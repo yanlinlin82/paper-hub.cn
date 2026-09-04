@@ -230,3 +230,487 @@ body {
         opacity: 1;
     }
 }
+
+/* ================================================================
+   Member reading-interest report
+   ================================================================ */
+.member-report {
+    --report-accent: #1f6f5c;
+    --report-accent-soft: rgba(31, 111, 92, 0.12);
+}
+.member-report .report-header {
+    border-bottom: 2px solid var(--bs-body-color);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+.member-report .report-kicker {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    color: var(--report-accent);
+    margin-bottom: 0.4rem;
+}
+.member-report .report-figs {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+.member-report .report-fig {
+    flex: 1 1 130px;
+    padding: 1rem 1.125rem;
+    border-right: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+}
+.member-report .report-fig:last-child {
+    border-right: 0;
+}
+.member-report .report-fig b {
+    display: block;
+    font-size: 1.4rem;
+    line-height: 1.2;
+    color: var(--report-accent);
+    font-weight: 700;
+}
+.member-report .report-fig span {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--bs-secondary-color);
+    margin-top: 0.25rem;
+    letter-spacing: 0.06em;
+}
+
+.member-report .report-section-header {
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.4rem;
+}
+.member-report .report-card {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 1rem 1.25rem;
+    background: var(--bs-body-bg);
+}
+
+/* Topic bars */
+.member-report .report-bars {
+    margin: 0.25rem 0;
+}
+.member-report .report-bar {
+    display: flex;
+    align-items: center;
+    font-size: 0.83rem;
+    margin: 0.35rem 0;
+}
+.member-report .report-bar-label {
+    width: 130px;
+    flex: 0 0 130px;
+    color: var(--bs-secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0.5rem;
+}
+.member-report .report-bar-track {
+    flex: 1;
+    height: 14px;
+    background: var(--bs-tertiary-bg);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.member-report .report-bar-fill {
+    display: block;
+    height: 100%;
+    background: var(--report-accent);
+    border-radius: 2px;
+    min-width: 2px;
+}
+.member-report .report-bar-value {
+    width: 84px;
+    flex: 0 0 84px;
+    text-align: right;
+    color: var(--bs-secondary-color);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Journal / tier badges */
+.member-report .report-journal-badge {
+    background: var(--report-accent-soft);
+    color: var(--report-accent);
+    font-weight: 500;
+}
+.member-report .report-badge-count {
+    font-size: 0.72rem;
+    opacity: 0.8;
+    margin-left: 0.25rem;
+}
+.member-report .report-metric-sm {
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color);
+}
+
+/* Member grid */
+.member-report .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+}
+.member-report .report-member-btn {
+    text-align: left;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 0.75rem 0.875rem;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    display: block;
+    width: 100%;
+}
+.member-report .report-member-btn:hover {
+    border-color: var(--report-accent);
+    box-shadow: 0 0 0 0.15rem var(--report-accent-soft);
+}
+.member-report .report-member-name {
+    font-weight: 700;
+}
+.member-report .report-member-meta {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+    margin-top: 0.2rem;
+}
+.member-report .report-member-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.35rem;
+}
+.member-report .report-topic-sm {
+    font-size: 0.68rem;
+    color: var(--report-accent);
+    background: var(--report-accent-soft);
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+}
+
+/* Tier badges */
+.member-report .report-tier {
+    font-size: 0.66rem;
+    border-radius: 2px;
+    padding: 0.05rem 0.4rem;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.member-report .report-tier.tier-a {
+    color: var(--report-accent);
+    background: var(--report-accent-soft);
+}
+.member-report .report-tier.tier-b {
+    color: #5b6b66;
+    background: var(--bs-tertiary-bg);
+}
+.member-report .report-tier.tier-c {
+    color: #8a6d1f;
+    background: rgba(201, 154, 52, 0.15);
+}
+.member-report .report-tier.tier-d {
+    color: #8c2f39;
+    background: rgba(140, 47, 57, 0.12);
+}
+
+/* Profile modal */
+.member-report .report-profile-hero {
+    border: 1px solid var(--report-accent-soft);
+    border-left: 3px solid var(--report-accent);
+    background: var(--report-accent-soft);
+    border-radius: 0.5rem;
+    padding: 1rem 1.125rem;
+    margin-bottom: 1.25rem;
+}
+.member-report .report-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+.member-report .report-stat {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 0.4rem 0.5rem;
+    text-align: center;
+    min-width: 0;
+}
+.member-report .report-stat b {
+    display: block;
+    color: var(--report-accent);
+    font-size: 1.15rem;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+}
+.member-report .report-stat span {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--bs-secondary-color);
+    margin-top: 0.15rem;
+    white-space: nowrap;
+}
+.member-report .report-quote {
+    color: var(--bs-body-color);
+    font-size: 0.95rem;
+    line-height: 1.75;
+}
+.member-report .report-quote-block {
+    margin: 0.4rem 0 0;
+    padding: 0.5rem 0.875rem;
+    border-left: 3px solid var(--report-accent);
+    background: var(--bs-body-bg);
+    border-radius: 0 0.25rem 0.25rem 0;
+    color: var(--bs-body-color);
+    font-size: 0.9rem;
+}
+.member-report .report-topic {
+    background: var(--report-accent-soft);
+    color: var(--report-accent);
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* Modal grouped sections */
+.member-report .report-modal-section {
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+    margin-bottom: 0.25rem;
+}
+.member-report .report-modal-section:first-of-type {
+    padding-top: 0.25rem;
+}
+.member-report .report-modal-section:last-of-type {
+    border-bottom: 0;
+    padding-bottom: 0.25rem;
+}
+.member-report .report-label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--report-accent);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+}
+.member-report .report-modal-row {
+    padding: 0.45rem 0;
+}
+.member-report .report-modal-row:first-of-type {
+    padding-top: 0;
+}
+.member-report .report-modal-row:last-of-type {
+    padding-bottom: 0;
+}
+.member-report .report-modal-row .report-label {
+    margin-bottom: 0.2rem;
+}
+.member-report .report-value {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: var(--bs-body-color);
+}
+.member-report .report-modal-block {
+    padding: 0.25rem 0 0.5rem;
+}
+.member-report .report-modal-block:last-of-type {
+    padding-bottom: 0;
+}
+
+/* Journal mini bars in modal */
+.member-report .report-journals {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0.35rem 0 0;
+}
+.member-report .report-journal {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px dashed var(--bs-border-color);
+    overflow: hidden;
+}
+.member-report .report-journal:last-child {
+    border-bottom: 0;
+}
+.member-report .report-journal-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: var(--report-accent-soft);
+    z-index: 0;
+}
+.member-report .report-journal-name {
+    position: relative;
+    z-index: 1;
+}
+.member-report .report-journal-count {
+    position: relative;
+    z-index: 1;
+    color: var(--bs-secondary-color);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Representative papers */
+.member-report .report-papers {
+    margin: 0.5rem 0 0;
+}
+.member-report .report-paper {
+    padding: 0.625rem 0;
+    border-bottom: 1px dashed var(--bs-border-color);
+}
+.member-report .report-paper:last-child {
+    border-bottom: 0;
+}
+.member-report .report-paper-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+.member-report .report-paper-comment {
+    font-size: 0.82rem;
+    color: var(--bs-secondary-color);
+    margin-top: 0.3rem;
+    line-height: 1.65;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Generator credit & header links */
+.member-report .report-credit {
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color);
+}
+.member-report .report-credit b {
+    color: var(--report-accent);
+}
+.member-report .report-header-links {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+}
+.member-report .report-header-links a {
+    color: var(--report-accent);
+    text-decoration: none;
+}
+.member-report .report-header-links a:hover {
+    text-decoration: underline;
+}
+
+/* Cohort summary */
+.member-report .report-summary {
+    border-left: 3px solid var(--report-accent);
+    background: var(--report-accent-soft);
+    border-radius: 0.25rem;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+/* Fun observations */
+.member-report .report-observations {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.member-report .report-observation {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px dashed var(--bs-border-color);
+    font-size: 0.9rem;
+}
+.member-report .report-observation:last-child {
+    border-bottom: 0;
+}
+.member-report .report-obs-title {
+    flex: 0 0 auto;
+    color: var(--report-accent);
+    font-weight: 600;
+}
+.member-report .report-obs-title::after {
+    content: "：";
+}
+.member-report .report-obs-text {
+    color: var(--bs-body-color);
+}
+
+/* Common papers */
+.member-report .report-common-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.member-report .report-common {
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed var(--bs-border-color);
+}
+.member-report .report-common:last-child {
+    border-bottom: 0;
+}
+.member-report .report-common-readers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+.member-report .report-common-readers a {
+    text-decoration: none;
+}
+
+/* Clickable paper title in modal / common list */
+.member-report .report-paper-link {
+    color: var(--bs-body-color);
+    text-decoration: none;
+}
+.member-report .report-paper-link:hover {
+    color: var(--report-accent);
+}
+
+/* Member grid inline share link */
+.member-report .report-member-meta a {
+    color: var(--report-accent);
+    text-decoration: none;
+}
+.member-report .report-member-meta a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive tweaks for the profile modal */
+@media (max-width: 575.98px) {
+    .member-report .report-stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .member-report .report-profile-hero {
+        padding: 0.875rem;
+    }
+}
+
+/* Modal body comfortable reading width */
+.member-report + .modal-content .modal-body,
+.modal-content .modal-body {
+    padding: 1.25rem 1.5rem;
+}
+.modal-content .modal-header {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.modal-content .modal-header .modal-title {
+    font-size: 1.05rem;
+}
