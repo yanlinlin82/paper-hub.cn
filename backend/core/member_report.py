@@ -22,7 +22,7 @@ import re
 import threading
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
@@ -332,6 +332,7 @@ class MemberProfile:
             ],
             "topic_counts": self.topic_counts,
             "reader_type": self.reader_type,
+            "avg_per_month": self.avg_per_month(),
             "portrait": self.portrait,
             "reading_form": self.reading_form,
             "rating_scale": self.rating_scale,
@@ -339,6 +340,11 @@ class MemberProfile:
             "signature": self.signature,
             "papers": self.papers,
         }
+
+    def avg_per_month(self) -> float:
+        """Average number of reviews per active month (fair across join times)."""
+        months = max(1, self.active_months)
+        return round(self.review_count / months, 2)
 
     def summary(self) -> Dict:
         """Light-weight row for the group index (the member list card)."""
@@ -349,18 +355,97 @@ class MemberProfile:
             "word_per_review": self.word_per_review,
             "reader_type": self.reader_type,
             "top_topics": self.top_topics,
+            "last_checkin": self.last_checkin,
+            "avg_per_month": self.avg_per_month(),
         }
 
 
-def _member_tier(count: int) -> str:
-    """Assign a tier label mirroring the reference report's productivity bands."""
-    if count >= 13:
-        return "核心"
-    if count >= 8:
-        return "骨干"
-    if count >= 6:
-        return "稳定"
-    return "活跃"
+# A member is considered active if they checked in during the latest natural
+# month present in the group's records (the reference month). The group checks in
+# monthly, so someone who did not check in that month is treated as having
+# dropped off ("暂停").
+
+
+TIER_CRITERIA_NOTE = (
+    "分档依据：月均打卡频率（累计有效分享 ÷ 活跃月数，消除加入时长的影响）+ 最近是否打卡。"
+    "活跃 = 最近一个月（本月或上月）内有过打卡。高频：月均 ≥2 篇；坚持：月均 ≥1 篇；"
+    "稀疏：月均不足 1 篇；尝试：总计仅 1 条；暂停：本月/上月均未打卡（可能断更）。"
+)
+
+
+TIER_LEGEND = [
+    {"name": "高频", "meaning": "活跃（最近有打卡）且月均 ≥2 篇"},
+    {"name": "坚持", "meaning": "活跃（最近有打卡）且月均 ≥1 篇"},
+    {"name": "稀疏", "meaning": "活跃（最近有打卡）且月均不足 1 篇"},
+    {"name": "尝试", "meaning": "活跃（最近有打卡）但总共仅 1 条"},
+    {"name": "暂停", "meaning": "本月/上月均未打卡（可能断更）"},
+]
+
+
+def _as_date(value):
+    """Accept a date object or an ISO date string and return a date."""
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    try:
+        return date.fromisoformat(str(value)[:10])
+    except (ValueError, TypeError):
+        return datetime.now().date()
+
+
+def _month_key(value):
+    """Natural month key (year, month) for a date/ISO string."""
+    d = _as_date(value)
+    return (d.year, d.month)
+
+
+def _shift_month(month, delta):
+    """Shift a (year, month) key by delta months (delta may be negative)."""
+    y, m = month
+    total = y * 12 + (m - 1) + delta
+    return (total // 12, total % 12 + 1)
+
+
+def _current_month():
+    """Month key for "today"."""
+    return _month_key(datetime.now())
+
+
+def _is_active(last_checkin, ref_month) -> bool:
+    """True if the member last checked in this month or the previous one.
+
+    The group checks in monthly, so "上个月提交过" (checked in this natural month
+    or the month before) counts as active; earlier check-ins mean a drop-off.
+    """
+    last = _month_key(last_checkin)
+    return last >= _shift_month(ref_month, -1)
+
+
+def _avg_per_month(count: int, active_months: int) -> float:
+    """Average reviews per active month (>= 1 month denominator)."""
+    return round(count / max(1, active_months), 2)
+
+
+def _member_tier(count: int, active_months: int, last_checkin, ref_month=None) -> str:
+    """Assign a tier from the check-in frequency and whether they checked in lately.
+
+    Frequency (reviews per active month) is used so members who joined at
+    different times are compared fairly. A member whose last check-in is not in
+    the current or previous month is "暂停" regardless of their history.
+    """
+    if ref_month is None:
+        ref_month = _current_month()
+    if not _is_active(last_checkin, ref_month):
+        return "暂停"
+    if count <= 1:
+        return "尝试"
+    freq = _avg_per_month(count, active_months)
+    if freq >= 2.0:
+        return "高频"
+    if freq >= 1.0:
+        return "坚持"
+    return "稀疏"
 
 
 def _friendly_name(nickname: str) -> str:
@@ -370,6 +455,25 @@ def _friendly_name(nickname: str) -> str:
     name = re.sub(r"[^\w\u4e00-\u9fff·]+", " ", name)
     name = re.sub(r"\s+", " ", name).strip()
     return name or (nickname or "").strip() or "未命名"
+
+
+def _sort_members(profiles: Sequence["MemberProfile"], ref_month=None) -> None:
+    """Sort members by activity first, then check-in frequency, then count/name.
+
+    Active members (checked in this or last month) come first; within each group
+    they are ordered by average reviews per month (desc), then review count
+    (desc), then name ascending (via a stable pre-sort). Paused members sink.
+    """
+    if ref_month is None:
+        ref_month = _current_month()
+    profiles.sort(key=lambda p: p.name)  # stable name pre-sort
+    profiles.sort(
+        key=lambda p: (
+            0 if _is_active(p.last_checkin, ref_month) else 1,
+            -p.avg_per_month(),
+            -p.review_count,
+        )
+    )
 
 
 def parse_review_body(comment: str) -> str:
@@ -425,6 +529,9 @@ def build_member_profiles(group_name: str, min_count: int = 1) -> List[MemberPro
         .select_related("creator", "paper")
         .order_by("checkin_at")
     )
+
+    # "上个月" is relative to today: active means checked in this month or last.
+    ref_month = _current_month()
 
     grouped = _collect_member_data(reviews)
 
@@ -489,7 +596,9 @@ def build_member_profiles(group_name: str, min_count: int = 1) -> List[MemberPro
         )
 
         top_topics = [t for t, _ in topic_counter.most_common(4)]
-        reader_type = _member_tier(len(member_reviews))
+        reader_type = _member_tier(
+            len(member_reviews), active_months, last, ref_month
+        )
         # Journal label: use the last segment of multi-part journal names.
         top_journals = {
             _shorten_journal(j): c
@@ -530,8 +639,7 @@ def build_member_profiles(group_name: str, min_count: int = 1) -> List[MemberPro
             )
         )
 
-    # Sort by review count descending (most prolific first), tie-break by name.
-    profiles.sort(key=lambda p: (-p.review_count, p.name))
+    _sort_members(profiles, ref_month)
     return profiles
 
 
@@ -927,7 +1035,11 @@ def build_group_aggregate(group_name: str, profiles: Sequence[MemberProfile]) ->
             j: c for j, c in journal_counter.most_common(8)
         },
         "topic_axes": axis_rows,
-        "member_tiers": {t: tiers[t] for t in ["核心", "骨干", "稳定", "活跃"]},
+        "member_tiers": {
+            t: tiers[t] for t in ["高频", "坚持", "稀疏", "尝试", "暂停"]
+        },
+        "tier_criteria_note": TIER_CRITERIA_NOTE,
+        "tier_legend": TIER_LEGEND,
     }
     # Cohort narrative: a one-line summary, factual observations, and the
     # papers read by the most distinct members. common_papers must be set before
@@ -996,9 +1108,21 @@ def read_member_summaries(group_name: str) -> List[Dict]:
                 "word_per_review": data.get("word_per_review", 0),
                 "reader_type": data.get("reader_type", ""),
                 "top_topics": data.get("top_topics", []),
+                "last_checkin": data.get("last_checkin", ""),
+                "active_months": data.get("active_months", 0),
+                "avg_per_month": data.get("avg_per_month", 0),
             }
         )
-    summaries.sort(key=lambda s: (-s["review_count"], s["name"]))
+    # Same activity-first ordering as the full report.
+    ref_month = _current_month()
+    summaries.sort(key=lambda s: s["name"])
+    summaries.sort(
+        key=lambda s: (
+            0 if _is_active(s.get("last_checkin", ""), ref_month) else 1,
+            -s.get("avg_per_month", 0),
+            -s["review_count"],
+        )
+    )
     return summaries
 
 
@@ -1192,9 +1316,15 @@ def build_html_report(
         )
 
     tiers = []
-    for t in ["核心", "骨干", "稳定", "活跃"]:
+    for t in ["高频", "坚持", "稀疏", "尝试", "暂停"]:
         c = aggregate["member_tiers"].get(t, 0)
         tiers.append(f'<span class="mb {_tier_class(t)}">{_esc(t)} {c}</span>')
+
+    legend_html = "".join(
+        f'<div class="legend-row"><span class="mb {_tier_class(item["name"])}">'
+        f'{_esc(item["name"])}</span><span class="legend-meaning">{_esc(item["meaning"])}</span></div>'
+        for item in aggregate.get("tier_legend", [])
+    )
 
     # Cohort narrative: summary + fun observations + commonly-read papers.
     cohort_summary = _esc(aggregate.get("cohort_summary", ""))
@@ -1259,6 +1389,9 @@ border-bottom:1px solid var(--line);padding-bottom:8px}}
 .mb{{font-size:10.5px;border-radius:2px;padding:1px 6px}}
 .mb.a{{color:var(--ac);background:#e8f1ed}}.mb.b{{color:#5b6b66;background:#eef1ef}}
 .mb.c{{color:#c99a34;background:#fbf5e6}}.mb.d{{color:#8c2f39;background:#faf0ef}}
+.mb.e{{color:var(--muted);background:#eef1ef}}  /* paused */
+.legend-row{{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:3px 0}}
+.legend-meaning{{color:var(--ink2)}}
 .axes{{font-size:12px;color:var(--ac);margin-bottom:2px}}
 dl{{margin:0}}dt{{font-size:11px;color:var(--muted);margin-top:8px}}
 dd{{margin:1px 0 0;font-size:13px;color:var(--ink2);line-height:1.7}}
@@ -1289,7 +1422,9 @@ footer{{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-s
 
 <h2>常读期刊</h2><div class="card">{''.join(journals)}</div>
 
-<h2>成员分层</h2><div class="card">{' '.join(tiers)}</div>
+<h2>成员分层</h2><div class="card">{' '.join(tiers)}
+<div style="margin:14px 0 0">{legend_html}</div>
+<p style="font-size:12px;color:var(--muted);margin:10px 0 0">{_esc(aggregate.get('tier_criteria_note', ''))}</p></div>
 
 <h2>数据观察</h2><div class="card"><ol style="margin:0;padding-left:20px">{observations_html}</ol></div>
 
@@ -1307,7 +1442,13 @@ footer{{margin-top:44px;padding-top:14px;border-top:1px solid var(--line);font-s
 
 
 def _tier_class(tier: str) -> str:
-    return {"核心": "a", "骨干": "b", "稳定": "c", "活跃": "d"}.get(tier, "b")
+    return {
+        "高频": "a",
+        "坚持": "b",
+        "稀疏": "c",
+        "尝试": "d",
+        "暂停": "e",
+    }.get(tier, "b")
 
 
 def write_html_report(

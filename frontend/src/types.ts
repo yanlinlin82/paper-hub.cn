@@ -100,6 +100,8 @@ export interface MemberReportAggregate {
   top_journals: Record<string, number>;
   topic_axes: TopicAxis[];
   member_tiers: Record<string, number>;
+  tier_criteria_note?: string;
+  tier_legend?: { name: string; meaning: string }[];
   cohort_summary: string;
   observations: { title: string; text: string }[];
   common_papers: CommonPaper[];
@@ -134,6 +136,8 @@ export interface MemberSummary {
   word_per_review: number;
   reader_type: string;
   top_topics: string[];
+  last_checkin?: string;
+  avg_per_month?: number;
 }
 
 export interface MemberProfile {
@@ -150,6 +154,7 @@ export interface MemberProfile {
   topic_links?: { name: string; query: string }[];
   topic_counts: Record<string, number>;
   reader_type: string;
+  avg_per_month?: number;
   portrait: string;
   reading_form: string;
   rating_scale: string;

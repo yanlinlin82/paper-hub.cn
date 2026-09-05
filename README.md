@@ -155,6 +155,11 @@ powers the topic list page `/group/<group>/member-report/topic/:topic` (served b
 member profiles or the profile dialog navigates there and lists every review in
 that research topic (whole group).
 
+Member tiers are based on check-in frequency plus activity (so members who joined
+at different times are compared fairly): 高频 (active and ≥2 reviews/month),
+坚持 (active and ≥1 review/month), 稀疏 (active but <1 review/month), 尝试
+(active but only 1 review total), 暂停 (no check-in this month or last).
+
 ### Database backup
 
 `backend/scripts/daily-update.sh` only backs up the database — it no longer

@@ -425,6 +425,28 @@ body {
     color: #8c2f39;
     background: rgba(140, 47, 57, 0.12);
 }
+.member-report .report-tier.tier-e {
+    color: var(--bs-secondary-color);
+    background: var(--bs-tertiary-bg);
+    border: 1px dashed var(--bs-border-color);
+}
+
+/* Tier legend */
+.member-report .report-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.875rem;
+}
+.member-report .report-legend-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+}
+.member-report .report-legend-meaning {
+    color: var(--bs-secondary-color);
+}
 
 /* Profile modal */
 .member-report .report-profile-hero {

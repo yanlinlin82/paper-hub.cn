@@ -327,6 +327,73 @@ class MemberReportTest(TestCase):
         self.assertTrue(profile.rating_scale)
         self.assertTrue(profile.theme_entry)
 
+    def test_member_tier_frequency_bands(self):
+        from datetime import date
+
+        from core.member_report import _member_tier
+
+        ref_month = (2026, 9)
+        active = date(2026, 8, 20)  # previous month -> still active
+        # Active members are tiered by average reviews per active month.
+        # 15 reviews over 5 months (3/month) -> 高频
+        self.assertEqual(_member_tier(15, 5, active, ref_month), "高频")
+        # 6 reviews over 6 months (1/month) -> 坚持
+        self.assertEqual(_member_tier(6, 6, active, ref_month), "坚持")
+        # 3 reviews over 6 months (0.5/month) -> 稀疏
+        self.assertEqual(_member_tier(3, 6, active, ref_month), "稀疏")
+        # Total just 1 review -> 尝试
+        self.assertEqual(_member_tier(1, 1, active, ref_month), "尝试")
+
+    def test_member_tier_paused_when_inactive(self):
+        from datetime import date
+
+        from core.member_report import _member_tier
+
+        ref_month = (2026, 9)
+        # Checked in this month or the previous one -> active.
+        self.assertEqual(_member_tier(15, 5, date(2026, 9, 1), ref_month), "高频")
+        self.assertEqual(_member_tier(15, 5, date(2026, 8, 31), ref_month), "高频")
+        # Checked in a month before the previous -> paused, regardless of history.
+        self.assertEqual(_member_tier(15, 5, date(2026, 7, 31), ref_month), "暂停")
+        self.assertEqual(_member_tier(3, 6, date(2025, 1, 1), ref_month), "暂停")
+
+    def test_sort_members_active_first(self):
+        from datetime import date
+
+        from core.member_report import MemberProfile, _sort_members
+
+        ref_month = (2026, 9)
+
+        def profile(name, last, count, months):
+            return MemberProfile(
+                user_id=1,
+                name=name,
+                review_count=count,
+                total_words=0,
+                word_per_review=0,
+                first_checkin=str(last),
+                last_checkin=str(last),
+                active_months=months,
+                top_journals={},
+                top_topics=[],
+                topic_counts={},
+                reader_type="",
+                portrait="",
+                reading_form="",
+                rating_scale="",
+                theme_entry="",
+            )
+
+        profiles = [
+            profile("老暂", date(2026, 2, 1), 40, 24),
+            profile("活跃低频", date(2026, 8, 10), 8, 24),
+            profile("活跃高频", date(2026, 9, 1), 20, 4),
+        ]
+        _sort_members(profiles, ref_month)
+        names = [p.name for p in profiles]
+        # Active, higher-frequency first; the paused member sinks to the bottom.
+        self.assertEqual(names, ["活跃高频", "活跃低频", "老暂"])
+
     def test_generate_llm_profile_without_bridge_hard_fails(self):
         from core.member_report import (
             build_member_profiles,

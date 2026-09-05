@@ -12,10 +12,11 @@ import {
 } from "../types";
 
 const TIER_CLASS: Record<string, string> = {
-  核心: "tier-a",
-  骨干: "tier-b",
-  稳定: "tier-c",
-  活跃: "tier-d",
+  高频: "tier-a",
+  坚持: "tier-b",
+  稀疏: "tier-c",
+  尝试: "tier-d",
+  暂停: "tier-e",
 };
 
 function formatDate(iso: string | undefined): string {
@@ -497,6 +498,24 @@ function MemberReportPage() {
             </span>
           ))}
         </div>
+
+        <div className="report-legend mb-2">
+          {aggregate.tier_legend?.length ? (
+            aggregate.tier_legend.map((item) => (
+              <div key={item.name} className="report-legend-row">
+                <span className={`report-tier ${TIER_CLASS[item.name] ?? ""}`}>
+                  {item.name}
+                </span>
+                <span className="report-legend-meaning">{item.meaning}</span>
+              </div>
+            ))
+          ) : null}
+        </div>
+        {aggregate.tier_criteria_note && (
+          <div className="text-body-secondary small">
+            {aggregate.tier_criteria_note}
+          </div>
+        )}
       </div>
 
       {/* Members grid */}
