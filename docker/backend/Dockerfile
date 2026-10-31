@@ -26,6 +26,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=ghcr.io/astral-sh/uv:0.12.9 /uv /uvx /bin/
 ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 
+# uv needs a writable cache and project environment. Compose runs the
+# container as the host user, which has no home directory in this image,
+# so uv falls back to `/.cache/uv` and fails with EACCES. Keep both under
+# /opt/uv and leave them world-writable so any UID/GID mapping works.
+ENV HOME=/opt/uv \
+    UV_CACHE_DIR=/opt/uv/cache \
+    UV_PROJECT_ENVIRONMENT=/opt/uv/venv
+RUN mkdir -p /opt/uv/cache /opt/uv/venv && chmod -R 777 /opt/uv
+
 # Copy project source (overridden in dev by ./backend:/app bind mount)
 COPY backend/ .
 

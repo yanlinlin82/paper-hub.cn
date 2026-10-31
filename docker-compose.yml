@@ -8,10 +8,11 @@
 # over the internal docker network.  Only the nginx port is
 # exposed to the host — no port conflicts.
 #
-# Python venv (backend/.venv):
-#   The host's backend/.venv is isolated from the container via an
-#   anonymous volume at /app/.venv, so the two don't interfere.
-#   The container creates its own venv on first startup via uv run.
+# Python venv:
+#   The container keeps its own venv at /opt/uv/venv (set via
+#   UV_PROJECT_ENVIRONMENT in docker/backend/Dockerfile), outside the
+#   ./backend bind mount, so the host's backend/.venv is untouched.
+#   uv sync runs inside the container on first startup.
 #
 # User namespace:
 #   Backend and frontend containers run as the host user to
@@ -29,7 +30,6 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./backend:/app
-      - /app/.venv # isolate container's venv from host's
       - backend-static:/app/static_root
     env_file:
       - .env.docker
