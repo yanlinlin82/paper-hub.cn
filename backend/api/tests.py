@@ -240,6 +240,30 @@ class ReviewDuplicateAndDeleteTest(FrontendAPITestBase):
         self.assertEqual(reviews.count(), 2)
         self.assertEqual(reviews[0].paper.pk, reviews[1].paper.pk)
 
+    def test_check_in_without_identifier_creates_paper(self):
+        """Manual entry (no DOI/PMID/arXiv) must not raise UnboundLocalError."""
+        self.client.login(username="testuser", password="password123")
+        payload = {
+            "group_name": "xiangma",
+            "paper": {
+                "title": "Manual Entry Paper",
+                "journal": "Nature",
+                "doi": "",
+                "pmid": "",
+                "arxiv_id": "",
+                "pub_date": "2024-02-01",
+            },
+            "comment": "",
+        }
+        resp = self._post_json("/api/check-in", payload)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json()["success"])
+        self.assertTrue(
+            Review.objects.filter(
+                paper__title="Manual Entry Paper", creator=self.profile
+            ).exists()
+        )
+
     def test_remove_review_deletes_only_target_review(self):
         """Deleting one review must leave the identical sibling review intact."""
         _, r1, r2 = self._create_duplicate_reviews()
