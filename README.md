@@ -160,6 +160,22 @@ at different times are compared fairly): 高频 (active and ≥2 reviews/month),
 坚持 (active and ≥1 review/month), 稀疏 (active but <1 review/month), 尝试
 (active but only 1 review total), 暂停 (no check-in this month or last).
 
+**Publish to the production server:**
+
+`backend/reports/` is gitignored, so `git pull` on the production server never
+carries it. After generating the report, push it:
+
+```sh
+cd backend
+./scripts/push-reports.sh
+```
+
+It rsyncs `backend/reports/` to
+`yanlinlin.cn:/var/www/paper-hub.cn/backend/reports/` with `--delete`, so member
+files no longer in the database are removed on the server. Pass a different
+destination as the first argument if needed. The report is served from disk on
+each request, so no restart is required.
+
 ### Database backup
 
 `backend/scripts/daily-update.sh` only backs up the database — it no longer
