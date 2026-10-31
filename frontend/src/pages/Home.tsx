@@ -247,9 +247,9 @@ function Home() {
                 src="/static/images/wechat-qrcode.png"
                 width="140"
                 height="140"
-                alt="微信群二维码"
+                alt="群主个人微信二维码"
               />
-              <div className="text-body-secondary small mt-2">微信群二维码</div>
+              <div className="text-body-secondary small mt-2">微信二维码（请备注“加入响马读paper群”）</div>
             </div>
           </div>
         </div>
