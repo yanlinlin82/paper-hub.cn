@@ -189,6 +189,23 @@ body {
     top: 5.25rem;
 }
 
+/* Navbar search box: takes its own full row below lg and becomes the
+   flexible middle column from lg up.  flex-basis, not order alone, keeps
+   it off the logo/actions row — flex wrapping otherwise packs it there
+   whenever the remaining space happens to be wide enough, which made the
+   whole header reshuffle as the window was resized. */
+.navbar-search {
+    flex: 1 1 100%;
+}
+
+@media (min-width: 992px) {
+    .navbar-search {
+        flex: 1 1 auto;
+        min-width: 12rem;
+        max-width: 480px;
+    }
+}
+
 /* Autocomplete dropdown for user search — uses CSS variables for dark mode compat */
 .autocomplete-dropdown {
     position: absolute;

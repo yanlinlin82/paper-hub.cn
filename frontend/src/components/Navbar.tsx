@@ -88,8 +88,24 @@ function SiteNavbar({ groupName, onShowLogin, onToggleSidebar }: NavbarProps) {
   ];
 
   return (
-    <Navbar sticky="top" bg="body-tertiary" className="border-bottom shadow-sm">
+    <Navbar
+      sticky="top"
+      bg="body-tertiary"
+      className="border-bottom shadow-sm"
+      expand={false}
+    >
       <div className="container-xl d-flex flex-wrap align-items-center gap-2 gap-lg-3">
+        {/* Mobile sidebar toggle — leftmost, matching the side the drawer
+            slides in from */}
+        <button
+          className="navbar-toggler d-lg-none flex-shrink-0"
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label="打开导航菜单"
+        >
+          <span className="navbar-toggler-icon" />
+        </button>
+
         {/* Brand */}
         <Navbar.Brand as={Link} to={`/group/${groupName}`} className="flex-shrink-0 me-0">
           <img
@@ -108,22 +124,12 @@ function SiteNavbar({ groupName, onShowLogin, onToggleSidebar }: NavbarProps) {
           />
         </Navbar.Brand>
 
-        {/* Mobile sidebar toggle */}
-        <button
-          className="navbar-toggler d-lg-none ms-auto"
-          type="button"
-          onClick={onToggleSidebar}
-          aria-label="打开导航菜单"
-        >
-          <span className="navbar-toggler-icon" />
-        </button>
-
-        {/* Search */}
+        {/* Search — its own row below lg, middle column from lg up */}
         <Form
-          className="flex-grow-1 order-3 order-lg-2 mx-lg-3 my-2 my-lg-0"
+          className="navbar-search order-3 order-lg-2 mx-lg-3"
           onSubmit={handleSearch}
         >
-          <div className="input-group" style={{ maxWidth: "480px" }}>
+          <div className="input-group">
             <input
               className="form-control"
               type="search"
