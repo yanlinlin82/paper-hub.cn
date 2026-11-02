@@ -206,6 +206,15 @@ body {
     }
 }
 
+/* The navbar deliberately has no .navbar-expand class: its mobile menu is an
+   Offcanvas drawer, not Bootstrap's collapse.  Bootstrap only lifts
+   .navbar-nav .dropdown-menu out of the flow inside .navbar-expand-*, so
+   without this the theme/account menus flow inline in the header instead of
+   opening over the page below their toggle. */
+.navbar-nav .dropdown-menu {
+    position: absolute;
+}
+
 /* Autocomplete dropdown for user search — uses CSS variables for dark mode compat */
 .autocomplete-dropdown {
     position: absolute;
