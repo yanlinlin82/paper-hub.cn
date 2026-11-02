@@ -49,6 +49,7 @@ function Layout({ children }: LayoutProps) {
 
       {/* Mobile sidebar drawer */}
       <Offcanvas
+        id="sidebar-drawer"
         show={showSidebar}
         onHide={() => setShowSidebar(false)}
         placement="start"
