@@ -29,6 +29,10 @@ function Footer() {
           rel="noreferrer"
         >
           GitHub
+        </a>{" "}
+        |{" "}
+        <a className="text-reset" href="mailto:contact@paper-hub.cn">
+          contact@paper-hub.cn
         </a>
       </div>
       <div className="py-1">
